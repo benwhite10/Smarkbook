@@ -1,21 +1,21 @@
 <?php
-include_once '../includes/db_functions.php';
-require("../includes/class.phpmailer.php");
+include_once('../includes/db_functions.php');
+include_once('../includes/session_functions.php');
+include_once('../includes/class.phpmailer.php');
+include_once('classes/AllClasses.php');
 
 sec_session_start();
-
-if($_SESSION['userid'] != null){
-    $userid = $_SESSION['userid'];
-    $userlevel = $_SESSION['userlevel'];
-    $loggedin = true;
-    $query = "SELECT `First Name`, `Surname` FROM `TUSERS` WHERE `User ID` = $userid;";
-    $results = db_select($query);
-    $fname = $results[0]['First Name'];
-    $sname = $results[0]['Surname'];
-    $name = $fname . " " . $sname;
-}else{
-    header('Location: index.php');
+$loggedin = false;
+$user = new Teacher();
+if(checkUserLoginStatus()){
+    if(isset($_SESSION['user'])){
+        $user = $_SESSION['user'];
+        $loggedin = true;
+    }
 }
+
+$fullName = $user->getFirstName() . ' ' . $user->getSurname();
+$userid = $user->getUserId();
 
 ?>
 
@@ -35,7 +35,6 @@ if($_SESSION['userid'] != null){
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
 </head>
 <body>
-    <?php echo $_SESSION['userid'] . '-' . $_SESSION['timeout']; ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -43,7 +42,7 @@ if($_SESSION['userid'] != null){
             </div>
                 <ul class="menu topbar">
                     <li>
-                        <a href="portalhome.php"><?php echo $name; ?> &#x25BE</a>
+                        <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
                         <ul class="dropdown topdrop">
                             <li><a href="portalhome.php">Home</a></li>
                             <li><a>My Account</a></li>

@@ -1,19 +1,14 @@
 <?php
 
-if(is_file('../includes/db_functions.php')){
-    require_once ('../includes/db_functions.php');
-}else{
-    //Run an error page;
-}
-
-$query = "SELECT Name FROM TTAGS WHERE `Tag ID` = 876;";
-$results = db_select_single($query, 'Name');
+include_once('classes/AllClasses.php');
+include_once('../includes/db_function.php');
 
 sec_session_start();
 
-echo $_SESSION['userid'];
+$teacher = Student::createStudentFromId(248);
 
+//var_dump($teacher);
 
-
-
-
+$_SESSION['gatland'] = $teacher;
+$test = $_SESSION['gatland'];
+var_dump($test);

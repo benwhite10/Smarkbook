@@ -1,22 +1,21 @@
 <?php
-include_once '../includes/db_functions.php';
-require("../includes/class.phpmailer.php");
+include_once('../includes/db_functions.php');
+include_once('../includes/session_functions.php');
+include_once('../includes/class.phpmailer.php');
+include_once('classes/AllClasses.php');
 
-//sec_session_start();
-session_start();
-
-if($_SESSION['userid'] != null){
-    $userid = $_SESSION['userid'];
-    $userlevel = $_SESSION['userlevel'];
-    $loggedin = true;
-    $query = "SELECT `First Name`, `Surname` FROM `TUSERS` WHERE `User ID` = $userid;";
-    $results = db_select($query);
-    $fname = $results[0]['First Name'];
-    $sname = $results[0]['Surname'];
-    $name = $fname . " " . $sname;
-}else{
-    header('Location: index.php');
+sec_session_start();
+$loggedin = false;
+$user = new Teacher();
+if(checkUserLoginStatus()){
+    if(isset($_SESSION['user'])){
+        $user = $_SESSION['user'];
+        $loggedin = true;
+    }
 }
+
+$fullName = $user->getFirstName() . ' ' . $user->getSurname();
+$userid = $user->getUserId();
 
 $studentId = filter_input(INPUT_GET,'stuid',FILTER_SANITIZE_NUMBER_INT);
 
@@ -72,7 +71,7 @@ $name = $student[0]['Preferred Name'] . ' ' . $student[0]['Surname'];
             </div>
             <ul class="menu topbar">
                 <li>
-                    <a href="portalhome.php"><?php echo $name ?> &#x25BE</a>
+                    <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
                     <ul class="dropdown topdrop">
                         <li><a href="portalhome.php">Home</a></li>
                         <li><a>My Account</a></li>
@@ -84,7 +83,7 @@ $name = $student[0]['Preferred Name'] . ' ' . $student[0]['Surname'];
     	<div id="body">
             <div id="top_bar">
                 <div id="title2">
-                    <h1><?php echo $name; ?></h1>
+                    <h1><?php echo $fullName; ?></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>

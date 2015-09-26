@@ -1,16 +1,21 @@
 <?php
-include_once '../../includes/db_functions.php';
+include_once('../../includes/db_functions.php');
+include_once('../../includes/session_functions.php');
+include_once('../classes/AllClasses.php');
 
 sec_session_start();
 
 if(isset($_POST['username'], $_POST['password'])){
-    $email = $_POST['username'];
-    $password = $_POST['password'];
+    $email = filter_input(INPUT_POST,'username',FILTER_SANITIZE_STRING);
+    $password = filter_input(INPUT_POST,'password',FILTER_SANITIZE_STRING);
     $details = getDetails($email);
-
+    
     if($password == $details[0]['Password']){
-        $_SESSION['userid'] = $details[0]['User ID'];
-        $_SESSION['userlevel'] = $details[0]['Role'];
+        if($details[0]['Role'] == 'STUDENT'){
+            $_SESSION['user'] = Student::createStudentFromId($details[0]['User ID']);
+        }else{
+            $_SESSION['user'] = Teacher::createTeacherFromId($details[0]['User ID']);
+        }
         $_SESSION['timeout'] = time();
         header('Location: ../portalhome.php');
     }else{
