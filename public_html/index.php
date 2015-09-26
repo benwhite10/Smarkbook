@@ -1,25 +1,20 @@
 <?php
-include_once '../includes/db_functions.php';
-require("../includes/class.phpmailer.php");
-
-//This is tesssssssst
+include_once('../includes/db_functions.php');
+include_once('../includes/session_functions.php');
+include_once('../includes/class.phpmailer.php');
+include_once('classes/AllClasses.php');
 
 sec_session_start();
 $loggedin = false;
+$user = new Teacher();
 if(checkUserLoginStatus()){
-    if(isset($_SESSION['userid']) && isset($_SESSION['userlevel'])){
-        $userid = $_SESSION['userid'];
-        $userlevel = $_SESSION['userlevel'];
+    if(isset($_SESSION['user'])){
+        $user = $_SESSION['user'];
         $loggedin = true;
-        //Set the user details for the page (Could be made global or even a part of the session)
-        $query = "SELECT `First Name`, `Surname` FROM `TUSERS` WHERE `User ID` = $userid;";
-        $results = db_select($query);
-        $fname = $results[0]['First Name'];
-        $sname = $results[0]['Surname'];
-        $name = $fname . " " . $sname;
     }
 }
 
+$fullName = $user->getFirstName() . ' ' . $user->getSurname();
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +52,7 @@ if(checkUserLoginStatus()){
             <?php }else{ ?>
                 <ul class="menu topbar">
                     <li>
-                        <a href="portalhome.php"><?php echo $name ?> &#x25BE</a>
+                        <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
                         <ul class="dropdown topdrop">
                             <li><a href="portalhome.php">Home</a></li>
                             <li><a>My Account</a></li>
