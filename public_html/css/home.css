@@ -1,0 +1,51 @@
+#headerform input[type="text"], #headerform input[type="password"], #headerform input[type="submit"]
+{ display: inline;
+  width: 200px;
+  background: rgba(255,255,255,0.5);
+  margin: 9px 10px 0 0px;
+  border: 0px solid;
+  -moz-border-radius:5px; /* Firefox */
+  -webkit-border-radius: 5px; /* Safari, Chrome */
+  -khtml-border-radius: 5px; /* KHTML */
+  border-radius: 5px; /* CSS3 */
+  color: #FFF; }
+
+#headerform input[type="submit"]
+{ width: auto;
+  background: transparent;
+  color: #66E11B;
+  vertical-align: top;}
+  
+#headerform input[type="submit"]:hover
+{ background: #66E11B;
+  color: #323232;}
+
+*::-webkit-input-placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+*:-moz-placeholder {
+    /* FF 4-18 */
+    color: rgba(0, 0, 0, 0.5);
+}
+*::-moz-placeholder {
+    /* FF 19+ */
+    color: rgba(0, 0, 0, 0.5);
+}
+*:-ms-input-placeholder {
+    /* IE 10+ */
+    color: rgba(0, 0, 0, 0.5);
+}
+
+#login_header
+{ height: 50px;
+  width: auto;
+  margin: 0px;
+  padding: 0px;
+  background: transparent;
+  overflow: hidden;
+  color: #000000;
+  z-index: 2;}
+
+#headerform
+{ display: inline;
+  float: right; }

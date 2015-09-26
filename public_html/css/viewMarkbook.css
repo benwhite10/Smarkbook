@@ -1,0 +1,16 @@
+/*Markbook*/
+
+table
+{ border-color: #323232; }
+
+td
+{ height: 32px; }
+
+td.name{
+  min-width: 180px;
+}
+
+td.marks{
+    padding: 0px;
+    text-align: center;
+}

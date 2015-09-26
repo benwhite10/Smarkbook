@@ -1,0 +1,53 @@
+/*Form objects*/
+
+input[type="text"], input[type="password"], input[type="submit"], select, input[type="url"], input[type="date"]{
+    display: inline-block;
+    font: normal 'Open Sans', sans-serif;
+    line-height: 20px;
+    height: 32px;
+    width: calc(100% - 182px);
+    background: #FFF;
+    margin: 0px auto 10px auto;
+    padding: 0 10px;
+    border: 1px solid;
+    -moz-border-radius: 2px; /* Firefox */
+    -webkit-border-radius: 2px; /* Safari, Chrome */
+    -khtml-border-radius: 2px; /* KHTML */
+    border-radius: 2px; /* CSS3 */ 
+    font-size: 0.9rem;
+    color: #323232;
+    outline: none;
+}
+  
+select{
+  width: calc(100% - 162px);
+}
+
+label {
+    display: inline-block;
+    width: 150px;
+    height:32px;
+    line-height: 32px;
+    padding-left: 10px;
+    font-size: 1.1rem;
+    vertical-align: middle;
+}
+
+input[type="submit"]{
+    display: block;
+    width: 200px;
+}
+
+fieldset { 
+    border:1px solid #323232;
+    margin: 10px auto;
+    padding-right: 10px; 
+}
+
+legend {
+  padding: 0.2em 0.5em;
+  border:1px solid #323232;
+  color:#323232;
+  font-size:100%;
+  text-align:left;
+}

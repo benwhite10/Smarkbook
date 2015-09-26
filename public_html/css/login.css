@@ -1,0 +1,38 @@
+/*To be moved to login page */
+#cancel
+{ color: #FF0000;}
+
+#cancel:hover
+{ background: #FF0000;
+  color: #FFFFFF;}
+  
+/*Login container*/
+
+.login_container
+{ height: auto;
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background: #E7E7E7;
+  overflow: hidden;
+  border: 1px solid;
+  -moz-border-radius: 10px; /* Firefox */
+  -webkit-border-radius: 10px; /* Safari, Chrome */
+  -khtml-border-radius: 10px; /* KHTML */
+  border-radius: 10px; /* CSS3 */
+  box-shadow: 5px 5px 5px grey;
+  color: #000000;
+  z-index: 11;}
+
+#forgot
+{ display: block;
+  line-height: 20px;
+  height: 20px;
+  width: 360px;
+  margin: 10px auto;
+  font-size: 14px;
+  color: #000000;}
