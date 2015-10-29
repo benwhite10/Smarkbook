@@ -115,14 +115,14 @@ input[type="text"].markInput
 
 input[type="submit"]
 { width: 160px;
-  background: #FFFFFF;
-  color: #66E11B;
-  border-color: #000000; 
+  background: #66E11B;
+  color: #323232;
+  border-color: #323232; 
   font-size: 1rem; }
   
 input[type="submit"]:hover
-{ background: #66E11B;
-  color: #FFFFFF;
+{ background: #323232;
+  color: #66E11B;
   cursor: pointer;}
 
 *::-webkit-input-placeholder {
@@ -219,6 +219,13 @@ label {
   margin: 10px;
   margin-right: 0px;
   width: calc(100% - 45px); }
+
+#messageText.error
+{
+  margin: 0px 20px;
+  color: #FF0000;
+  text-align: center;
+}
 
 #title2
 { width: auto;
@@ -440,6 +447,23 @@ tr:hover
 
 tr:nth-child(even):hover {
     background-color: #66E11B;
+}
+
+label.error{
+  color:red;
+  width: auto;
+  display: block;
+  background: transparent;
+  margin-top: -10px;
+  margin-left: 150px;
+  padding-left: 10px;
+  height: 32px;
+  line-height: 32px;
+  font-size: 0.8rem;
+}
+
+#editForm input.error{
+    border: 1px solid red;
 }
 
 

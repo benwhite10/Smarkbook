@@ -21,8 +21,30 @@ function validatePassword(pwd){
     return true;
 }
 
-function loginFormHash(form, usrname, pwd){
-    return true;
-}
+$(document).ready(function(){
+    $('#headerform').submit(function(){        
+        //May be worth adding in some form of validation at this point
+        var p = document.createElement("input");
+        // Add the new element to our form. 
+        this.appendChild(p);
+        p.name = "p";
+        p.type = "hidden";
+        p.value = hex_sha512($('#password').val());
+        $('#password').val("");
+        return true;
+    });
+    
+    $('#login_form').submit(function(){        
+        //May be worth adding in some form of validation at this point
+        var p = document.createElement("input");
+        // Add the new element to our form. 
+        this.appendChild(p);
+        p.name = "p";
+        p.type = "hidden";
+        p.value = hex_sha512($('#password').val());
+        $('#password').val("");
+        return true;
+    });
+});
 
 

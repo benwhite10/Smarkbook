@@ -10,30 +10,31 @@ $wname = filter_input(INPUT_POST, 'worksheetname', FILTER_SANITIZE_STRING);
 $vname = filter_input(INPUT_POST, 'versionname', FILTER_SANITIZE_STRING);
 $author = filter_input(INPUT_POST, 'author', FILTER_SANITIZE_NUMBER_INT);
 $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
-$number = filter_input(INPUT_POST, 'questions', FILTER_SANITIZE_NUMBER_INT);
+$number = filter_input(INPUT_POST, 'questions', FILTER_SANITIZE_STRING);
 
 if(isset($wname, $vname, $author, $date)){
     $link = filter_input(INPUT_POST, 'link', FILTER_SANITIZE_URL);
     $newdate = date('Y-d-m h:m:s',strtotime(str_replace('/','-', $date)));
     
     $query = "INSERT INTO TWORKSHEETS (`Name`, `Link`) VALUES ('$wname', '$link');";
-    $result = db_query($query);
-    $wid = $GLOBALS['lastid'];
+    $resultArray = db_insert_query($query);
+    $wid = $resultArray[1];
     
     $query1 = "INSERT INTO TWORKSHEETVERSION (`Worksheet ID`, `Name`, `Author ID`) VALUES ($wid, '$vname', $author);";
-    $result1= db_query($query1);
-    $vid = $GLOBALS['lastid'];
+    $resultArray1 = db_insert_query($query1);
+    $vid = $resultArray1[1];
     
     $tags = filter_input(INPUT_POST, 'updateTags', FILTER_SANITIZE_STRING);
     $tagsArray = convertTagsToArray($tags);
            
     for ($i = 1; $i <= $number; $i++){
         $query2 = "INSERT INTO TQUESTIONS (`Link`) VALUES ('');";
-        $result2 = db_query($query2);
-        $qid = $GLOBALS['lastid'];
+        $resultArray2 = db_insert_query($query2);
+        $qid = $resultArray2[1];
+        
         $query3 = "INSERT INTO TSTOREDQUESTIONS (`Question ID`, `Version ID`, `Number`, `Marks`, `Order`) VALUES ($qid, $vid, $i, 0, $i);";
-        $result3 = db_query($query3);
-        $sqid = $GLOBALS['lastid'];
+        $resultArray3 = db_insert_query($query3);
+        $sqid = $resultArray3[1];
         foreach ($tagsArray as $tag){
             $query4 = "INSERT INTO TQUESTIONTAGS (`Tag ID`, `Stored Question ID`) VALUES ($tag, $sqid);";
             $result4 = db_query($query4);

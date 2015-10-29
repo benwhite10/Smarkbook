@@ -1,5 +1,7 @@
 <?php
-//error_reporting(0);
+$include_path = get_include_path();
+include_once $include_path . '/public_html/includes/errorReporting.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
 
 function sec_session_start(){
     
@@ -41,20 +43,41 @@ function logout(){
     }
 }
 
-function checkUserLoginStatus(){
-    if (isset($_SESSION['timeout'])){
-        if($_SESSION['timeout'] + 15*60 < time()){
-            //Session timed out so log out
-            logout();
-            return false;
+function checkUserLoginStatus($url){
+    //See if there is a logged in user
+    if(isset($_SESSION['user'])){
+        $user = $_SESSION['user'];
+        $userid = $user->getUserId();
+        $username = $user->getEmail();
+        $timeout = $_SESSION['timeout'];
+        if(isset($timeout)){
+            if($timeout + 30*60 < time()){
+                //Session timed out so save the users url and log them out
+                $msg = "User $userid has been timed out.";
+                infoLog($msg);
+                if(isset($url)){
+                    $_SESSION['url'] = $url;
+                    $_SESSION['urlid'] = $userid;
+                }
+                logout();
+                $url = "Location: login.php?email=$username";
+                $bool = false;
+            }else{
+                //All good so carry on!
+                $_SESSION['timeout'] = time();
+                $url = '';
+                $bool = true;
+            }
         }else{
-            //Session ok so get the info
-            $_SESSION['timeout'] = time();
-            return true;
+            //No timeout information so log out
+            $url = "Location: login.php?email=$username";
+            $bool = false;
         }
     }else{
-        //No session time so logged out
-        logout();
-        return false;
+        //Not logged in user so go to homepage
+        $url = "Location: index.php";
+        $bool = false;
     }
+    $resultArray = array($bool, $url);
+    return $resultArray;
 }

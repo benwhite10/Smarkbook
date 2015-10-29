@@ -5,13 +5,12 @@ include_once('../includes/class.phpmailer.php');
 include_once('classes/AllClasses.php');
 
 sec_session_start();
-$loggedin = false;
-$user = new Teacher();
-if(checkUserLoginStatus()){
-    if(isset($_SESSION['user'])){
-        $user = $_SESSION['user'];
-        $loggedin = true;
-    }
+$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
+if($resultArray[0]){ 
+    $user = $_SESSION['user'];
+}else{
+    header($resultArray[1]);
+    exit();
 }
 
 $fullName = $user->getFirstName() . ' ' . $user->getSurname();
@@ -38,7 +37,7 @@ $tags = db_select($query);
 <!DOCTYPE html>
 <html>
 <head lang="en">
-	<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <title>Smarkbook</title>
     <meta name="description" content="Smarkbook" />
     <meta name="keywords" content="Intelligent, personalised feedback through smart data analysis" />
@@ -61,7 +60,7 @@ $tags = db_select($query);
                     <a href="portalhome.php"><?php echo $fullName ?> &#x25BE</a>
                     <ul class="dropdown topdrop">
                         <li><a href="portalhome.php">Home</a></li>
-                        <li><a>My Account</a></li>
+                        <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
                         <li><a href="includes/process_logout.php">Log Out</a></li>
                     </ul>
                 </li>
@@ -109,7 +108,9 @@ $tags = db_select($query);
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
                 <li><a href="editWorksheet.php?id=<?php echo $vid ?>">Edit</a></li>
+                <?php if(isset($setid) && $setid <> ''){?>
                 <li><a href="editSetResults.php?vid=<?php echo $vid . '&setid=' . $setid; ?>">Enter Results</a></li>
+                <?php } ?>
                 <li><a href="viewAllWorksheets.php">Back To Worksheets</a></li>
             </ul>
             </div>
