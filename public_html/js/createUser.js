@@ -32,18 +32,6 @@ $(document).ready(function(){
         }
     }
     
-//    $('#editForm').submit(function(){
-//        //Do form validation 
-//        alert('Oops');
-////        var elem = document.getElementById('role');
-////        if(elem.value === 'STUDENT'){
-////            //Submit student
-////        }else{
-////            //Submit staff member
-////        }
-//         return false;
-//    });
-    
     $.validator.addMethod(
         "regex",
         function(value, element, regexp) {
@@ -76,7 +64,6 @@ $(document).ready(function(){
         submitHandler: function(form){
             // Create a new element input, this will be our hashed password field. 
             var p = document.createElement("input");
-            var role = document.createElement("input");
 
             // Add the new element to our form. 
             form.appendChild(p);
@@ -84,20 +71,7 @@ $(document).ready(function(){
             p.type = "hidden";
             p.value = hex_sha512($('#password').val());
             
-            //form.appendChild(role);
-            //role.name = "role";
-            //role.type="hidden";
-            //role.value=$('#role').val();
-            
             var elem = document.getElementById('role');
-            console.log(elem);
-            console.lof(elem.value);
-
-            // Make sure the plaintext password doesn't get sent. 
-            //if($('#role').val() !== 'STUDENT'){
-              //  $('#password').val("");
-                //$('#conf').val("");
-            //}
             
             form.submit();
             return true;

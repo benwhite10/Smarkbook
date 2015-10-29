@@ -28,7 +28,6 @@ $sets = db_select($query);
 if(!isset($setId)){ 
     if(count($sets) > 0){
         $setId = $sets[0]['ID'];
-        //$url = "Location: viewSetMarkbook.php?staffid=$staffId&setid=$setId";
     }
 }
 
@@ -45,6 +44,7 @@ $query1 = "SELECT VID, WID, WName, VName, Date, SUM(Marks) Marks FROM (
                 GROUP BY SQ.`Stored Question ID`) Questions
             GROUP BY Questions.VID, Questions.Date
             ORDER BY Questions.Date;";
+
 $query1 = "SELECT WV.`Version ID` VID, W.`Worksheet ID` WID, W.Name WName, WV.Name VName, Worksheets.Date Date, Worksheets.Marks Marks FROM (
                 SELECT Worksheets.`Version ID`, Worksheets.`Set Due Date` Date, SUM(SQ.Marks) Marks FROM (
                     SELECT S.`Version ID`, C.`Set Due Date` FROM TCOMPLETEDQUESTIONS C

@@ -6,8 +6,6 @@
 
 $(document).ready(function(){
     $('#login_form').submit(function(){
-        //$username = document.getElementById('username');
-        //$password = document.getElementById('password');
         $username = $('#username').val();
         $password = $('#password').val();
         if($username == '' || $password == ''){

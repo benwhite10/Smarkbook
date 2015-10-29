@@ -17,14 +17,10 @@ if(isset($wname, $vname, $author, $date)){
     $newdate = date('Y-d-m h:m:s',strtotime(str_replace('/','-', $date)));
     
     $query = "INSERT INTO TWORKSHEETS (`Name`, `Link`) VALUES ('$wname', '$link');";
-    //$result = db_query($query);
-    //$wid = $GLOBALS['lastid'];
     $resultArray = db_insert_query($query);
     $wid = $resultArray[1];
     
     $query1 = "INSERT INTO TWORKSHEETVERSION (`Worksheet ID`, `Name`, `Author ID`) VALUES ($wid, '$vname', $author);";
-    //$result1= db_query($query1);
-    //$vid = $GLOBALS['lastid'];
     $resultArray1 = db_insert_query($query1);
     $vid = $resultArray1[1];
     
@@ -33,14 +29,10 @@ if(isset($wname, $vname, $author, $date)){
            
     for ($i = 1; $i <= $number; $i++){
         $query2 = "INSERT INTO TQUESTIONS (`Link`) VALUES ('');";
-        //$result2 = db_query($query2);
-        //$qid = $GLOBALS['lastid'];
         $resultArray2 = db_insert_query($query2);
         $qid = $resultArray2[1];
         
         $query3 = "INSERT INTO TSTOREDQUESTIONS (`Question ID`, `Version ID`, `Number`, `Marks`, `Order`) VALUES ($qid, $vid, $i, 0, $i);";
-        //$result3 = db_query($query3);
-        //$sqid = $GLOBALS['lastid'];
         $resultArray3 = db_insert_query($query3);
         $sqid = $resultArray3[1];
         foreach ($tagsArray as $tag){

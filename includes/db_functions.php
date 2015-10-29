@@ -1,5 +1,5 @@
 <?php
-//error_reporting(0);
+
 include_once ('db_connect.php');
 
 function db_query($query){
@@ -8,7 +8,6 @@ function db_query($query){
     if(!$result){
         error_log(mysqli_error($mysql));
     }
-    //$GLOBALS['lastid'] = mysqli_insert_id($mysql);
     return $result;
 }
 

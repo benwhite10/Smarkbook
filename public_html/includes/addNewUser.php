@@ -85,95 +85,11 @@ if(isset($role)){
     
     $message = "User '$fname $sname' successfully added.";
     returnToPageSuccess($message);
-//    
-//    $result = db_query($query2);
-//    if($result){
-//        //Success
-//        
-//    }else{
-//        //Failed
-//        $desc = "Something went wrong while saving the new user.";
-//        $message .= seriousError($desc);
-//        returnToPageError($message);
-//    }
 }else{
     $desc = "Something went wrong while saving the new user.";
     $message .= seriousError($desc);
     returnToPageError($message);
 }
-    
-        
-//        if(isset($pwd, $fname, $sname, $email)){
-            
-//            if (strlen($pwd) != 128) {
-//                // The hashed pwd should be 128 characters long.
-//                // If it's not, something really odd has happened
-//                $message = "Invalid password configuration";
-//            }
-//
-//            $random_salt = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
-//            // Create salted password 
-//            $password = hash('sha512', $password . $random_salt);
-//            $query = "INSERT INTO TUSERS (`First Name`, `Surname`, `Username`, `Email`, `Password`, `Salt`, `Role`)
-//                      VALUES('$fname','$sname','$email','$email','$password','$pwd','$role')";
-//            $resultArray = db_insert_query($query);
-            
-//            if($result){
-//                //Successfull
-//                $type = "SUCCESS";
-//                $message = "User succesfully created";
-//                $_SESSION['message'] = new Message($type, $message);
-//                header("Location: ../createUser.php");
-//                exit;
-//            }else{
-//                //Query failed
-//                $desc = "Not all required roles were set for a student user";
-//                $message .= seriousError($desc);
-//            }
-//        }else{
-//            //Not enough info to proceed
-//            $message .= "You have not entered all of the fields required to create a user";
-//        }
-//    }else{
-//        //Staff user
-//        if(isset($pwd, $fname, $sname, $email)){
-//            //Carry out the password hashing and generate the salt
-//            if (strlen($pwd) != 128) {
-//                // The hashed pwd should be 128 characters long.
-//                // If it's not, something really odd has happened
-//                $message = "Invalid password configuration";
-//            }
-//
-//            $random_salt = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
-//            // Create salted password 
-//            $password = hash('sha512', $password . $random_salt);
-//            
-//            $query = "INSERT INTO TUSERS (`First Name`, `Surname`, `Email`, `Username`, `Password`, `Salt`, `Role`)
-//                      VALUES('$fname','$sname','$email','$email','$password','$random_salt','$role')";
-//            $resultArray = db_insert_query($query);
-//            
-//            if($result){
-//                //Successfull
-//                $type = "SUCCESS";
-//                $message = "User succesfully created";
-//                $_SESSION['message'] = new Message($type, $message);
-//                header("Location: ../createUser.php");
-//                exit;
-//            }else{
-//                //Query failed
-//                $desc = "Not all required roles were set for a staff user";
-//                $message .= seriousError($desc);
-//            }
-//        }else{
-//            //Not enough info to proceed
-//            $message .= "You have not entered all of the fields required to create a user";
-//        }
-//    }
-//}else{
-//    //Something had gone really wrong
-//    $desc = "The user role was not set";
-//    $message .= seriousError($desc);
-//}
 
 function returnToPageError($message){
     $type = 'ERROR';

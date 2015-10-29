@@ -21,13 +21,6 @@ function seriousError($desc){
 
 function infoLog($msg){
     $error_msg = "[INFO] ";
-//    if(isset($_SESSION['user'])){
-//        $user = $_SESSION['user'];
-//        $fname = $user->getFirstName();
-//        $sname = $user->getSurname();
-//        $name = $fname . ' ' . $sname;
-//        $error_msg .= $name . ':' . $user->getUserId() . ':';
-//    }
     $error_msg .= $msg;
     error_log($error_msg);
 }
