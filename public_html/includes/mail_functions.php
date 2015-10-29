@@ -1,5 +1,6 @@
 <?php
-require("../../includes/class.phpmailer.php");
+$include_path = get_include_path();
+require $include_path . '/includes/class.phpmailer.php';
 
 if(isset($_POST['email'], $_POST['name'])){
     send_mail(CONTACT, $_POST['email'], $_POST['name'], $_POST['body']);

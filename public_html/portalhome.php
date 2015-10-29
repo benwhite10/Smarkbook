@@ -5,13 +5,13 @@ include_once('../includes/class.phpmailer.php');
 include_once('classes/AllClasses.php');
 
 sec_session_start();
-$loggedin = false;
-$user = new Teacher();
-if(checkUserLoginStatus()){
-    if(isset($_SESSION['user'])){
-        $user = $_SESSION['user'];
-        $loggedin = true;
-    }
+$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
+if($resultArray[0]){ 
+    $user = $_SESSION['user'];
+    $loggedin = true; 
+}else{
+    header($resultArray[1]);
+    exit();
 }
 
 $fullName = $user->getFirstName() . ' ' . $user->getSurname();
@@ -45,7 +45,7 @@ $userid = $user->getUserId();
                         <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
                         <ul class="dropdown topdrop">
                             <li><a href="portalhome.php">Home</a></li>
-                            <li><a>My Account</a></li>
+                            <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
                             <li><a href="includes/process_logout.php">Log Out</a></li>
                         </ul>
                     </li>
@@ -71,6 +71,10 @@ $userid = $user->getUserId();
                     <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>"><img src="branding/markbook.png" /></a>
                     <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>" class="title">Mark Book</a>
                 </div>
+                <!--<div class="menuobject">
+                    <a href="editUsers.php"><img src="branding/markbook.png" /></a>
+                    <a href="editUsers.php" class="title">Users</a>
+                </div>-->
             </div>
     	</div>
     </div>

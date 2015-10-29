@@ -4,7 +4,4 @@
  * and open the template in the editor.
  */
 
-function closeDiv(){
-    document.getElementById('message').style.display = 'none';
-}
-        
+

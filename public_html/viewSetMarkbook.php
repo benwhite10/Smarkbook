@@ -5,13 +5,12 @@ include_once('../includes/class.phpmailer.php');
 include_once('classes/AllClasses.php');
 
 sec_session_start();
-$loggedin = false;
-$user = new Teacher();
-if(checkUserLoginStatus()){
-    if(isset($_SESSION['user'])){
-        $user = $_SESSION['user'];
-        $loggedin = true;
-    }
+$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
+if($resultArray[0]){ 
+    $user = $_SESSION['user'];
+}else{
+    header($resultArray[1]);
+    exit();
 }
 
 $fullName = $user->getFirstName() . ' ' . $user->getSurname();
@@ -23,17 +22,14 @@ if(!$staffId){
     $staffId = $userid;
 }
 
-$query = "SELECT G.`Group ID` ID, G.Name Name FROM TUSERGROUPS U JOIN TGROUPS G ON U.`Group ID` = G.`Group ID` WHERE `User ID` = 2 AND G.`Type ID` = 3 ORDER BY G.Name;";
+$query = "SELECT G.`Group ID` ID, G.Name Name FROM TUSERGROUPS U JOIN TGROUPS G ON U.`Group ID` = G.`Group ID` WHERE `User ID` = $staffId AND G.`Type ID` = 3 ORDER BY G.Name;";
 $sets = db_select($query);
     
 if(!isset($setId)){ 
     if(count($sets) > 0){
         $setId = $sets[0]['ID'];
-        $url = "Location: viewSetMarkbook.php?staffid=$staffId&setid=$setId";
-    }else{
-        $url = "Location: index.php";
+        //$url = "Location: viewSetMarkbook.php?staffid=$staffId&setid=$setId";
     }
-    header($url);
 }
 
 $message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
@@ -102,7 +98,7 @@ $set = db_select("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;")[0]['Name
                     <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
                     <ul class="dropdown topdrop">
                         <li><a href="portalhome.php">Home</a></li>
-                        <li><a>My Account</a></li>
+                        <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
                         <li><a href="includes/process_logout.php">Log Out</a></li>
                     </ul>
                 </li>
@@ -111,7 +107,7 @@ $set = db_select("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;")[0]['Name
     	<div id="body">
             <div id="top_bar">
                 <div id="title2">
-                    <h1><?php echo $name; ?></h1>
+                    <h1><?php echo $fullName; ?></h1>
                 </div>
                 <ul class="menu navbar">
                     <li>

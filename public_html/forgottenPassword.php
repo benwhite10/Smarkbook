@@ -18,13 +18,16 @@ if($resultArray[0]){
     exit();
 }
 
+$email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
+if(isset($email)){
+    //Send the email to reset the password
+}
+
 if(isset($_SESSION['message'])){
     $Message = $_SESSION['message'];
     $message = $Message->getMessage();
     unset($_SESSION['message']);
 }
-
-$email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
 
 ?>
 
@@ -58,7 +61,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
             <div id="messageText" class="error"><p><?php if(isset($message)){echo $message;} ?></p></div>
            
             <form class="login_form" id="login_form" action="includes/process_login.php" method="POST">
-                <input type="text" name="username" placeholder="Username" value="<?php if(isset($email)){echo $email;} ?>"/>
+                <input type="text" name="username" placeholder="Username" />
                 <input type="password" name="password" placeholder="Password" id="password"/>
                 <input type="submit" value="LOGIN" />
             </form>
