@@ -1646,3 +1646,69 @@ Stack trace:
 [29-Oct-2015 20:59:18 Europe/London] PHP Warning:  Invalid argument supplied for foreach() in /Users/benwhite/Dropbox/Smarkbook/Website/public_html/viewSetMarkbook.php on line 198
 [29-Oct-2015 20:59:18 Europe/London] PHP Stack trace:
 [29-Oct-2015 20:59:18 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/viewSetMarkbook.php:0
+[30-Oct-2015 00:00:42 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[30-Oct-2015 00:00:42 Europe/London] PHP Stack trace:
+[30-Oct-2015 00:00:42 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[30-Oct-2015 00:00:42 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[30-Oct-2015 00:00:42 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[30-Oct-2015 00:00:42 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[30-Oct-2015 00:00:42 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[30-Oct-2015 00:00:42 Europe/London] No database selected
+[30-Oct-2015 00:00:48 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[30-Oct-2015 00:00:48 Europe/London] PHP Stack trace:
+[30-Oct-2015 00:00:48 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[30-Oct-2015 00:00:48 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[30-Oct-2015 00:00:48 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[30-Oct-2015 00:00:48 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[30-Oct-2015 00:00:48 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[30-Oct-2015 00:00:48 Europe/London] No database selected
+[06-Nov-2015 20:42:33 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[06-Nov-2015 20:42:33 Europe/London] PHP Stack trace:
+[06-Nov-2015 20:42:33 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[06-Nov-2015 20:42:33 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[06-Nov-2015 20:42:33 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[06-Nov-2015 20:42:33 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[06-Nov-2015 20:42:33 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[06-Nov-2015 20:42:33 Europe/London] No database selected
+[06-Nov-2015 20:42:40 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[06-Nov-2015 20:42:40 Europe/London] PHP Stack trace:
+[06-Nov-2015 20:42:40 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[06-Nov-2015 20:42:40 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[06-Nov-2015 20:42:40 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[06-Nov-2015 20:42:40 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[06-Nov-2015 20:42:40 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[06-Nov-2015 20:42:40 Europe/London] No database selected
+[06-Nov-2015 20:42:51 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[06-Nov-2015 20:42:51 Europe/London] PHP Stack trace:
+[06-Nov-2015 20:42:51 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[06-Nov-2015 20:42:51 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[06-Nov-2015 20:42:51 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[06-Nov-2015 20:42:51 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[06-Nov-2015 20:42:51 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[06-Nov-2015 20:42:51 Europe/London] No database selected
+[06-Nov-2015 20:42:57 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[06-Nov-2015 20:42:57 Europe/London] PHP Stack trace:
+[06-Nov-2015 20:42:57 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[06-Nov-2015 20:42:57 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[06-Nov-2015 20:42:57 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[06-Nov-2015 20:42:57 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[06-Nov-2015 20:42:57 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[06-Nov-2015 20:42:57 Europe/London] No database selected
+[06-Nov-2015 20:43:22 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[06-Nov-2015 20:43:22 Europe/London] PHP Stack trace:
+[06-Nov-2015 20:43:22 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[06-Nov-2015 20:43:22 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[06-Nov-2015 20:43:22 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[06-Nov-2015 20:43:22 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[06-Nov-2015 20:43:22 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[06-Nov-2015 20:43:22 Europe/London] No database selected
+[06-Nov-2015 20:43:27 Europe/London] PHP Warning:  parse_ini_file(config.ini): failed to open stream: No such file or directory in /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php on line 7
+[06-Nov-2015 20:43:27 Europe/London] PHP Stack trace:
+[06-Nov-2015 20:43:27 Europe/London] PHP   1. {main}() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:0
+[06-Nov-2015 20:43:27 Europe/London] PHP   2. getDetails() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:16
+[06-Nov-2015 20:43:27 Europe/London] PHP   3. db_select_single_exception() /Users/benwhite/Dropbox/Smarkbook/Website/public_html/includes/process_login.php:87
+[06-Nov-2015 20:43:27 Europe/London] PHP   4. db_connect() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_functions.php:67
+[06-Nov-2015 20:43:27 Europe/London] PHP   5. parse_ini_file() /Users/benwhite/Dropbox/Smarkbook/Website/includes/db_connect.php:7
+[06-Nov-2015 20:43:27 Europe/London] No database selected
+[06-Nov-2015 20:52:14 Europe/London] [INFO] Failed logins for user 1 have been cleared.
+[06-Nov-2015 20:52:14 Europe/London] [INFO] User 1 has been successfully logged in.
