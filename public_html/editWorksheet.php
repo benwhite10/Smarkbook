@@ -40,6 +40,13 @@ $alltags = db_select($query4);
 $query5 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S;";
 $staff = db_select($query5);
 
+if(isset($_SESSION['message'])){
+    $Message = $_SESSION['message'];
+    $message = $Message->getMessage();
+    $type = $Message->getType();
+    unset($_SESSION['message']);
+}
+
 ?>
 
 <!DOCTYPE html>

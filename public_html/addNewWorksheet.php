@@ -2,10 +2,11 @@
 
 date_default_timezone_set('Europe/London');
 
-include_once('../includes/db_functions.php');
-include_once('../includes/session_functions.php');
-include_once('../includes/class.phpmailer.php');
-include_once('classes/AllClasses.php');
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/includes/class.phpmailer.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -18,15 +19,32 @@ if($resultArray[0]){
 
 $fullName = $user->getFirstName() . ' ' . $user->getSurname();
 $userid = $user->getUserId();
+$author = $userid;
 
-$query5 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S;";
+if(isset($_SESSION["formValues"])){
+    $informationArray = $_SESSION["formValues"];
+    $wname = $informationArray[0];
+    $vname = $informationArray[1];
+    $author = $informationArray[2];
+    $date = $informationArray[3];
+    $number = $informationArray[4];
+    $tags = $informationArray[5];
+    $link = $informationArray[6];
+    unset($_SESSION["formValues"]);
+}
+
+$query5 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S WHERE S.`Initials` <> '' ORDER BY S.`Initials`;";
 $staff = db_select($query5);
 
 $query4 = "SELECT T.`Name` Name, T.`Tag ID` ID FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` GROUP BY T.`Name` ORDER BY COUNT(T.`Name`) DESC, T.`Name`; ";
 $alltags = db_select($query4);
 
-$message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
-$type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
+if(isset($_SESSION['message'])){
+    $Message = $_SESSION['message'];
+    $message = $Message->getMessage();
+    $type = $Message->getType();
+    unset($_SESSION['message']);
+}
 
 ?>
 
@@ -45,8 +63,10 @@ $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
     <link href="css/autocomplete.css" rel="stylesheet" />
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
     <script src="js/allTagsList.js"></script>
     <script src="js/methods.js"></script>
+    <script src="js/addWorksheet.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
 </head>
@@ -96,11 +116,11 @@ $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
             <form id="editForm" class="editWorksheet" action="includes/addNewWorksheet.php" method="POST">
                 <div id="main_content">
                     <label for="worksheetname">Worksheet:
-                    </label><input type="text" name="worksheetname" placeholder="Name"></input>
+                    </label><input type="text" name="worksheetname" placeholder="Name" value="<?php if(isset($wname)){ echo $wname; } ?>"></input>
                     <label for="versionname">Version:
-                    </label><input type="text" name="versionname" placeholder="Version" value="Original"></input>
+                    </label><input type="text" name="versionname" placeholder="Version" value="<?php echo isset($vname)?$vname:"Original"; ?>"</input>
                     <label for="link">File Link:
-                    </label><input type="url" name="link" placeholder="File Link" id="test123"></input>
+                    </label><input type="url" name="link" placeholder="File Link" id="test123" value="<?php if(isset($link)){ echo $link; } ?>"></input>
                     <label for="author">Author:
                     </label><select name="author">
                         <option value=0>Author:</option>
@@ -108,7 +128,7 @@ $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
                             foreach($staff as $teacher){
                                 $id = $teacher['ID'];
                                 $initials = $teacher['Initials'];
-                                if($id == $userid){
+                                if($id == $author){
                                     echo "<option value='$id' selected>$initials</option>";
                                 }else{
                                     echo "<option value='$id'>$initials</option>";
@@ -117,16 +137,18 @@ $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
                         ?>
                     </select>
                     <?php
-                        $newdate = date('d/m/Y');
+                        if(!isset($date)){
+                            $date = date('d/m/Y');
+                        }
                     ?>
                     <label for="date">Date Added:
-                    </label><input type="text" name="date" placeholder="DD/MM/YYYY" value="<?php echo $newdate ?>"></input>
+                    </label><input type="text" name="date" placeholder="DD/MM/YYYY" value="<?php echo $date; ?>"></input>
                     
                     <label for="questions">Questions:
-                    </label><input type="text" name="questions" placeholder="Number of Questions"></input>
+                    </label><input type="text" name="questions" placeholder="Number of Questions" value="<?php echo isset($number)?$number:1; ?>"></input>
                     
                     <label for="tags">Tags: 
-                    </label><textarea name='tags' class='autocomplete' placeholder='Enter the tags which will be used on every question'></textarea>  
+                    </label><textarea name="tags" class="autocomplete" placeholder="Enter the tags which will be used on every question" ><?php if(isset($tags)){echo $tags;} ?></textarea>  
                     
                     <input type="submit" value="Save"/>
                 </div><div id="side_bar">
@@ -192,7 +214,7 @@ $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
             return false;
         }
     });
-
+    
     </script>
     <script src="js/allTagsList.js"></script>
 </body>
