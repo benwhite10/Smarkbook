@@ -64,7 +64,7 @@ if(validation($wname, $vname, $author, $date, $number)){
             returnToPageError($message);
         }
         
-        $query3 = "INSERT INTO TSTOREDQUESTIONS (`Question ID`, `Version ID`, `Number`, `Marks`, `Order`) VALUES ($qid, $vid, $i, 0, $i);";
+        $query3 = "INSERT INTO TSTOREDQUESTIONS (`Question ID`, `Version ID`, `Number`, `Marks`, `Question Order`) VALUES ($qid, $vid, $i, 0, $i);";
         try{
             $resultArray3 = db_insert_query_exception($query3);
             $sqid = $resultArray3[1];
