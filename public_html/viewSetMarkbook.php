@@ -28,6 +28,8 @@ $sets = db_select($query);
 if(!isset($setId)){ 
     if(count($sets) > 0){
         $setId = $sets[0]['ID'];
+    }else{
+        $setId = 0;
     }
 }
 
@@ -62,7 +64,11 @@ $worksheets = db_select($query1);
 $query2 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $setId ORDER BY U.Surname;";
 $students = db_select($query2);
 
-$set = db_select("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;")[0]['Name'];
+$array = db_select("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;");
+if($array){
+    $set = $array[0]['Name'];
+}
+        
 
 ?>
 
@@ -111,7 +117,7 @@ $set = db_select("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;")[0]['Name
                 </div>
                 <ul class="menu navbar">
                     <li>
-                        <a><b><?php echo $set; ?> &#x25BE</b></a>
+                        <a><b><?php if(isset($set)){ echo $set; }?> &#x25BE</b></a>
                         <ul class="dropdown navdrop">
                             <?php
                                 foreach($sets as $set){
@@ -138,7 +144,7 @@ $set = db_select("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;")[0]['Name
             ?>
             
             <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php echo $message; ?></p>
+                <div id="messageText"><p><?php if(isset($message)){ echo $message; }?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
             </div>  
             
