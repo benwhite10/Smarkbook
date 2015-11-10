@@ -15,12 +15,18 @@ function seriousError($desc){
         $error_msg = $name . ':' . $user->getUserId() . ':';
     }
     $error_msg .= $desc;
-    error_log($error_msg);
+    error_log($desc);
     return $msg;
 }
 
 function infoLog($msg){
     $error_msg = "[INFO] ";
+    $error_msg .= $msg;
+    error_log($error_msg);
+}
+
+function errorLog($msg){
+    $error_msg = "[ERROR] ";
     $error_msg .= $msg;
     error_log($error_msg);
 }

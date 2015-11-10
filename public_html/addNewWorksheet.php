@@ -89,7 +89,7 @@ $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
             ?>
             
             <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php echo $message; ?></p>
+                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
             </div>   
             

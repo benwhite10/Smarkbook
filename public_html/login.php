@@ -64,7 +64,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
             </form>
       
             <div id="forgot">
-                <a href="http://www.bbc.co.uk">Forgot your password?</a>
+                <a href="forgottenPassword.php">Forgot your password?</a>
             </div>
         </div>
     </div>

@@ -101,7 +101,7 @@ $staff = db_select($query5);
             ?>
             
             <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php echo $message; ?></p>
+                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
             </div>  
             
