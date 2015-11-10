@@ -54,9 +54,14 @@ if(isset($type, $email)){
                     </body>
                 </html>
                 ";
-        sendMailFromContact($email, $name, $body, $subject);
-        $message = "An email has been sent to $email containing a link to reset your password.";
-        returnToPageSuccess($message);
+        try {
+            sendMailFromContact($email, $name, $body, $subject);
+            $message = "An email has been sent to $email containing a link to reset your password.";
+            returnToPageSuccess($message);
+        } catch (Exception $ex) {
+            $desc = "Something went wrong while sending the forgot password email.";
+            returnToPageError($desc);
+        }
     }else if($type === "RESET"){
         if(isset($pwd, $code)){
             //Check the details match up for the right time

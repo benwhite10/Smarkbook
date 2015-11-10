@@ -29,10 +29,9 @@ function sendMailFromContact($to, $name, $body, $subject){
     $mail->IsHTML(true);
 
     if(!$mail->Send()) {
-        echo 'Message was not sent. \n';
-        echo 'Mailer error: ' . $mail->ErrorInfo;
+        infoLog("Email failed to send to $name about $subject");
+        throw new Exception("Email failed to send");
     } else {
-        //echo 'Message has been sent.';
-        //infoLog("Sent")
+        infoLog("Email sent to $name about $subject");
     }
 }
