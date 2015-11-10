@@ -54,6 +54,16 @@ function db_select($query){
     return $rows;
 }
 
+function db_select_exception($query){
+    $rows = array();
+    $result = db_query($query);
+
+    while($row = mysqli_fetch_assoc($result)){
+        $rows[] = $row;
+    }
+    return $rows;
+}
+
 function db_select_single($query, $name){
     $result = db_select($query);
     if(count($result)>0){

@@ -130,7 +130,7 @@ if(isset($_SESSION['message'])){
                         <option value="STUDENT">Student</option>
                         <option value="SUPER_USER">Super User</option>
                     </select> 
-                    --> 
+                    -->
                     <input type="hidden" name="role" value="<?php if(isset($role)){echo $role;}?>"/>
                     <input type="hidden" name="userid" value="<?php if(isset($userid)){echo $userid;}?>"/>
                     <div>
