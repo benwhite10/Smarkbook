@@ -119,7 +119,8 @@ function getTagId($string){
     $type = $array[1];
     if($type == 'NEW'){
         //Add a brand new tag
-        $query = "INSERT INTO `TTAGS`(`Name`, `Date Added`) VALUES ('$tagid', NOW());";
+        $now = date("Y-m-d H:i:s", time());
+        $query = "INSERT INTO `TTAGS`(`Name`, `Date Added`) VALUES ('$tagid', '$now');";
         try{
             $newtagid = db_insert_query_exception($query);
         } catch (Exception $ex) {

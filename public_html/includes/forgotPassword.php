@@ -33,15 +33,16 @@ if(isset($type, $email)){
             returnToPageError($message);
         }
         $code = generateRandomString(20);
-        $query1 = "UPDATE TUSERS SET `Reset Code` = '$code', `Reset Time` = NOW() WHERE `User ID` = $userid;";
+        $now = date("Y-m-d H:i:s", time());
+        $query1 = "UPDATE TUSERS SET `Reset Code` = '$code', `Reset Time` = '$now' WHERE `User ID` = $userid;";
         try{
             db_query_exception($query1);
         } catch (Exception $ex) {
             $desc = "Something went wrong while sending the forgot password email.";
             returnToPageError($desc);
         }
-        $origin = filter_input(INPUT_SERVER, 'HTTP_ORIGIN', FILTER_SANITIZE_STRING);
-        $url = "$origin/forgottenPassword.php?code=$code";
+        $origin = $_SERVER["SERVER_NAME"];
+        $url = "http://$origin/forgottenPassword.php?code=$code";
         $subject = "Forgotten password";
         $name = "$firstName $surname";
         $body = "<html>
