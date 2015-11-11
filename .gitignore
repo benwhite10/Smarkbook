@@ -4,3 +4,4 @@ nbproject/project.properties
 nbproject/project.xml
 includes/config.ini
 public_html/error_log
+public_html/test.php

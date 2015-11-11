@@ -88,7 +88,8 @@ function updateTag($string){
     $type = $array[2];
     if($type == 'NEW'){
         //Add a brand new tag
-        $query = "INSERT INTO `TTAGS`(`Name`, `Date Added`) VALUES ('$tagid',NOW());";
+        $now = date("Y-m-d H:i:s", time());
+        $query = "INSERT INTO `TTAGS`(`Name`, `Date Added`) VALUES ('$tagid','$now');";
         db_query($query);
         $array = db_select("SELECT `Tag ID` FROM `TTAGS` WHERE `Name` = '$tagid';");
         $newtagid = $array[0]['Tag ID'];

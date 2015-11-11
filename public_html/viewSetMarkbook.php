@@ -36,7 +36,7 @@ if(!isset($setId)){
 $message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
 $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
 
-$query1 = "SELECT VID, WID, WName, VName, Date, SUM(Marks) Marks FROM (
+$query0 = "SELECT VID, WID, WName, VName, Date, SUM(Marks) Marks FROM (
                 SELECT WV.`Version ID` VID, WV.`Worksheet ID` WID, W.Name WName, WV.Name VName, C.`Set Due Date` Date, Marks Marks 
                 FROM TCOMPLETEDQUESTIONS C 
                   JOIN TSTOREDQUESTIONS SQ ON C.`Stored Question ID` = SQ.`Stored Question ID` 
