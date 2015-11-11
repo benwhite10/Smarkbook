@@ -28,7 +28,7 @@ if(!$vid){
 $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
 $worksheet = db_select($query1);
 
-$query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Order`;";
+$query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
 $questions = db_select($query2);
 
 $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
@@ -37,8 +37,15 @@ $tags = db_select($query3);
 $query4 = "SELECT T.`Name` Name, T.`Tag ID` ID FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` GROUP BY T.`Name` ORDER BY COUNT(T.`Name`) DESC, T.`Name`; ";
 $alltags = db_select($query4);
 
-$query5 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S;";
+$query5 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S ORDER BY S.`Initials`;";
 $staff = db_select($query5);
+
+if(isset($_SESSION['message'])){
+    $Message = $_SESSION['message'];
+    $message = $Message->getMessage();
+    $type = $Message->getType();
+    unset($_SESSION['message']);
+}
 
 ?>
 
