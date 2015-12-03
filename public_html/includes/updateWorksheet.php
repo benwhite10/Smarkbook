@@ -73,15 +73,23 @@ if(isset($wname, $vname, $author, $date, $version)){
     
     $updateString = filter_input(INPUT_POST, 'updateTags', FILTER_SANITIZE_STRING);
     if($updateString){       
-        updateAllTags($updateString, $nberror);
+        $nberror = updateAllTags($updateString, $nberror);
     }
+    
+    $message = "'$wname' successfully updated";
     
     if(count($nberror) > 0){
         // Deal with the non=breaking errors
-        errorLog("Ooops");
+        $message .= " with the following errors. <br>";
+        for($i = 0; $i < count($nberror); $i++){
+            $message .= "- " . $nberror[$i] . "<br>";
+            errorLog("Non-breaking error for worksheet '$wname': " . $nberror);
+        }
+        $message .= "Please check all of the questions before continuing.";
+    }else{
+        $message .= ".";
     }
     
-    $message = "'$wname' successfully updated.";
     returnToPageSuccess($message, $version);
     
 }else{
@@ -140,7 +148,7 @@ function updateTag($string, $nberror){
         try{
             db_query_exception($query);
         } catch (Exception $ex) {
-            $nberror[] = "There was a problem adding a tag.";
+            $nberror[] = "There was a problem adding a tag for an unknown question.";
             return $nberror;
         }
     }else if($type == 'DELETE'){

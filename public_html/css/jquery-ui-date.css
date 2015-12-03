@@ -888,10 +888,12 @@ body .ui-tooltip {
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus {
 	border: 0px;
-	background: transparent;
+	background: #323232;
 	font-weight: bold;
-	color: #000000;
+	color: #66E11B;
 }
+
+
 .ui-state-hover a,
 .ui-state-hover a:hover,
 .ui-state-hover a:link,
