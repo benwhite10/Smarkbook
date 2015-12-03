@@ -1,27 +1,37 @@
 <?php
 
-$include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
+$query = "INSERT INTO ";
+$result = db_select($query);
+echo $result[0]["Username"];
 
-$time = time();
-$date = date("Y-m-d H:i:s", $time);
-echo $date;
-echo $time;
-echo "||";
-  
-//$query = "UPDATE TUSERS SET `Reset Time` = '$date' WHERE `User ID` = 1";
-//try{
-//    $result = db_query_exception($query);
-//} catch (Exception $ex) {
-//    echo $ex->getMessage();
-//}
-//
-//$query1 = "SELECT `Reset Time` FROM TUSERS WHERE `User ID` = 1;";
-//try{
-//    $newdate = db_select_single_exception($query1, "Reset Time");
-//} catch (Exception $ex) {
-//    echo $ex->getMessage();
-//}
+function db_query($query){
+    $mysql = mysqli_connect("198.46.81.178","arlene12_dbuser","eRC@fhsYu","arlene12_usersdb");
+	$result = mysqli_query($mysql, $query);
+    if(!$result){
+        error_log(mysqli_error($mysql));
+    }
+    return $result;
+}
 
-echo $newdate;
-echo strtotime($newdate);
+function db_select($query){
+    $rows = array();
+    $result = db_query($query);
+    
+    if($result == false){
+        return false;
+    }
+
+    while($row = mysqli_fetch_assoc($result)){
+        $rows[] = $row;
+    }
+    return $rows;
+}
+
+function db_insert_query($query){
+    $mysql = db_connect();
+    $result = mysqli_query($mysql, $query);
+    $array = array();
+    array_push($array, $result);
+    array_push($array, mysqli_insert_id($mysql));
+    return $array;
+}

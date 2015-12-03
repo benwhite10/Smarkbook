@@ -1,8 +1,9 @@
 <?php
-include_once('../includes/db_functions.php');
-include_once('../includes/session_functions.php');
-include_once('../includes/class.phpmailer.php');
-include_once('classes/AllClasses.php');
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/includes/class.phpmailer.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -17,34 +18,63 @@ $fullName = $user->getFirstName() . ' ' . $user->getSurname();
 $userid = $user->getUserId();
 
 $vid = filter_input(INPUT_GET,'id',FILTER_SANITIZE_NUMBER_INT);
-$message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
-$type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
 
-if(!$vid){
-    $message = 'Something has gone wrong, please go back and try again.';
-    $type = 'ERROR';
+if(!isset($vid)){
+    failWithMessage("Something went wrong loading the details, please try again.");
 }
 
 $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
-$worksheet = db_select($query1);
+try{
+    $worksheet = db_select_exception($query1);
+} catch (Exception $ex) {
+    $msg = $ex->getMessage();
+    failWithMessage("Something went wrong selecting the worksheet with Version ID ($vid) - $msg");
+}
 
 $query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
-$questions = db_select($query2);
+try{
+    $questions = db_select_exception($query2);
+} catch (Exception $ex) {
+    $msg = $ex->getMessage();
+    failWithMessage("Something went wrong selecting questions for the worksheet with Version ID ($vid) - $msg");
+}
 
 $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
-$tags = db_select($query3);
+try{
+    $tags = db_select_exception($query3);
+} catch (Exception $ex) {
+    $msg = $ex->getMessage();
+    failWithMessage("Something went wrong selecting tags for the worksheet with Version ID ($vid) - $msg");
+}
 
 $query4 = "SELECT T.`Name` Name, T.`Tag ID` ID FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` GROUP BY T.`Name` ORDER BY COUNT(T.`Name`) DESC, T.`Name`; ";
-$alltags = db_select($query4);
+try{
+    $alltags = db_select_exception($query4);
+} catch (Exception $ex) {
+    $msg = $ex->getMessage();
+    failWithMessage("Something went wrong loading all of the tags - $msg");
+}
 
 $query5 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S ORDER BY S.`Initials`;";
-$staff = db_select($query5);
+try{
+    $staff = db_select_exception($query5);
+} catch (Exception $ex) {
+    $msg = $ex->getMessage();
+    failWithMessage("Something went wrong loading all of the staff - $msg");
+}
 
 if(isset($_SESSION['message'])){
     $Message = $_SESSION['message'];
     $message = $Message->getMessage();
     $type = $Message->getType();
     unset($_SESSION['message']);
+}
+
+function failWithMessage($msg){
+    header("Location: index.php");
+    $_SESSION['goBackUrl'] = "viewAllWorksheets.php";
+    errorLog($msg);
+    exit();
 }
 
 ?>
@@ -62,10 +92,19 @@ if(isset($_SESSION['message'])){
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
     <link href="css/autocomplete.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css"/>
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
     <script src="js/tagsList.js"></script>
     <script src="js/methods.js"></script>
+    <script src="js/moment.js"></script>
+    <script>
+        $(function() {
+          $( "#datepicker" ).datepicker({ dateFormat: 'dd/mm/yy' });
+        });
+    </script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
 </head>
@@ -116,13 +155,13 @@ if(isset($_SESSION['message'])){
                 <div id="main_content">
                     <input type="hidden" name = "version" value="<?php echo $vid ?>" />
                     <label for="worksheetname">Worksheet:
-                    </label><input type="text" name="worksheetname" placeholder="Name" value="<?php echo $worksheet[0]['WName'] ?>"></input>
+                    </label><input type="text" name="worksheetname" id="worksheetname" placeholder="Name" value="<?php echo $worksheet[0]['WName'] ?>"></input>
                     <label for="versionname">Version:
-                    </label><input type="text" name="versionname" placeholder="Version" value="<?php echo $worksheet[0]['VName'] ?>"></input>
+                    </label><input type="text" name="versionname" id="versionname" placeholder="Version" value="<?php echo $worksheet[0]['VName'] ?>"></input>
                     <label for="link">File Link:
                     </label><input type="url" name="link" placeholder="File Link" id="test123" value="<?php echo $worksheet[0]['Link'] ?>"></input>
                     <label for="author">Author:
-                    </label><select name="author">
+                    </label><select name="author" id="author">
                         <option value=0>Author:</option>
                         <?php
                             $author = $worksheet[0]['AuthorID'];
@@ -142,7 +181,7 @@ if(isset($_SESSION['message'])){
                         $newdate = date('d/m/Y',strtotime($date));
                     ?>
                     <label for="date">Date Added:
-                    </label><input type="text" name="date" placeholder="DD/MM/YYYY" value="<?php echo $newdate ?>"></input>
+                    </label><input type="text" name="date" id="datepicker" placeholder="DD/MM/YYYY" value="<?php echo $newdate ?>"></input>
                     <?php 
                         $count = 1;
                         foreach ($questions as $question){
@@ -180,6 +219,7 @@ if(isset($_SESSION['message'])){
                             echo "<label for='$name3'>Tags: ";
                             echo "</label><textarea name='$name3' class='autocomplete' >$tagstring</textarea>";
                             
+                            //Leave like this so that ' can be included in the tag name
                             $varname = $count . 'currTags';
                             print '<input type="hidden" name="' . $varname . '" value="' . $tagstring . '" />';
 
@@ -190,9 +230,16 @@ if(isset($_SESSION['message'])){
                     <input type="submit" value="Save"/>
                 </div><div id="side_bar">
                     <ul class="menu sidebar">
-                        <li><a href="www.bbc.co.uk">Add Question</a></li>
+                        <!--<li><a href="www.bbc.co.uk">Add Question</a></li>-->
                         <li><input type="submit" value="Save"/></li>
-                        <li><a href="/viewWorksheet.php?id=<?php echo $vid ?>">Back To Overview</a></li>
+                        <li><a <?php 
+                                    if(isset($vid)){
+                                        echo "href='/viewWorksheet.php?id=$vid'";
+                                    }else{
+                                        echo "href='/viewAllWorksheets.php'";
+                                    }
+                                ?>
+                                >Back To Overview</a></li>
                     </ul>
                 </div>
             </form> 

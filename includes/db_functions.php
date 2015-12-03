@@ -17,6 +17,7 @@ function db_query_exception($query){
     if(!$result){
         throw new Exception(mysqli_error($mysql), 150);
     }
+    return $result;
 }
 
 function db_insert_query($query){
@@ -56,7 +57,7 @@ function db_select($query){
 
 function db_select_exception($query){
     $rows = array();
-    $result = db_query($query);
+    $result = db_query_exception($query);
 
     while($row = mysqli_fetch_assoc($result)){
         $rows[] = $row;
@@ -74,15 +75,11 @@ function db_select_single($query, $name){
 }
 
 function db_select_single_exception($query, $name){
-    $mysql = db_connect();
     $result = db_select($query);
-    if(!$result){
-        throw new Exception(mysqli_error($mysql), 150);
-    }
-    if(count($result)>0){
-        return $result[0][$name];
+    if(!$result || count($result)===0){
+        throw new Exception("Your query returned no results", 199);
     }else{
-        throw new Exception("Your query returned no results", 150);
+        return $result[0][$name];
     }
 }
 
