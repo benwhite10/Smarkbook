@@ -22,7 +22,7 @@ $userid = $user->getUserId();
 <!DOCTYPE html>
 <html>
 <head lang="en">
-	<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <title>Smarkbook</title>
     <meta name="description" content="Smarkbook" />
     <meta name="keywords" content="Intelligent, personalised feedback through smart data analysis" />
@@ -58,18 +58,21 @@ $userid = $user->getUserId();
                 </div>
                 <ul class="menu navbar">
                     <li>
-                        <a href="viewMySets.php?id=<?php echo $userid; ?>">View My Sets</a>
                     </li>
                 </ul>
-            </div>
-            <div id="main">
-                <div class="menuobject">
-                    <a href="viewAllWorksheets.php"><img src="branding/worksheet.png" /></a>
+            </div>  
+            <div id="menuContainer">
+                <div class="menuobject first">
+                    <a href="viewAllWorksheets.php"><img src="images/Worksheets.png" /></a>
                     <a href="viewAllWorksheets.php" class="title">Worksheets</a>
                 </div>
                 <div class="menuobject">
-                    <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>"><img src="branding/markbook.png" /></a>
+                    <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>"><img src="images/Markbook.png" /></a>
                     <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>" class="title">Mark Book</a>
+                </div>
+                <div class="menuobject">
+                    <a href="viewMySets.php?id=<?php echo $userid; ?>"><img src="images/class.png" /></a>
+                    <a href="viewMySets.php?id=<?php echo $userid; ?>" class="title">My Sets</a>
                 </div>
                 <!--<div class="menuobject">
                     <a href="editUsers.php"><img src="branding/markbook.png" /></a>

@@ -1,32 +1,41 @@
 /*Portal home*/
 
+#menuContainer{
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .menuobject{
     display: inline-block;
-    width: 45%;
-    height: 400px;
-    margin-left: calc(2.5% - 2px);
-    margin-right: calc(2.5% - 2px);
-    margin-top: 10px;
-    margin-bottom: 10px;
-    border: 2px solid #000;
+    width: 200px;
+    height: 250px;
+    margin: 10px 30px;
     float: left;
     overflow: hidden;
     position: relative;
     cursor: pointer;
 }
 
+.first{
+    margin-left: 130px;
+}
+
 .menuobject img{
     width: 100%;
-    height: 100%;
+    height: calc(100% - 50px);
 }
 
 .menuobject a.title{
     position: absolute; 
-    right:10px; 
-    bottom: 10px;
-    color: #ffffff;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    line-height: 40px;
+    color: #000000;
     text-decoration: none;
-    font-size: 3rem;
+    text-align: center;
+    font-size: 2rem;
 }
 
 .menuobject a img{
