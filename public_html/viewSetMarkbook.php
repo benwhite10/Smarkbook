@@ -159,7 +159,8 @@ if($array){
                                 <?php
                                     foreach($worksheets as $worksheet){
                                         $name = $worksheet['WName'];
-                                        echo "<th style='text-align: center'>$name</th>";
+                                        $vid = $worksheet['VID'];
+                                        echo "<th style='text-align: center'><a href='editSetResults.php?vid=$vid&setid=$setId'>$name</a></th>";
                                     }
                                 ?>
                             </tr>
