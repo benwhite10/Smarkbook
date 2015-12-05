@@ -421,6 +421,14 @@ th
   font-size: 1.2rem;
   font-weight: normal; }
 
+th a
+{
+  color: #66E11B;
+  font-size: 1.2rem;
+  font-weight: normal;
+  text-decoration: none;
+}
+
 table thead tr th.sortable
 {   background-image: url('../images/bg.png');
     background-repeat: no-repeat;
