@@ -90,7 +90,9 @@ $worksheets = db_select($query);
                 </table>
             </div><div id="side_bar" class="menu_bar">
                 <ul class="menu sidebar">
-                    <li><a href="/addNewWorksheet.php">Add a New Worksheet</a></li>   
+                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
+                    <li><a href="/addNewWorksheet.php">Add a New Worksheet</a></li> 
+                    <?php } ?>
                 </ul>
             </div>
     	</div>

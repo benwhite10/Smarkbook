@@ -236,7 +236,9 @@ if($array){
                     </table>
                 </div><div id="side_bar">
                     <ul class="menu sidebar">
+                        <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
                         <li><a href="viewAllWorksheets.php?setid=<?php echo $setId; ?>">Enter New Results</a></li>
+                        <?php } ?>
                     </ul>
                 </div>
              
