@@ -60,7 +60,7 @@ function checkUserLoginStatus($url){
                     $_SESSION['urlid'] = $userid;
                 }
                 logout();
-                $url = "Location: login.php?email=$username";
+                $url = "Location: ../login.php?email=$username";
                 $bool = false;
             }else{
                 //All good so carry on!
@@ -70,12 +70,12 @@ function checkUserLoginStatus($url){
             }
         }else{
             //No timeout information so log out
-            $url = "Location: login.php?email=$username";
+            $url = "Location: ../login.php?email=$username";
             $bool = false;
         }
     }else{
         //Not logged in user so go to homepage
-        $url = "Location: index.php";
+        $url = "Location: ../unauthorisedAccess.php";
         $bool = false;
     }
     $resultArray = array($bool, $url);

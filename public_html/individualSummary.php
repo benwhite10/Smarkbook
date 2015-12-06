@@ -8,13 +8,19 @@ sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
 if($resultArray[0]){ 
     $user = $_SESSION['user'];
+    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
+    $userid = $user->getUserId();
+    $userRole = $user->getRole();
+    $author = $userid;
 }else{
     header($resultArray[1]);
     exit();
 }
 
-$fullName = $user->getFirstName() . ' ' . $user->getSurname();
-$userid = $user->getUserId();
+if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+    header("Location: unauthorisedAccess.php");
+    exit();
+}
 
 $studentId = filter_input(INPUT_GET,'stuid',FILTER_SANITIZE_NUMBER_INT);
 

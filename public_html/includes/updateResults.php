@@ -2,6 +2,14 @@
 include_once '../../includes/db_functions.php';
 
 session_start();
+if(isset($_SESSION['user'])){ 
+    $user = $_SESSION['user'];
+    $userRole = $user->getRole();
+    if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+        header("Location: ../unauthorisedAccess.php");
+        exit();
+    }
+}
 
 $setId = filter_input(INPUT_POST, 'set', FILTER_SANITIZE_NUMBER_INT);
 $staffId = filter_input(INPUT_POST, 'staff', FILTER_SANITIZE_NUMBER_INT);
