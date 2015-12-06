@@ -81,3 +81,12 @@ function checkUserLoginStatus($url){
     $resultArray = array($bool, $url);
     return $resultArray;
 }
+
+function authoriseUserRoles($userRole, $roles){
+    foreach($roles as $role){
+        if($userRole === $role){
+            return true;
+        }
+    }
+    return false;
+}

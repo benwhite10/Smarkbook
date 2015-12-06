@@ -2,6 +2,7 @@
 nbproject/private/private.properties
 nbproject/project.properties
 nbproject/project.xml
+nbproject/private/private.xml
 includes/config.ini
 public_html/error_log
 public_html/test.php

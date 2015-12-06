@@ -9,13 +9,13 @@ $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILT
 if($resultArray[0]){ 
     $user = $_SESSION['user'];
     $loggedin = true; 
+    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
+    $userid = $user->getUserId();
+    $userRole = $user->getRole();
 }else{
     header($resultArray[1]);
     exit();
 }
-
-$fullName = $user->getFirstName() . ' ' . $user->getSurname();
-$userid = $user->getUserId();
 
 ?>
 
@@ -57,8 +57,9 @@ $userid = $user->getUserId();
                     <h1>Portal Home</h1>
                 </div>
                 <ul class="menu navbar">
-                    <li>
-                    </li>
+                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER"])){?>
+                        <li><a href="switchUser.php">Switch User</a></li>
+                    <?php } ?>
                 </ul>
             </div>  
             <div id="menuContainer">
