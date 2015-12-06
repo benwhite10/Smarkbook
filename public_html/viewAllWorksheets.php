@@ -8,13 +8,18 @@ sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
 if($resultArray[0]){ 
     $user = $_SESSION['user'];
+    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
+    $userid = $user->getUserId();
+    $userRole = $user->getRole();
 }else{
     header($resultArray[1]);
     exit();
 }
 
-$fullName = $user->getFirstName() . ' ' . $user->getSurname();
-$userid = $user->getUserId();
+if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+    header("Location: unauthorisedAccess.php");
+    exit();
+}
 
 $setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
 
@@ -85,7 +90,9 @@ $worksheets = db_select($query);
                 </table>
             </div><div id="side_bar" class="menu_bar">
                 <ul class="menu sidebar">
-                    <li><a href="/addNewWorksheet.php">Add a New Worksheet</a></li>   
+                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
+                    <li><a href="/addNewWorksheet.php">Add a New Worksheet</a></li> 
+                    <?php } ?>
                 </ul>
             </div>
     	</div>

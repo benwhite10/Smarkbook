@@ -63,18 +63,22 @@ if($resultArray[0]){
                 </ul>
             </div>  
             <div id="menuContainer">
+                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
                 <div class="menuobject first">
                     <a href="viewAllWorksheets.php"><img src="images/Worksheets.png" /></a>
                     <a href="viewAllWorksheets.php" class="title">Worksheets</a>
                 </div>
+                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
                 <div class="menuobject">
                     <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>"><img src="images/Markbook.png" /></a>
                     <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>" class="title">Mark Book</a>
                 </div>
+                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
                 <div class="menuobject">
                     <a href="viewMySets.php?id=<?php echo $userid; ?>"><img src="images/class.png" /></a>
                     <a href="viewMySets.php?id=<?php echo $userid; ?>" class="title">My Sets</a>
                 </div>
+                <?php } ?>
                 <!--<div class="menuobject">
                     <a href="editUsers.php"><img src="branding/markbook.png" /></a>
                     <a href="editUsers.php" class="title">Users</a>

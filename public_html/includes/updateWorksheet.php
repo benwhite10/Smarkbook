@@ -6,6 +6,14 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
+if(isset($_SESSION['user'])){ 
+    $user = $_SESSION['user'];
+    $userRole = $user->getRole();
+    if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+        header("Location: ../unauthorisedAccess.php");
+        exit();
+    }
+}
 
 $wname = filter_input(INPUT_POST, 'worksheetname', FILTER_SANITIZE_STRING);
 $vname = filter_input(INPUT_POST, 'versionname', FILTER_SANITIZE_STRING);

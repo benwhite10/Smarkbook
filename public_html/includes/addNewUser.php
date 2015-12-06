@@ -7,6 +7,14 @@ include_once 'errorReporting.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
+if(isset($_SESSION['user'])){ 
+    $user = $_SESSION['user'];
+    $userRole = $user->getRole();
+    if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
+        header("Location: ../unauthorisedAccess.php");
+        exit();
+    }
+}
 
 $pwd = filter_input(INPUT_POST, 'p', FILTER_SANITIZE_STRING);
 $fname = filter_input(INPUT_POST, 'firstname', FILTER_SANITIZE_STRING);

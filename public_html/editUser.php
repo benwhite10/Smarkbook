@@ -9,13 +9,12 @@ sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
 if($resultArray[0]){ 
     $loggedInUser = $_SESSION['user'];
+    $fullName = $loggedInUser->getFirstName() . ' ' . $loggedInUser->getSurname();
+    $loggedInUserId = $loggedInUser->getUserId();
 }else{
     header($resultArray[1]);
     exit;
 }
-
-$fullName = $loggedInUser->getFirstName() . ' ' . $loggedInUser->getSurname();
-$loggedInUserId = $loggedInUser->getUserId();
 
 $userid = filter_input(INPUT_GET,'userid',FILTER_SANITIZE_STRING);
 $query = "SELECT `Role` FROM TUSERS WHERE `User ID` = $userid";

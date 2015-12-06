@@ -9,13 +9,9 @@ sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
 if($resultArray[0]){ 
     $user = $_SESSION['user'];
-}else{
-    header($resultArray[1]);
-    exit();
+    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
+    $userid = $user->getUserId();
 }
-
-$fullName = $user->getFirstName() . ' ' . $user->getSurname();
-$userid = $user->getUserId();
 
 ?>
 
@@ -49,18 +45,20 @@ $userid = $user->getUserId();
             </div>
             <ul class="menu topbar">
                 <li>
+                    <?php if(isset($user)){ ?>
                     <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
                     <ul class="dropdown topdrop">
                         <li><a href="portalhome.php">Home</a></li>
                         <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
                         <li><a href="includes/process_logout.php">Log Out</a></li>
                     </ul>
+                    <?php } ?>
                 </li>
             </ul>
     	</div>
     	<div id="body">
             <p style="text-align: center"><br>You do not have permission to access this page. <br>
-                Please go back to the <a href="portalhome.php">home</a> page and try again. </p>
+                Please go back to the <a href="index.php">home</a> page and try again. </p>
     	</div>
     </div>  
 </body>

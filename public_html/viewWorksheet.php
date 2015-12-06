@@ -8,13 +8,18 @@ sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
 if($resultArray[0]){ 
     $user = $_SESSION['user'];
+    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
+    $userid = $user->getUserId();
+    $userRole = $user->getRole();
 }else{
     header($resultArray[1]);
     exit();
 }
 
-$fullName = $user->getFirstName() . ' ' . $user->getSurname();
-$userid = $user->getUserId();
+if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+    header("Location: unauthorisedAccess.php");
+    exit();
+}
 
 if($_GET['id'])
 {
@@ -108,7 +113,7 @@ $tags = db_select($query);
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
                 <li><a href="editWorksheet.php?id=<?php echo $vid ?>">Edit</a></li>
-                <?php if(isset($setid) && $setid <> ''){?>
+                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($setid) && $setid <> ''){?>
                 <li><a href="editSetResults.php?vid=<?php echo $vid . '&setid=' . $setid; ?>">Enter Results</a></li>
                 <?php } ?>
                 <li><a href="viewAllWorksheets.php">Back To Worksheets</a></li>
