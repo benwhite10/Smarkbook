@@ -27,7 +27,7 @@ try{
     $staff = db_select_exception($query);
 } catch (Exception $ex) {
     $msg = $ex->getMessage();
-    failWithMessage("Something went wrong loading all of the staff - $msg");
+    failWithMessage("There was an error loading all of the users.", $msg);
 }
 
 if(isset($_SESSION['message'])){
@@ -37,11 +37,10 @@ if(isset($_SESSION['message'])){
     unset($_SESSION['message']);
 }
 
-function failWithMessage($msg){
-    header("Location: index.php");
-    $_SESSION['goBackUrl'] = "viewAllWorksheets.php";
-    errorLog($msg);
-    exit();
+function failWithMessage($msg, $error){
+    $msg = $msg . " Please refresh and try again. If this continues to happen then please contact our support <a href='mailto:contact.smarkbook@gmail.com'>team</a>.";
+    $_SESSION['message'] = new Message("ERROR", $msg);
+    errorLog($msg . ' - ' . $error);
 }
 
 ?>
@@ -117,10 +116,12 @@ function failWithMessage($msg){
                     </label><select name="userid" id="author">
                         <option value=0>Author:</option>
                         <?php
-                            foreach($staff as $teacher){
-                                $id = $teacher['ID'];
-                                $initials = $teacher['Initials'];
-                                echo "<option value='$id'>$initials</option>";
+                            if(isset($staff)){
+                                foreach($staff as $teacher){
+                                    $id = $teacher['ID'];
+                                    $initials = $teacher['Initials'];
+                                    echo "<option value='$id'>$initials</option>";
+                                }
                             }
                         ?>
                     </select>

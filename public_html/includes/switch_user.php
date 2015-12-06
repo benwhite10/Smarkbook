@@ -27,6 +27,12 @@ if(isset($userid) && $userid != 0){
 
 function returnToPageError($message){
     $type = 'ERROR';
+    if(isset($_SESSION['user'])){
+        $user = $_SESSION['user'];
+        $userid = $user->getUserId();
+        $msg = "User $userid was unable to switch users as the id was not correctly set.";
+        errorLog($msg);
+    }
     $_SESSION['message'] = new Message($type, $message);
     header("Location: ../switchUser.php");
     exit;
