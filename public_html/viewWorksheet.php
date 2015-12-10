@@ -21,21 +21,31 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-if($_GET['id'])
-{
-    $vid = $_GET['id'];
-}
-
+$vid = filter_input(INPUT_GET,'id',FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
 
-$query = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
-$worksheet = db_select($query);
+if(isset($vid)){
+    $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
+    $query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
+    $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
 
-$query = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
-$questions = db_select($query);
-
-$query = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
-$tags = db_select($query);
+    try{
+        $worksheet = db_select_exception($query1);
+        $questions = db_select_exception($query2);
+        $tags = db_select_exception($query3);
+    } catch (Exception $ex) {
+        $worksheet = $questions = $tags = NULL;
+        $msg = "There was an error loading the worksheet ($vid): " . $ex->getMessage();
+        errorLog($msg);
+        $message = "Sorry but there was an error loading the worksheet, please try again. If the problem persists then contact customer support";
+        $type = "ERROR";
+    }
+}else{
+    $msg = "There was no id provided for the worksheet";
+    errorLog($msg);
+    $message = "Sorry but there was an error loading the worksheet, you may have been sent to this page in error. Please try again, If the problem persists then contact customer support";
+    $type = "ERROR";
+}
 
 ?>
 
@@ -51,6 +61,7 @@ $tags = db_select($query);
     <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
     <link rel="shortcut icon" href="branding/favicon.ico">
+    <script src="js/methods.js"></script>
     <script src="js/sorttable.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
 </head>
@@ -72,9 +83,27 @@ $tags = db_select($query);
             </ul>
     	</div>
     	<div id="body">
+            
+            <?php
+                if(isset($message)){
+                    if($type == "ERROR"){
+                        $div = 'class="error"';
+                    }else if($type == "SUCCESS"){
+                        $div = 'class="success"';
+                    }
+                }else{
+                    $div = 'style="display:none;"';
+                }
+            ?>
+            
+            <div id="message" <?php echo $div; ?>>
+                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
+                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
+            </div> 
+            
             <div id="top_bar">
                 <div id="title2">
-                    <h1><?php echo $worksheet[0]['WName']; ?></h1>
+                    <h1><?php if(isset($worksheet)){ echo $worksheet[0]['WName']; }?></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>
@@ -90,30 +119,34 @@ $tags = db_select($query);
                     <tbody>
                         <?php 
                             $qid = 0;
-                            foreach ($questions as $key=>$question){
-                                $number = $question['Number'];
-                                $marks = $question['Marks'];
-                                $qid = $question['ID'];
-                                $tagstring = "";
+                            if(isset($questions)){
+                                foreach ($questions as $key=>$question){
+                                    $number = $question['Number'];
+                                    $marks = $question['Marks'];
+                                    $qid = $question['ID'];
+                                    $tagstring = "";
 
-                                foreach($tags as $tag){
-                                    if($tag['ID'] == $qid){
-                                        $name = $tag['Name'];
-                                        $tagstring = $tagstring . $name . ", ";
+                                    foreach($tags as $tag){
+                                        if($tag['ID'] == $qid){
+                                            $name = $tag['Name'];
+                                            $tagstring = $tagstring . $name . ", ";
+                                        }
                                     }
+
+                                    $tagstring = substr($tagstring, 0, -2);
+
+                                    echo "<tr><td>$number</td><td>$marks</td><td>$tagstring</td></tr>";
                                 }
-
-                                $tagstring = substr($tagstring, 0, -2);
-
-                                echo "<tr><td>$number</td><td>$marks</td><td>$tagstring</td></tr>";
                             }
                         ?> 
                     </tbody>
                 </table>
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
-                <li><a href="editWorksheet.php?id=<?php echo $vid ?>">Edit</a></li>
-                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($setid) && $setid <> ''){?>
+                <?php if(isset($vid)){ ?>
+                <li><a href="editWorksheet.php?id=<?php echo $vid; ?>">Edit</a></li>
+                <?php } ?>
+                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($setid, $vid) && $setid <> ''){?>
                 <li><a href="editSetResults.php?vid=<?php echo $vid . '&setid=' . $setid; ?>">Enter Results</a></li>
                 <?php } ?>
                 <li><a href="viewAllWorksheets.php">Back To Worksheets</a></li>

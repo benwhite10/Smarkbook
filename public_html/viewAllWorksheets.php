@@ -27,10 +27,9 @@ $query = "SELECT W.`Worksheet ID` WID, V.`Version ID` VID, W.`Name` Name, V.`Nam
 try{
     $worksheets = db_select_exception($query);
 } catch (Exception $ex) {
-    //Need to do something here to load the page but with an error
     $msg = "There was an error loading all of the worksheets: " . $ex->getMessage();
     errorLog($msg);
-    $message = $msg;
+    $message = "Sorry but there was an error loading the worksheets, please try again. If the problem persists then contact customer support";
     $type = "ERROR";
 }
 
