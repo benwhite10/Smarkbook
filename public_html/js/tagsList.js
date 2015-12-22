@@ -60,7 +60,6 @@ $('#editForm').submit(function(){
         // Need some sort of regex or check that this is a valid number. Other option is just to update with the number if possible
         var mark = marksArray[i];
         if(isNaN(mark) || mark < 0 || mark%1 !== 0 || mark.length === 0){
-            console.log(i);
             var message = "You have entered an invlaid mark for question " + (i + 1);
             setUpErrorMessage(message);
             return false;
