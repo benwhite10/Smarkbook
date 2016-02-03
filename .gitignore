@@ -6,3 +6,4 @@ nbproject/private/private.xml
 includes/config.ini
 public_html/error_log
 public_html/test.php
+public_html/request_tests/*
