@@ -1,8 +1,10 @@
 <?php
-include_once('../includes/db_functions.php');
-include_once('../includes/session_functions.php');
-include_once('../includes/class.phpmailer.php');
-include_once('classes/AllClasses.php');
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/public_html/includes/mail_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
+include_once $include_path . '/public_html/requests/core.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -21,27 +23,62 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-$versionId = filter_input(INPUT_GET,'vid',FILTER_SANITIZE_NUMBER_INT);
-$setId = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
-$staffId = filter_input(INPUT_GET,'staffid',FILTER_SANITIZE_STRING);
-$message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
-$type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
+$gwid = filter_input(INPUT_GET, 'gwid', FILTER_SANITIZE_NUMBER_INT);
+//$versionId = filter_input(INPUT_GET,'vid',FILTER_SANITIZE_NUMBER_INT);
+//$setId = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
+//$staffId = isset($_GET['staffid']) ? filter_input(INPUT_GET,'staffid',FILTER_SANITIZE_STRING) : $userid;
 
-if(!$staffId){
-    $staffId = $userid;
+//$message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
+//$type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
+
+//IMPORTANT DO NOT USE THIS QUERY
+//$query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $versionId;";
+//$worksheet = db_select($query1);
+//
+//$query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $versionId ORDER BY S.`Question Order`;";
+//$questions = db_select($query2);
+//
+//$query3 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $setId ORDER BY U.Surname;";
+//$students = db_select($query3);
+//
+//
+//IMPORTANT DO NOT USE THIS QUERY
+//$query4 = "SELECT CONCAT(C.`Stored Question ID`,'-',C.`Student ID`) String1, CONCAT(C.`Stored Question ID`,'-',C.`Student ID`,'-',C.`Mark`,'-',C.`Completed Question ID`) String2, C.`Stored Question ID` SqID, C.`Student ID` StuID, C.`Mark` Mark FROM `TCOMPLETEDQUESTIONS` C JOIN `TSTOREDQUESTIONS` S ON C.`Stored Question ID` = S.`Stored Question ID` JOIN TSTUDENTS ST ON ST.`Student ID` = C.`Student ID` JOIN TUSERGROUPS U ON ST.`User ID` = U.`User ID` WHERE S.`Version ID` = $versionId AND C.`Staff ID` = $staffId AND U.`Group ID` = $setId;";
+//$results = db_select($query4);
+
+$query1 = "SELECT S.`User ID`, S.`Initials` FROM TSTAFF S 
+            JOIN TUSERS U ON S.`User ID` = U.`User ID`
+            ORDER BY U.`Surname`;";
+try{
+    $staff = db_select_exception($query1);
+} catch (Exception $ex) {
+    $staff = array();
 }
 
-$query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $versionId;";
-$worksheet = db_select($query1);
+$postData = array(
+    "gwid" => $gwid,
+    "type" => "WORKSHEETFORGWID"
+);
+        
+$resp = sendCURLRequest("/requests/getWorksheet.php", $postData);
+$respArray = json_decode($resp[1], TRUE);
 
-$query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $versionId ORDER BY S.`Question Order`;";
-$questions = db_select($query2);
+$details = $respArray["details"];
+$worksheet = $respArray["worksheet"];
+$results = $respArray["results"];
+$completedWorksheets = $respArray["completedWorksheets"];
+$notes = $respArray["notes"];
+$students = $respArray["students"];
 
-$query3 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $setId ORDER BY U.Surname;";
-$students = db_select($query3);
+function getArrayValueForKey($array, $key)
+{
+    return array_key_exists($key, $array) ? $array[$key] : null;
+}
 
-$query4 = "SELECT CONCAT(C.`Stored Question ID`,'-',C.`Student ID`) String1, CONCAT(C.`Stored Question ID`,'-',C.`Student ID`,'-',C.`Mark`,'-',C.`Completed Question ID`) String2, C.`Stored Question ID` SqID, C.`Student ID` StuID, C.`Mark` Mark FROM `TCOMPLETEDQUESTIONS` C JOIN `TSTOREDQUESTIONS` S ON C.`Stored Question ID` = S.`Stored Question ID` JOIN TSTUDENTS ST ON ST.`Student ID` = C.`Student ID` JOIN TUSERGROUPS U ON ST.`User ID` = U.`User ID` WHERE S.`Version ID` = $versionId AND C.`Staff ID` = $staffId AND U.`Group ID` = $setId;";
-$results = db_select($query4);
+if(isset($_SESSION['message'])){
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']);
+}
 
 ?>
 
@@ -56,18 +93,96 @@ $results = db_select($query4);
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
-    <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
+    <link rel="stylesheet" type="text/css" href="css/editSetResults.css" />
     <link href="css/autocomplete.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css"/>
+    <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css"/>
     <script src="js/jquery.js"></script>
-    <script src="js/jquery-ui.js"></script>
     <script src="js/tagsList.js"></script>
     <script src="js/methods.js"></script>
+    <script src="js/moment.js"></script>
+    <script src="js/editSetResults.js"></script>
+    <script src="pickadate/picker.js"></script>
+    <script src="pickadate/picker.date.js"></script>
+    <script src="pickadate/legacy.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">
-    	<div id="header">
+    	<div id="popUpBackground">
+            <div id="popUpBox">
+                <div id="popUpBoxMain">
+                    <h2 id="popUpName">Name</h2><!--
+                    --><h2 id="popUpMarks">Marks</h2>
+                    <input type="hidden" value="" id="popUpStudent" />
+                    <select id="popUpCompletionStatusSelect" onchange="completionStatusChange(this.value)">
+                        <option value="Completed">Completed</option>
+                        <option value="Partially Completed">Partially Completed</option>
+                        <option value="Incomplete" class="incomplete">Incomplete</option>
+                        <option value="Not Required">Not Required</option>
+                    </select><!--
+                    --><select id="popUpDateStatusSelect" onChange="dateStatusChange(this.value)">
+                        <option value=0> - </option>
+                        <option value=1>On Time</option>
+                        <option value=2>Late</option>
+                    </select>
+                    <br>
+                    <div id="popUpDateHandedIn">
+                        <div class="dateLabel">
+                            <p>Handed In</p>
+                        </div><div class="dateInput">
+                            <select id="day" onChange="dueDateChange()">
+                                <?php
+                                    for($i = 1; $i <= 31; $i++){
+                                        $val = sprintf("%02d", $i);
+                                        echo "<option value=$i>$val</option>";
+                                    }
+                                ?>
+                            </select>
+                            <select id="month" onChange="dueDateChange()">
+                                <option value=1>Jan</option>
+                                <option value=2>Feb</option>
+                                <option value=3>Mar</option>
+                                <option value=4>Apr</option>
+                                <option value=5>May</option>
+                                <option value=6>Jun</option>
+                                <option value=7>Jul</option>
+                                <option value=8>Aug</option>
+                                <option value=9>Sep</option>
+                                <option value=10>Oct</option>
+                                <option value=11>Nov</option>
+                                <option value=12>Dec</option>
+                            </select>
+                            <select id="year" onChange="dueDateChange()">
+                                <?php
+                                    for($i = 2010; $i <= 2040; $i++){
+                                        echo "<option value=$i>$i</option>";
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="popUpDateDue">
+                        <div class="dateLabel">
+                            <p>Date Due</p>
+                        </div><div class="dateDue">
+                            <p id="dateDueText"></p>
+                        </div><div class="daysLate">
+                            <p id="daysLateText"></p>
+                        </div>
+                    </div>
+                    <div id="popUpNotes">
+                        <textarea id="popUpNoteText" placeholder="Notes"></textarea>
+                    </div>
+                </div>
+                <div id="popUpBoxButtons">
+                    <button id="popUpSave" onclick="div_hide(true)">Save</button><!--
+                    --><button id="popUpClose" onclick="div_hide(false)">Close</button>
+                </div>
+            </div>
+        </div>
+        <div id="header">
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
             </div>
@@ -85,7 +200,7 @@ $results = db_select($query4);
     	<div id="body">
             <div id="top_bar">
                 <div id="title2">
-                    <h1><?php echo $worksheet[0]['WName']; ?></h1>
+                    <h1><?php echo $details['WName']; ?></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>
@@ -93,6 +208,8 @@ $results = db_select($query4);
             
             <?php
                 if(isset($message)){
+                    $type = $message->getType();
+                    $string = $message->getMessage();
                     if($type == "ERROR"){
                         $div = 'class="error"';
                     }else if($type == "SUCCESS"){
@@ -104,128 +221,212 @@ $results = db_select($query4);
             ?>
             
             <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
+                <div id="messageText"><p><?php if(isset($string)) {echo $string;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>  
+            </div>
             
             <form id="editForm" class="editResults" action="includes/updateResults.php" method="POST">
+                <?php
+                    $dateString = date('d/m/Y', strtotime($details["DateDue"]));
+                    $staffNotes = isset($details["StaffNotes"]) ? $details["StaffNotes"] : "";
+                    $studentNotes = isset($details["StudentNotes"]) ? $details["StudentNotes"] : "";
+                    echo "<input type='hidden' id = 'gwid' name='gwid' value=$gwid />";  
+                ?>
+      
+                <div id="summaryBox">
+                    <div id="summaryBoxDetails">
+                        <div id="summaryBoxShowDetailsText">
+                            <h2 onclick="showHideDetails()" id="summaryBoxShowDetailsTextMain" ><?php echo $details["SetName"] . " - " . $dateString; ?></h2>
+                        </div><div id="summaryBoxShowHide">
+                        </div>
+                    </div><div id="summaryBoxButtons">
+                        <input id="saveButton" type="submit" value="Save" onclick="return clickSave()"/><!--
+                        --><input id="cancelButton" type="submit" value="Cancel" onclick="return clickCancel()"/>
+                    </div>
+                </div>
+                
+                <div id="details" style="display:none">
+                    <table class="form">
+                        <tbody class="form">
+                            <tr class="form">
+                                <td class="form">
+                                    <label for="date">Date Due:</label><!--
+                                    --><input type="text" name="dateDueMain" id="dateDueMain" class="datepicker" placeholder="DD/MM/YYYY" onChange="changeDateDueMain()" value="<?php echo $dateString; ?>"/>
+                                </td>
+                                <td class="form">
+                                    <label for="staff1">Teacher:</label>
+                                    <select name="staff1" id="staff1">
+                                        <option value="0">Teacher</option>
+                                            <?php
+                                            $staff1 = $details["StaffID1"];
+                                            foreach($staff as $teacher){
+                                                $id = $teacher['User ID'];
+                                                $initials = $teacher['Initials'];
+                                                if($id == $staff1){
+                                                    echo "<option value='$id' selected>$initials</option>";
+                                                }else{
+                                                    echo "<option value='$id'>$initials</option>";
+                                                }
+                                            }
+                                            ?>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr class="form">
+                                <td class="form">
+                                    <label for="staff2">Extra Teacher:</label>
+                                    <select name="staff2" id="staff2">
+                                        <option value="0">Extra Teacher</option>
+                                            <?php
+                                            $staff2 = $details["StaffID2"];
+                                            foreach($staff as $teacher){
+                                                $id = $teacher['User ID'];
+                                                $initials = $teacher['Initials'];
+                                                if($id == $staff2){
+                                                    echo "<option value='$id' selected>$initials</option>";
+                                                }else{
+                                                    echo "<option value='$id'>$initials</option>";
+                                                }
+                                            }
+                                            ?>
+                                    </select>
+                                </td>
+                                <td class="form">
+                                    <label for="staff3">Extra Teacher:</label>
+                                    <select name="staff3" id="staff3">
+                                        <option value="0">Extra Teacher</option>
+                                            <?php
+                                            $staff3 = $details["StaffID3"];
+                                            foreach($staff as $teacher){
+                                                $id = $teacher['User ID'];
+                                                $initials = $teacher['Initials'];
+                                                if($id == $staff3){
+                                                    echo "<option value='$id' selected>$initials</option>";
+                                                }else{
+                                                    echo "<option value='$id'>$initials</option>";
+                                                }
+                                            }
+                                            ?>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr class="form">
+                                <td class="form" colspan="2">
+                                    <label for="studentNotes">Notes (Students)</label>
+                                    <textarea name="studentNotes"><?php echo $studentNotes; ?></textarea>
+                                </td>
+                            </tr>
+                            <tr class="form">
+                                <td class="form" colspan="2">
+                                    <label for="staffNotes">Notes (Staff)</label>
+                                    <textarea name="staffNotes"><?php echo $staffNotes; ?></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            
                 <div id="main_content" style="overflow: scroll;">
-                    <input type="hidden" name = "version" value="<?php echo $versionId ?>" />
-                    <input type="hidden" name = "set" value="<?php echo $setId ?>" />
-                    <input type="hidden" name = "staff" value="<?php echo $staffId ?>" />
-                    <table border="1">
-                        <thead>
-                            <tr>
-                                <th>Students</th>
+                    <input type="hidden" name="questioncount" id="questioncount" value="<?php echo count($worksheet) ?>" />
+                    <table class="results" border="1">
+                        <thead class="results">
+                            <tr class="results">
+                                <th class="results"></th>
                                 <?php
-                                    foreach($questions as $question){
+                                    foreach($worksheet as $question){
                                         $qno = $question['Number'];
-                                        echo "<th style='text-align: center'>$qno</th>";
+                                        echo "<th class='results' style='text-align: center; padding-left: 0px;'>$qno</th>";
                                     }
+                                    echo "<th class='results'></th>";
+                                    echo "<th class='results'></th>";
+                                ?>
+                            </tr>
+                            <tr class="results">
+                                <?php
+                                    echo "<th class='results' style='padding: 10px 0px 10px 10px;'><b>Students</b></th>";
+                                    $count = 1;
+                                    $totalMarks = 0;
+                                    foreach ($worksheet as $question){
+                                        $marks = $question['Marks'];
+                                        echo "<th class='results' style='text-align: center'><b>/ $marks</b></th>";
+                                        echo "<input type='hidden' id='ques$count' value='$marks' />";
+                                        $count++;
+                                        $totalMarks += $marks;
+                                    }
+                                    echo "<input id='totalMarks' type='hidden' value='$totalMarks' />";
+                                    echo "<th class='results' style='text-align: center; min-width: 100px;'>Status</th>";
+                                    echo "<th class='results' style='text-align: center; min-width: 100px;'>Date</th>"; 
                                 ?>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php 
-                                //Make the search array
-                                $search = array();
-                                foreach($results as $result){
-                                    $search[] = $result['String1'];
-                                }
-                            
-                                echo "<tr><td></td>";
-                                foreach ($questions as $question){
-                                    $marks = $question['Marks'];
-                                    echo "<td style='text-align: center'><b>/ $marks</b></td>";
-                                }
-                                echo "</tr>";
-                                foreach($students as $student){
-                                    $stuId = $student['ID'];
+                        <tbody class="results">
+                            <?php                           
+                                foreach ($students as $student){
+                                    $stuID = $student["ID"];
                                     $stuName = $student['Name'];
-                                    echo "<tr><td style='min-width: 180px;'>$stuName</td>";
-                                    foreach ($questions as $question){
-                                        $qid = $question['ID'];
-                                        $string = $qid . '-' . $stuId;
-                                        $key = array_search($string, $search);
-                                        if($key === false){
-                                            $id = $string;
-                                            $mark = '';
+                                    $resultArray = $results[$stuID];
+                                    $completedWorksheet = array_key_exists($stuID, $completedWorksheets) ? $completedWorksheets[$stuID] : null;
+                                    echo "<tr class='results'><td class='results' id='stu$stuID' style='min-width: 180px; padding-left: 10px;'>$stuName</td>";
+                                    $count = 1;
+                                    foreach ($worksheet as $question){
+                                        $sqid = $question["SQID"];
+                                        if(array_key_exists($sqid, $resultArray)){
+                                            $mark = $resultArray[$sqid]["Mark"];
+                                            $cqid = $resultArray[$sqid]["CQID"];
                                         }else{
-                                            $id = $results[$key]['String2'];
-                                            $mark = $results[$key]['Mark'];
+                                            $mark = "";
+                                            $cqid = 0;
                                         }
-                                        echo "<td style='padding:0px; text-align: center;'><input type='text' class='markInput' name='resultInput[]' value=$mark><input type='hidden' name='resultInfo[]' value=$id /></td>";
+                                        $id = $stuID . '-' . $sqid . '-' . $cqid . '-' . $mark;
+                                        echo "<td class='results' style='padding:0px;'><input type='text' class='markInput' name='resultInput[$id]' value='$mark' id='$stuID-$count' onBlur='changeResult(this.value, $stuID, $count)'></td>";
+                                        $count++;
                                     }
+                                    echo "<input type='hidden' id='count$stuID' value=$count />";
+                                    $completionStatus = "Not Required";
+                                    $daysLate = "";
+                                    $dateStatus = "-";
+                                    $cwid = null;
+                                    $lateClass = "";
+                                    $compClass = "";
+                                    if($completedWorksheet != null)
+                                    { 
+                                        $completionStatus = getArrayValueForKey($completedWorksheet, "Completion Status");
+                                        $daysLate = getArrayValueForKey($completedWorksheet, "Date Status");
+                                        if($completionStatus == "Incomplete"){
+                                            $compClass = "late";
+                                        } else if ($completionStatus == "Partially Completed") {
+                                            $compClass = "partial";
+                                        }
+                                        if($daysLate === "" || $daysLate === null){
+                                            $datestatus = "-";
+                                        } else if ($daysLate == 0) {
+                                            $dateStatus = "On Time";
+                                        } else if ($daysLate == 1) {
+                                            $dateStatus = "1 day late";
+                                            $lateClass = "late";
+                                        } else {
+                                            $dateStatus = $daysLate . " days late";
+                                            $lateClass = "late";
+                                        }
+                                        $cwid = getArrayValueForKey($completedWorksheet, "Completed Worksheet ID");
+                                    }
+                                    $id = $stuID . '-' . $cwid;
+                                    echo "<td class='results'><input type='text' id='comp$stuID' class='status $compClass' name='completion[$stuID]' value='$completionStatus' onClick='showStatusPopUp($stuID)'></input></td>";
+                                    echo "<td class='results'><input type='text' id='date$stuID' class='status $lateClass' name='date[$stuID]' value='$dateStatus' onClick='showStatusPopUp($stuID)'></input></td>";
+                                    echo "<input type='hidden' name='notes[$stuID]' id='note$stuID' value='' />";
+                                    echo "<input type='hidden' name='dates[$stuID]' id='daysLate$stuID' value='$daysLate' />";
+                                    echo "<input type='hidden' name='ids[$stuID]' value='$cwid' />";
+                                    $lock = $cwid != null;
+                                    echo "<input type='hidden' id='lock$stuID' value='$lock' />";
                                     echo "</tr>";
                                 }
                             ?> 
                         </tbody>
                     </table>
-                </div><div id="side_bar">
-                    <ul class="menu sidebar">
-                        <li><input type="submit" value="Save"/></li>
-                    </ul>
                 </div>
             </form> 
     	</div>
     </div>
-    <script>
-    var availableTags = [];
-    <?php
-        foreach ($alltags as $tag){
-            print 'availableTags.push("' . $tag['Name'] . '");';
-        }
-    ?>
-        
-    var allTagNames = [];
-    var allTagIds = [];
-    <?php
-        foreach ($alltags as $tag){
-            print 'allTagNames.push("' . $tag['Name'] . '");';
-            print 'allTagIds.push("' . $tag['ID'] . '");';
-        }
-    ?>
-        
-    function split( val ) {
-      return val.split( /,\s*/ );
-    }
-    function extractLast( term ) {
-      return split( term ).pop();
-    }
-
-    $( ".autocomplete" )
-    // don't navigate away from the field on tab when selecting an item
-    .bind( "keydown", function( event ) {
-        if ( event.keyCode === $.ui.keyCode.TAB && $( this ).autocomplete( "instance" ).menu.active ) {
-            event.preventDefault();
-        }
-    })
-
-    .autocomplete({
-        minLength: 0,
-        source: function( request, response ) {
-            // delegate back to autocomplete, but extract the last term
-            response( $.ui.autocomplete.filter(availableTags, extractLast( request.term ) ) );
-        },
-        focus: function() {
-            // prevent value inserted on focus
-            return false;
-        },
-        select: function( event, ui ) {
-            var terms = split( this.value );
-            // remove the current input
-            terms.pop();
-            // add the selected item
-            terms.push( ui.item.value );
-            // add placeholder to get the comma-and-space at the end
-            terms.push( "" );
-            this.value = terms.join( ", " );
-            return false;
-        }
-    });
-
-    </script>
-    <script src="js/tagsList.js"></script>
 </body>
 
 	

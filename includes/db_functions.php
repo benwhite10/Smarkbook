@@ -2,6 +2,21 @@
 
 include_once ('db_connect.php');
 
+function db_begin_transaction(){
+   $mysql = db_connect();
+   mysqli_query($mysql, "START TRANSACTION");
+}
+
+function db_commit_transaction(){
+    $mysql = db_connect();
+    mysqli_query($mysql, "COMMIT");
+}
+
+function db_rollback_transaction(){
+    $mysql = db_connect();
+    mysqli_query($mysql, "ROLLBACK");
+}
+
 function db_query($query){
     $mysql = db_connect();
     $result = mysqli_query($mysql, $query);
@@ -18,6 +33,15 @@ function db_query_exception($query){
         throw new Exception(mysqli_error($mysql), 150);
     }
     return $result;
+}
+
+function db_prepare_query($query, $parameters){
+    $mysql = db_connect();
+    $stmt = mysqli_prepare($mysql, $query);
+    foreach ($param as $parameters)
+    {
+        
+    }
 }
 
 function db_insert_query($query){
@@ -86,4 +110,8 @@ function db_select_single_exception($query, $name){
 function db_error(){
     $mysql = db_connect();
     return mysqli_error($mysql);
+}
+
+function db_query_escape_string($string){
+    
 }
