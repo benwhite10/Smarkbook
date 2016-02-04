@@ -1,6 +1,6 @@
 $(document).ready(function(){
    changeType();
-   setUpSets();
+   setUpSets(true);
    addDate();
 });
 
@@ -35,7 +35,6 @@ function staffSuccess(xml){
     document.getElementById("creatingStaff").innerHTML = str2;
     document.getElementById("assisstingStaff1").innerHTML = str;
     document.getElementById("assisstingStaff2").innerHTML = str;
-    //setUpWorksheets();
 }
 
 function setUpWorksheets(){
@@ -154,7 +153,7 @@ function filteredWorksheetsSuccess(xml){
     }
 }
 
-function setUpSets(){
+function setUpSets(firstTime){
     var infoArray = {orderby: "Name", desc: "FALSE"};
     var type = "SETSBYSTAFF";
     infoArray["type"] = type;
@@ -164,7 +163,9 @@ function setUpSets(){
         data: infoArray,
         url: "requests/getGroup.php",
         dataType: "xml",
-        success: setsSuccess,
+        success: function(xml) {
+            setsSuccess(xml, firstTime);
+        },
         error: function(xml) {
             console.log(xml);
         }
@@ -200,14 +201,13 @@ function setUpStudents(){
 }
 
 function studentsSuccess(xml){
-    console.log(xml);
     var ids = xml.getElementsByTagName("ID");
     var fnames = xml.getElementsByTagName("FName");
     var snames = xml.getElementsByTagName("SName");
     var pnames = xml.getElementsByTagName("PName");
     var studentid = 0;
     var str = "";
-    if(ids.length == 0){
+    if(ids.length === 0){
         str = "<option value=0>-No Students-</option>";
     }else{
         for(i=0;i<ids.length;i++){
@@ -219,7 +219,7 @@ function studentsSuccess(xml){
                 }
                 var sname = snames[i].childNodes[0].nodeValue;
                 var id = ids[i].childNodes[0].nodeValue;
-                if(id == studentid){ 
+                if(id === studentid){ 
                     str += "<option value=" + id + " selected>" + name + " " + sname + "</option>"; 
                 } else{
                     str += "<option value=" + id + ">" + name + " " + sname + "</option>";
@@ -231,19 +231,19 @@ function studentsSuccess(xml){
     document.getElementById("students").innerHTML = str;
 }
 
-function setsSuccess(xml){
+function setsSuccess(xml, firstTime){
     var ids = xml.getElementsByTagName("ID");
     var names = xml.getElementsByTagName("Name");
-    var setid = 0;
+    var setid = firstTime ? $("#originalGroup").val() : 0;
     var str = "";
-    if(ids.length == 0){
+    if(ids.length === 0){
         str = "<option value=0>-No Sets-</option>";
     }else{
         for(i=0;i<ids.length;i++){
             if(names[i].childNodes[0] !== undefined && ids[i].childNodes[0] !== undefined){
                 var name = names[i].childNodes[0].nodeValue;
                 var id = ids[i].childNodes[0].nodeValue;
-                if(id == setid){ 
+                if(id === setid){ 
                     str += "<option value=" + id + " selected>" + name + "</option>"; 
                 } else{
                     str += "<option value=" + id + ">" + name + "</option>";
@@ -254,7 +254,7 @@ function setsSuccess(xml){
     }
     document.getElementById("group").innerHTML = str;
     setUpStudents();
-    if(document.getElementById("type") && document.getElementById("type").value == 2){
+    if(document.getElementById("type") && parseInt(document.getElementById("type").value) === 2){
         setUpWorksheets();
     }
 }
@@ -317,7 +317,7 @@ function changeStaffMember(){
     if(document.getElementById("creatingStaffMember") && document.getElementById("creatingStaff")){
         document.getElementById("creatingStaffMember").value = document.getElementById("creatingStaff").value;
     }
-    setUpSets();
+    setUpSets(false);
 }
 
 function addDate(){

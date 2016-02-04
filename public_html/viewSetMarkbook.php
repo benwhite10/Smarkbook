@@ -152,9 +152,8 @@ $noStudents = (count($students) == 0);
                                 if(!$noResults){
                                     foreach($worksheets as $worksheet){
                                         $name = $worksheet['WName'];
-                                        $vid = $worksheet['VID'];
                                         $gwid = $worksheet['GWID'];
-                                        echo "<th style='text-align: center'><a href='editSetResults.php?vid=$vid&setid=$setId&gwid=$gwid'>$name</a></th>";
+                                        echo "<th style='text-align: center'><a href='editSetResults.php?gwid=$gwid'>$name</a></th>";
                                     }
                                 }
                             ?>
@@ -207,7 +206,7 @@ $noStudents = (count($students) == 0);
             <div id="side_bar">
                 <ul class="menu sidebar">
                     <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                    <li><a href="viewAllWorksheets.php?setid=<?php echo $setId; ?>">Enter New Results</a></li>
+                    <li><a href="resultsEntryHome.php?level=1&type=2&staffid=<?php echo "$staffId&groupid=$setId"; ?>">Enter New Results</a></li>
                     <?php } ?>
                 </ul>
             </div>

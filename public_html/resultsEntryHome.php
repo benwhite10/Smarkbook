@@ -31,6 +31,7 @@ $level = getInput("GET", "level", "INT");
 $type = 1;
 $groupid = getInput("GET", "groupid", "INT");
 $staffid = getInput("GET", "staffid", "INT");
+$vid = getInput("GET", "vid", "INT");
 
 $query1 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S ORDER BY S.`Initials`;";
 $query2 = "SELECT * FROM TGROUPS G JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID` WHERE UG.`User ID` = 2 AND `Type ID` = 3 ORDER BY `Name`";
@@ -154,6 +155,7 @@ function getInput($method, $name, $type){
                     </label><select name="creatingStaff" id="creatingStaff" onchange="changeStaffMember()">
                         <option value=0>Loading</option>
                     </select>
+                    <input type="hidden" id="originalGroup" value="<?php echo $groupid; ?>" />
                     <label for="group">Set *:
                     </label><select name="group" id="group" onchange="changeGroup()">
                         <option value=0>Loading Sets</option>
@@ -162,6 +164,7 @@ function getInput($method, $name, $type){
                     </label><select name="students" id="students" onchange="changeStudents()">
                         <option value=0>Loading Students</option>
                     </select>
+                    <input type="hidden" id="originalWorksheet" value="<?php echo $vid; ?>" />
                     <label for="worksheet">Worksheet *:
                     </label><select name="worksheet" id="worksheet">
                         <option value=0>Loading Worksheets</option>
@@ -181,7 +184,7 @@ function getInput($method, $name, $type){
                 </div><div id="side_bar" class="menu_bar">
                 <ul class="menu sidebar">
                     <li><input type="submit" value="Go"/></li>
-                    <li><a href="viewMySets.php">Cancel</a></li>
+                    <!--<li><a href="viewMySets.php">Cancel</a></li>-->
                 </ul>
                 </div>
             </form>
