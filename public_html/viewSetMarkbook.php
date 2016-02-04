@@ -193,9 +193,7 @@ $noStudents = (count($students) == 0);
                                     }else{
                                         $mark = "";
                                     }
-                                    // IMPORTANT - Look into this and how it works
                                     echo "<td class='marks'><input type='text' class='markInput' name='resultInput[]' value=$mark></td>";
-                                    //echo "<td class='marks'>$mark</td>";
                                 }
                                 echo "</tr>";
                             }
