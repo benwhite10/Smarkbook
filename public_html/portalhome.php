@@ -1,8 +1,10 @@
 <?php
-include_once('../includes/db_functions.php');
-include_once('../includes/session_functions.php');
-include_once('../includes/class.phpmailer.php');
-include_once('classes/AllClasses.php');
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/public_html/includes/mail_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
+include_once $include_path . '/public_html/requests/core.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -77,6 +79,16 @@ if($resultArray[0]){
                 <div class="menuobject">
                     <a href="viewMySets.php?id=<?php echo $userid; ?>"><img src="images/class.png" /></a>
                     <a href="viewMySets.php?id=<?php echo $userid; ?>" class="title">My Sets</a>
+                </div>
+                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
+                <div class="menuobject">
+                    <a href="resultsEntryHome.php?level=1&staffid=<?php echo $userid; ?>"><img src="images/enterresults.png" /></a>
+                    <a href="resultsEntryHome.php?level=1&staffid=<?php echo $userid; ?>" class="title">Enter Results</a>
+                </div>
+                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
+                <div class="menuobject">
+                    <a href="resultsEntryHome.php?level=2&staffid=<?php echo $userid; ?>"><img src="images/editresults.png" /></a>
+                    <a href="resultsEntryHome.php?level=2&staffid=<?php echo $userid; ?>" class="title">Edit Results</a>
                 </div>
                 <?php } ?>
                 <!--<div class="menuobject">

@@ -1,8 +1,10 @@
 <?php
-include_once('../includes/db_functions.php');
-include_once('../includes/session_functions.php');
-include_once('../includes/class.phpmailer.php');
-include_once('classes/AllClasses.php');
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/public_html/includes/mail_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
+include_once $include_path . '/public_html/requests/core.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
