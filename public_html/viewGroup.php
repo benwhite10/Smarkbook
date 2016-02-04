@@ -106,7 +106,10 @@ $worksheetName = db_select($query3);
                 </table>
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
-                <li><a href="viewAllWorksheets.php?setid=<?php echo $groupid; ?>">Enter Results</a></li>
+                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+                    echo "<li><a href='resultsEntryHome.php?level=1&type=2&staffid=$userid&groupid=$groupid'>Enter Results</a></li>";
+                    echo "<li><a href='resultsEntryHome.php?level=2&type=2&staffid=$userid&groupid=$groupid'>Edit Results</a></li>";
+                } ?>
                 <li><a href="viewMySets.php">Back To My Sets</a></li>
             </ul>
             </div>
