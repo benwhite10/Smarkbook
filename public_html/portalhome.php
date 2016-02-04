@@ -65,28 +65,29 @@ if($resultArray[0]){
                 </ul>
             </div>  
             <div id="menuContainer">
+                <?php $count = 1; ?>
                 <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject first">
+                <div class="menuobject first" <?php $count++; echo "id='menuobject$count';"; ?>>
                     <a href="viewAllWorksheets.php"><img src="images/Worksheets.png" /></a>
                     <a href="viewAllWorksheets.php" class="title">Worksheets</a>
                 </div>
                 <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject">
+                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?>>
                     <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>"><img src="images/Markbook.png" /></a>
                     <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>" class="title">Mark Book</a>
                 </div>
                 <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject">
+                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?>>
                     <a href="viewMySets.php?id=<?php echo $userid; ?>"><img src="images/class.png" /></a>
                     <a href="viewMySets.php?id=<?php echo $userid; ?>" class="title">My Sets</a>
                 </div>
                 <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject">
+                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?> style="margin-left: 250px; margin-top:50px;">
                     <a href="resultsEntryHome.php?level=1&staffid=<?php echo $userid; ?>"><img src="images/enterresults.png" /></a>
                     <a href="resultsEntryHome.php?level=1&staffid=<?php echo $userid; ?>" class="title">Enter Results</a>
                 </div>
                 <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject">
+                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?> style="margin-top:50px;">
                     <a href="resultsEntryHome.php?level=2&staffid=<?php echo $userid; ?>"><img src="images/editresults.png" /></a>
                     <a href="resultsEntryHome.php?level=2&staffid=<?php echo $userid; ?>" class="title">Edit Results</a>
                 </div>
