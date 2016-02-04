@@ -23,13 +23,9 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 
 if(isset($_SESSION['message'])){
     $message = $_SESSION['message'];
-    unset($_SESSION['message']);
 }
 
-if(isset($_SESSION["backButtonUrl"])){
-    $backUrl = $_SESSION["backButtonUrl"];
-    unset($_SESSION["backButtonUrl"]);
-}
+clearAllTemporaryVariables();
 
 $level = getInput("GET", "level", "INT");
 //$type = getInput("GET", "type", "INT");
@@ -188,12 +184,7 @@ function getInput($method, $name, $type){
                     <input type="hidden" id="datedue" name="datedue">
                 </div><div id="side_bar" class="menu_bar">
                 <ul class="menu sidebar">
-                    <li><input type="submit" value="Go"/></li>                  
-                    <?php
-                        if(isset($backUrl)){
-                           echo "<li><a href='$backUrl'>Cancel</a></li>";
-                        }
-                    ?>  
+                    <li><input type="submit" value="Go"/></li>                   
                 </ul>
                 </div>
             </form>

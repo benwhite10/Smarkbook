@@ -90,3 +90,10 @@ function authoriseUserRoles($userRole, $roles){
     }
     return false;
 }
+
+function clearAllTemporaryVariables(){
+    $tempVariables = array("message");
+    foreach($tempVariables as $variable){
+        unset($_SESSION[$variable]);
+    }
+}
