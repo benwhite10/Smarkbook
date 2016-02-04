@@ -26,6 +26,11 @@ if(isset($_SESSION['message'])){
     unset($_SESSION['message']);
 }
 
+if(isset($_SESSION["backButtonUrl"])){
+    $backUrl = $_SESSION["backButtonUrl"];
+    unset($_SESSION["backButtonUrl"]);
+}
+
 $level = getInput("GET", "level", "INT");
 //$type = getInput("GET", "type", "INT");
 $type = 1;
@@ -183,8 +188,12 @@ function getInput($method, $name, $type){
                     <input type="hidden" id="datedue" name="datedue">
                 </div><div id="side_bar" class="menu_bar">
                 <ul class="menu sidebar">
-                    <li><input type="submit" value="Go"/></li>
-                    <!--<li><a href="viewMySets.php">Cancel</a></li>-->
+                    <li><input type="submit" value="Go"/></li>                  
+                    <?php
+                        if(isset($backUrl)){
+                           echo "<li><a href='$backUrl'>Cancel</a></li>";
+                        }
+                    ?>  
                 </ul>
                 </div>
             </form>

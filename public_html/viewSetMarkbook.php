@@ -18,6 +18,8 @@ if($resultArray[0]){
     exit();
 }
 
+$_SESSION["backButtonUrl"] = $_SERVER["REQUEST_URI"];
+
 if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     header("Location: unauthorisedAccess.php");
     exit();
