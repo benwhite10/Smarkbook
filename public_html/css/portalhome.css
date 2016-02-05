@@ -8,36 +8,39 @@
 
 .menuobject{
     display: inline-block;
-    width: 200px;
-    height: 250px;
-    margin: 10px 30px;
     float: left;
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    background: #323232;
+    background-repeat: no-repeat;
+    background-size: 400px 200px;
+    background-position: 0px;
 }
 
-.first{
-    margin-left: 130px;
+.light{
+    background: #525252;
+    background-repeat: no-repeat;
+    background-size: 400px 200px;
+    background-position: 0px;
 }
 
-.menuobject img{
-    width: 100%;
-    height: calc(100% - 50px);
+.menuobject:hover{
+    background-position: -200px; // ?
 }
 
 .menuobject a.title{
     position: absolute; 
     left: 0px;
     right: 0px;
-    bottom: 0px;
+    bottom: 8px;
     line-height: 40px;
-    color: #000000;
+    color: #EEE;
     text-decoration: none;
     text-align: center;
     font-size: 2rem;
 }
 
-.menuobject a img{
-    
+.menuobject:hover a.title{
+    color: #66E11B;
 }

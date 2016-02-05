@@ -46,7 +46,7 @@ function getAllWorksheetNames($orderby, $desc){
             $query .= " DESC";
         }
     }
-    infoLog($query);
+    //infoLog($query);
 
     setXMLHeaders();
     openXML();
@@ -78,7 +78,7 @@ function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
     $query .= filterBy(["GW.`Group ID`", "GW.`Primary Staff ID`"], [$groupid, $staffid]);
     $query .= orderBy([$orderby], [$desc]);
     
-    infoLog($query);
+    //infoLog($query);
     
     setXMLHeaders();
     openXML();

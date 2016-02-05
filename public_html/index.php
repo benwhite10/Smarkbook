@@ -12,12 +12,19 @@ if($resultArray[0]){
     $loggedin = true; 
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
+	// Redirect to portalhome
+	header("Location: ../portalhome.php");
+	exit();
 }else{
     $loggedin = false;
+	// Redirect to login
+	header("Location: ../login.php");
+	exit();
 }
 if(isset($_SESSION['url'])){
     unset($_SESSION['url']);
 }
+
 ?>
 
 <!DOCTYPE html>

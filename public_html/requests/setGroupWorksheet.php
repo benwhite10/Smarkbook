@@ -69,7 +69,7 @@ function createNewGroupWorksheet($staff, $setid, $versionid, $datedue){
     
     try{
         db_begin_transaction();
-        infoLog($query);
+        //infoLog($query);
         $result = db_insert_query_exception($query);
         $gwid = $result[1];
         db_commit_transaction();
@@ -83,6 +83,6 @@ function createNewGroupWorksheet($staff, $setid, $versionid, $datedue){
         "result" => TRUE,
         "gwid" => $gwid
         );
-    infoLog(json_encode($resultArray));
+    //infoLog(json_encode($resultArray));
     echo json_encode($resultArray);
 }

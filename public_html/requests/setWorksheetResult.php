@@ -55,7 +55,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
                 . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
                 . "WHERE `Group Worksheet ID` = $gwid;";
-        infoLog($query);
+        //infoLog($query);
         db_query_exception($query);
     } catch (Exception $ex) {
         db_rollback_transaction();
@@ -171,7 +171,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
     }
     
     db_commit_transaction();
-    infoLog("Results successfully updated for group worksheet: $gwid");
+    //infoLog("Results successfully updated for group worksheet: $gwid");
     $test = array(
         "result" => TRUE
         );

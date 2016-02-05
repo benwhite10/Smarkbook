@@ -33,6 +33,8 @@ if($resultArray[0]){
     <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
     <link rel="stylesheet" type="text/css" href="css/portalhome.css" />
+    <script src="js/jquery.js"></script>
+    <script src="js/portalhome.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
 </head>
@@ -65,37 +67,42 @@ if($resultArray[0]){
                 </ul>
             </div>  
             <div id="menuContainer">
-                <?php $count = 1; ?>
-                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject first" <?php $count++; echo "id='menuobject$count';"; ?>>
-                    <a href="viewAllWorksheets.php"><img src="images/Worksheets.png" /></a>
-                    <a href="viewAllWorksheets.php" class="title">Worksheets</a>
-                </div>
-                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?>>
-                    <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>"><img src="images/Markbook.png" /></a>
-                    <a href="viewSetMarkbook.php?staffId=<?php echo $userid; ?>" class="title">Mark Book</a>
-                </div>
-                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?>>
-                    <a href="viewMySets.php?id=<?php echo $userid; ?>"><img src="images/class.png" /></a>
-                    <a href="viewMySets.php?id=<?php echo $userid; ?>" class="title">My Sets</a>
-                </div>
-                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?> style="margin-left: 250px; margin-top:50px;">
-                    <a href="resultsEntryHome.php?level=1&staffid=<?php echo $userid; ?>"><img src="images/enterresults.png" /></a>
-                    <a href="resultsEntryHome.php?level=1&staffid=<?php echo $userid; ?>" class="title">Enter Results</a>
-                </div>
-                <?php } if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                <div class="menuobject" <?php $count++; echo "id='menuobject$count';"; ?> style="margin-top:50px;">
-                    <a href="resultsEntryHome.php?level=2&staffid=<?php echo $userid; ?>"><img src="images/editresults.png" /></a>
-                    <a href="resultsEntryHome.php?level=2&staffid=<?php echo $userid; ?>" class="title">Edit Results</a>
-                </div>
-                <?php } ?>
-                <!--<div class="menuobject">
-                    <a href="editUsers.php"><img src="branding/markbook.png" /></a>
-                    <a href="editUsers.php" class="title">Users</a>
-                </div>-->
+                <?php   
+                $count = 0;
+                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+                    $count++;
+                    echo "<div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='viewAllWorksheets.php' class='title'>Worksheets</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='viewAllWorksheets.php'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='viewSetMarkbook.php?staffId=$userid' class='title'>Mark Book</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='viewSetMarkbook.php?staffId=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-markbook.png'>";
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='viewMySets.php?staffId=$userid' class='title'>My Sets</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='viewMySets.php?staffId=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-sets.png'>";
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='resultsEntryHome.php?level=1&staffid=$userid' class='title'>Enter Results</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='resultsEntryHome.php?level=1&staffid=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-enter-results.png'>";
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='resultsEntryHome.php?level=2&staffid=$userid' class='title'>Edit Results</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='resultsEntryHome.php?level=2&staffid=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-edit-results.png'>";
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='editUser.php?userid=$userid' class='title'>My Account</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='editUser.php?userid=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-user.png'>";
+                    echo "</div>";
+                    echo "<input type='hidden' id='menuCount' value=$count />";
+                } ?>
             </div>
     	</div>
     </div>
