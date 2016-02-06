@@ -36,11 +36,14 @@ if(isset($type, $email)){
         $now = date("Y-m-d H:i:s", time());
         $query1 = "UPDATE TUSERS SET `Reset Code` = '$code', `Reset Time` = '$now' WHERE `User ID` = $userid;";
         try{
+            db_begin_transaction();
             db_query_exception($query1);
         } catch (Exception $ex) {
+            db_rollback_transaction();
             $desc = "Something went wrong while sending the forgot password email.";
             returnToPageError($desc);
         }
+        db_commit_transaction();
         $origin = $_SERVER["SERVER_NAME"];
         $url = "http://$origin/forgottenPassword.php?code=$code";
         $subject = "Forgotten password";

@@ -4,7 +4,6 @@ include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/public_html/includes/mail_functions.php';
 include_once $include_path . '/includes/session_functions.php';
 include_once 'errorReporting.php';
-//include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
 if(isset($_SESSION['user'])){ 
@@ -29,6 +28,7 @@ $rawTags = filter_input(INPUT_POST, 'tags', FILTER_SANITIZE_STRING);
 
 $informationArray = array($wname, $vname, $author, $date, $number, $rawTags, $link);
 
+db_begin_transaction();
 if(validation($wname, $vname, $author, $date, $number)){
     
     $newdate = date('Y-d-m h:m:s',strtotime(str_replace('/','-', $date)));
@@ -38,9 +38,9 @@ if(validation($wname, $vname, $author, $date, $number)){
         $resultArray = db_insert_query_exception($query);
         $wid = $resultArray[1];
     } catch (Exception $ex) {
+        db_rollback_transaction();
         $errorMessage = "There was a problem adding the worksheet. " . $ex->getMessage();
         error_log($errorMessage);
-        //Undo
         $message = "Something went wrong adding the worksheet, please try again.";
         returnToPageError($message);
     }
@@ -50,6 +50,7 @@ if(validation($wname, $vname, $author, $date, $number)){
         $resultArray1 = db_insert_query_exception($query1);
         $vid = $resultArray1[1];
     } catch (Exception $ex) {
+        db_rollback_transaction();
         $errorMessage = "There was a problem adding the worksheet version for worksheet ($wid). " . $ex->getMessage();
         error_log($errorMessage);
         $message = "Something went wrong adding the worksheet, please try again.";
@@ -66,6 +67,7 @@ if(validation($wname, $vname, $author, $date, $number)){
             $resultArray2 = db_insert_query_exception($query2);
             $qid = $resultArray2[1];
         } catch (Exception $ex) {
+            db_rollback_transaction();
             $errorMessage = "There was a problem adding question $i for worksheet ($wid). " . $ex->getMessage();
             error_log($errorMessage);
             $message = "Something went wrong adding the worksheet, please try again.";
@@ -77,6 +79,7 @@ if(validation($wname, $vname, $author, $date, $number)){
             $resultArray3 = db_insert_query_exception($query3);
             $sqid = $resultArray3[1];
         } catch (Exception $ex) {
+            db_rollback_transaction();
             $errorMessage = "There was a problem adding stored question $i for worksheet ($wid). " . $ex->getMessage();
             error_log($errorMessage);
             $message = "Something went wrong adding the worksheet, please try again.";
@@ -88,11 +91,13 @@ if(validation($wname, $vname, $author, $date, $number)){
             try{
                 db_query_exception($query4);
             } catch (Exception $ex) {
+                db_rollback_transaction();
                 $errorMessage = "There was a problem adding the tag ($tag) for stored question ($sqid) on worksheet ($wid). " . $ex->getMessage();
                 error_log($errorMessage);
             }
         }
     }
+    db_commit_transaction();
       
     $message = "Worksheet ($wname - $vname) added successfully.";
     returnToPageSuccess($message, $vid);

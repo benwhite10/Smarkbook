@@ -24,6 +24,7 @@ $version = filter_input(INPUT_POST, 'version', FILTER_SANITIZE_STRING);
 $nberror = array();
 
 if(isset($wname, $vname, $author, $date, $version)){
+    db_begin_transaction();
     $link = filter_input(INPUT_POST, 'link', FILTER_SANITIZE_URL);
     $newdate = date('Y-m-d h:m:s',strtotime(str_replace('/','-', $date)));
     
@@ -33,6 +34,7 @@ if(isset($wname, $vname, $author, $date, $version)){
     try{
         db_query_exception($query);
     } catch (Exception $ex) {
+        db_rollback_transaction();
         $msg = "Something went wrong updating the worksheet";
         returnToPageError($msg, $version);
     }
@@ -47,6 +49,7 @@ if(isset($wname, $vname, $author, $date, $version)){
         $alltagids = db_select_exception($query2);
         $alltagnames = db_select_exception($query3);
     } catch (Exception $ex) {
+        db_rollback_transaction();
         $msg = "Something went setting up the tags.";
         returnToPageError($msg, $version);
     }
@@ -69,7 +72,7 @@ if(isset($wname, $vname, $author, $date, $version)){
             try{
                 db_query_exception($query);
             } catch (Exception $ex) {
-                //Maybe don't fail for every question, could give it 2 goes.
+                db_rollback_transaction();
                 $msg = "Something went wrong while updating question $count on worksheet $wname ($version).";
                 returnToPageError($msg, $version);
             }        
@@ -78,6 +81,7 @@ if(isset($wname, $vname, $author, $date, $version)){
         }
         $count = $count + 1;
     } while($flag);
+    db_commit_transaction();
     
     $updateString = filter_input(INPUT_POST, 'updateTags', FILTER_SANITIZE_STRING);
     if($updateString){       

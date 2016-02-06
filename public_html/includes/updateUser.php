@@ -31,6 +31,7 @@ $dob = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
 $message = "";
 
 if(isset($role, $userid)){
+    db_begin_transaction();
     if(isset($pwd)){
         if (strlen($pwd) != 128) {
             // The hashed pwd should be 128 characters long.
@@ -47,6 +48,7 @@ if(isset($role, $userid)){
         try{
             $result = db_query_exception($query);
         } catch (Exception $ex) {
+            db_rollback_transaction();
             if($ex->getMessage() !== null){
                 $desc = $ex->getMessage();
             }else{
@@ -72,6 +74,7 @@ if(isset($role, $userid)){
             $result1 = db_query_exception($query1);
             $result2 = db_query_exception($query2);
         } catch (Exception $ex) {
+            db_rollback_transaction();
             if($ex->getMessage() !== null){
                 $desc = $ex->getMessage();
             }else{
@@ -81,11 +84,12 @@ if(isset($role, $userid)){
             returnToPageError($message, $userid);
         }
     }else{
+        db_rollback_transaction();
         //Not enough info to proceed
         $message .= "You have not entered all of the required fields.";
         returnToPageError($message, $userid);
     }
-    
+    db_commit_transaction();
     $message = "User '$fname $sname' successfully updated.";
     updateCurrentUser();
     returnToPageSuccess($message, $userid);
