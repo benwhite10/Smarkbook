@@ -2,6 +2,21 @@
 
 include_once ('db_connect.php');
 
+function db_begin_transaction(){
+   $mysql = db_connect();
+   mysqli_query($mysql, "START TRANSACTION");
+}
+
+function db_commit_transaction(){
+    $mysql = db_connect();
+    mysqli_query($mysql, "COMMIT");
+}
+
+function db_rollback_transaction(){
+    $mysql = db_connect();
+    mysqli_query($mysql, "ROLLBACK");
+}
+
 function db_query($query){
     $mysql = db_connect();
     $result = mysqli_query($mysql, $query);

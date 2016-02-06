@@ -1,7 +1,11 @@
 <?php
+$include_path = get_include_path();
 include_once '../../includes/db_functions.php';
+include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/public_html/includes/errorReporting.php';
+include_once $include_path . '/includes/session_functions.php';
 
-session_start();
+sec_session_start();
 if(isset($_SESSION['user'])){ 
     $user = $_SESSION['user'];
     $userRole = $user->getRole();
@@ -9,114 +13,86 @@ if(isset($_SESSION['user'])){
         header("Location: ../unauthorisedAccess.php");
         exit();
     }
-}
-
-$setId = filter_input(INPUT_POST, 'set', FILTER_SANITIZE_NUMBER_INT);
-$staffId = filter_input(INPUT_POST, 'staff', FILTER_SANITIZE_NUMBER_INT);
-$versionId = filter_input(INPUT_POST, 'version', FILTER_SANITIZE_NUMBER_INT);
-
-if(isset($staffId)){
-    //Roll through the inputs
-    //For each check the value, consider how it could be compared to thr original value. 
-    //Maybe it could be passed in with the id. Only upload any changes
-    
-    $resultInfo = $_POST['resultInfo'];
-    $resultInput = $_POST['resultInput'];
-    $updateArray = array();
-    $insertArray = array();
-    
-    foreach($resultInfo as $index => $result) {
-        $resultArray = explode("-",$result);
-        $mark = $resultInput[$index];
-        if(count($resultArray) == 4){
-            //There is an existing result, see if it matched the current value
-            if($resultArray[2] == $mark){
-                //Do nothing
-            }else{
-                //Add to the update array
-                $resultArray[2] = $mark;
-                $updateArray[] = $resultArray;
-            }
-        }else{
-            //There is no existing result so add to the insert array
-            if($mark <> ''){
-                $resultArray[] = $mark;
-                $insertArray[] = $resultArray;
-            }
-        }
-    }
-    
- //   echo count($insertArray) . '-' . count($updateArray);
-    
-    //Insert new results
-    foreach($insertArray as $result){
-        $sqid = $result[0];
-        $stuId = $result[1];
-        $mark = $result[2];
-        $date = date('Y-m-d');
-        $query = "INSERT INTO `TCOMPLETEDQUESTIONS`(`Stored Question ID`, `Mark`, `Student ID`, `Staff ID`, `Date Added`, `Set ID`, `Set Due Date`) VALUES ($sqid,$mark,$stuId,$staffId,'$date',$setId,'$date')"; 
-        $result = db_query($query);
-    }
-    
-    //Update results
-    foreach($updateArray as $result){
-        $mark = $result[2];
-        $cqid = $result[3];
-        if($mark == ''){
-            $query = "DELETE FROM `TCOMPLETEDQUESTIONS` WHERE `Completed Question ID` = $cqid;";
-        }else{
-            $query = "UPDATE `TCOMPLETEDQUESTIONS` SET `Mark`=$mark WHERE `Completed Question ID` = $cqid;";
-        }
-        $result = db_query($query);
-    }
-    
-    if($result){
-        $message = 'Results succesfully updated.';
-        header('Location: ../editSetResults.php?vid=' . $versionId . '&setid=' . $setId . '&err=SUCCESS&msg=' . $message);
-    }else{
-        $message = 'Sorry but something has gone wrong while saving your results. Please refresh and try again.';
-        header('Location: ../editSetResults.php?vid=' . $versionId . '&setid=' . $setId . '&err=ERROR&msg=' . $message);
-    }
 }else{
-    echo 'Failure';
-    //header('Location: ../editWorksheet.php');
+    header("Location: ../unauthorisedAccess.php");
+    exit();
 }
 
-function updateAllTags($string){
-    $updates = explode('/',$string);
-    foreach ($updates as $update){
-        updateTag($update);
+$newResults = $_POST['resultInput'];
+$worksheetColumns = array(
+    "gwid",
+    "dateDueMain",
+    "staff1",
+    "staff2",
+    "staff3",
+    "studentNotes",
+    "staffNotes"
+);
+$worksheetDetails = array();
+foreach($worksheetColumns as $variable)
+{
+    $worksheetDetails[$variable] = $_POST[$variable];
+}
+$gwid = $worksheetDetails["gwid"];
+
+//Set up completed worksheets
+$notes = $_POST["notes"];
+$daysLate = $_POST["dates"];
+$cwid = $_POST["ids"];
+$completionStatus = $_POST["completion"];
+
+$completedWorksheets = array(
+    "notes" => $notes,
+    "dates" => $daysLate,
+    "completion" => $completionStatus,
+    "cwid" => $cwid
+);
+
+try {
+    $postData = array(
+        "details" => $worksheetDetails,
+        "newResults" => $newResults,
+        "compWorksheets" => $completedWorksheets,
+        "type" => "UPDATE"
+    );
+
+    $postData = array("data" => json_encode($postData));
+    $resp = sendCURLRequest("/requests/setWorksheetResult.php", $postData);
+    $respArray = json_decode($resp[1], TRUE);
+    if(!$respArray["result"]){
+        //Failure
+        failWithMessage($gwid, $respArray["message"]);
     }
+} catch (Exception $ex) {
+    $message = "There was an error saving the results, please try again.";
+    failWithMessageAndException($gwid, $message, $ex);
 }
 
-function updateTag($string){
-    $array = explode(':',$string);
-    $qid = $array[0];
-    $tagid = $array[1];
-    $type = $array[2];
-    if($type == 'NEW'){
-        //Add a brand new tag
-        $now = date("Y-m-d H:i:s", time());
-        $query = "INSERT INTO `TTAGS`(`Name`, `Date Added`) VALUES ('$tagid','$now');";
-        db_query($query);
-        $array = db_select("SELECT `Tag ID` FROM `TTAGS` WHERE `Name` = '$tagid';");
-        $newtagid = $array[0]['Tag ID'];
-        
-        $query = "INSERT INTO `TQUESTIONTAGS` (`Tag ID`, `Stored Question ID`) VALUES ($newtagid, $qid);";
-        db_query($query);
-    }else if($type == 'ADD'){
-        //Add a new tag for the question
-        $query = "INSERT INTO `TQUESTIONTAGS` (`Tag ID`, `Stored Question ID`) VALUES ($tagid, $qid);";
-        db_query($query);
-    }else if($type == 'DELETE'){
-        //Delete a tag
-        $query = "DELETE FROM `TQUESTIONTAGS` WHERE `Tag ID` = $tagid AND `Stored Question ID` = $qid";
-        db_query($query);
-    }else{
-        echo 'FAILURE';
-    }
+$message = 'Results succesfully updated.';
+completeWithMessage($gwid, $message);
+
+function failWithMessage($gwid, $message)
+{
+    $type = 'ERROR';
+    $_SESSION['message'] = new Message($type, $message);
+    header("Location: ../editSetResults.php?gwid=$gwid");
+    exit;
 }
 
+function failWithMessageAndException($gwid, $message, $ex)
+{
+    $type = 'ERROR';
+    $_SESSION['message'] = new Message($type, $message);
+    $exMsg = $ex != null ? $ex->getMessage() : "";
+    errorLog($message . " With exception: " . $exMsg);
+    header("Location: ../editSetResults.php?gwid=$gwid");
+    exit;
+}
 
-
-
+function completeWithMessage($gwid, $message)
+{
+    $type = 'SUCCESS';
+    $_SESSION['message'] = new Message($type, $message);
+    header("Location: ../editSetResults.php?gwid=$gwid");
+    exit;
+}

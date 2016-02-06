@@ -1,8 +1,10 @@
 <?php
-include_once('../includes/db_functions.php');
-include_once('../includes/session_functions.php');
-include_once('../includes/class.phpmailer.php');
-include_once('classes/AllClasses.php');
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/public_html/includes/mail_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
+include_once $include_path . '/public_html/requests/core.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -21,59 +23,53 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-$setId = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
-$staffId = filter_input(INPUT_GET,'staffid',FILTER_SANITIZE_STRING);
-if(!$staffId){
-    $staffId = $userid;
-}
+$setId = isset($_GET['setid']) ? filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING) : 0;
+$staffId = isset($_GET['staffid']) ? filter_input(INPUT_GET,'staffid', FILTER_SANITIZE_STRING) : $userid;
 
-$query = "SELECT G.`Group ID` ID, G.Name Name FROM TUSERGROUPS U JOIN TGROUPS G ON U.`Group ID` = G.`Group ID` WHERE `User ID` = $staffId AND G.`Type ID` = 3 ORDER BY G.Name;";
-$sets = db_select($query);
-    
-if(!isset($setId)){ 
-    if(count($sets) > 0){
+$query = "SELECT G.`Group ID` ID, G.Name Name "
+        . "FROM TUSERGROUPS U JOIN TGROUPS G ON U.`Group ID` = G.`Group ID` "
+        . "WHERE `User ID` = $staffId AND G.`Type ID` = 3 ORDER BY G.Name;";
+try{
+    $sets = db_select_exception($query);
+    if($setId == 0 && count($sets)>0){
         $setId = $sets[0]['ID'];
-    }else{
-        $setId = 0;
     }
+    $message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
+    $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
+} catch (Exception $ex) {
+    errorLog($ex->getMessage());
+    $success = FALSE;
+    $message = "There was an error loading the markbook.";
+    $type = "ERROR"; 
 }
 
-$message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
-$type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
-
-$query0 = "SELECT VID, WID, WName, VName, Date, SUM(Marks) Marks FROM (
-                SELECT WV.`Version ID` VID, WV.`Worksheet ID` WID, W.Name WName, WV.Name VName, C.`Set Due Date` Date, Marks Marks 
-                FROM TCOMPLETEDQUESTIONS C 
-                  JOIN TSTOREDQUESTIONS SQ ON C.`Stored Question ID` = SQ.`Stored Question ID` 
-                  JOIN TWORKSHEETVERSION WV ON SQ.`Version ID` = WV.`Version ID` 
-                  JOIN TWORKSHEETS W ON WV.`Worksheet ID` = W.`Worksheet ID` 
-                WHERE C.`Set ID` = $setId AND C.`Staff ID` = $staffId 
-                GROUP BY SQ.`Stored Question ID`) Questions
-            GROUP BY Questions.VID, Questions.Date
-            ORDER BY Questions.Date;";
-
-$query1 = "SELECT WV.`Version ID` VID, W.`Worksheet ID` WID, W.Name WName, WV.Name VName, Worksheets.Date Date, Worksheets.Marks Marks FROM (
-                SELECT Worksheets.`Version ID`, Worksheets.`Set Due Date` Date, SUM(SQ.Marks) Marks FROM (
-                    SELECT S.`Version ID`, C.`Set Due Date` FROM TCOMPLETEDQUESTIONS C
-                      JOIN TSTOREDQUESTIONS S ON C.`Stored Question ID` = S.`Stored Question ID`
-                    WHERE C.`Set ID` = $setId AND C.`Staff ID` = $staffId
-                    GROUP BY C.`Set Due Date`, S.`Version ID`
-                  ) Worksheets
-                  JOIN TSTOREDQUESTIONS SQ ON Worksheets.`Version ID` = SQ.`Version ID`
-                GROUP BY Worksheets.`Set Due Date`, Worksheets.`Version ID`
-              ) Worksheets
-              JOIN TWORKSHEETVERSION WV ON Worksheets.`Version ID` = WV.`Version ID` JOIN TWORKSHEETS W ON WV.`Worksheet ID` = W.`Worksheet ID`
-              ORDER BY Worksheets.Date;";
-$worksheets = db_select($query1);
-
-$query2 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $setId ORDER BY U.Surname;";
-$students = db_select($query2);
-
-$array = db_select("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;");
-if($array){
-    $set = $array[0]['Name'];
+try{
+    $set = db_select_single_exception("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;", "Name");
+} catch (Exception $ex) {
+    $set = "";
 }
+
+$postData = array(
+    "set" => $setId,
+    "staff" => $staffId,
+    "type" => "MARKBOOKFORSETANDTEACHER"
+);
         
+$resp = sendCURLRequest("/requests/getMarkbook.php", $postData);
+$respArray = json_decode($resp[1], TRUE);
+if($respArray["success"]){
+    $success = isset($success) ? $success : TRUE;
+    $students = $respArray["students"];
+    $worksheets = $respArray["worksheets"];
+    $results = $respArray["results"];
+
+    $noResults = (count($results) == 0);
+    $noStudents = (count($students) == 0);
+} else {
+    $success = FALSE;
+    $message = "There was an error loading the markbook.";
+    $type = "ERROR";       
+}
 
 ?>
 
@@ -88,6 +84,7 @@ if($array){
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
+    <link rel="stylesheet" type="text/css" href="css/table.css" />
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
     <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css" />
     <link href="css/autocomplete.css" rel="stylesheet" />
@@ -96,7 +93,7 @@ if($array){
     <script src="js/tagsList.js"></script>
     <script src="js/methods.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">
@@ -116,26 +113,6 @@ if($array){
             </ul>
     	</div>
     	<div id="body">
-            <div id="top_bar">
-                <div id="title2">
-                    <h1><?php echo $fullName; ?></h1>
-                </div>
-                <ul class="menu navbar">
-                    <li>
-                        <a><b><?php if(isset($set)){ echo $set; }?> &#x25BE</b></a>
-                        <ul class="dropdown navdrop">
-                            <?php
-                                foreach($sets as $set){
-                                    $name = $set['Name'];
-                                    $id = $set['ID'];
-                                    echo "<li><a href='viewSetMarkbook.php?staffid=$staffId&setid=$id'>$name</a></li>";
-                                }
-                            ?>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-            
             <?php
                 if(isset($message)){
                     if($type == "ERROR"){
@@ -154,94 +131,94 @@ if($array){
             </div>  
             
             
-                <div id="main_content" style="overflow: scroll;">
-                    <input type="hidden" name = "set" value="<?php echo $setId ?>" />
-                    <input type="hidden" name = "staff" value="<?php echo $staffId ?>" />
-                    <table border="1">
-                        <thead>
-                            <tr>
-                                <th>Students</th>
-                                <?php
+            <div id="top_bar">
+                <div id="title2">
+                    <h1><?php echo $fullName; ?></h1>
+                </div>
+                <ul class="menu navbar">
+                    <li>
+                        <a><?php if(isset($set)){ echo $set; }?> &#x25BE</a>
+                        <ul class="dropdown navdrop">
+                            <?php
+                                foreach($sets as $set){
+                                    $name = $set['Name'];
+                                    $id = $set['ID'];
+                                    echo "<li><a href='viewSetMarkbook.php?staffid=$staffId&setid=$id'>$name</a></li>";
+                                }
+                            ?>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <?php if($success){ ?>
+            <div id="main_content" style="overflow: scroll;">
+                <input type="hidden" name = "set" value="<?php echo $setId ?>" />
+                <input type="hidden" name = "staff" value="<?php echo $staffId ?>" />
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Students</th>
+                            <?php
+                                if(!$noResults){
                                     foreach($worksheets as $worksheet){
                                         $name = $worksheet['WName'];
-                                        $vid = $worksheet['VID'];
-                                        echo "<th style='text-align: center'><a href='editSetResults.php?vid=$vid&setid=$setId'>$name</a></th>";
-                                    }
-                                ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php 
-                                //Make search array
-                                $searchArray = array();
-                                $markArray = array();
-                                $marksArray = array();
-                                foreach($worksheets as $worksheet){
-                                    $vid = $worksheet['VID'];
-                                    $date = $worksheet['Date'];
-                                    $query = "SELECT C.`Student ID` ID, SUM(Mark) Mark, SUM(Marks) Marks 
-                                                FROM TCOMPLETEDQUESTIONS C
-                                                  JOIN TSTOREDQUESTIONS SQ ON C.`Stored Question ID` = SQ.`Stored Question ID`
-                                                WHERE C.`Set ID` = $setId AND C.`Staff ID` = $staffId AND SQ.`Version ID` = $vid AND C.`Set Due Date` = '$date'
-                                                GROUP BY C.`Student ID`;";
-                                    $results = db_select($query);
-                                    foreach($results as $result){
-                                        $string = $vid . '/' . $date . '/' . $result['ID'];
-                                        $searchArray[] = $string;
-                                        $markArray[] = $result['Mark'];
-                                        $marksArray[] = $result['Marks'];
+                                        $gwid = $worksheet['GWID'];
+                                        echo "<th style='text-align: center'><a href='editSetResults.php?gwid=$gwid'>$name</a></th>";
                                     }
                                 }
-                                
+                            ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                            if(!$noResults){
                                 echo "<tr><td></td>";
                                 foreach ($worksheets as $worksheet){
                                     $date = $worksheet['Date'];
                                     echo "<td style='text-align: center'><b>$date</b></td>";
                                 }
                                 echo "</tr>";
-                                
+
                                 echo "<tr><td></td>";
                                 foreach ($worksheets as $worksheet){
                                     $marks = $worksheet['Marks'];
                                     echo "<td style='text-align: center'><b>/ $marks</b></td>";
                                 }
                                 echo "</tr>";
-                              
-                                foreach($students as $student){
-                                    $stuId = $student['ID'];
-                                    $stuName = $student['Name'];
-                                    echo "<tr><td class='name'><a href='individualSummary.php?stuid=$stuId&setid=$setId&staffid=$staffId'>$stuName</a></td>";
-                                    foreach ($worksheets as $worksheet){
-                                        $vid = $worksheet['VID'];
-                                        $date = $worksheet['Date'];
-                                        $marks = $worksheet['Marks'];
-                                        $searchString = $vid . '/' . $date . '/' . $stuId;
-                                        $key = array_search($searchString, $searchArray);
-                                        if($key === false){
-                                            $mark = '';
-                                        }else{
-                                            $qmarks = $marksArray[$key];
-                                            if($qmarks == $marks){
-                                                $mark = $markArray[$key];
-                                            }else{
-                                                $mark = $markArray[$key] . '/' . $qmarks;
-                                            }
+                            }
+                            foreach($students as $student){
+                                $stuId = $student['ID'];
+                                $stuName = $student['Name'];
+                                echo "<tr><td class='name'><a href='individualSummary.php?stuid=$stuId&setid=$setId&staffid=$staffId'>$stuName</a></td>";
+                                foreach ($worksheets as $worksheet){
+                                    $vid = $worksheet['VID'];
+                                    $marks = $worksheet['Marks'];
+                                    if(array_key_exists($vid, $results) && array_key_exists($stuId, $results[$vid])){
+                                        $resultArray = $results[$vid][$stuId];
+                                        $mark = $resultArray['Mark'];
+                                        $stumarks = $resultArray['Marks'];
+                                        if($stumarks != $marks){
+                                            $mark .= "/" . $stumarks;
                                         }
-                                        echo "<td class='marks'><input type='text' class='markInput' name='resultInput[]' value=$mark></td>";
+                                    }else{
+                                        $mark = "";
                                     }
-                                    echo "</tr>";
+                                    echo "<td class='marks'><input type='text' class='markInput' name='resultInput[]' value=$mark></td>";
                                 }
-                            ?> 
-                        </tbody>
-                    </table>
-                </div><div id="side_bar">
-                    <ul class="menu sidebar">
-                        <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                        <li><a href="viewAllWorksheets.php?setid=<?php echo $setId; ?>">Enter New Results</a></li>
-                        <?php } ?>
-                    </ul>
-                </div>
-             
+                                echo "</tr>";
+                            }
+                        ?> 
+                    </tbody>
+                </table>
+            </div>
+            <div id="side_bar">
+                <ul class="menu sidebar">
+                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
+                    <li><a href="resultsEntryHome.php?level=1&type=2&staffid=<?php echo "$staffId&groupid=$setId"; ?>">Enter New Results</a></li>
+                    <?php } ?>
+                </ul>
+            </div>
+            <?php } ?>
     	</div>
     </div>
 </body>
