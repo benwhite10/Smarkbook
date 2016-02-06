@@ -3,7 +3,8 @@ html
 { height: 100%;
   font: normal 100% 'Open Sans', sans-serif;
   color: #000;
-  text-align: justify; }
+  text-align: justify;
+  font-weight: 400; }
 
 *
 { margin: 0 auto;
@@ -25,7 +26,8 @@ p
 
 h1
 { line-height: 50px;
-  font-size: 2rem; }
+  font-size: 2rem;
+  font-weight: 400; }
 
 h2
 { font-size: 1.6rem; }
@@ -45,7 +47,8 @@ h6
 a
 { font-size: 0.8rem;
   text-decoration: none;
-  cursor: pointer; }
+  cursor: pointer;
+  font-weight: 300; }
 
 /*Lists*/
 ul
@@ -276,14 +279,16 @@ ul.sidebar li {
 
 ul.menu a{
   font-size: 1rem;
+  font-weight: 300;
 }
 
 ul.navbar a, ul.sidebar a{
   color: #323232;
+  font-weight: 400;
 }
 
 ul.navbar a{
-    font-weight: bold;
+  font-weight: 400;
 }
 
 ul.sidebar li input[type="submit"] {

@@ -94,7 +94,7 @@ th.results
 { background: #323232;
   color: #66E11B;
   font-size: 1rem;
-  font-weight: normal;
+  font-weight: 400;
   padding-top: 5px; }
 
 tr.results
@@ -427,6 +427,7 @@ input[type="text"].partial
     line-height: 60px;
     margin-left: 20px;
     width: calc(100%-40px);
+    font-weight: 400;
 }
 
 #summaryBoxButtons

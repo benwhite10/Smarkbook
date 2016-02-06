@@ -75,7 +75,7 @@ function checkUserLoginStatus($url){
         }
     }else{
         //Not logged in user so go to homepage
-        $url = "Location: ../unauthorisedAccess.php";
+        $url = "Location: ../login.php";
         $bool = false;
     }
     $resultArray = array($bool, $url);

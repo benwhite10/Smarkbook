@@ -26,7 +26,7 @@
 }
 
 .menuobject:hover{
-    background-position: -200px; // ?
+    background-position: -200px;
 }
 
 .menuobject a.title{
@@ -39,6 +39,7 @@
     text-decoration: none;
     text-align: center;
     font-size: 2rem;
+    font-weight: lighter;
 }
 
 .menuobject:hover a.title{

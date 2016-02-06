@@ -44,7 +44,7 @@ if(isset($_SESSION['url'])){
     <script src="js/sha512.js"></script>
     <script type="text/javascript" src="js/userFunctions.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <div id="main">

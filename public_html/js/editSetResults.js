@@ -249,6 +249,7 @@ function changeResult(value, student, question){
         if(!lock){
             updateCompletionStatus(student);
         }
+        updateResults(student);
     } else {
         $("#" + student + "-" + question).val("");
         $("#" + student + "-" + question).focus();
@@ -274,6 +275,22 @@ function updateCompletionStatus(student){
         $("#comp" + student).val("Completed");
         $("#date" + student).val("On Time");
     }
+}
+
+function updateResults(student){
+    // Loop through each question
+    var num = parseInt($("#count" + student).val() - 1);
+    var totalMark = 0;
+    var totalMarks = 0;
+    for(var i = 1; i <= num; i++){
+        var mark = $("#" + student + "-" + i).val();
+        var marks = $("#ques" + i).val();
+        if(mark !== "" && mark !== null){
+            totalMark += parseInt(mark);
+            totalMarks += parseInt(marks);
+        }
+    }
+    $("#total" + student).text(totalMark + " / " + totalMarks);
 }
 
 function checkAllCompleted(student){

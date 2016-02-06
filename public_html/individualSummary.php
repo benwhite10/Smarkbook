@@ -67,7 +67,7 @@ $name = $student[0]['Preferred Name'] . ' ' . $student[0]['Surname'];
     <link rel="stylesheet" type="text/css" href="css/table.css" />
     <link rel="shortcut icon" href="branding/favicon.ico">
     <script src="js/sorttable.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">

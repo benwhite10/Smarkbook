@@ -84,7 +84,7 @@ $noStudents = (count($students) == 0);
     <script src="js/tagsList.js"></script>
     <script src="js/methods.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">
@@ -110,7 +110,7 @@ $noStudents = (count($students) == 0);
                 </div>
                 <ul class="menu navbar">
                     <li>
-                        <a><b><?php if(isset($set)){ echo $set; }?> &#x25BE</b></a>
+                        <a><?php if(isset($set)){ echo $set; }?> &#x25BE</a>
                         <ul class="dropdown navdrop">
                             <?php
                                 foreach($sets as $set){

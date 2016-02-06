@@ -71,7 +71,7 @@ if(isset($_SESSION['message'])){
     <script src="js/methods.js"></script>
     <script src="js/addWorksheet.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <div id="main">
@@ -153,7 +153,7 @@ if(isset($_SESSION['message'])){
                     <label for="tags">Tags: 
                     </label><textarea name="tags" class="autocomplete" placeholder="Enter the tags which will be used on every question" ><?php if(isset($tags)){echo $tags;} ?></textarea>  
                     
-                    <input type="submit" value="Save"/>
+                    <!--<input type="submit" value="Save"/>-->
                 </div><div id="side_bar">
                     <ul class="menu sidebar">
                         <li><input type="submit" value="Create Worksheet"/></li>

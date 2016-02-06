@@ -106,7 +106,7 @@ if(isset($_SESSION['message'])){
     <script src="pickadate/picker.date.js"></script>
     <script src="pickadate/legacy.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <div id="main">
@@ -339,23 +339,25 @@ if(isset($_SESSION['message'])){
                                     }
                                     echo "<th class='results'></th>";
                                     echo "<th class='results'></th>";
+                                    echo "<th class='results'></th>";
                                 ?>
                             </tr>
                             <tr class="results">
                                 <?php
-                                    echo "<th class='results' style='padding: 10px 0px 10px 10px;'><b>Students</b></th>";
+                                    echo "<th class='results' style='padding: 10px 0px 10px 10px;'>Students</th>";
                                     $count = 1;
                                     $totalMarks = 0;
                                     foreach ($worksheet as $question){
                                         $marks = $question['Marks'];
-                                        echo "<th class='results' style='text-align: center'><b>/ $marks</b></th>";
+                                        echo "<th class='results' style='text-align: center'>/ $marks</th>";
                                         echo "<input type='hidden' id='ques$count' value='$marks' />";
                                         $count++;
                                         $totalMarks += $marks;
                                     }
                                     echo "<input id='totalMarks' type='hidden' value='$totalMarks' />";
-                                    echo "<th class='results' style='text-align: center; min-width: 100px;'>Status</th>";
-                                    echo "<th class='results' style='text-align: center; min-width: 100px;'>Date</th>"; 
+                                    echo "<th class='results' style='text-align: center; min-width: 100px;'>Total</th>";
+                                    echo "<th class='results' style='text-align: center; min-width: 150px;'>Status</th>";
+                                    echo "<th class='results' style='text-align: center; min-width: 150px;'>Date</th>"; 
                                 ?>
                             </tr>
                         </thead>
@@ -368,11 +370,15 @@ if(isset($_SESSION['message'])){
                                     $completedWorksheet = array_key_exists($stuID, $completedWorksheets) ? $completedWorksheets[$stuID] : null;
                                     echo "<tr class='results'><td class='results' id='stu$stuID' style='min-width: 180px; padding-left: 10px;'>$stuName</td>";
                                     $count = 1;
+                                    $totalMark = 0;
+                                    $totalMarks = 0;
                                     foreach ($worksheet as $question){
                                         $sqid = $question["SQID"];
                                         if(array_key_exists($sqid, $resultArray)){
                                             $mark = $resultArray[$sqid]["Mark"];
                                             $cqid = $resultArray[$sqid]["CQID"];
+                                            $totalMark += $mark;
+                                            $totalMarks += $question["Marks"];
                                         }else{
                                             $mark = "";
                                             $cqid = 0;
@@ -381,6 +387,7 @@ if(isset($_SESSION['message'])){
                                         echo "<td class='results' style='padding:0px;'><input type='text' class='markInput' name='resultInput[$id]' value='$mark' id='$stuID-$count' onBlur='changeResult(this.value, $stuID, $count)'></td>";
                                         $count++;
                                     }
+                                    echo "<td class='results' style='padding:0px; text-align: center;'><b id='total$stuID'>$totalMark / $totalMarks</b></td>";
                                     echo "<input type='hidden' id='count$stuID' value=$count />";
                                     $completionStatus = "Not Required";
                                     $daysLate = "";
