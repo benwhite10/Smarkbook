@@ -24,10 +24,16 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 $vid = filter_input(INPUT_GET,'id',FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
 
+<<<<<<< HEAD
 if(isset($vid)){
     $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
     $query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
     $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
+=======
+/* IMPORTANT Changed Staff ID -> User ID */
+$query = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`User ID` WHERE V.`Version ID` = $vid;";
+$worksheet = db_select($query);
+>>>>>>> master
 
     try{
         $worksheet = db_select_exception($query1);
@@ -60,10 +66,11 @@ if(isset($vid)){
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
+    <link rel="stylesheet" type="text/css" href="css/table.css" />
     <link rel="shortcut icon" href="branding/favicon.ico">
     <script src="js/methods.js"></script>
     <script src="js/sorttable.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">

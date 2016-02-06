@@ -3,7 +3,8 @@ html
 { height: 100%;
   font: normal 100% 'Open Sans', sans-serif;
   color: #000;
-  text-align: justify; }
+  text-align: justify;
+  font-weight: 400; }
 
 *
 { margin: 0 auto;
@@ -25,7 +26,8 @@ p
 
 h1
 { line-height: 50px;
-  font-size: 2rem; }
+  font-size: 2rem;
+  font-weight: 400; }
 
 h2
 { font-size: 1.6rem; }
@@ -45,7 +47,8 @@ h6
 a
 { font-size: 0.8rem;
   text-decoration: none;
-  cursor: pointer; }
+  cursor: pointer;
+  font-weight: 300; }
 
 /*Lists*/
 ul
@@ -59,7 +62,8 @@ ul
 
 /*Header, title and menu*/
 #header
-{ height: 50px;
+{
+  height: 50px;
   position: absolute;
   top: 0px;
   overflow: visible;
@@ -67,7 +71,8 @@ ul
   background: #323232;
   color: #66E11B;
   z-index: 1;
-  display: block;}
+  display: block;
+  }
 
 #title
 { height: 40px;
@@ -107,6 +112,7 @@ input[type="text"].markInput
   background: transparent;
   border: none;
   font-size: 0.9rem;
+  padding: 0px;
   color: #323232;
   margin: auto;
   outline: none;
@@ -273,14 +279,16 @@ ul.sidebar li {
 
 ul.menu a{
   font-size: 1rem;
+  font-weight: 300;
 }
 
 ul.navbar a, ul.sidebar a{
   color: #323232;
+  font-weight: 400;
 }
 
 ul.navbar a{
-    font-weight: bold;
+  font-weight: 400;
 }
 
 ul.sidebar li input[type="submit"] {
@@ -373,13 +381,16 @@ ul.navdrop li:hover {
   background: #323232; }
 
 #main_content
-{ width: 75%;
+{
+  width: 75%;
   float: left;
   display: inline-block;
   height: 100%;
   vertical-align: top;
   overflow: hidden;
-  background: transparent; }
+  background: transparent;
+  margin-top: 20px;
+  }
 
 #side_bar
 { width: 20%;
@@ -390,72 +401,6 @@ ul.navdrop li:hover {
   -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.39);
   -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.39);
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.39); }
-
-/*General table set up*/
-
-table
-{ width: 100%;
-  margin: 0px auto 20px auto;
-  border: 0px solid;
-  color: #000; 
-  border-collapse: collapse; }
-
-th, td
-{ height: 50px;
-  text-align: left;
-  padding-left: 10px;}
-
-td
-{ font-size: 0.9rem;
-  font-weight: normal;
-  color: #323232; }
-
-td a
-{ font-size: 0.9rem;
-  text-decoration: none;
-  color: #323232; }
-
-th
-{ background: #323232;
-  color: #66E11B;
-  font-size: 1.2rem;
-  font-weight: normal; }
-
-th a
-{
-  color: #66E11B;
-  font-size: 1.2rem;
-  font-weight: normal;
-  text-decoration: none;
-}
-
-table thead tr th.sortable
-{   background-image: url('../images/bg.png');
-    background-repeat: no-repeat;
-    background-position: center right;
-    cursor: pointer;
-    padding-right: 20px; }
-
-table thead tr th.sorttable_sorted
-{ background-image: url('../images/asc.png'); }
-
-table thead tr th.sorttable_sorted_reverse
-{ background-image: url('../images/desc.png'); }
-
-tr
-{ background: #EEE; }
-
-tr:nth-child(even) {
-    background-color: #DDD;
-}
-
-tr:hover
-{ background: #66E11B;
-  cursor: pointer; }
-
-tr:nth-child(even):hover {
-    background-color: #66E11B;
-}
 
 label.error{
   color:red;

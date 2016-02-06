@@ -48,10 +48,11 @@ $worksheetName = db_select($query3);
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
+    <link rel="stylesheet" type="text/css" href="css/table.css" />
     <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css" />
     <link rel="shortcut icon" href="branding/favicon.ico">
     <script src="js/sorttable.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">
@@ -105,7 +106,10 @@ $worksheetName = db_select($query3);
                 </table>
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
-                <li><a href="viewAllWorksheets.php?setid=<?php echo $groupid; ?>">Enter Results</a></li>
+                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+                    echo "<li><a href='resultsEntryHome.php?level=1&type=2&staffid=$userid&groupid=$groupid'>Enter Results</a></li>";
+                    echo "<li><a href='resultsEntryHome.php?level=2&type=2&staffid=$userid&groupid=$groupid'>Edit Results</a></li>";
+                } ?>
                 <li><a href="viewMySets.php">Back To My Sets</a></li>
             </ul>
             </div>

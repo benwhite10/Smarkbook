@@ -1,0 +1,67 @@
+/* 
+    Created on : 14-Jan-2016, 19:44:13
+    Author     : benwhite
+*/
+
+/*General table set up*/
+
+table
+{ width: 100%;
+  margin: 0px auto 20px auto;
+  border: 0px solid;
+  color: #000; 
+  border-collapse: collapse; }
+
+th, td
+{ height: 50px;
+  text-align: left;
+  padding-left: 10px;}
+
+td
+{ font-size: 0.9rem;
+  font-weight: normal;
+  color: #323232; }
+
+td a
+{ font-size: 0.9rem;
+  text-decoration: none;
+  color: #323232;
+  font-weight: 400; }
+
+th
+{ background: #323232;
+  color: #66E11B;
+  font-size: 1.2rem;
+  font-weight: 400; }
+
+th a
+{
+  color: #66E11B;
+  font-size: 1.2rem;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+table thead tr th.sortable
+{   background-image: url('../images/bg.png');
+    background-repeat: no-repeat;
+    background-position: center right;
+    cursor: pointer;
+    padding-right: 20px; }
+
+table thead tr th.sorttable_sorted
+{ background-image: url('../images/asc.png'); }
+
+table thead tr th.sorttable_sorted_reverse
+{ background-image: url('../images/desc.png'); }
+
+tr
+{ background: #EEE; }
+
+tr:nth-child(even) {
+    background-color: #DDD;
+}
+
+tr:hover, tr:nth-child(even):hover {
+    background-color: #a4ef76;
+}

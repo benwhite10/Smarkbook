@@ -1,0 +1,49 @@
+<?php
+
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
+include_once $include_path . '/public_html/requests/core.php';
+
+$requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
+$desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
+$setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
+
+switch ($requestType){
+    case "STUDENTSBYSET":
+        getStudentsForSet($setid, $orderby, $desc);
+        break;
+    default:
+        break;
+}
+
+function getStudentsForSet($setid, $orderby, $desc){  
+    $query = "select U.`User ID` ID, U.`First Name` FName, U.`Surname` SName, S.`Preferred Name` PName from TUSERGROUPS UG
+                join TSTUDENTS S ON S.`User ID` = UG.`User ID`
+                join TUSERS U ON U.`User ID` = S.`User ID`";
+    
+    $query .= filterBy(["UG.`Group ID`"], [$setid]);
+    $query .= orderBy([$orderby], [$desc]);
+    
+    try{
+        $students = db_select_exception($query);
+    } catch (Exception $ex) {
+        $message = "There was an error loading the students";
+        returnToPageError($ex, $message);
+    }
+    
+    $response = array(
+        "success" => TRUE,
+        "students" => $students);
+    echo json_encode($response);
+}
+
+function returnToPageError($ex, $message){
+    errorLog("There was an error in the get students request: " . $ex->getMessage());
+    $response = array(
+        "success" => FALSE);
+    echo json_encode($response);
+    exit();
+}

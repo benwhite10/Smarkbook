@@ -65,7 +65,7 @@ function failWithMessage($msg, $error){
     <script src="js/methods.js"></script>
     <script src="js/moment.js"></script>
     <link rel="shortcut icon" href="branding/favicon.ico" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'/>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">

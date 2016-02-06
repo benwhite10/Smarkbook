@@ -1,0 +1,481 @@
+#details{
+    background: transparent;
+    margin-bottom: 0px;
+    margin-top: -1px;
+    padding: 5px;
+    padding-top:  10px;
+    border: 1px solid #323232;
+    display: inline-block;
+    width: calc(100% - 10px);
+}
+
+input[type="text"], input[type="password"], input[type="submit"], select, textarea{
+    display: inline-block;
+    font: normal 'Open Sans', sans-serif;
+    line-height: 32px;
+    height: 32px;
+    width: calc(100% - 177px);
+    background: transparent;
+    margin: 0px;
+    padding: 0px;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    margin-left: 5px;
+    border: 1px solid #323232;
+    font-size: 0.9rem;
+    color: #323232;
+    outline: none;
+    text-align: left;
+    vertical-align: top;
+}
+
+input[type="text"].status{
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    background: transparent;
+    border: 0px;
+    text-align: center;
+    cursor: pointer;
+}
+
+textarea{
+    width: calc(100% - 176px);
+    height: 80px;
+    margin-left: 0px;
+}
+
+p.details{
+    display: inline-block;
+    padding: 0px;
+    padding-left: 10px;
+    width: calc(100%-160px);
+    margin: 0px;
+    margin-bottom: 10px;
+}
+
+select {
+   width: calc(100% - 163px);
+   background: transparent;
+   height: 32px;
+   margin: 0px;
+   margin-left: 1px;
+   margin-bottom: 10px;
+}
+
+label {
+    display: inline-block;
+    background: transparent;
+    width: 150px;
+    height:32px;
+    line-height: 32px;
+    font-size: 0.9rem;
+    font-weight: bolder;
+    vertical-align: top;
+    margin: 0px;
+    padding: 0px;
+}
+
+/*General table set up*/
+
+table.form
+{
+  width: 100%;
+  margin: 0px auto;
+  border: 0px solid;
+  color: #000;
+  border-collapse: collapse;
+  background: transparent;
+  }
+
+th.results
+{ background: #323232;
+  color: #66E11B;
+  font-size: 1rem;
+  font-weight: 400;
+  padding-top: 5px; }
+
+tr.results
+{ background: #EEE; }
+
+tr.results:nth-child(even) {
+    background-color: #DDD;
+}
+
+tr.results:nth-child(even):hover, tr.results:hover
+{
+    background-color: #c2f4a4;
+}
+
+td.form
+{ height: 32px;
+  margin: 0px;
+  width: 50%;
+  text-align: left;
+  padding-left: 0px;
+  font-size: 0.9rem;
+  font-weight: normal;
+  color: #323232; }
+
+tr.form
+{ background: transparent; }
+
+tr.form:nth-child(even) {
+    background-color: transparent;
+}
+
+tr.form:hover
+{ background: transparent;
+  cursor: pointer; }
+
+tr.form:nth-child(even):hover {
+    background-color: transparent;
+}
+
+table.results {
+    border: 1px solid #323232;
+    border-collapse: collapse;
+}
+
+td.results {
+    height: auto;
+    padding-left: 0px;
+}
+
+#main_content
+{ width: 100%;margin-bottom: 20px;}
+
+#saveButton
+{
+    width: 50%;
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+    background: transparent;
+    height: 60px;
+    text-align: center;
+    font-size: 1.3rem;
+    border: none;
+    border-left: thin solid #323232;
+    border-radius: 0px;
+}
+
+#saveButton:hover
+{
+    background: #c2f4a4;
+    color: #323232;
+}
+
+#cancelButton
+{
+    width: 50%;
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+    background: transparent;
+    height: 60px;
+    text-align: center;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 0px;
+}
+
+#cancelButton:hover
+{
+    background: #ff9999;;
+    color: #323232;
+}
+
+#popUpBackground
+{
+    position: fixed;
+    padding:0;
+    margin:0;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background:rgba(0,0,0,0.5);
+    display: none;
+    z-index: 10000;
+}
+
+#popUpBox
+{
+    position: absolute;
+    width: 500px;
+    top: 50%;
+    left: 50%;
+    margin-left: -250px;
+    margin-top: -200px;
+    height: auto;
+    padding: 0px;
+    display: block;
+    background: #FFF;
+    z-index: 99999;
+}
+
+#popUpBoxMain
+{
+    height: auto;
+    width: 100%;
+    //max-height: 250px;
+    position: relative;
+    top: 0px;
+    overflow: scroll;
+}
+
+#popUpBoxButtons
+{
+    position: relative;
+    height: 60px;
+    width: 100%;
+    top: 0px;
+}
+
+#popUpName
+{
+    display: inline-block;
+    margin: 5px 0px 0px 10px;
+    width: calc(70% - 10px);
+    text-align: left;
+}
+
+#popUpMarks
+{
+    display: inline-block;
+    margin: 5px 10px 0px 0px;
+    width: calc(30% - 10px);
+    text-align: right;
+}
+
+#popUpMarks.complete
+{
+    color: #489f13;
+}
+
+#popUpMarks.incomplete
+{
+    color: #b30000;
+}
+
+#popUpMarks.partial
+{
+    color: #eb8f00;
+}
+
+#popUpCompletionStatusSelect
+{
+    width: calc(50% - 20px);
+    display: inline-block;
+    margin: 15px 10px 0px 10px;
+}
+
+#popUpDateStatusSelect
+{
+    width: calc(50% - 20px);
+    display: inline-block;
+    margin: 15px 10px 0px 10px;
+}
+
+#popUpDateHandedIn, #popUpDateDue, #popUpNotes
+{
+    display: inline-block;
+    width: 100%;
+    margin-top: 10px;
+    height: 40px;
+    overflow: hidden;
+}
+
+#popUpDateDue, #popUpNotes
+{
+    margin-top: 5px;
+}
+
+#popUpNotes
+{
+    height: auto;
+}
+
+#popUpNotes textarea
+{
+    padding: 5px;
+    margin: 5px 10px;
+    text-align: left;
+    width: calc(100% - 32px);
+    height:  auto;
+    line-height: 20px;
+}
+
+.dateLabel
+{
+    display: inline-block;
+    width: 100px;
+    margin: 0px;
+    height: 40px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.dateDue p, .daysLate p
+{
+    line-height: 40px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.dateLabel p
+{
+    line-height: 40px;
+    font-size: 1.1rem;
+    text-align: left;
+    padding-left: 10px;
+    font-weight: bolder;
+}
+
+.dateDue, .daysLate
+{
+    display: inline-block;
+    width: calc(50% - 55px);
+    margin: 0px;
+    height: 40px;
+}
+
+.dateInput
+{
+    display: inline-block;
+    width: calc(100% - 100px);
+    margin: 0px;
+    height: 40px;
+}
+
+#day, #month, #year
+{
+    width: calc(33% - 15px);
+    margin: 5px 5px 0 5px;
+    height: 30px;
+    text-align: center;
+}
+
+#popUpSave, #popUpClose
+{
+    display: inline-block;
+    background: #FAFAFA;
+    width: 50%;
+    margin: 0px;
+    padding: 0px;
+    height: 60px;
+    bottom: 0px;
+    box-shadow: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    font-size: 1.5rem;
+    border-top: thin solid #999;
+}
+
+#popUpSave:hover
+{
+    background: #c2f4a4;
+}
+
+#popUpClose:hover
+{
+    background: #ff9999;
+}
+
+input[type="text"].late
+{
+    color: #F00;
+}
+
+input[type="text"].partial
+{
+    color: #eb8f00;
+}
+
+#daysLateText.notLate
+{
+    color: #F00;
+}
+
+#summaryBox
+{
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: thin solid #323232;
+    cursor: pointer;
+}
+
+#summaryBoxDetails
+{
+    display: inline-block;
+    width: 70%;
+    background: transparent;
+    height: 60px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: top;
+}
+
+#summaryBoxDetails h2
+{
+    line-height: 60px;
+    margin-left: 20px;
+    width: calc(100%-40px);
+    font-weight: 400;
+}
+
+#summaryBoxButtons
+{
+    display: inline-block;
+    width: 30%;
+    background: transparent;
+    height: 60px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: top;
+}
+
+#summaryBoxShowDetailsText
+{
+    display: inline-block;
+    width: calc(100% - 40px);
+    height: 60px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: middle;
+}
+
+#summaryBoxShowHide
+{
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: middle;
+    background-image: url("../images/plusminus.png");
+    background-repeat: no-repeat;
+    background-size: 100px 25px;
+    background-position: -75px;
+}
+
+#summaryBoxShowHide:hover
+{
+    background-position: -50px;
+}
+
+#summaryBoxShowHide.minus
+{
+    background-position: -25px;
+}
+
+#summaryBoxShowHide.minus:hover
+{
+    background-position: 0px;
+}
