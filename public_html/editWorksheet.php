@@ -28,10 +28,8 @@ if(!isset($vid)){
     failWithMessage("Something went wrong loading the details, please try again.");
 }
 
-<<<<<<< HEAD
 $stopFlag = FALSE;
-=======
-// IMPORTANT - This needs to be checked, Staff ID changed to User ID
+
 $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`User ID` WHERE V.`Version ID` = $vid;";
 try{
     $worksheet = db_select_exception($query1);
@@ -39,7 +37,6 @@ try{
     $msg = $ex->getMessage();
     failWithMessage("Something went wrong selecting the worksheet with Version ID ($vid) - $msg");
 }
->>>>>>> master
 
 $queries = array(
     "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;",
@@ -246,15 +243,10 @@ function failWithMessage($msg, $ex){
                             $count = $count + 1;
                         }
                     ?> 
-<<<<<<< HEAD
-                    <input type="submit" value="Save"/>
+                    <!--<input type="submit" value="Save"/>-->
                 </div>
             <?php } ?>
                 <div id="side_bar">
-=======
-                    <!--<input type="submit" value="Save"/>-->
-                </div><div id="side_bar">
->>>>>>> master
                     <ul class="menu sidebar">
                         <!--<li><a href="www.bbc.co.uk">Add Question</a></li>-->
                         <?php if(!$stopFlag){ ?>
