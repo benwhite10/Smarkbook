@@ -18,10 +18,6 @@ if(isset($_SESSION['user'])){
     exit();
 }
 
-//$setId = filter_input(INPUT_POST, 'set', FILTER_SANITIZE_NUMBER_INT);
-//$staffId = filter_input(INPUT_POST, 'staff', FILTER_SANITIZE_NUMBER_INT);
-//$versionId = filter_input(INPUT_POST, 'version', FILTER_SANITIZE_NUMBER_INT);
-
 $newResults = $_POST['resultInput'];
 $worksheetColumns = array(
     "gwid",

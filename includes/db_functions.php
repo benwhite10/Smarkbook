@@ -35,15 +35,6 @@ function db_query_exception($query){
     return $result;
 }
 
-function db_prepare_query($query, $parameters){
-    $mysql = db_connect();
-    $stmt = mysqli_prepare($mysql, $query);
-    foreach ($param as $parameters)
-    {
-        
-    }
-}
-
 function db_insert_query($query){
     $mysql = db_connect();
     $result = mysqli_query($mysql, $query);
@@ -110,8 +101,4 @@ function db_select_single_exception($query, $name){
 function db_error(){
     $mysql = db_connect();
     return mysqli_error($mysql);
-}
-
-function db_query_escape_string($string){
-    
 }

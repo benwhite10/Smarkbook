@@ -141,7 +141,7 @@ function getInput($method, $name, $type){
             
             <form id="resultsHome" class="resultsHome" action="includes/resultsEntry.php" method="POST">
                 <div id="main_content">
-                    <p style="margin-left: 162px;" id="ajaxtest"><i>(*) indicates required field</i></p>
+                    <p style="margin-left: 162px;"><i>(*) indicates required field</i></p>
                     <label for="type">Function: 
                     </label><select name="type" id="type" onchange="changeType()">
                         <option value=1 <?php if(isset($level) && $level == 1){echo "selected";}?>>Enter New Results</option>
