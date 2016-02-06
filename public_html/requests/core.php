@@ -1,34 +1,5 @@
 <?php
 
-function getAllColumnsFromTable($table){
-    $array = [];
-    try{
-        $columns = db_select_exception("SHOW COLUMNS FROM $table");
-        foreach ($columns as $column) {
-            array_push($array, [$column['Field'], str_replace(" ", "", $column['Field'])]);
-        }
-    } catch (Exception $ex) {
-        errorLog("Error getting columns for '$table': " . $ex->getMessage());
-    }
-    return $array;
-}
-
-function setXMLHeaders(){
-    header('Content-type: text/xml');
-    header('Pragma: public');
-    header('Cache-control: private');
-    header('Expires: -1');
-}
-
-function openXML(){
-    echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-    echo "<xml>";
-}
-
-function closeXML(){
-    echo "</xml>";
-}
-
 function orderBy($orderby, $desc){
     $query = "";
     if(count($orderby) == count($desc)){

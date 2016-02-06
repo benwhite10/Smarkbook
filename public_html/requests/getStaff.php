@@ -6,23 +6,8 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
-sec_session_start();
-
-$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
-    $user = $_SESSION['user'];
-    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-    $userid = $user->getUserId();
-    $userRole = $user->getRole();
-    $author = $userid;
-}else{
-    header($resultArray[1]);
-    exit();
-}
-
-$orderby = filter_input(INPUT_GET,'orderby',FILTER_SANITIZE_STRING);
-$desc = filter_input(INPUT_GET,'desc',FILTER_SANITIZE_STRING);
-$columns = getAllColumnsFromTable("TSTAFF");
+$orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
+$desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 
 $query1 = "SELECT * FROM TSTAFF";
 if(isset($orderby)){
@@ -39,18 +24,13 @@ try{
         $staff = db_select_exception($query1);
     } catch (Exception $ex) {
         errorLog("Error loading the staff: " . $ex->getMessage());
-        //Somehow I need to exit the php page here, throw a bad response
+        $response = array(
+                "success" => FALSE);
+        echo json_encode($response);
     }
 }
 
-setXMLHeaders();
-openXML();
-foreach ($staff as $staffMember){
-    echo "<staff>";
-    foreach($columns as $variables){
-        $content = $staffMember[$variables[0]];
-        echo "<$variables[1]>$content</$variables[1]>";
-    }
-    echo "</staff>";
-}
-closeXML();
+$response = array(
+        "success" => TRUE,
+        "staff" => $staff);
+echo json_encode($response);

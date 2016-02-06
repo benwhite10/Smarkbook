@@ -24,27 +24,6 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 }
 
 $gwid = filter_input(INPUT_GET, 'gwid', FILTER_SANITIZE_NUMBER_INT);
-//$versionId = filter_input(INPUT_GET,'vid',FILTER_SANITIZE_NUMBER_INT);
-//$setId = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
-//$staffId = isset($_GET['staffid']) ? filter_input(INPUT_GET,'staffid',FILTER_SANITIZE_STRING) : $userid;
-
-//$message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
-//$type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
-
-//IMPORTANT DO NOT USE THIS QUERY
-//$query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $versionId;";
-//$worksheet = db_select($query1);
-//
-//$query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $versionId ORDER BY S.`Question Order`;";
-//$questions = db_select($query2);
-//
-//$query3 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $setId ORDER BY U.Surname;";
-//$students = db_select($query3);
-//
-//
-//IMPORTANT DO NOT USE THIS QUERY
-//$query4 = "SELECT CONCAT(C.`Stored Question ID`,'-',C.`Student ID`) String1, CONCAT(C.`Stored Question ID`,'-',C.`Student ID`,'-',C.`Mark`,'-',C.`Completed Question ID`) String2, C.`Stored Question ID` SqID, C.`Student ID` StuID, C.`Mark` Mark FROM `TCOMPLETEDQUESTIONS` C JOIN `TSTOREDQUESTIONS` S ON C.`Stored Question ID` = S.`Stored Question ID` JOIN TSTUDENTS ST ON ST.`Student ID` = C.`Student ID` JOIN TUSERGROUPS U ON ST.`User ID` = U.`User ID` WHERE S.`Version ID` = $versionId AND C.`Staff ID` = $staffId AND U.`Group ID` = $setId;";
-//$results = db_select($query4);
 
 $query1 = "SELECT S.`User ID`, S.`Initials` FROM TSTAFF S 
             JOIN TUSERS U ON S.`User ID` = U.`User ID`
@@ -63,12 +42,17 @@ $postData = array(
 $resp = sendCURLRequest("/requests/getWorksheet.php", $postData);
 $respArray = json_decode($resp[1], TRUE);
 
-$details = $respArray["details"];
-$worksheet = $respArray["worksheet"];
-$results = $respArray["results"];
-$completedWorksheets = $respArray["completedWorksheets"];
-$notes = $respArray["notes"];
-$students = $respArray["students"];
+$success = $respArray["success"];
+if($success){
+    $details = $respArray["details"];
+    $worksheet = $respArray["worksheet"];
+    $results = $respArray["results"];
+    $completedWorksheets = $respArray["completedWorksheets"];
+    $notes = $respArray["notes"];
+    $students = $respArray["students"];
+} else {
+    $message = new Message("ERROR", "Something went wrong loading the results, please try again");
+}
 
 function getArrayValueForKey($array, $key)
 {
@@ -198,14 +182,6 @@ if(isset($_SESSION['message'])){
             </ul>
     	</div>
     	<div id="body">
-            <div id="top_bar">
-                <div id="title2">
-                    <h1><?php echo $details['WName']; ?></h1>
-                </div>
-                <ul class="menu navbar">
-                </ul>
-            </div>
-            
             <?php
                 if(isset($message)){
                     $type = $message->getType();
@@ -223,6 +199,16 @@ if(isset($_SESSION['message'])){
             <div id="message" <?php echo $div; ?>>
                 <div id="messageText"><p><?php if(isset($string)) {echo $string;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
+            </div>
+            
+            <?php if($success) { ?>
+            
+            <div id="top_bar">
+                <div id="title2">
+                    <h1><?php echo $details['WName']; ?></h1>
+                </div>
+                <ul class="menu navbar">
+                </ul>
             </div>
             
             <form id="editForm" class="editResults" action="includes/updateResults.php" method="POST">
@@ -432,6 +418,7 @@ if(isset($_SESSION['message'])){
                     </table>
                 </div>
             </form> 
+            <?php } ?>
     	</div>
     </div>
 </body>

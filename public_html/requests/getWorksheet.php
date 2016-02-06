@@ -6,20 +6,6 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
-//sec_session_start();
-//
-//$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-//if($resultArray[0]){ 
-//    $user = $_SESSION['user'];
-//    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-//    $userid = $user->getUserId();
-//    $userRole = $user->getRole();
-//    $author = $userid;
-//}else{
-//    header($resultArray[1]);
-//    exit();
-//}
-
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
 
@@ -78,9 +64,14 @@ function getWorksheetForGWID($gwid){
         $finalResults = groupResultsByStudent($results, $students);
     } catch (Exception $ex) {
         errorLog("Something went wrong loading the data for the worksheet: " . $ex->getMessage());
+        $test = array(
+            "success" => FALSE);
+        echo json_encode($test);
+        exit();
     }
     
     $test = array(
+        "success" => TRUE,
         "worksheet" => $worksheetDetails,
         "results" => $finalResults,
         "details" => $details[0],
@@ -114,18 +105,20 @@ function groupResultsByStudent($results, $students){
 }
 
 function getNotesForGWID($gwid){
-    // Notes for each student, late reason etc
     $query = "SELECT `Student ID`, `Notes` FROM TCOMPLETEDWORKSHEETS WHERE `Group Worksheet ID` = $gwid;";
     
     try{
         $notes = optimiseArray(db_select_exception($query), "Student ID");
     } catch (Exception $ex) {
         errorLog("Something went wrong loading the notes for the worksheet: " . $ex->getMessage());
+        $test = array(
+                "success" => FALSE);
+        echo json_encode($test);
     }
     
     $test = array(
-        "notes" => $notes
-            );
+        "success" => TRUE,
+        "notes" => $notes);
     
     echo json_encode($test);
 }

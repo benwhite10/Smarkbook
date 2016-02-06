@@ -7,20 +7,6 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/errorReporting.php';
 
-//sec_session_start();
-//
-//$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-//if($resultArray[0]){ 
-//    $user = $_SESSION['user'];
-//    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-//    $userid = $user->getUserId();
-//    $userRole = $user->getRole();
-//    $author = $userid;
-//}else{
-//    header($resultArray[1]);
-//    exit();
-//}
-
 $postData = json_decode($_POST["data"], TRUE);
 $requestType = $postData['type'];
 $worksheetDetails = $postData['details'];
@@ -171,7 +157,6 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
     }
     
     db_commit_transaction();
-    //infoLog("Results successfully updated for group worksheet: $gwid");
     $test = array(
         "result" => TRUE
         );

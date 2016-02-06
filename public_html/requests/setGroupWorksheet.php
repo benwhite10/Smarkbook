@@ -6,20 +6,6 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
-//sec_session_start();
-//
-//$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-//if($resultArray[0]){ 
-//    $user = $_SESSION['user'];
-//    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-//    $userid = $user->getUserId();
-//    $userRole = $user->getRole();
-//    $author = $userid;
-//}else{
-//    header($resultArray[1]);
-//    exit();
-//}
-
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $addstaffid1 = filter_input(INPUT_POST,'addstaff1',FILTER_SANITIZE_NUMBER_INT);
@@ -69,20 +55,20 @@ function createNewGroupWorksheet($staff, $setid, $versionid, $datedue){
     
     try{
         db_begin_transaction();
-        //infoLog($query);
         $result = db_insert_query_exception($query);
         $gwid = $result[1];
         db_commit_transaction();
     } catch (Exception $ex) {
         db_rollback_transaction();
         errorLog("Error creating a new group worksheet link: " . $ex->getMessage());
-        //Somehow I need to exit the php page here, throw a bad response
+        $resultArray = array(
+            "result" => FALSE);
+        echo json_encode($resultArray);
     }
     
     $resultArray = array(
         "result" => TRUE,
         "gwid" => $gwid
         );
-    //infoLog(json_encode($resultArray));
     echo json_encode($resultArray);
 }

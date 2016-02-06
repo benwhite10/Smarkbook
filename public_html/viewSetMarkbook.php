@@ -34,12 +34,14 @@ try{
     if($setId == 0 && count($sets)>0){
         $setId = $sets[0]['ID'];
     }
+    $message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
+    $type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
 } catch (Exception $ex) {
     errorLog($ex->getMessage());
+    $success = FALSE;
+    $message = "There was an error loading the markbook.";
+    $type = "ERROR"; 
 }
-
-$message = filter_input(INPUT_GET,'msg',FILTER_SANITIZE_STRING);
-$type = filter_input(INPUT_GET,'err',FILTER_SANITIZE_STRING);
 
 try{
     $set = db_select_single_exception("SELECT Name FROM TGROUPS WHERE `Group ID` = $setId;", "Name");
@@ -55,12 +57,19 @@ $postData = array(
         
 $resp = sendCURLRequest("/requests/getMarkbook.php", $postData);
 $respArray = json_decode($resp[1], TRUE);
-$students = $respArray["students"];
-$worksheets = $respArray["worksheets"];
-$results = $respArray["results"];
+if($respArray["success"]){
+    $success = isset($success) ? $success : TRUE;
+    $students = $respArray["students"];
+    $worksheets = $respArray["worksheets"];
+    $results = $respArray["results"];
 
-$noResults = (count($results) == 0);
-$noStudents = (count($students) == 0);
+    $noResults = (count($results) == 0);
+    $noStudents = (count($students) == 0);
+} else {
+    $success = FALSE;
+    $message = "There was an error loading the markbook.";
+    $type = "ERROR";       
+}
 
 ?>
 
@@ -104,6 +113,24 @@ $noStudents = (count($students) == 0);
             </ul>
     	</div>
     	<div id="body">
+            <?php
+                if(isset($message)){
+                    if($type == "ERROR"){
+                        $div = 'class="error"';
+                    }else if($type == "SUCCESS"){
+                        $div = 'class="success"';
+                    }
+                }else{
+                    $div = 'style="display:none;"';
+                }
+            ?>
+            
+            <div id="message" <?php echo $div; ?>>
+                <div id="messageText"><p><?php if(isset($message)){ echo $message; }?></p>
+                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
+            </div>  
+            
+            
             <div id="top_bar">
                 <div id="title2">
                     <h1><?php echo $fullName; ?></h1>
@@ -123,24 +150,7 @@ $noStudents = (count($students) == 0);
                     </li>
                 </ul>
             </div>
-            
-            <?php
-                if(isset($message)){
-                    if($type == "ERROR"){
-                        $div = 'class="error"';
-                    }else if($type == "SUCCESS"){
-                        $div = 'class="success"';
-                    }
-                }else{
-                    $div = 'style="display:none;"';
-                }
-            ?>
-            
-            <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($message)){ echo $message; }?></p>
-                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>  
-            
+            <?php if($success){ ?>
             <div id="main_content" style="overflow: scroll;">
                 <input type="hidden" name = "set" value="<?php echo $setId ?>" />
                 <input type="hidden" name = "staff" value="<?php echo $staffId ?>" />
@@ -208,6 +218,7 @@ $noStudents = (count($students) == 0);
                     <?php } ?>
                 </ul>
             </div>
+            <?php } ?>
     	</div>
     </div>
 </body>

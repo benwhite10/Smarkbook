@@ -5,36 +5,43 @@ $(document).ready(function(){
 });
 
 function setUpStaff(){
+    var infoArray = {};
+    infoArray["orderby"] = "Initials";
     $.ajax({
-        type: "GET",
-        url: "requests/getStaff.php?orderby=Initials",
-        dataType: "xml",
-        success: staffSuccess
+        type: "POST",
+        data: infoArray,
+        url: "requests/getStaff.php",
+        dataType: "json",
+        success: staffSuccess,
+        error: function(){
+            console.log("There was an error retrieving the staff.");
+        }
     });
 }
 
-function staffSuccess(xml){
-    var ids = xml.getElementsByTagName("UserID");
-    var initials = xml.getElementsByTagName("Initials");
-    var userid = document.getElementById("creatingStaffMember").value;
-    var str = "<option value=0>-Initials-</option>";
-    var str2 = "<option value=0>-Initials-</option>";
-    for(i=0;i<ids.length;i++){
-        if(initials[i].childNodes[0] !== undefined && ids[i].childNodes[0] !== undefined){
-            var initial = initials[i].childNodes[0].nodeValue;
-            var id = ids[i].childNodes[0].nodeValue;
-            if(id == userid){ 
-                str2 += "<option value=" + id + " selected>" + initial + "</option>"; 
+function staffSuccess(json){
+    if(json["success"]){
+        var staff = json["staff"];
+        var userid = document.getElementById("creatingStaffMember").value;
+        var str = "<option value=0>-Initials-</option>";
+        var str2 = "<option value=0>-Initials-</option>";
+        for(var i = 0; i < staff.length; i++){
+            var teacher = staff[i];
+            var id = teacher["User ID"];
+            var initials = teacher["Initials"];
+            if(id === userid){ 
+                str2 += "<option value=" + id + " selected>" + initials + "</option>"; 
             } else{
-                str2 += "<option value=" + id + ">" + initial + "</option>";
+                str2 += "<option value=" + id + ">" + initials + "</option>";
             }
-            str += "<option value=" + id + ">" + initial + "</option>";
+            str += "<option value=" + id + ">" + initials + "</option>";
         }
-
+        document.getElementById("creatingStaff").innerHTML = str2;
+        document.getElementById("assisstingStaff1").innerHTML = str;
+        document.getElementById("assisstingStaff2").innerHTML = str;
+    } else {
+        console.log("There was an error retrieving the staff.");
     }
-    document.getElementById("creatingStaff").innerHTML = str2;
-    document.getElementById("assisstingStaff1").innerHTML = str;
-    document.getElementById("assisstingStaff2").innerHTML = str;
 }
 
 function setUpWorksheets(){
@@ -47,76 +54,50 @@ function setUpWorksheets(){
         infoArray["type"] = "FILTERED";
         infoArray["orderby"] = "DueDate";
         infoArray["desc"] = "TRUE";
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "requests/getWorksheets.php",
-            dataType: "xml",
-            success: filteredWorksheetsSuccess,
-            error: function(){
-                alert("Errrrrror");
-            }
-        });
     }else{
         infoArray["type"] = "ALL";
         infoArray["orderby"] = "WName";
         infoArray["desc"] = "FALSE";
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "requests/getWorksheets.php",
-            dataType: "xml",
-            success: allWorksheetsSuccess,
-            error: function(){
-                alert("Errrrrror");
-            }
-        });
     }
+    
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: url,
+        dataType: "json",
+        success: worksheetsSuccess,
+        error: function(){
+            console.log("There was an error retrieving the worksheets.");
+        }
+    });
 }
 
-function allWorksheetsSuccess(xml){
-    if(xml.getElementsByTagName("result")){
-        var ids = xml.getElementsByTagName("ID");
-        var names = xml.getElementsByTagName("WName");
-        var vnames = xml.getElementsByTagName("VName");
+function worksheetsSuccess(json){
+    if(json["success"]){
+        var worksheets = json["worksheets"];
         var worksheetid = 0;
         var str = "";
-        if(ids.length === 0){
+        if(worksheets.length === 0){
             str = "<option value=0>-No Worksheets-</option>";
-        }else{
-            var counts = countForEachName(names);
-            for(i=0;i<ids.length;i++){
-                if(names[i].childNodes[0] !== undefined && ids[i].childNodes[0] !== undefined){
-                    var name = names[i].childNodes[0].nodeValue;
-                    var id = ids[i].childNodes[0].nodeValue;
-                    if(counts[name] > 1 && vnames[i].childNodes[0] !== undefined){
-                        var vname = vnames[i].childNodes[0].nodeValue;
-                        str += "<option value=" + id + ">" + name + " - " + vname + "</option>";
-                    }else{
-                        str += "<option value=" + id + ">" + name + "</option>";
-                    }
-
+        } else {
+            for(var i = 0; i < worksheets.length; i++){
+                var worksheet = worksheets[i];
+                var name = worksheet["WName"];
+                var vname = worksheet["VName"];
+                var id = worksheet["ID"];
+                if(vname !== undefined){
+                    str += "<option value=" + id + ">" + name + " - " + vname + "</option>";
+                }else{
+                    str += "<option value=" + id + ">" + name + "</option>";
                 }
-
             }
         }
-        document.getElementById("worksheet").innerHTML = str;
+    } else {
+        console.log("There was an error retrieving the worksheets.");
     }
+    document.getElementById("worksheet").innerHTML = str;
 }
 
-function checkResult(result){
-    if (result[0].childNodes[0] !== undefined){
-        if(result[0].childNodes[0].nodeValue === "TRUE"){
-            return true;
-        } else {
-            console.log("Finding worksheets failed.");
-            return false;
-        }
-    } else {
-        console.log("Finding worksheets failed.");
-        return false;
-    }
-}
 function countForEachName(names){
     var counts = {};
     for(var i = 0; i < names.length; i++){
@@ -128,31 +109,6 @@ function countForEachName(names){
     return counts;
 }
 
-function filteredWorksheetsSuccess(xml){
-    if(xml.getElementsByTagName("result")){    
-        var ids = xml.getElementsByTagName("GWID");
-        var names = xml.getElementsByTagName("WName");
-        var dates = xml.getElementsByTagName("DueDate");
-        //var versions = xml.getElementsByTagName("VName");
-        //var worksheetid = document.getElementById("creatingStaffMember").value;
-        var worksheetid = 0;
-        var str = "";
-        if(ids.length === 0){
-            str = "<option value=0>-No Worksheets-</option>";
-        }else{
-            for(i=0;i<ids.length;i++){
-                if(names[i].childNodes[0] !== undefined && ids[i].childNodes[0] !== undefined && dates[i].childNodes[0] !== undefined){
-                    var name = names[i].childNodes[0].nodeValue;
-                    var date = dates[i].childNodes[0].nodeValue;
-                    var gwid = ids[i].childNodes[0].nodeValue;
-                    str += "<option value=" + gwid + ">" + name + " - " + date + "</option>";
-                }
-            }
-        }
-        document.getElementById("worksheet").innerHTML = str;
-    }
-}
-
 function setUpSets(firstTime){
     var infoArray = {orderby: "Name", desc: "FALSE"};
     var type = "SETSBYSTAFF";
@@ -162,12 +118,16 @@ function setUpSets(firstTime){
         type: "POST",
         data: infoArray,
         url: "requests/getGroup.php",
-        dataType: "xml",
-        success: function(xml) {
-            setsSuccess(xml, firstTime);
+        dataType: "json",
+        success: function(json) {
+            if(json["success"]){
+                setsSuccess(json, firstTime);
+            } else {
+                console.log("There was an error setting up the sets");
+            }
         },
-        error: function(xml) {
-            console.log(xml);
+        error: function(json) {
+            console.log("There was an error setting up the sets");
         }
     });
 }
@@ -175,7 +135,7 @@ function setUpSets(firstTime){
 function setUpStudents(){
     if(document.getElementById("level")){
         var level = document.getElementById("level").value;
-        if(level == 1){
+        if(level === "1"){
             document.getElementById("students").style.display = "none";
             document.getElementById("studentslabel").style.display = "none";
         }else{
@@ -185,71 +145,61 @@ function setUpStudents(){
             var type = "STUDENTSBYSET";
             infoArray["type"] = type;
             infoArray["set"] = document.getElementById("group") ? document.getElementById("group").value : 0;
-            console.log(infoArray);
             $.ajax({
                 type: "POST",
                 data: infoArray,
                 url: "requests/getStudents.php",
-                dataType: "xml",
+                dataType: "json",
                 success: studentsSuccess,
-                error: function(xml) {
-                    console.log(xml);
+                error: function() {
+                    console.log("There was an error loading the students.");
                 }
             });
         }
     }
 }
 
-function studentsSuccess(xml){
-    var ids = xml.getElementsByTagName("ID");
-    var fnames = xml.getElementsByTagName("FName");
-    var snames = xml.getElementsByTagName("SName");
-    var pnames = xml.getElementsByTagName("PName");
-    var studentid = 0;
-    var str = "";
-    if(ids.length === 0){
-        str = "<option value=0>-No Students-</option>";
-    }else{
-        for(i=0;i<ids.length;i++){
-            if(fnames[i].childNodes[0] !== undefined && ids[i].childNodes[0] !== undefined && fnames[i].childNodes[0] !== undefined){
-                if(pnames[i] !== undefined){
-                    var name = pnames[i].childNodes[0].nodeValue;
-                }else{
-                    var name = fnames[i].childNodes[0].nodeValue;
-                }
-                var sname = snames[i].childNodes[0].nodeValue;
-                var id = ids[i].childNodes[0].nodeValue;
-                if(id === studentid){ 
-                    str += "<option value=" + id + " selected>" + name + " " + sname + "</option>"; 
-                } else{
-                    str += "<option value=" + id + ">" + name + " " + sname + "</option>";
-                }
-            }
-
+function studentsSuccess(json){
+    if(json["success"]){
+        var students = json["students"];
+        var studentid = 0;
+        var str = "";
+        if(students.length === 0){
+            str = "<option value=0>-No Students-</option>";
         }
+        for(var i = 0; i < students.length; i++){
+            var student = students[i];
+            var id = student["ID"];
+            var name = (student["PName"] === undefined || student["PName"] === "") ? student["FName"] : student["PName"];
+            var sname = student["SName"];
+            if(id === studentid){ 
+                str += "<option value=" + id + " selected>" + name + " " + sname + "</option>"; 
+            } else{
+                str += "<option value=" + id + ">" + name + " " + sname + "</option>";
+            }
+        }
+    } else {
+        console.log("There was an error loading the students.");
     }
     document.getElementById("students").innerHTML = str;
 }
 
-function setsSuccess(xml, firstTime){
-    var ids = xml.getElementsByTagName("ID");
-    var names = xml.getElementsByTagName("Name");
+function setsSuccess(json, firstTime){
+    var sets = json["sets"]
     var setid = firstTime ? $("#originalGroup").val() : 0;
     var str = "";
-    if(ids.length === 0){
+    if(sets.length === 0){
         str = "<option value=0>-No Sets-</option>";
     }else{
-        for(i=0;i<ids.length;i++){
-            if(names[i].childNodes[0] !== undefined && ids[i].childNodes[0] !== undefined){
-                var name = names[i].childNodes[0].nodeValue;
-                var id = ids[i].childNodes[0].nodeValue;
-                if(id === setid){ 
-                    str += "<option value=" + id + " selected>" + name + "</option>"; 
-                } else{
-                    str += "<option value=" + id + ">" + name + "</option>";
-                }
+        for(var i = 0; i < sets.length; i++){
+            var set = sets[i];
+            var id = set["ID"];
+            var name = set["Name"]
+            if(id === setid){ 
+                str += "<option value=" + id + " selected>" + name + "</option>"; 
+            } else{
+                str += "<option value=" + id + ">" + name + "</option>";
             }
-
         }
     }
     document.getElementById("group").innerHTML = str;
@@ -290,7 +240,6 @@ function changeType(){
         }
         setUpStaff();
         setUpWorksheets();
-        setUpStudents();
         var textDisplay = document.getElementById("typeDescription");
         if(textDisplay){
             textDisplay.innerHTML = "<i>" + text + "</i>";

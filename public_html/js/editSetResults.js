@@ -39,20 +39,24 @@ function setUpNotes() {
         success: function(json){
             addNotesToInputs(json);
         },
-        error: function(json) {
-            console.log(json);
+        error: function(json){
+            console.log("There was an error retrieving the notes");
         }
     });
 }
 
 function addNotesToInputs(json){
-    var notes = json["notes"]
-    for (var note in notes)
-    {
-        var stuID = note;
-        var realNote = notes[stuID]["Notes"];
-        $("#note" + stuID).val(realNote);
-    }
+    if(json["success"]){
+        var notes = json["notes"]
+        for (var note in notes)
+        {
+            var stuID = note;
+            var realNote = notes[stuID]["Notes"];
+            $("#note" + stuID).val(realNote);
+        }
+    } else {
+        console.log("There was an error retrieving the notes");
+    } 
 }
 
 /* DOM interaction methods */

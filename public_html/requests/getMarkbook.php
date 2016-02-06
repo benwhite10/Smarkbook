@@ -6,20 +6,6 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
-//sec_session_start();
-//
-//$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-//if($resultArray[0]){ 
-//    $user = $_SESSION['user'];
-//    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-//    $userid = $user->getUserId();
-//    $userRole = $user->getRole();
-//    $author = $userid;
-//}else{
-//    header($resultArray[1]);
-//    exit();
-//}
-
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
@@ -31,7 +17,6 @@ switch ($requestType){
     default:
         break;
 }
-
 
 function getMarkbookForSetAndTeacher($setid, $staffid){
     $query1 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G 
@@ -50,7 +35,8 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
         $students = db_select_exception($query1);
         $worksheets = db_select_exception($query2);
     } catch (Exception $ex) {
-        //Failed
+        $message = "There was an error retrieving the markbook";
+        returnToPageError($ex, $message);
     }
     
     $resultsArray = array();
@@ -64,7 +50,8 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
         try{
             $results = db_select_exception($query);
         } catch (Exception $ex) {
-            //Error
+            $message = "There was an error retrieving the markbook";
+            returnToPageError($ex, $message);
         }
         $newArray = array();
         foreach($results as $result){
@@ -76,50 +63,18 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
         $resultsArray[$vid] = $newArray;
     }
     
-    //$detailsColumns = ["GWID", "WName", "VName", "DueDate"];
-    
-    $test = array(
+    $response = array(
+        "success" => TRUE,
         "students" => $students,
         "worksheets" => $worksheets,
         "results" => $resultsArray);
-    echo json_encode($test);
-//    setXMLHeaders();
-//    openXML();
-//    echo "<worksheets>";
-//    foreach ($finalArray as $array){
-//        echo "<worksheet>";
-//        $details = $array[0];
-//        $results = $array[1];
-//        echo "<details>";
-//        foreach($detailsColumns as $variable){
-//            $content = $details[$variable];
-//            echo "<$variable>$content</$variable>";
-//        }
-//        echo "</details>";
-//        echo "<results>";
-//        foreach($results as $result){
-//            $stuid = $result["StuID"];
-//            $mark = $result["Mark"];
-//            $marks = $result["Marks"];
-//            echo "<result>";
-//            echo "<stuid>$stuid</stuid>";
-//            echo "<mark>$mark</mark>";
-//            echo "<marks>$marks</marks>";
-//            echo "</result>";
-//        }
-//        echo "</results>";
-//        echo "</worksheet>";
-//    }
-//    echo "</worksheets>";
-//    echo "<students>";
-//    foreach ($students as $student){
-//        $userid = $student["ID"];
-//        $name = $student["Name"];
-//        echo "<student>";
-//        echo "<userid>$userid</userid>";
-//        echo "<name>$name</name>";
-//        echo "</student>";
-//    }
-//    echo "</students>";
-//    closeXML();
+    echo json_encode($response);
+}
+
+function returnToPageError($ex, $message){
+    errorLog("There was an error in the get markbook request: " . $ex->getMessage());
+    $response = array(
+        "success" => FALSE);
+    echo json_encode($response);
+    exit();
 }
