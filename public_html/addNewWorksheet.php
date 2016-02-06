@@ -183,15 +183,15 @@ if(isset($_SESSION['message'])){
                         }
                     ?>
                     <label for="date">Date Added:
-                    </label><input type="text" name="date" id="datepicker" placeholder="DD/MM/YYYY" value="<?php echo $date ?>"></input>
+                    </label><input type="text" name="date" id="datepicker" placeholder="DD/MM/YYYY" value="<?php echo $date ?>"/>
     
                     <label for="questions">Questions:
-                    </label><input type="text" name="questions" id="questions" placeholder="Number of Questions" value="<?php echo isset($number)?$number:1; ?>"></input>
+                    </label><input type="text" name="questions" id="questions" placeholder="Number of Questions" value="<?php echo isset($number)?$number:1; ?>"/>
                     
                     <label for="tags">Tags: 
                     </label><textarea name="tags" id="tags" class="autocomplete" placeholder="Enter the tags which will be used on every question" ><?php if(isset($tags)){echo $tags;} ?></textarea>  
                     
-                    <input type="submit" value="Save"/>
+                    <!--<input type="submit" value="Save"/>-->
                 </div>
                 <?php } ?>
                 <div id="side_bar">
