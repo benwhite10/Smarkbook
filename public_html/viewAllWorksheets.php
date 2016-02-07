@@ -24,7 +24,14 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 $setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
 
 $query = "SELECT W.`Worksheet ID` WID, V.`Version ID` VID, W.`Name` Name, V.`Name` Version, DATE_FORMAT(W.`Date Added`, '%d/%m/%y') Date, S.`Initials` Author FROM TWORKSHEETS W JOIN TWORKSHEETVERSION V ON W.`WORKSHEET ID` = V.`WORKSHEET ID` JOIN TSTAFF S ON S.`User ID` = V.`Author ID` ORDER BY Name;";
-$worksheets = db_select($query);
+try{
+    $worksheets = db_select_exception($query);
+} catch (Exception $ex) {
+    $msg = "There was an error loading all of the worksheets: " . $ex->getMessage();
+    errorLog($msg);
+    $message = "Sorry but there was an error loading the worksheets, please try again. If the problem persists then contact customer support";
+    $type = "ERROR";
+}
 
 ?>
 
@@ -41,6 +48,7 @@ $worksheets = db_select($query);
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
     <link rel="stylesheet" type="text/css" href="css/table.css" />
     <link rel="shortcut icon" href="branding/favicon.ico">
+    <script src="js/methods.js"></script>
     <script src="js/sorttable.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
@@ -62,6 +70,23 @@ $worksheets = db_select($query);
             </ul>
     	</div>
     	<div id="body">
+            <?php
+                if(isset($message)){
+                    if($type == "ERROR"){
+                        $div = 'class="error"';
+                    }else if($type == "SUCCESS"){
+                        $div = 'class="success"';
+                    }
+                }else{
+                    $div = 'style="display:none;"';
+                }
+            ?>
+            
+            <div id="message" <?php echo $div; ?>>
+                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
+                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
+            </div>
+            
             <div id="top_bar">
                 <div id="title2">
                     <h1>Worksheets</h1>
@@ -79,12 +104,14 @@ $worksheets = db_select($query);
                     </thead>
                     <tbody>
                         <?php 
-                            foreach ($worksheets as $key=>$worksheet){
-                                $name = $worksheet['Name'];
-                                $date = $worksheet['Date'];
-                                $author = $worksheet['Author'];
-                                $vid = $worksheet['VID'];
-                                echo "<tr><td><a href='viewWorksheet.php?id=$vid&setid=$setid'>$name</a></td><td>$author</td><td>$date</td></tr>";
+                            if(isset($worksheets)){
+                                foreach ($worksheets as $key=>$worksheet){
+                                    $name = $worksheet['Name'];
+                                    $date = $worksheet['Date'];
+                                    $author = $worksheet['Author'];
+                                    $vid = $worksheet['VID'];
+                                    echo "<tr><td><a href='viewWorksheet.php?id=$vid&setid=$setid'>$name</a></td><td>$author</td><td>$date</td></tr>";
+                                }
                             }
                         ?> 
                     </tbody>

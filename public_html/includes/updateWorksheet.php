@@ -27,12 +27,15 @@ if(isset($wname, $vname, $author, $date, $version)){
     $link = filter_input(INPUT_POST, 'link', FILTER_SANITIZE_URL);
     $newdate = date('Y-m-d h:m:s',strtotime(str_replace('/','-', $date)));
     
+    db_begin_transaction();
+    
     $query = "UPDATE TWORKSHEETS W JOIN TWORKSHEETVERSION V ON W.`Worksheet ID` = V.`Worksheet ID` 
         SET W.`Name` = '$wname', V.`Name` = '$vname', W.`Link` = '$link', V.`Date Added` = '$newdate', V.`Author ID` = $author
         WHERE V.`Version ID` = $version;";
     try{
         db_query_exception($query);
     } catch (Exception $ex) {
+        db_rollback_transaction();
         $msg = "Something went wrong updating the worksheet";
         returnToPageError($msg, $version);
     }
@@ -47,6 +50,7 @@ if(isset($wname, $vname, $author, $date, $version)){
         $alltagids = db_select_exception($query2);
         $alltagnames = db_select_exception($query3);
     } catch (Exception $ex) {
+        db_rollback_transaction();
         $msg = "Something went setting up the tags.";
         returnToPageError($msg, $version);
     }
@@ -69,7 +73,7 @@ if(isset($wname, $vname, $author, $date, $version)){
             try{
                 db_query_exception($query);
             } catch (Exception $ex) {
-                //Maybe don't fail for every question, could give it 2 goes.
+                db_rollback_transaction();
                 $msg = "Something went wrong while updating question $count on worksheet $wname ($version).";
                 returnToPageError($msg, $version);
             }        
@@ -91,13 +95,14 @@ if(isset($wname, $vname, $author, $date, $version)){
         $message .= " with the following errors. <br>";
         for($i = 0; $i < count($nberror); $i++){
             $message .= "- " . $nberror[$i] . "<br>";
-            errorLog("Non-breaking error for worksheet '$wname': " . $nberror);
+            errorLog("Non-breaking error for worksheet '$wname': " . $nberror[$i]);
         }
         $message .= "Please check all of the questions before continuing.";
     }else{
         $message .= ".";
     }
     
+    db_commit_transaction();
     returnToPageSuccess($message, $version);
     
 }else{

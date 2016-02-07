@@ -60,7 +60,6 @@ $('#editForm').submit(function(){
         // Need some sort of regex or check that this is a valid number. Other option is just to update with the number if possible
         var mark = marksArray[i];
         if(isNaN(mark) || mark < 0 || mark%1 !== 0 || mark.length === 0){
-            console.log(i);
             var message = "You have entered an invlaid mark for question " + (i + 1);
             setUpErrorMessage(message);
             return false;
@@ -158,18 +157,15 @@ function convertToArray(string){
     }
     var array = string.split(',');
     var tag;
-    //What happens for one in the middle!!!
-    // NEEDS TO BE SORTED OUT
+    var newArray = new Array();
     for(var i = 0; i < array.length; i++){
         tag = array[i];
         tag = tag.trim();
-        if (tag.length === 0){
-            array[i] = "";
-        }else{
-            array[i] = getIdFromTag(tag);
+        if(tag.length > 0){
+            newArray.push(getIdFromTag(tag));
         }
     }
-    return array;
+    return newArray;
 }
 
 //TODO this can probably be done by AJAX calls

@@ -28,7 +28,8 @@ if(!isset($vid)){
     failWithMessage("Something went wrong loading the details, please try again.");
 }
 
-// IMPORTANT - This needs to be checked, Staff ID changed to User ID
+$stopFlag = FALSE;
+
 $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`User ID` WHERE V.`Version ID` = $vid;";
 try{
     $worksheet = db_select_exception($query1);
@@ -37,36 +38,46 @@ try{
     failWithMessage("Something went wrong selecting the worksheet with Version ID ($vid) - $msg");
 }
 
-$query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
-try{
-    $questions = db_select_exception($query2);
-} catch (Exception $ex) {
-    $msg = $ex->getMessage();
-    failWithMessage("Something went wrong selecting questions for the worksheet with Version ID ($vid) - $msg");
-}
+$queries = array(
+    "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;",
+    "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;",
+    "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;",
+    "SELECT T.`Name` Name, T.`Tag ID` ID FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` GROUP BY T.`Name` ORDER BY COUNT(T.`Name`) DESC, T.`Name`; ",
+    "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S ORDER BY S.`Initials`;"
+);
 
-$query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
-try{
-    $tags = db_select_exception($query3);
-} catch (Exception $ex) {
-    $msg = $ex->getMessage();
-    failWithMessage("Something went wrong selecting tags for the worksheet with Version ID ($vid) - $msg");
-}
+$errors = array(
+    "Something went wrong retrieving the worksheet with Version ID ($vid)",
+    "Something went wrong retrieving questions for the worksheet with Version ID ($vid)",
+    "Something went wrong retrieving tags for the worksheet with Version ID ($vid)",
+    "Something went wrong loading all of the tags, please try again.",
+    "Something went wrong loading all of the staff, please try again"
+);
 
-$query4 = "SELECT T.`Name` Name, T.`Tag ID` ID FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` GROUP BY T.`Name` ORDER BY COUNT(T.`Name`) DESC, T.`Name`; ";
-try{
-    $alltags = db_select_exception($query4);
-} catch (Exception $ex) {
-    $msg = $ex->getMessage();
-    failWithMessage("Something went wrong loading all of the tags - $msg");
-}
+$variables = array(
+    "worksheet",
+    "questions",
+    "tags",
+    "alltags",
+    "staff"
+);
 
-$query5 = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S ORDER BY S.`Initials`;";
-try{
-    $staff = db_select_exception($query5);
-} catch (Exception $ex) {
-    $msg = $ex->getMessage();
-    failWithMessage("Something went wrong loading all of the staff - $msg");
+for($i = 0; $i < count($queries); $i++) {
+    if(!$stopFlag){
+        $query = $queries[$i];
+        $error = $errors[$i];
+        $variable = $variables[$i];
+        if(isset($query, $variable, $error)){
+            try{
+                $$variable = db_select_exception($query);
+            } catch (Exception $ex) {
+                $stopFlag = true;
+                failWithMessage($error, $ex);
+            }
+        }else{
+            $stopFlag = true;
+        }
+    }
 }
 
 if(isset($_SESSION['message'])){
@@ -76,11 +87,9 @@ if(isset($_SESSION['message'])){
     unset($_SESSION['message']);
 }
 
-function failWithMessage($msg){
-    header("Location: index.php");
-    $_SESSION['goBackUrl'] = "viewAllWorksheets.php";
-    errorLog($msg);
-    exit();
+function failWithMessage($msg, $ex){
+    $_SESSION['message'] = new Message("ERROR", $msg);
+    errorLog($msg . ' - ' . $ex->getMessage());
 }
 
 ?>
@@ -157,6 +166,7 @@ function failWithMessage($msg){
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
             </div>  
             
+            <?php if(!$stopFlag){ ?>
             <form id="editForm" class="editWorksheet" action="includes/updateWorksheet.php" method="POST">
                 <div id="main_content">
                     <input type="hidden" name = "version" value="<?php echo $vid ?>" />
@@ -234,10 +244,14 @@ function failWithMessage($msg){
                         }
                     ?> 
                     <!--<input type="submit" value="Save"/>-->
-                </div><div id="side_bar">
+                </div>
+            <?php } ?>
+                <div id="side_bar">
                     <ul class="menu sidebar">
                         <!--<li><a href="www.bbc.co.uk">Add Question</a></li>-->
+                        <?php if(!$stopFlag){ ?>
                         <li><input type="submit" value="Save"/></li>
+                        <?php } ?>
                         <li><a <?php 
                                     if(isset($vid)){
                                         echo "href='/viewWorksheet.php?id=$vid'";

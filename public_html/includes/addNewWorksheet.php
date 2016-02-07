@@ -23,13 +23,14 @@ $vname = filter_input(INPUT_POST, 'versionname', FILTER_SANITIZE_STRING);
 $author = filter_input(INPUT_POST, 'author', FILTER_SANITIZE_NUMBER_INT);
 $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
 $number = filter_input(INPUT_POST, 'questions', FILTER_SANITIZE_STRING);
-$tags = filter_input(INPUT_POST, 'updateTags', FILTER_SANITIZE_STRING);
 $link = filter_input(INPUT_POST, 'link', FILTER_SANITIZE_URL);
 $rawTags = filter_input(INPUT_POST, 'tags', FILTER_SANITIZE_STRING);
 
 $informationArray = array($wname, $vname, $author, $date, $number, $rawTags, $link);
 
 if(validation($wname, $vname, $author, $date, $number)){
+    
+    db_begin_transaction();
     
     $newdate = date('Y-d-m h:m:s',strtotime(str_replace('/','-', $date)));
     
@@ -38,11 +39,9 @@ if(validation($wname, $vname, $author, $date, $number)){
         $resultArray = db_insert_query_exception($query);
         $wid = $resultArray[1];
     } catch (Exception $ex) {
-        $errorMessage = "There was a problem adding the worksheet. " . $ex->getMessage();
-        error_log($errorMessage);
-        //Undo
+        db_rollback_transaction();
         $message = "Something went wrong adding the worksheet, please try again.";
-        returnToPageError($message);
+        returnToPageError($message, $ex);
     }
     
     $query1 = "INSERT INTO TWORKSHEETVERSION (`Worksheet ID`, `Name`, `Author ID`) VALUES ($wid, '$vname', $author);";
@@ -50,15 +49,12 @@ if(validation($wname, $vname, $author, $date, $number)){
         $resultArray1 = db_insert_query_exception($query1);
         $vid = $resultArray1[1];
     } catch (Exception $ex) {
-        $errorMessage = "There was a problem adding the worksheet version for worksheet ($wid). " . $ex->getMessage();
-        error_log($errorMessage);
+        db_rollback_transaction();
         $message = "Something went wrong adding the worksheet, please try again.";
-        returnToPageError($message);
+        returnToPageError($message, $ex);
     }
     
-    if($tags != ""){
-        $tagsArray = convertTagsToArray($tags);
-    }
+    $tagsArray = json_decode($_POST['updateTags']);
            
     for ($i = 1; $i <= $number; $i++){
         $query2 = "INSERT INTO TQUESTIONS (`Link`) VALUES ('$link');";
@@ -66,10 +62,9 @@ if(validation($wname, $vname, $author, $date, $number)){
             $resultArray2 = db_insert_query_exception($query2);
             $qid = $resultArray2[1];
         } catch (Exception $ex) {
-            $errorMessage = "There was a problem adding question $i for worksheet ($wid). " . $ex->getMessage();
-            error_log($errorMessage);
-            $message = "Something went wrong adding the worksheet, please try again.";
-            returnToPageError($message);
+            db_rollback_transaction();
+            $message = "Something went wrong adding question $i for the worksheet, please try again.";
+            returnToPageError($message, $ex);
         }
         
         $query3 = "INSERT INTO TSTOREDQUESTIONS (`Question ID`, `Version ID`, `Number`, `Marks`, `Question Order`) VALUES ($qid, $vid, $i, 0, $i);";
@@ -77,23 +72,46 @@ if(validation($wname, $vname, $author, $date, $number)){
             $resultArray3 = db_insert_query_exception($query3);
             $sqid = $resultArray3[1];
         } catch (Exception $ex) {
-            $errorMessage = "There was a problem adding stored question $i for worksheet ($wid). " . $ex->getMessage();
-            error_log($errorMessage);
-            $message = "Something went wrong adding the worksheet, please try again.";
-            returnToPageError($message);
+            db_rollback_transaction();
+            $message = "Something went wrong adding question $i for the worksheet, please try again.";
+            returnToPageError($message, $ex);
         }
         
-        foreach ($tagsArray as $tag){
-            $query4 = "INSERT INTO TQUESTIONTAGS (`Tag ID`, `Stored Question ID`) VALUES ($tag, $sqid);";
-            try{
-                db_query_exception($query4);
-            } catch (Exception $ex) {
-                $errorMessage = "There was a problem adding the tag ($tag) for stored question ($sqid) on worksheet ($wid). " . $ex->getMessage();
-                error_log($errorMessage);
+        foreach ($tagsArray as $tagArray){
+            $type = $tagArray[0];
+            $tagId = $tagArray[1];
+            if($type === "NEW"){
+                //Add a brand new tag
+                $now = date("Y-m-d H:i:s", time());
+                $query4 = "INSERT INTO `TTAGS`(`Name`, `Date Added`) VALUES ('$tagId', '$now');";
+                try{
+                    $newtagid = db_insert_query_exception($query4);
+                } catch (Exception $ex) {
+                    db_rollback_transaction();
+                    $message = "There was a problem adding a tag to the worksheet, please try again.";
+                    returnToPageError($message, $ex);
+                }
+                $tagId = $newtagid[1];
+            }else if($type !== "CURRENT" && $type !== "NULL"){
+                db_rollback_transaction();
+                $message = "There was an error creating the tags for the worksheet, please try again.";
+                returnToPageError($message, "An invalid type was passed into a tag.");
+            }
+            
+            if($type !== "NULL" && $tagId !== ""){
+                $query5 = "INSERT INTO TQUESTIONTAGS (`Tag ID`, `Stored Question ID`) VALUES ($tagId, $sqid);";
+                try{
+                    db_query_exception($query5);
+                } catch (Exception $ex) {
+                    db_rollback_transaction();
+                    $message = "There was a problem adding a tag to the worksheet, please try again.";
+                    returnToPageError($message, $ex);
+                }
             }
         }
     }
       
+    db_commit_transaction();
     $message = "Worksheet ($wname - $vname) added successfully.";
     returnToPageSuccess($message, $vid);
 }else{
@@ -146,12 +164,12 @@ function getTagId($string){
     }
 }
 
-function returnToPageError($message){
+function returnToPageError($message, $ex){
     $type = 'ERROR';
     if(!isset($message)){
         $message = 'Something has gone wrong';   
     }
-    infoLog($message);
+    errorLog($message . ": " . $ex->getMessage());
     $_SESSION['message'] = new Message($type, $message);
     $_SESSION['formValues'] = $GLOBALS["informationArray"];
     header("Location: ../addNewWorksheet.php");
