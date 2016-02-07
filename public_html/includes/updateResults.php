@@ -1,9 +1,10 @@
 <?php
 $include_path = get_include_path();
-include_once '../../includes/db_functions.php';
+include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/errorReporting.php';
 include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
 if(isset($_SESSION['user'])){ 
