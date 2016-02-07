@@ -157,18 +157,22 @@ function convertToArray(string){
     }
     var array = string.split(',');
     var tag;
+    var newArray = new Array();
     //What happens for one in the middle!!!
     // NEEDS TO BE SORTED OUT
     for(var i = 0; i < array.length; i++){
         tag = array[i];
         tag = tag.trim();
-        if (tag.length === 0){
-            array[i] = "";
-        }else{
-            array[i] = getIdFromTag(tag);
+//        if (tag.length === 0){
+//            array[i] = "";
+//        }else{
+//            array[i] = getIdFromTag(tag);
+//        }
+        if(tag.length > 0){
+            newArray.push(getIdFromTag(tag));
         }
     }
-    return array;
+    return newArray;
 }
 
 //TODO this can probably be done by AJAX calls
