@@ -9,3 +9,6 @@ public_html/error_log
 public_html/test.php
 public_html/request_tests/
 public_html/spanish.php
+php.ini
+public_html/phpinfo.php
+.htaccess
