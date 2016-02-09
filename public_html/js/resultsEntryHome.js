@@ -84,8 +84,11 @@ function worksheetsSuccess(json){
                 var worksheet = worksheets[i];
                 var name = worksheet["WName"];
                 var vname = worksheet["VName"];
+                var date = worksheet["DueDate"];
                 var id = worksheet["ID"];
-                if(vname !== undefined){
+                if(date !== undefined){
+                    str += "<option value=" + id + ">" + name + " - " + date + "</option>";
+                }else if(vname !== undefined){
                     str += "<option value=" + id + ">" + name + " - " + vname + "</option>";
                 }else{
                     str += "<option value=" + id + ">" + name + "</option>";
