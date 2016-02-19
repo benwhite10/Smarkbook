@@ -29,7 +29,7 @@ function getWorksheetForGWID($gwid){
                 ORDER BY SQ.`Question Order`;";
 
     // Results for every student in the group
-    $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark, C.`Set Due Date` Date
+    $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark
                 FROM TCOMPLETEDQUESTIONS C
                 WHERE `Group Worksheet ID` = $gwid AND `Deleted` = 0;";
     

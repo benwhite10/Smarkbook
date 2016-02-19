@@ -101,6 +101,12 @@ if($resultArray[0]){
                     echo "<input type='hidden' id='menuObjectLink$count' value='editUser.php?userid=$userid'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-user.png'>";
                     echo "</div>";
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='reportHome.php?staff=$userid' class='title'>Reports</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='reportHome.php?staff=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
+                    echo "</div>";
                     echo "<input type='hidden' id='menuCount' value=$count />";
                 } ?>
             </div>

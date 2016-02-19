@@ -1,0 +1,365 @@
+.fullSection
+{
+    width: 100%;
+    margin-top: 20px;
+    //border: thin solid #323232;
+}
+.sectionSummary
+{
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: thin solid #323232;
+    cursor: pointer;
+}
+
+.sectionSummaryDetails
+{
+    display: inline-block;
+    width: 100%;
+    background: transparent;
+    height: 60px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: top;
+}
+
+.sectionSummaryDetails h2
+{
+    line-height: 60px;
+    margin-left: 20px;
+    width: calc(100%-40px);
+    font-weight: 400;
+}
+
+.sectionSummaryButtons
+{
+    display: inline-block;
+    width: 0%;
+    background: transparent;
+    height: 60px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: top;
+}
+
+.sectionSummaryDetailsText
+{
+    display: inline-block;
+    width: calc(100% - 40px);
+    height: 60px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: middle;
+}
+
+.sectionSummaryShowHideButton
+{
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: middle;
+    background-image: url("../images/plusminus.png");
+    background-repeat: no-repeat;
+    background-size: 100px 25px;
+    background-position: -75px;
+}
+
+.sectionSummaryShowHideButton:hover
+{
+    background-position: -50px;
+}
+
+.sectionSummaryShowHideButton.minus
+{
+    background-position: -25px;
+}
+
+.sectionSummaryShowHideButton.minus:hover
+{
+    background-position: 0px;
+}
+
+.sectionMain
+{
+    width: calc(100% - 20px);
+    display: block;
+    margin: 0px;
+    padding: 10px;
+    background: transparent;
+    border: thin solid #323232;
+    border-top: none;
+    cursor: pointer;
+}
+
+#variablesInputBox
+{
+}
+
+#variablesInputBoxDetails
+{
+    width: 80%;
+}
+
+#variablesInputBoxDetails h2
+{
+}
+
+#variablesInputBoxButtons
+{
+    width: 20%;
+}
+
+#variablesInputBoxDetailsText
+{
+
+}
+
+#variablesInputBoxShowHideButton
+{
+
+}
+
+#variablesInputBoxShowHideButton:hover
+{
+
+}
+
+#variablesInputBoxShowHideButton.minus
+{
+
+}
+
+#variablesInputBoxShowHideButton.minus:hover
+{
+
+}
+
+#generateReportButton
+{
+    width: 100%;
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+    background: transparent;
+    height: 60px;
+    text-align: center;
+    font-size: 1.3rem;
+    border: none;
+    border-left: thin solid #323232;
+    border-radius: 0px;
+}
+
+#generateReportButton:hover
+{
+    background: #c2f4a4;
+    color: #323232;
+}
+
+/*General table set up*/
+
+table.form
+{
+  width: 100%;
+  margin: 0px auto;
+  border: 0px solid;
+  color: #000;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+td.form
+{
+  height: 32px;
+  margin: 0px;
+  width: 33%;
+  text-align: left;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 0.9rem;
+  font-weight: normal;
+  color: #323232;
+  }
+
+tr.form
+{ background: transparent; }
+
+tr.form:nth-child(even) {
+    background-color: transparent;
+}
+
+tr.form:hover
+{ background: transparent;
+  cursor: pointer; }
+
+tr.form:nth-child(even):hover {
+    background-color: transparent;
+}
+
+table.results {
+    width: 100%;
+    border: 1px solid #323232;
+    border-collapse: collapse;
+}
+
+table.half {
+    width: calc(50% - 2px);
+    display: inline-block;
+    float: left;
+    margin-left:  -1px;
+}
+
+td.results {
+    line-height: 30px;
+    font-size: 0.9rem;
+    padding-left: 0px;
+    text-align: center;
+}
+
+th.results
+{
+  background: #323232;
+  color: #66E11B;
+  font-size: 1rem;
+  font-weight: 400;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  text-align: center;
+  /* width:  100%; */
+  }
+
+tr.results
+{ 
+    background: #EEE;width:  100%;margin-left: 0px;margin-right: 0px;
+}
+
+tr.results:nth-child(even) 
+{
+    background-color: #DDD;
+}
+
+tr.results:nth-child(even):hover, tr.results:hover
+{
+    background-color: #c2f4a4;
+}
+
+tr.lowrel
+{
+    color: #AAA;
+}
+
+thead.results {
+    width: 800px;
+}
+
+#details{
+    background: transparent;
+    margin-bottom: 0px;
+    margin-top: -1px;
+    padding: 5px;
+    padding-top:  10px;
+    border: 1px solid #323232;
+    display: inline-block;
+    width: calc(100% - 10px);
+}
+
+input[type="text"], input[type="password"], input[type="submit"], select, textarea{
+    display: inline-block;
+    font: normal 'Open Sans', sans-serif;
+    line-height: 32px;
+    height: 32px;
+    width: calc(100% - 177px);
+    background: transparent;
+    margin: 0px;
+    padding: 0px;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    margin-left: 5px;
+    border: 1px solid #323232;
+    font-size: 0.9rem;
+    color: #323232;
+    outline: none;
+    text-align: left;
+    vertical-align: top;
+}
+
+textarea{
+    width: calc(100% - 176px);
+    height: 80px;
+    margin-left: 0px;
+}
+
+p.details{
+    display: inline-block;
+    padding: 0px;
+    padding-left: 10px;
+    width: calc(100%-160px);
+    margin: 0px;
+    margin-bottom: 10px;
+}
+
+select {
+   width: 100%;
+   background: transparent;
+   height: 32px;
+   margin: 0px;
+   margin-left: 1px;
+   margin-bottom: 10px;
+}
+
+label {
+    display: inline-block;
+    background: transparent;
+    width: 150px;
+    height:32px;
+    line-height: 32px;
+    font-size: 0.9rem;
+    font-weight: bolder;
+    vertical-align: top;
+    margin: 0px;
+    padding: 0px;
+}
+
+.dateLeft, .dateRight{
+    display: inline-block;
+    width: 50%;
+    float: left;
+}
+
+.dateRight input[type="text"]{
+    margin-right: 0px;
+    float: right;
+}
+
+#tagsReportShort{
+    width: calc(100% + 4px);
+}
+
+#tagsReportFull{
+    height: 500px;
+    overflow-y: scroll;
+    /* border: thin solid #323232; */
+    width: 100%;
+}
+
+table.fullResults{
+    border: none;
+}
+
+.fullSection{
+    border: thin solid #323232;
+}
+
+#tagsReportSummary{
+    border: none;
+    border-bottom: solid thin #323232;
+}
+
+#noResults{
+    text-align: center; 
+    margin-top: 20px;
+    display: none;
+}

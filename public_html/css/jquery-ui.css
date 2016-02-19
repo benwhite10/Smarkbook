@@ -942,3 +942,7 @@ body .ui-tooltip {
 	filter: Alpha(Opacity=20); /* support: IE8 */
 	border-radius: 5px;
 }
+
+.datepicker {
+
+}
