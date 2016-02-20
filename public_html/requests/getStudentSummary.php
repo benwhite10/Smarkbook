@@ -13,14 +13,8 @@ $studentId = filter_input(INPUT_POST,'student',FILTER_SANITIZE_NUMBER_INT);
 $staffId = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $setId = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 //$tagsArrayString = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
-
-//$requestType = "STUDENTREPORT";
-//$startDate = "01/01/2016";
-//$endDate = "01/03/2016";
-//$studentId = 291;
-//$staffId = 1;
-//$setId = 411;
 $tagsArrayString = "";
+
 $questions = [];
 $tags = [];
 $reliabilityConstant = 0.2;
@@ -37,6 +31,7 @@ switch ($requestType){
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     default:
+        failRequest("Invalid request type.");
         break;
 }
 
@@ -46,14 +41,12 @@ function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId,
     validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
     unset($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
     
-    //$relevantTags = createRelevantTags($returns);
-    //createRelevantQuestions($returns);
     getAnsweredQuestions();
     
     if(count($questions) === 0){
         succeedRequest(null);
     }
-    //getGlobalStandard($relevantQuestions);
+
     setDifficultyScores();
     $userAvg = getUserAverage();
     
@@ -62,35 +55,7 @@ function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId,
     combineQuestionsWithTags();
     getFinalScoreForTags();
     
-    foreach($tags as $key1 => $tag){
-        foreach($tags as $key2 => $tag){
-            if($tags[$key1]["Result"]["Score"] < $tags[$key2]["Result"]["Score"]){
-                $temp = $tags[$key1];
-                $tags[$key1] = $tags[$key2];
-                $tags[$key2] = $temp;
-            }
-        }
-    }
-    
-    $count = 0;
-    $newtags = [];
-    foreach($tags as $key => $tag){
-        $tag["Result"]["Rank"] = $count;
-        $newtags[$key] = $tag["Result"];
-        $count++;
-//        $name = $tag["Result"]["Name"];
-//        $score = $tag["Result"]["Score"];
-//        $rel = $tag["Result"]["Reliability"];
-//        $totalMark = $tag["Result"]["TotalMark"];
-//        $totalMarks = $tag["Result"]["TotalMarks"];
-//        $total = intval(100 * $totalMark / $totalMarks);
-//        echo "<h2>$name</h2>";
-//        echo "<p>Score - $score</p>";
-//        echo "<p>Reliability - $rel</p>";
-//        echo "<p>Total - $totalMark / $totalMarks ($total)</p>";
-    }
-    
-    succeedRequest($newtags);
+    reorderTagsAndSucceedRequest();
 }
 
 /*Query Creation*/
@@ -198,20 +163,13 @@ function getFinalScoreForTags(){
         $totalRelCount = 0;
         $name = $tag[0]["Name"];
         $numRel = getReliabilityScore(count($tag));
-        $count = count($tag);
-        $sqid = $tag[0]["SQID"];
         $totalMark = 0;
         $totalMarks = 0;
-        //echo "<h2>$name ($sqid) - $count</h2>";
         foreach($tag as $result){
             $diffRel = $result["GRel"];
             $userRel = $result["URel"];
             $timeWeight = $result["TimeWeight"];
-            //echo "<p>Diff Rel - $diffRel</p>";
-            //echo "<p>User Rel - $userRel</p>";
-            //echo "<p>Time Weight - $timeWeight</p>";
             $totalRel += $diffRelWeight * $diffRel + $userRelWeight * $userRel;
-            //echo "<p>Total Rel - $totalRel";
             $totalRelCount += $diffRelWeight + $userRelWeight;
             $total += $result["RelativeScore"] * $result["Marks"] * $timeWeight;
             $marks += $result["Marks"] * $timeWeight;
@@ -220,10 +178,7 @@ function getFinalScoreForTags(){
             $totalMarks += $result["Marks"];
         }
         $quesRel = $totalRel / $totalRelCount;
-        //echo "<p>Ques Rel - $quesRel</p>";
-        //echo "<p>Num Rel - $numRel</p>";
         $reliability = ($numRelWeight * $numRel + $quesRelWeight * $quesRel) / ($numRelWeight + $quesRelWeight);
-        //echo "<p>Final Rel = $reliability";
         $score = $total / $marks;
         $array = [];
         $array["Score"] = $score;
@@ -283,58 +238,6 @@ function getAnsweredQuestions(){
         foreach($results as $result){
             $result["TimeWeight"] = getTimeWeight($result["Days"]);
             $questions[$result["CQID"]] = $result;
-        }
-    } catch (Exception $ex) {
-        $message = "There was an error generating the report.";
-        failRequestWithException($message, $ex);
-    }
-}
-
-function createRelevantQuestions($returns){
-    global $relevantQuestions;
-    // Get all results ever that have been answered with the criteria input
-    $query = "SELECT CQ.`Stored Question ID` SQID, SQ.`Marks` FROM TCOMPLETEDQUESTIONS CQ
-                JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = CQ.`Stored Question ID`
-                JOIN TQUESTIONTAGS QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
-                WHERE ";
-    if(array_key_exists("inputs", $returns)){
-        $inputs = $returns["inputs"];
-        if(array_key_exists("student", $inputs)){
-            $student = $inputs["student"];
-            $query .= "CQ.`Student ID` = $student AND ";
-        }
-        if(array_key_exists("staff", $inputs)){
-            $staff = $inputs["staff"];
-            $query .= "CQ.`Staff ID` = $staff AND ";
-        }
-        if(array_key_exists("set", $inputs)){
-            $set = $inputs["set"];
-            $query .= "CQ.`Set ID` = $set AND ";
-        }
-        if(array_key_exists("tags", $inputs)){
-            $tags = $returns["tags"];
-            foreach($tags as $tag){
-                $query .= "QT.`Tag ID` = $tag AND ";
-            }
-        }
-    }
-    if(array_key_exists("dates", $returns)){
-        $dates = $returns["dates"];
-        if(count($dates) === 1){
-            // Only 1 date
-            $date = $dates[0];
-            $query .= "CQ.`Date Completed` > STR_TO_DATE('$date', '%d/%m/%Y')";
-        } else {
-            $date1 = $dates[0];
-            $date2 = $dates[1];
-            $query .= "CQ.`Date Completed` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
-        }
-    }
-    $query .= " GROUP BY CQ.`Stored Question ID`;";
-    try{
-        $results = db_select_exception($query);
-        foreach($results as $result){
-            $relevantQuestions[$result["SQID"]] = $result;
         }
     } catch (Exception $ex) {
         $message = "There was an error generating the report.";
@@ -406,6 +309,30 @@ function checkValidInputs($staffId, $tagsArrayString, $setId, $studentId){
 
 function checkIdInputIsValid($id){
     return isset($id) && is_int(intval($id)) && intval($id) > 0;
+}
+
+function reorderTagsAndSucceedRequest(){
+    global $tags;
+    
+    foreach($tags as $key1 => $tag){
+        foreach($tags as $key2 => $tag){
+            if($tags[$key1]["Result"]["Score"] < $tags[$key2]["Result"]["Score"]){
+                $temp = $tags[$key1];
+                $tags[$key1] = $tags[$key2];
+                $tags[$key2] = $temp;
+            }
+        }
+    }
+    
+    $count = 0;
+    $newtags = [];
+    foreach($tags as $key => $tag){
+        $tag["Result"]["Rank"] = $count;
+        $newtags[$key] = $tag["Result"];
+        $count++;
+    }
+    
+    succeedRequest($newtags);
 }
 
 /* Exit page */

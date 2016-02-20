@@ -21,8 +21,7 @@ function setDates(){
         $("#endDate").val($("#end").val());
     } else {
         $("#endDate").val(moment().format('DD/MM/YYYY'));
-    }
-    
+    } 
 }
 
 function setInputsTitle(){
@@ -159,7 +158,6 @@ function studentChange(){
         generateReport();
         localStorage.setItem("initialRun", false);
     }
-    
 }
 
 /* Summary show/hide buttons */

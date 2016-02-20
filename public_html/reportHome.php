@@ -106,16 +106,6 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
                 </div>
 
-                <!--
-                <div id="top_bar">
-                    <div id="title2">
-                        <h1><?php //echo $details['WName'];  ?></h1>
-                    </div>
-                    <ul class="menu navbar">
-                    </ul>
-                </div>
-                -->
-
                 <form id="variablesInput" class="fullSection" style="border: none;" action="" method="POST">      
                     <div id="variablesInputBox" class="sectionSummary">
                         <div id="variablesInputBoxDetails" class="sectionSummaryDetails">

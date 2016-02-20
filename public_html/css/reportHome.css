@@ -2,7 +2,6 @@
 {
     width: 100%;
     margin-top: 20px;
-    //border: thin solid #323232;
 }
 .sectionSummary
 {
@@ -94,47 +93,14 @@
     cursor: pointer;
 }
 
-#variablesInputBox
-{
-}
-
 #variablesInputBoxDetails
 {
     width: 80%;
 }
 
-#variablesInputBoxDetails h2
-{
-}
-
 #variablesInputBoxButtons
 {
     width: 20%;
-}
-
-#variablesInputBoxDetailsText
-{
-
-}
-
-#variablesInputBoxShowHideButton
-{
-
-}
-
-#variablesInputBoxShowHideButton:hover
-{
-
-}
-
-#variablesInputBoxShowHideButton.minus
-{
-
-}
-
-#variablesInputBoxShowHideButton.minus:hover
-{
-
 }
 
 #generateReportButton
