@@ -268,16 +268,18 @@ function updateCompletionStatus(student){
     var dateElem = document.getElementById(dateid);
     $("#comp" + student).removeClass("partial");
     $("#comp" + student).removeClass("late");
-    if(state == "INCOMPLETE"){
+    if(state === "INCOMPLETE"){
         $("#comp" + student).val("Not Required");
         $("#date" + student).val("-");
-    }else if (state == "PARTIAL"){
+    }else if (state === "PARTIAL"){
         $("#comp" + student).val("Partially Completed");
         $("#date" + student).val("On Time");
         $("#comp" + student).addClass("partial");
-    }else if (state == "COMPLETE"){
+        $("#daysLate" + student).val("0");
+    }else if (state === "COMPLETE"){
         $("#comp" + student).val("Completed");
         $("#date" + student).val("On Time");
+        $("#daysLate" + student).val("0");
     }
 }
 
