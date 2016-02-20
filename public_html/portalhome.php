@@ -100,11 +100,16 @@ if($resultArray[0]){
                     echo "<a href='editUser.php?userid=$userid' class='title'>My Account</a>";
                     echo "<input type='hidden' id='menuObjectLink$count' value='editUser.php?userid=$userid'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-user.png'>";
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='reportHome.php?staff=$userid' class='title'>Reports</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='reportHome.php?staff=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 } 
                 if(authoriseUserRoles($userRole, ["SUPER_USER"])){
                     $count++;
-                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<div class='menuobject' id='menuobject$count' >";
                     echo "<a href='tagManagement.php' class='title'>Manage Tags</a>";
                     echo "<input type='hidden' id='menuObjectLink$count' value='tagManagement.php'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-modify.png'>";
