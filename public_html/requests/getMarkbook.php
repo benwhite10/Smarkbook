@@ -29,7 +29,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 join TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                
                 where GW.`Primary Staff ID` = $staffid and GW.`Group ID` = $setid and W.`Deleted` = 0
                 group by GW.`Group Worksheet ID`                
-                order by GW.`Date Due`;";
+                order by GW.`Date Due`, WV.`Name`;";
 
     try{
         $students = db_select_exception($query1);
@@ -43,7 +43,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
     
     foreach ($worksheets as $worksheet){
         $GWID = $worksheet["GWID"];
-        $query = "select SQ.`Version ID` VID, CQ.`Student ID` StuID, SUM(Mark) Mark, SUM(Marks) Marks from TCOMPLETEDQUESTIONS CQ
+        $query = "select SQ.`Version ID` VID, `Group Worksheet ID` GWID, CQ.`Student ID` StuID, SUM(Mark) Mark, SUM(Marks) Marks from TCOMPLETEDQUESTIONS CQ
                     join TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
                     WHERE `Group Worksheet ID` = $GWID
                     group by CQ.`Student ID`;";
@@ -60,7 +60,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
         }
         
         $vid = $worksheet["VID"];
-        $resultsArray[$vid] = $newArray;
+        $resultsArray[$GWID] = $newArray;
     }
     
     $response = array(

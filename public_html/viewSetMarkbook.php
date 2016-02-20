@@ -191,10 +191,10 @@ if($respArray["success"]){
                                 $stuName = $student['Name'];
                                 echo "<tr><td class='name'><a href='individualSummary.php?stuid=$stuId&setid=$setId&staffid=$staffId'>$stuName</a></td>";
                                 foreach ($worksheets as $worksheet){
-                                    $vid = $worksheet['VID'];
+                                    $gwid = $worksheet['GWID'];
                                     $marks = $worksheet['Marks'];
-                                    if(array_key_exists($vid, $results) && array_key_exists($stuId, $results[$vid])){
-                                        $resultArray = $results[$vid][$stuId];
+                                    if(array_key_exists($gwid, $results) && array_key_exists($stuId, $results[$gwid])){
+                                        $resultArray = $results[$gwid][$stuId];
                                         $mark = $resultArray['Mark'];
                                         $stumarks = $resultArray['Marks'];
                                         if($stumarks != $marks){

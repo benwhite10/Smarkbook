@@ -46,7 +46,7 @@ function getAllWorksheetNames($orderby, $desc){
 }
 
 function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
-    $query = "SELECT GW.`Group Worksheet ID` GWID, W.`Name` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DueDate FROM TGROUPWORKSHEETS GW 
+    $query = "SELECT GW.`Group Worksheet ID` ID, W.`Name` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DueDate FROM TGROUPWORKSHEETS GW 
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                  JOIN TWORKSHEETS W ON W.`Worksheet ID` = WV.`Worksheet ID` ";
     
