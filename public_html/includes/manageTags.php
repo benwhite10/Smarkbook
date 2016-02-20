@@ -30,16 +30,17 @@ if($type === "DELETE"){
     mergeTags($tag1, $tag2);
 }
 
-returnToPageError();
+returnToPageError("There was an error updating the tag, please try again.", null);
 
 function deleteTag($tag1){
-    $query = "DELETE FROM `TTAGS` WHERE `Tag ID` = $tag1";
-    try{
-        db_query_exception($query);
-        returnToPageSuccess("Tag succesfully deleted");
-    } catch (Exception $ex) {
-        returnToPageError("There was a problem deleting the tag", $ex);
-    }
+//    $query = "DELETE FROM `TTAGS` WHERE `Tag ID` = $tag1";
+//    try{
+//        db_query_exception($query);
+//        returnToPageSuccess("Tag succesfully deleted");
+//    } catch (Exception $ex) {
+//        returnToPageError("There was a problem deleting the tag", $ex);
+//    }
+    returnToPageError("You shouldn't have been able to get here!", null);
 }
 
 function mergeTags($tag1, $tag2){
@@ -71,7 +72,9 @@ function returnToPageError($message, $ex){
     if(!isset($message)){
         $message = 'Something has gone wrong';   
     }
-    errorLog($ex->getMessage());
+    if(!is_null($ex)){
+        errorLog($ex->getMessage());
+    }
     $_SESSION['message'] = new Message($messageType, $message);
     header("Location: ../tagManagement.php");
     exit;
