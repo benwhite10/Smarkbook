@@ -212,7 +212,9 @@ function sendReportRequest(){
         endDate: $('#endDate').val(),
         student: $('#student').val(),
         staff: $('#staff').val(),
-        set: $('#set').val()
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     console.log(infoArray);
     $.ajax({
