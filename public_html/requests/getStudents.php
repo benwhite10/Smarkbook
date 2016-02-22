@@ -10,9 +10,19 @@ $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
 $desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
+$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+
+$role = validateRequest($userid, $userval);
+if(!$role){
+    failRequest("There was a problem validating your request");
+}
 
 switch ($requestType){
     case "STUDENTSBYSET":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         getStudentsForSet($setid, $orderby, $desc);
         break;
     default:
@@ -42,6 +52,13 @@ function getStudentsForSet($setid, $orderby, $desc){
 
 function returnToPageError($ex, $message){
     errorLog("There was an error in the get students request: " . $ex->getMessage());
+    $response = array(
+        "success" => FALSE);
+    echo json_encode($response);
+    exit();
+}
+
+function failRequest($message){
     $response = array(
         "success" => FALSE);
     echo json_encode($response);

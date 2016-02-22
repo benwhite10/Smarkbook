@@ -153,10 +153,15 @@ function setUpStudents(){
         }else{
             document.getElementById("students").style.display = "inline-block";
             document.getElementById("studentslabel").style.display = "inline-block";
-            var infoArray = {orderby: "SName", desc: "FALSE"};
-            var type = "STUDENTSBYSET";
-            infoArray["type"] = type;
-            infoArray["set"] = document.getElementById("group") ? document.getElementById("group").value : 0;
+            var set = document.getElementById("group") ? document.getElementById("group").value : 0;
+            var infoArray = {
+                orderby: "SName",
+                desc: "FALSE",
+                type: "STUDENTSBYSET",
+                set: set,
+                userid: $('#userid').val(),
+                userval: $('#userval').val()
+            };
             $.ajax({
                 type: "POST",
                 data: infoArray,

@@ -80,7 +80,9 @@ function updateStudents(){
         orderby: "SName",
         desc: "FALSE",
         type: "STUDENTSBYSET",
-        set: $('#set').val()
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",
