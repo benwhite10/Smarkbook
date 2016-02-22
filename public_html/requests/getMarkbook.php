@@ -88,3 +88,11 @@ function returnToPageError($ex, $message){
     echo json_encode($response);
     exit();
 }
+
+function failRequest($message){
+    errorLog("There was an error in the get markbook request: " . $message);
+    $response = array(
+        "success" => FALSE);
+    echo json_encode($response);
+    exit();
+}

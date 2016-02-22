@@ -5,8 +5,11 @@ $(document).ready(function(){
 });
 
 function setUpStaff(){
-    var infoArray = {};
-    infoArray["orderby"] = "Initials";
+    var infoArray = {
+        orderby: "Initials",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     $.ajax({
         type: "POST",
         data: infoArray,
