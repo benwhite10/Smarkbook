@@ -98,3 +98,19 @@ function sendCURLRequest($url, $postData){
     return [$success, $resp];
 }
 
+function validateRequest($userid, $userval){
+    $query = "SELECT `Validation`, `Role` FROM TUSERS U WHERE `User ID` = $userid";
+    try{
+        $result = db_select_exception($query);
+        if(count($result) > 0 && $result[0]['Validation'] === $userval){
+            return $result[0]['Role'];
+        } else {
+            errorLog("Request failed due to invalid credentials");
+            return false;
+        }
+    } catch (Exception $ex) {
+        //Request invalidated
+        errorLog("Request failed with exception: " . $ex->getMessage());
+        return false;
+    }
+}

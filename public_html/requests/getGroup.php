@@ -10,12 +10,23 @@ $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
 $desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
+$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+
+$role = validateRequest($userid, $userval);
+if(!$role){
+    failRequest("There was a problem validating your request");
+}
 
 switch ($requestType){
     case "SETSBYSTAFF":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         getSetsForStaffMember($staffid, $orderby, $desc);
         break;
     default:
+        failRequest("There was a problem with your request, please try again.");
         break;
 }
 
@@ -38,4 +49,12 @@ function getSetsForStaffMember($staffid, $orderby, $desc){
         "success" => TRUE,
         "sets" => $sets);
     echo json_encode($response);
+}
+
+function failRequest($message){
+    errorLog("There was an error in the get group request: " . $message);
+    $response = array(
+        "success" => FALSE);
+    echo json_encode($response);
+    exit();
 }

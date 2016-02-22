@@ -55,7 +55,9 @@ function updateSets(){
         orderby: "Name",
         desc: "FALSE",
         type: "SETSBYSTAFF",
-        staff: $('#staff').val()
+        staff: $('#staff').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",

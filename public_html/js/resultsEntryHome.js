@@ -113,10 +113,16 @@ function countForEachName(names){
 }
 
 function setUpSets(firstTime){
-    var infoArray = {orderby: "Name", desc: "FALSE"};
+    var infoArray = {
+        orderby: "Name", 
+        desc: "FALSE",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()};
     var type = "SETSBYSTAFF";
     infoArray["type"] = type;
     infoArray["staff"] = document.getElementById("creatingStaffMember") ? document.getElementById("creatingStaffMember").value : 0;
+    
+    
     $.ajax({
         type: "POST",
         data: infoArray,
