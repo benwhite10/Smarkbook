@@ -10,6 +10,8 @@ sec_session_start();
 if(isset($_SESSION['user'])){ 
     $user = $_SESSION['user'];
     $userRole = $user->getRole();
+    $userid = $user->getUserId();
+    $userval = base64_encode($user->getValidation());
     if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
         header("Location: ../unauthorisedAccess.php");
         exit();
@@ -54,11 +56,13 @@ try {
         "details" => $worksheetDetails,
         "newResults" => $newResults,
         "compWorksheets" => $completedWorksheets,
-        "type" => "UPDATE"
+        "type" => "UPDATE",
+        "userid" => $userid,
+        "userval" => $userval
     );
 
-    $postData = array("data" => json_encode($postData));
-    $resp = sendCURLRequest("/requests/setWorksheetResult.php", $postData);
+    $data = array("data" => json_encode($postData));
+    $resp = sendCURLRequest("/requests/setWorksheetResult.php", $data);
     $respArray = json_decode($resp[1], TRUE);
     if(!$respArray["result"]){
         //Failure

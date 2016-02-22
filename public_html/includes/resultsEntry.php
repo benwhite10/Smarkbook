@@ -19,6 +19,15 @@ $worksheetid = filter_input(INPUT_POST, 'worksheet', FILTER_SANITIZE_NUMBER_INT)
 $setid = filter_input(INPUT_POST, 'group', FILTER_SANITIZE_NUMBER_INT);
 $studentid = filter_input(INPUT_POST, 'students', FILTER_SANITIZE_NUMBER_INT);
 
+$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
+if($resultArray[0]){ 
+    $user = $_SESSION['user'];
+    $userid = $user->getUserId();
+    $userval = base64_encode($user->getValidation());
+}else{
+    returnToPageError("Something went wrong completing your request.", $level, $type, $setid, $staff[0]);
+}
+
 if(isset($type, $level)){
     $value = $type . $level;
     switch($value){
@@ -42,8 +51,12 @@ if(isset($type, $level)){
 }
 
 function newWorksheetForGroup($staff, $setid, $worksheetid, $duedate, $level, $type){
+    global $userid, $userval;
+    
     $postData = array(
-        "type" => "NEW"
+        "type" => "NEW",
+        "userid" => $userid,
+        "userval" => $userval
     );
     
     if(isset($staff[0])){ $postData["staff"] = $staff[0]; }

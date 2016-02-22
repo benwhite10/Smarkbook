@@ -131,7 +131,7 @@ class User
         $this->validation = $validation;
     }
 
-    function getValidation($validation) {
+    function getValidation() {
         return $this->validation;
     }
 }
