@@ -28,9 +28,12 @@ $(function() {
 
 function setUpNotes() {
     var gwid = $("#gwid").val();
-    var infoArray = {"gwid": gwid};
-    var type = "JUSTNOTES";
-    infoArray["type"] = type;
+    var infoArray = {
+        gwid: gwid,
+        type: "JUSTNOTES",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     $.ajax({
         type: "POST",
         data: infoArray,

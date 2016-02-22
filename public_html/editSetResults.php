@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -36,7 +37,9 @@ try{
 
 $postData = array(
     "gwid" => $gwid,
-    "type" => "WORKSHEETFORGWID"
+    "type" => "WORKSHEETFORGWID",
+    "userid" => $userid,
+    "userval" => $userval
 );
         
 $resp = sendCURLRequest("/requests/getWorksheet.php", $postData);
@@ -93,6 +96,10 @@ if(isset($_SESSION['message'])){
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
+    <?php
+        echo "<input type='hidden' id='userid' value='$userid' />";
+        echo "<input type='hidden' id='userval' value='$userval' />";
+        ?>
     <div id="main">
     	<div id="popUpBackground">
             <div id="popUpBox">

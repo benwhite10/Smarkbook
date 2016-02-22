@@ -8,12 +8,25 @@ include_once $include_path . '/public_html/requests/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
+$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+
+$role = validateRequest($userid, $userval);
+if(!$role){
+    failRequest("There was a problem validating your request");
+}
 
 switch ($requestType){
     case "WORKSHEETFORGWID":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         getWorksheetForGWID($gwid);
         break;
     case "JUSTNOTES":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         getNotesForGWID($gwid);
         break;
     default:
@@ -121,4 +134,12 @@ function getNotesForGWID($gwid){
         "notes" => $notes);
     
     echo json_encode($test);
+}
+
+function failRequest($message){
+    errorLog("There was an error in the get group request: " . $message);
+    $response = array(
+        "success" => FALSE);
+    echo json_encode($response);
+    exit();
 }
