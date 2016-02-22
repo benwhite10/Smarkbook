@@ -48,7 +48,10 @@ function staffSuccess(json){
 }
 
 function setUpWorksheets(){
-    var infoArray = {};
+    var infoArray = {
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     infoArray["group"] = document.getElementById("group") ? document.getElementById("group").value : 0;
     infoArray["staff"] = document.getElementById("creatingStaffMember") ? document.getElementById("creatingStaffMember").value : 0;
     var url = "requests/getWorksheets.php";
