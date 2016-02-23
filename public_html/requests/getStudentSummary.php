@@ -17,6 +17,7 @@ $tagsArrayString = "";
 
 $questions = [];
 $tags = [];
+$userAvg;
 $reliabilityConstant = 0.2;
 $reliabilityBase = 0.2;
 $diffRelWeight = 1;
@@ -36,7 +37,7 @@ switch ($requestType){
 }
 
 function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){
-    global $questions, $returns, $tags;
+    global $questions, $userAvg;
     
     validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
     unset($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
@@ -54,6 +55,8 @@ function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId,
     
     combineQuestionsWithTags();
     getFinalScoreForTags();
+    
+    // Average Score For All Questions
     
     reorderTagsAndSucceedRequest();
 }
@@ -312,7 +315,7 @@ function checkIdInputIsValid($id){
 }
 
 function reorderTagsAndSucceedRequest(){
-    global $tags;
+    global $tags, $userAvg;
     
     foreach($tags as $key1 => $tag){
         foreach($tags as $key2 => $tag){
@@ -332,7 +335,14 @@ function reorderTagsAndSucceedRequest(){
         $count++;
     }
     
-    succeedRequest($newtags);
+    $average = $userAvg["AVG"];
+    
+    $result = array(
+        "tags" => $newtags,
+        "average" => $average
+    );
+    
+    succeedRequest($result);
 }
 
 /* Exit page */

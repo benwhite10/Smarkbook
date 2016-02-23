@@ -207,7 +207,6 @@ function sendReportRequest(){
         staff: $('#staff').val(),
         set: $('#set').val()
     };
-    console.log(infoArray);
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -221,7 +220,8 @@ function sendReportRequest(){
 
 function reportRequestSuccess(json){
     if(json["success"]){
-        localStorage.setItem("tagResults", JSON.stringify(json["result"]));
+        localStorage.setItem("tagResults", JSON.stringify(json["result"]["tags"]));
+        localStorage.setItem("userAverage", parseInt(parseFloat(json["result"]["average"]) * 100));
         refreshTagResults();
     } else {
         console.log("Something went wrong generating the reports.");
