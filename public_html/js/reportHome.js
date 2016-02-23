@@ -193,6 +193,7 @@ function showHideFullTagResults(){
 
 /* Generate Report */
 function generateReport(){
+    showAllSpinners();
     sendReportRequest();
     setInputsTitle();
     return false;
@@ -234,9 +235,9 @@ function refreshTagResults(){
     $('#alltags tbody').html('');
     var results = JSON.parse(localStorage.getItem("tagResults"));
     if(results === null){
-        showTagResults(false);
+        setNoResults();
     } else {
-        showTagResults(true);
+        showTagResults(false);
         var length = Object.keys(results).length;
         for(var count = 0; count < 5; count++){
             for(var key in results){
@@ -274,23 +275,58 @@ function setHalfWidthTagResults(results, key, length){
     return string;
 }
 
-function showTagResults(results){
-    showHideAllSections(results);
-    showHideNoResults(!results);
+function setNoResults(){
+    hideAllSections();
+    $("#noResults").show();
 }
 
-function showHideAllSections(show){
-    if(show){
-        $("#tagsReport").show();
-    } else {
-        $("#tagsReport").hide();
-    }
+function hideAllSections(){
+    $("#tagsReport").hide();
 }
 
-function showHideNoResults(show){
-    if(show){
-        $("#noResults").show();
+function hideAllContent(){
+    $("#tagsReportSummary").hide();
+    $("#tagsReportShort").hide();
+    $("#tagsReportFull").hide();
+}
+
+function showAllSpinners(){
+    hideAllContent();
+    startSpinnerInDiv('tagsReportSpinner');
+}
+
+function startSpinnerInDiv(div){
+    var opts = {
+      lines: 10             // The number of lines to draw
+    , length: 9             // The length of each line
+    , width: 4              // The line thickness
+    , radius: 10            // The radius of the inner circle
+    , scale: 1.0            // Scales overall size of the spinner
+    , corners: 1           // Roundness (0..1)
+    , color: '#000'         // #rgb or #rrggbb
+    , left: '0%'           // center horizontally
+    , position: 'relative'  // Element positioning
+    };
+    $("#" + div).show();
+    var spinner = new Spinner(opts).spin($("#" + div).get(0));
+    $($("#" + div).get(0)).data('spinner', spinner);
+}
+
+function stopSpinnerInDiv(div){
+    $('#' + div).data('spinner').stop();
+    $('#' + div).hide();
+}
+
+function showTagResults(full){
+    stopSpinnerInDiv('tagsReportSpinner');
+    $("#tagsReportSummary").show();
+    if(full){
+        $("#tagsReportFull").show();
+        $("#tagsReportShort").hide();
+        $("#showHideFullTagResultsText").text("Hide Full Results");
     } else {
-        $("#noResults").hide();
+        $("#tagsReportShort").show();
+        $("#tagsReportFull").hide();
+        $("#showHideFullTagResultsText").text("Show Full Results");
     }
 }

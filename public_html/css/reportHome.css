@@ -329,3 +329,9 @@ table.fullResults{
     margin-top: 20px;
     display: none;
 }
+
+.spinnerBox{
+    display: block;
+    width: 100%;
+    height: 100px;
+}
