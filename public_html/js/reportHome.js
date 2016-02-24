@@ -193,6 +193,7 @@ function showHideFullTagResults(){
 
 /* Generate Report */
 function generateReport(){
+    showAllSections()
     showAllSpinners();
     sendReportRequest();
     setInputsTitle();
@@ -277,11 +278,16 @@ function setHalfWidthTagResults(results, key, length){
 
 function setNoResults(){
     hideAllSections();
-    $("#noResults").show();
 }
 
 function hideAllSections(){
     $("#tagsReport").hide();
+    $("#noResults").show();
+}
+
+function showAllSections(){
+    $("#tagsReport").show();
+    $("#noResults").hide();
 }
 
 function hideAllContent(){
