@@ -57,6 +57,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
         <script src="pickadate/picker.js"></script>
         <script src="pickadate/picker.date.js"></script>
         <script src="pickadate/legacy.js"></script>
+        <script src="libraries/spin.js"></script>
         <link rel="shortcut icon" href="branding/favicon.ico" />
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
     </head>
@@ -157,10 +158,12 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     <p>If you are expecting results then please check the start and end date for this set of results</p>
                 </div>
                 <div id="tagsReport" class="fullSection">
-                    <div id="tagsReportSummary" class="sectionMain">
+                    <div id="tagsReportSpinner" class="spinnerBox">
+                    </div>
+                    <div id="tagsReportSummary" class="sectionMain" style="display: none;">
                         <h4 style="text-align: right;" onclick="showHideFullTagResults()" id="showHideFullTagResultsText">Show Full Results</h4>
                     </div>
-                    <div id="tagsReportShort" style="display: block;">
+                    <div id="tagsReportShort" style="display: none;">
                         <table class="results half" id="top5tags" style="border-right: solid thin #323232;">
                             <thead class="results">
                                 <tr class="results">
