@@ -156,6 +156,39 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     <h1>No results to display</h1>
                     <p>If you are expecting results then please check the start and end date for this set of results</p>
                 </div>
+                <div id="summaryReport" class="sectionWrapper">
+                    <div id="summaryReportMain" class="innerSectionWrapper top">
+                        <div id="worksheetSummaryDetails">
+                            <p id="worksheetSummaryDetailsCompleted">-</p>
+                            <p id="worksheetSummaryDetailsInfo">-</p>
+                        </div>
+                        <div id="summaryReportUserAvg">
+                            <p id="summaryReportUserAvgTitle" class="title">Student Average</p>
+                            <h1 id="summaryReportUserAvgValue" class="value"></h1>
+                        </div>
+                        <div id="summaryReportSetAvg">
+                            <p id="summaryReportSetAvgTitle" class="title">Set Average</p>
+                            <h1 id="summaryReportSetAvgValue" class="value"></h1>
+                        </div>
+                    </div>
+                    <div id="summaryReportDetails" class="innerSectionWrapper">
+                        <table id="worksheetSummaryTable" class="worksheetSummaryTable">
+                            <thead class="worksheetSummaryTable">
+                                <tr class="worksheetSummaryTable tableHead">
+                                    <th class="worksheetName">Worksheet</th>
+                                    <th>Date Due</th>
+                                    <th>Student</th>
+                                    <th>Set</th>
+                                    <th></th>
+                                    <th></th> 
+                                </tr>
+                            </thead>
+                            <tbody class="worksheetSummaryTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
                 <div id="tagsReport" class="fullSection">
                     <div id="tagsReportSummary" class="sectionMain">
                         <h4 style="text-align: right;" onclick="showHideFullTagResults()" id="showHideFullTagResultsText">Show Full Results</h4>

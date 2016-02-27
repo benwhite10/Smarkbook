@@ -3,6 +3,10 @@ $(document).ready(function(){
         showHideButton("variablesInputMain", "variablesInputBoxShowHideButton");
     });
     
+    $("#worksheetSummaryDetails").click(function(){
+        $("#summaryReportDetails").toggle();
+    });
+    
     setUpVariableInputs();
 });
 
@@ -194,8 +198,29 @@ function showHideFullTagResults(){
 /* Generate Report */
 function generateReport(){
     sendReportRequest();
+    sendSummaryRequest();
     setInputsTitle();
     return false;
+}
+
+function sendSummaryRequest(){
+    var infoArray = {
+        type: "STUDENTSUMMARY",
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        student: $('#student').val(),
+        staff: $('#staff').val(),
+        set: $('#set').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            summaryRequestSuccess(json);
+        }
+    });
 }
 
 function sendReportRequest(){
@@ -221,10 +246,20 @@ function sendReportRequest(){
 function reportRequestSuccess(json){
     if(json["success"]){
         localStorage.setItem("tagResults", JSON.stringify(json["result"]["tags"]));
-        localStorage.setItem("userAverage", parseInt(parseFloat(json["result"]["average"]) * 100));
         refreshTagResults();
     } else {
         console.log("Something went wrong generating the reports.");
+    }
+}
+
+function summaryRequestSuccess(json){
+    if(json["success"]){
+        localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
+        localStorage.setItem("userAverage", parseInt(parseFloat(json["result"]["stuAvg"]) * 100));
+        localStorage.setItem("setAverage", parseInt(parseFloat(json["result"]["setAvg"]) * 100));
+        refreshSummaryResults();
+    } else {
+        console.log("Something went wrong generating the report summary.");
     }
 }
 
@@ -252,6 +287,93 @@ function refreshTagResults(){
         for(var key in results){
             $('#alltags tbody').append(setHalfWidthTagResults(results, key, length));
         }
+    }
+}
+
+function refreshSummaryResults(){
+    $('#worksheetSummaryTable tbody').html('');
+    setSummaryReportToDefaults();
+    
+    // Set the averages
+    var userAvg = parseInt(JSON.parse(localStorage.getItem("userAverage")));
+    var setAvg = parseInt(JSON.parse(localStorage.getItem("setAverage")));
+    $('#summaryReportUserAvgValue').text(userAvg + "%");
+    $('#summaryReportSetAvgValue').text(setAvg + "%");
+    $('#summaryReportSetAvgValue').css('color', getColourForPercentage(setAvg));
+    $('#summaryReportUserAvgValue').css('color', getColourForPercentage(userAvg));
+    
+    setWorksheetsSummary();
+    setWorksheetsTable();
+}
+
+function setSummaryReportToDefaults(){
+    $('#worksheetSummaryDetailsCompleted').text('-');
+    $('#worksheetSummaryDetailsInfo').text('-');
+    $('#summaryReportUserAvgTitle').text('Student Average');
+    $('#summaryReportUserAvgValue').text('-');
+    $('#summaryReportSetAvgTitle').text('Set Average');
+    $('#summaryReportSetAvgValue').text('-');
+}
+
+function getColourForPercentage(value){
+    var red = Math.min(255, parseInt(255 + (5.1 * (50 - value))));
+    var green = parseInt(value * 2.55);
+    var blue = Math.max(0, parseInt(2 * (value - 50)));
+    return "rgb(" + red + ", " + green + ", " + blue + ")";
+}
+
+function setWorksheetsSummary(){
+    var summary = JSON.parse(localStorage.getItem("summary"));
+    var setComp = summary["setComp"];
+    var stuComp = summary["stuComp"];
+    $('#worksheetSummaryDetailsCompleted').text(stuComp + "/" + setComp + " Worksheets Completed");
+    var summaryString = "";
+    var late = parseInt(summary["late"]);
+    var string = late + " late, ";
+    summaryString += string;
+
+    var partial = parseInt(summary["partial"]);
+    var string = partial + " partially completed, ";
+    summaryString += string;
+
+    var incomplete = parseInt(summary["incomplete"]);
+    var string = incomplete + " incomplete.";
+    summaryString += string;
+    $('#worksheetSummaryDetailsInfo').text(summaryString);
+}
+
+function setWorksheetsTable(){
+    var summary = JSON.parse(localStorage.getItem("summary"));
+    var list = summary["worksheetList"];
+    for(var key in list){
+        var sheet = list[key];
+        var name = sheet["WName"];
+        var date = sheet["DateDue"];
+        var stuScore = parseInt(100 * sheet["StuAVG"]);
+        var student = sheet["StuMark"] + "/" + sheet["StuMarks"] + " (" + stuScore + "%)";
+        var setScore = parseInt(100 * sheet["AVG"]);
+        var setMarks = sheet["Marks"];
+        var setMark = parseInt(setMarks * sheet["AVG"]);
+        var set = setMark + "/" + setMarks + " (" + setScore + "%)";
+        var late = sheet["StuDays"];
+        var lateString = "";
+        if(late === "" || late === null){
+            lateString = "-";
+        } else if(late === 0 || late === "0") {
+            lateString = "On Time";
+        } else {
+            lateString = late + " Days Late";
+        }
+        var comp = sheet["StuComp"];
+        var string = "<tr class='worksheetSummaryTable'>";
+        string += "<td class='worksheetName'>" + name + "</td>";
+        string += "<td>" + date + "</td>";
+        string += "<td>" + student + "</td>";
+        string += "<td>" + set + "</td>";
+        string += "<td>" + comp + "</td>";
+        string += "<td>" + lateString + "</td>";
+        string += "</tr>";
+        $('#worksheetSummaryTable tbody').append(string);
     }
 }
 

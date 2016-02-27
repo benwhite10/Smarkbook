@@ -17,6 +17,8 @@ $tagsArrayString = "";
 
 $questions = [];
 $tags = [];
+$setWorksheets = [];
+$studentWorksheets = [];
 $userAvg;
 $reliabilityConstant = 0.2;
 $reliabilityBase = 0.2;
@@ -30,6 +32,9 @@ $timeConstant = 0.0004;
 switch ($requestType){
     case "STUDENTREPORT":
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+        break;
+    case "STUDENTSUMMARY":
+        getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     default:
         failRequest("Invalid request type.");
@@ -49,17 +54,41 @@ function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId,
     }
 
     setDifficultyScores();
-    $userAvg = getUserAverage();
+    $userAvg = getUserAverage(null);
     
     calculateRelativeScorePerQuestion($userAvg);
     
     combineQuestionsWithTags();
     getFinalScoreForTags();
     
-    // Average Score For All Questions
-    
     reorderTagsAndSucceedRequest();
 }
+
+function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){    
+    global $returns;
+    
+    validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+    unset($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+    
+    // Worksheets completed for student, include late, notes, mark
+    getStudentWorksheets();
+    setStudentWorksheetResults();
+    $userAvgArray = getUserAverage($returns["dates"]);
+    
+    // Worksheets completed for set, include set average
+    getSetWorksheets();
+    setSetWorksheetMarks();
+    setSetWorksheetResults();
+    setStudentWorksheetStatus();
+    $setAvgArray = getSetAverage($returns["dates"]);
+    
+    //Combine worksheet lists
+    $list = createCombinedList();
+
+    // Set average score (probably not here though)
+    succeedSummaryRequest($list, $userAvgArray["AVG"], $setAvgArray["AVG"]);
+}
+
 
 /*Query Creation*/
 function setDifficultyScores(){
@@ -95,12 +124,44 @@ function setDifficultyScores(){
     }
 }
 
-function getUserAverage(){
+function getUserAverage($dates){
     global $returns;
     $student = $returns["inputs"]["student"];
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, COUNT(Marks) N 
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE CQ.`Student ID` = $student;";
+            WHERE CQ.`Student ID` = $student";
+    if(count($dates) === 2){
+        $startDate = $dates[0];
+        $endDate = $dates[1];
+        $query .= " AND CQ.`Date Completed` BETWEEN STR_TO_DATE('$startDate', '%d/%m/%Y') AND STR_TO_DATE('$endDate','%d/%m/%Y')";
+    } else if (count($dates) === 1) {
+        $date = is_null($startDate) ? $endDate : $startDate;
+        $query .= " AND CQ.`Date Completed` > STR_TO_DATE('$date', '%d/%m/%Y')";
+    }
+    try{
+        $results = db_select_exception($query);
+        $results[0]["URel"] = getReliabilityScore($results[0]["N"]);
+        return $results[0];
+    } catch (Exception $ex) {
+	$message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);	
+    }
+}
+
+function getSetAverage($dates){
+    global $returns;
+    $set = $returns["inputs"]["set"];
+    $query = "SELECT SUM(Mark)/SUM(Marks) AVG, Count(Mark) N
+            FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+            WHERE CQ.`Set ID` = $set";
+    if(count($dates) === 2){
+        $startDate = $dates[0];
+        $endDate = $dates[1];
+        $query .= " AND CQ.`Date Completed` BETWEEN STR_TO_DATE('$startDate', '%d/%m/%Y') AND STR_TO_DATE('$endDate','%d/%m/%Y')";
+    } else if (count($dates) === 1) {
+        $date = is_null($startDate) ? $endDate : $startDate;
+        $query .= " AND CQ.`Date Completed` > STR_TO_DATE('$date', '%d/%m/%Y')";
+    }
     try{
         $results = db_select_exception($query);
         $results[0]["URel"] = getReliabilityScore($results[0]["N"]);
@@ -216,10 +277,16 @@ function getAnsweredQuestions(){
             $query .= "CQ.`Set ID` = $set AND ";
         }
         if(array_key_exists("tags", $inputs)){
-            $tags = $returns["tags"];
-            foreach($tags as $tag){
-                $query .= "QT.`Tag ID` = $tag AND ";
-            }
+            if(count($tags) > 0){
+                $query .= "(";
+                foreach($tags as $key => $tag){
+                    if(count($tags) - 1 !== $key){
+                        $query .= "QT.`Tag ID` = $tag OR ";
+                    } else {
+                        $query .= "QT.`Tag ID` = $tag) AND ";
+                    }
+                }
+            } 
         }
     }
     if(array_key_exists("dates", $returns)){
@@ -233,6 +300,8 @@ function getAnsweredQuestions(){
             $date2 = $dates[1];
             $query .= "CQ.`Date Completed` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
         }
+    } else {
+        $query = substr($query, 0, -4);
     }
     $query .= " GROUP BY CQ.`Completed Question ID`;";
     
@@ -246,6 +315,283 @@ function getAnsweredQuestions(){
         $message = "There was an error generating the report.";
         failRequestWithException($message, $ex);
     }
+}
+
+function getSetWorksheets(){
+    global $returns, $setWorksheets;
+    
+    $query = "select GW.`Group Worksheet ID` GWID, GW.`Version ID` VID, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DateDue, GW.`Additional Notes Student` StuNotes,
+                GW.`Additional Notes Staff` StaffNotes, W.`Name` WName, WV.`Name` VName from TGROUPWORKSHEETS GW
+               JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
+               JOIN TWORKSHEETS W ON WV.`Worksheet ID` = W.`Worksheet ID`
+               JOIN TSTOREDQUESTIONS SQ ON SQ.`Version ID` = GW.`Version ID`
+               JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID`
+                WHERE ";
+    if(array_key_exists("inputs", $returns)){
+        $inputs = $returns["inputs"];
+        if(array_key_exists("staff", $inputs)){
+            $staff = $inputs["staff"];
+            $query .= "GW.`Primary Staff ID` = $staff AND ";
+        }
+        if(array_key_exists("set", $inputs)){
+            $set = $inputs["set"];
+            $query .= "GW.`Group ID` = $set AND ";
+        }
+        if(array_key_exists("tags", $inputs)){
+            $tags = $returns["tags"];
+            if(count($tags) > 0){
+                $query .= "(";
+                foreach($tags as $key => $tag){
+                    if(count($tags) - 1 !== $key){
+                        $query .= "QT.`Tag ID` = $tag OR ";
+                    } else {
+                        $query .= "QT.`Tag ID` = $tag) AND ";
+                    }
+                }
+            }  
+        }
+    }
+    if(array_key_exists("dates", $returns)){
+        $dates = $returns["dates"];
+        if(count($dates) === 1){
+            // Only 1 date
+            $date = $dates[0];
+            $query .= "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')";
+        } else {
+            $date1 = $dates[0];
+            $date2 = $dates[1];
+            $query .= "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
+        }
+    } else {
+        $query = substr($query, 0, -4);
+    }
+    $query .= " GROUP BY GW.`Group Worksheet ID`";
+    $query .= " ORDER BY GW.`Date Due` DESC;";
+    
+    try{
+        $results = db_select_exception($query);
+        foreach($results as $result){
+            $setWorksheets[$result["GWID"]] = $result;
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);
+    }
+}
+
+function getStudentWorksheets(){
+    global $returns, $studentWorksheets;
+    
+    $query = "select CW.`Group Worksheet ID` GWID from TCOMPLETEDWORKSHEETS CW
+                JOIN TGROUPWORKSHEETS GW ON CW.`Group Worksheet ID` = GW.`Group Worksheet ID`
+                JOIN TSTOREDQUESTIONS SQ ON SQ.`Version ID` = GW.`Version ID`
+                JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID`
+                WHERE ";
+    if(array_key_exists("inputs", $returns)){
+        $inputs = $returns["inputs"];
+        if(array_key_exists("staff", $inputs)){
+            $staff = $inputs["staff"];
+            $query .= "GW.`Primary Staff ID` = $staff AND ";
+        }
+        if(array_key_exists("set", $inputs)){
+            $set = $inputs["set"];
+            $query .= "GW.`Group ID` = $set AND ";
+        }
+        if(array_key_exists("student", $inputs)){
+            $student = $inputs["student"];
+            $query .= "CW.`Student ID` = $student AND ";
+        }
+        if(array_key_exists("tags", $inputs)){
+            $tags = $returns["tags"];
+            if(count($tags) > 0){
+                $query .= "(";
+                foreach($tags as $key => $tag){
+                    if(count($tags) - 1 !== $key){
+                        $query .= "QT.`Tag ID` = $tag OR ";
+                    } else {
+                        $query .= "QT.`Tag ID` = $tag) AND ";
+                    }
+                }
+            }  
+        }
+    }
+    if(array_key_exists("dates", $returns)){
+        $dates = $returns["dates"];
+        if(count($dates) === 1){
+            // Only 1 date
+            $date = $dates[0];
+            $query .= "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')";
+        } else {
+            $date1 = $dates[0];
+            $date2 = $dates[1];
+            $query .= "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
+        }
+    } else {
+        $query = substr($query, 0, -4);
+    }
+    $query .= " GROUP BY GW.`Group Worksheet ID`, CW.`Completed Worksheet ID`";
+    $query .= " ORDER BY GW.`Date Due` DESC;";
+    
+    try{
+        $results = db_select_exception($query);
+        foreach($results as $result){
+            $studentWorksheets[$result["GWID"]] = $result;
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);
+    }
+}
+
+function setSetWorksheetResults(){
+    global $setWorksheets;
+            
+    $query = "select `Group Worksheet ID` GWID, SUM(CQ.Mark) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.Mark)/SUM(SQ.`Marks`) AVG from TCOMPLETEDQUESTIONS CQ
+            JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+            WHERE `Group Worksheet ID` IN (";
+    foreach($setWorksheets as $worksheet){
+        $query .= $worksheet["GWID"] . ", ";
+    }
+    $query = substr($query, 0, -2);
+    $query .= ") GROUP BY `Group Worksheet ID`;";
+    try{
+        $results = db_select_exception($query);
+        foreach($results as $result){
+            $setWorksheets[$result["GWID"]]["AVG"] = $result["AVG"];
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);
+    }
+}
+
+function setSetWorksheetMarks(){
+    global $setWorksheets;
+            
+    $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Version ID` VID, SUM(SQ.`Marks`) Marks FROM TGROUPWORKSHEETS GW
+                JOIN TSTOREDQUESTIONS SQ ON GW.`Version ID` = SQ.`Version ID`
+                where GW.`Group Worksheet ID` IN (";
+    foreach($setWorksheets as $worksheet){
+        $query .= $worksheet["GWID"] . ", ";
+    }
+    $query = substr($query, 0, -2);
+    $query .= ") GROUP BY GW.`Version ID`, GW.`Group Worksheet ID`;";
+    try{
+        $results = db_select_exception($query);
+        foreach($results as $result){
+            foreach($setWorksheets as $setWorksheet){
+                if($result["VID"] === $setWorksheet["VID"]){
+                    $setWorksheets[$setWorksheet["GWID"]]["Marks"] = $result["Marks"];
+                }
+            }
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);
+    }
+}
+
+function setStudentWorksheetResults(){
+    global $studentWorksheets, $returns;
+            
+    $query = "SELECT CQ.`Group Worksheet ID` GWID, SUM(CQ.Mark) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.Mark)/SUM(SQ.`Marks`) AVG FROM TCOMPLETEDQUESTIONS CQ
+            JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+            WHERE ";
+    $inputs = $returns["inputs"];
+    if(array_key_exists("student", $inputs)){
+        $student = $inputs["student"];
+        $query .= "CQ.`Student ID` = $student AND ";
+    }
+    $query .= "CQ.`Group Worksheet ID` IN (";
+    foreach($studentWorksheets as $worksheet){
+        $query .= $worksheet["GWID"] . ", ";
+    }
+    $query = substr($query, 0, -2);
+    $query .= ") GROUP BY CQ.`Group Worksheet ID`;";
+    try{
+        $results = db_select_exception($query);
+        foreach($results as $result){
+            $studentWorksheets[$result["GWID"]]["Mark"] = $result["Mark"];
+            $studentWorksheets[$result["GWID"]]["Marks"] = $result["Marks"];
+            $studentWorksheets[$result["GWID"]]["AVG"] = $result["AVG"];
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);
+    }
+}
+
+function setStudentWorksheetStatus(){
+    global $studentWorksheets, $returns;
+            
+    $query = "SELECT CW.`Group Worksheet ID` GWID, CW.`Notes` Notes, CW.`Completion Status` Comp, CW.`Date Status` Days
+            FROM TCOMPLETEDWORKSHEETS CW
+            WHERE ";
+    $inputs = $returns["inputs"];
+    if(array_key_exists("student", $inputs)){
+        $student = $inputs["student"];
+        $query .= "CW.`Student ID` = $student AND ";
+    }
+    $query .= "CW.`Group Worksheet ID` IN (";
+    foreach($studentWorksheets as $worksheet){
+        $query .= $worksheet["GWID"] . ", ";
+    }
+    $query = substr($query, 0, -2);
+    $query .= ")";
+    
+    try{
+        $results = db_select_exception($query);
+        foreach($results as $result){
+            $studentWorksheets[$result["GWID"]]["Notes"] = $result["Notes"];
+            $studentWorksheets[$result["GWID"]]["Comp"] = $result["Comp"];
+            $studentWorksheets[$result["GWID"]]["Days"] = $result["Days"];
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);
+    }
+}
+
+function createCombinedList(){
+    global $setWorksheets, $studentWorksheets;
+    
+    $studentComp = 0;
+    $setComp = 0;
+    $lateCount = 0;
+    $partiallyCompletedCount = 0;
+    $incompleteCount = 0;
+    $worksheetList = [];
+    foreach($setWorksheets as $worksheet){
+        $setComp++;
+        $gwid = $worksheet["GWID"];
+        if(array_key_exists($gwid, $studentWorksheets)){
+            $studentComp++;
+            $worksheet["StuAVG"] = $studentWorksheets[$gwid]["AVG"];
+            $worksheet["StuMark"] = $studentWorksheets[$gwid]["Mark"];
+            $worksheet["StuMarks"] = $studentWorksheets[$gwid]["Marks"];
+            $worksheet["StuNotes"] = $studentWorksheets[$gwid]["Notes"];
+            $worksheet["StuComp"] = $studentWorksheets[$gwid]["Comp"];
+            $worksheet["StuDays"] = $studentWorksheets[$gwid]["Days"];
+            if($studentWorksheets[$gwid]["Comp"] === "Partially Completed"){
+                $partiallyCompletedCount++;
+            } else if ($studentWorksheets[$gwid]["Comp"] === "Incomplete"){
+                $incompleteCount++;
+            }
+            if(intval($studentWorksheets[$gwid]["Days"]) > 0){
+                $lateCount++;
+            }
+            $worksheetList[$gwid] = $worksheet;
+        }
+    }
+    
+    return array(
+        "worksheetList" => $worksheetList,
+        "setComp" => $setComp,
+        "stuComp" => $studentComp,
+        "late" => $lateCount,
+        "partial" => $partiallyCompletedCount,
+        "incomplete" => $incompleteCount
+    );
 }
 
 /*Input Validation*/
@@ -342,6 +688,15 @@ function reorderTagsAndSucceedRequest(){
         "average" => $average
     );
     
+    succeedRequest($result);
+}
+
+function succeedSummaryRequest($list, $userAvg, $setAvg){
+    $result = array(
+        "summary" => $list,
+        "stuAvg" => $userAvg,
+        "setAvg" => $setAvg
+    );
     succeedRequest($result);
 }
 
