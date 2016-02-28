@@ -158,6 +158,8 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     <p>If you are expecting results then please check the start and end date for this set of results</p>
                 </div>
                 <div id="summaryReport" class="sectionWrapper">
+                    <div id="summaryReportSpinner" class="spinnerBox">
+                    </div>
                     <div id="summaryReportMain" class="innerSectionWrapper top">
                         <div id="worksheetSummaryDetails">
                             <!--<p id="worksheetSummaryDetailsCompleted">-</p>

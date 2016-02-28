@@ -437,6 +437,9 @@ function getStudentWorksheets(){
         foreach($results as $result){
             $studentWorksheets[$result["GWID"]] = $result;
         }
+        if(count($studentWorksheets) === 0){
+            succeedRequest(null);
+        }
     } catch (Exception $ex) {
         $message = "There was an error generating the report.";
         failRequestWithException($message, $ex);
@@ -502,11 +505,11 @@ function setStudentWorksheetResults(){
         $student = $inputs["student"];
         $query .= "CQ.`Student ID` = $student AND ";
     }
-    $query .= "CQ.`Group Worksheet ID` IN (";
-    foreach($studentWorksheets as $worksheet){
-        $query .= $worksheet["GWID"] . ", ";
-    }
-    $query = substr($query, 0, -2);
+        $query .= "CQ.`Group Worksheet ID` IN (";
+        foreach($studentWorksheets as $worksheet){
+            $query .= $worksheet["GWID"] . ", ";
+        }
+        $query = substr($query, 0, -2);
     $query .= ") GROUP BY CQ.`Group Worksheet ID`;";
     try{
         $results = db_select_exception($query);

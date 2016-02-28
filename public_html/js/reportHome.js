@@ -256,7 +256,12 @@ function sendReportRequest(){
 
 function reportRequestSuccess(json){
     if(json["success"]){
-        localStorage.setItem("tagResults", JSON.stringify(json["result"]["tags"]));
+        var results = json["result"];
+        if(results !== null){
+            localStorage.setItem("tagResults", JSON.stringify(json["result"]["tags"]));
+        } else {
+            localStorage.setItem("tagResults", null);
+        }
         refreshTagResults();
     } else {
         console.log("Something went wrong generating the reports.");
@@ -315,6 +320,7 @@ function refreshSummaryResults(){
     
     setWorksheetsSummary();
     setWorksheetsTable();
+    showSummaryResults();
 }
 
 function setSummaryReportToDefaults(){
@@ -427,11 +433,13 @@ function setNoResults(){
 
 function hideAllSections(){
     $("#tagsReport").hide();
+    $("#summaryReport").hide();
     $("#noResults").show();
 }
 
 function showAllSections(){
     $("#tagsReport").show();
+    $("#summaryReport").show();
     $("#noResults").hide();
 }
 
@@ -439,11 +447,14 @@ function hideAllContent(){
     $("#tagsReportSummary").hide();
     $("#tagsReportShort").hide();
     $("#tagsReportFull").hide();
+    $("#summaryReportMain").hide();
+    $("#summaryReportDetails").hide();
 }
 
 function showAllSpinners(){
     hideAllContent();
     startSpinnerInDiv('tagsReportSpinner');
+    startSpinnerInDiv('summaryReportSpinner');
 }
 
 function startSpinnerInDiv(div){
@@ -480,4 +491,9 @@ function showTagResults(full){
         $("#tagsReportFull").hide();
         $("#showHideFullTagResultsText").text("Show Full Results");
     }
+}
+
+function showSummaryResults(){
+    stopSpinnerInDiv('summaryReportSpinner');
+    $("#summaryReportMain").show();
 }
