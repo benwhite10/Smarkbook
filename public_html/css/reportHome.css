@@ -427,3 +427,45 @@ tr.worksheetSummaryTable:nth-child(odd){
 tr.tableHead:nth-child(odd){
     background-color: transparent;
 }
+
+.noResults{
+    color: #AAA;
+    font-style: italic;
+}
+
+#worksheetSummaryDetailsTable{
+    width: 100%;
+    float: left;
+    border-collapse: collapse;
+}
+
+#worksheetSummaryDetailsTable td{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#tableTitleRow{
+    font-size: 1rem;
+    text-align: center;
+}
+
+.green, .orange, .red, .grey{
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.green{
+    color: #00CC00;
+}
+
+.orange{
+    color: #e68a00;
+}
+
+.red{
+    color: #CC0000;
+}
+
+.grey{
+    color: #AAA;
+}

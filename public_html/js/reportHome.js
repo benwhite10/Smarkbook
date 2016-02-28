@@ -4,7 +4,7 @@ $(document).ready(function(){
     });
     
     $("#worksheetSummaryDetails").click(function(){
-        $("#summaryReportDetails").toggle();
+        showHideWorksheetDetails();
     });
     
     setUpVariableInputs();
@@ -15,6 +15,15 @@ function setUpVariableInputs(){
     localStorage.setItem("initialRun", true);
     getStaff();
     setDates();
+}
+
+function showHideWorksheetDetails(){
+    if($("#summaryReportDetails").is(":visible")){
+        $("#showHideWorksheetText").text("Show Worksheets");
+    } else {
+        $("#showHideWorksheetText").text("Hide Worksheets");
+    }
+    $("#summaryReportDetails").slideToggle();
 }
 
 function setDates(){
@@ -307,8 +316,13 @@ function refreshSummaryResults(){
 }
 
 function setSummaryReportToDefaults(){
-    $('#worksheetSummaryDetailsCompleted').text('-');
-    $('#worksheetSummaryDetailsInfo').text('-');
+    $('#compValue').text('0');
+    $('#partialValue').text('0');
+    $('#incompleteValue').text('0');
+    $('#onTimeValue').text('0');
+    $('#lateValue').text('0');
+    $('#dateNoInfoValue').text('0');
+    $('#compNoInfoValue').text('0');
     $('#summaryReportUserAvgTitle').text('Student Average');
     $('#summaryReportUserAvgValue').text('-');
     $('#summaryReportSetAvgTitle').text('Set Average');
@@ -324,22 +338,24 @@ function getColourForPercentage(value){
 
 function setWorksheetsSummary(){
     var summary = JSON.parse(localStorage.getItem("summary"));
-    var setComp = summary["setComp"];
-    var stuComp = summary["stuComp"];
-    $('#worksheetSummaryDetailsCompleted').text(stuComp + "/" + setComp + " Worksheets Completed");
-    var summaryString = "";
-    var late = parseInt(summary["late"]);
-    var string = late + " late, ";
-    summaryString += string;
-
-    var partial = parseInt(summary["partial"]);
-    var string = partial + " partially completed, ";
-    summaryString += string;
-
-    var incomplete = parseInt(summary["incomplete"]);
-    var string = incomplete + " incomplete.";
-    summaryString += string;
-    $('#worksheetSummaryDetailsInfo').text(summaryString);
+    $('#compValue').text(summary["compStatus"]["Completed"]);
+    $('#partialValue').text(summary["compStatus"]["Partially Completed"]);
+    $('#incompleteValue').text(summary["compStatus"]["Incomplete"]);
+    $('#onTimeValue').text(summary["dateStatus"]["OnTime"]);
+    $('#lateValue').text(summary["dateStatus"]["Late"]);
+    $('#dateNoInfoValue').text(summary["dateStatus"]["-"]);
+    $('#compNoInfoValue').text(summary["compStatus"]["-"]);
+    var completed = summary["compStatus"]["Completed"];
+    var partial = summary["compStatus"]["Partially Completed"];
+    var incomplete = summary["compStatus"]["Incomplete"];
+    var blank = summary["compStatus"]["-"];
+    var worksheetString = completed + " Completed, " + partial + " Partial, " + incomplete + " Incomplete, " + blank + " -.";
+    $('#worksheetSummaryDetailsCompleted').text(worksheetString);
+    var onTime = summary["dateStatus"]["OnTime"];
+    var late = summary["dateStatus"]["Late"];
+    var blank = summary["dateStatus"]["-"];
+    var dateString = onTime + " On Time, " + late + " Late, " + blank + " -.";
+    $('#worksheetSummaryDetailsInfo').text(dateString);
 }
 
 function setWorksheetsTable(){
@@ -349,23 +365,30 @@ function setWorksheetsTable(){
         var sheet = list[key];
         var name = sheet["WName"];
         var date = sheet["DateDue"];
-        var stuScore = parseInt(100 * sheet["StuAVG"]);
-        var student = sheet["StuMark"] + "/" + sheet["StuMarks"] + " (" + stuScore + "%)";
-        var setScore = parseInt(100 * sheet["AVG"]);
-        var setMarks = sheet["Marks"];
-        var setMark = parseInt(setMarks * sheet["AVG"]);
-        var set = setMark + "/" + setMarks + " (" + setScore + "%)";
-        var late = sheet["StuDays"];
-        var lateString = "";
-        if(late === "" || late === null){
-            lateString = "-";
-        } else if(late === 0 || late === "0") {
-            lateString = "On Time";
-        } else {
-            lateString = late + " Days Late";
+        var lateString = "-";
+        var comp = "-";
+        var student = "-";
+        var set = "-";
+        var classString = "worksheetSummaryTable noResults";
+        if(sheet["Results"]){
+            var stuScore = parseInt(100 * sheet["StuAVG"]);
+            student = sheet["StuMark"] + "/" + sheet["StuMarks"] + " (" + stuScore + "%)";
+            var setScore = parseInt(100 * sheet["AVG"]);
+            var setMarks = sheet["Marks"];
+            var setMark = parseInt(setMarks * sheet["AVG"]);
+            set = setMark + "/" + setMarks + " (" + setScore + "%)";
+            var late = sheet["StuDays"];
+            if(late === "" || late === null){
+                lateString = "-";
+            } else if(late === 0 || late === "0") {
+                lateString = "On Time";
+            } else {
+                lateString = late + " Days Late";
+            }
+            comp = sheet["StuComp"];
+            classString = "worksheetSummaryTable";
         }
-        var comp = sheet["StuComp"];
-        var string = "<tr class='worksheetSummaryTable'>";
+        var string = "<tr class='" + classString + "'>";
         string += "<td class='worksheetName'>" + name + "</td>";
         string += "<td>" + date + "</td>";
         string += "<td>" + student + "</td>";

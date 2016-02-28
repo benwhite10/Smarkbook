@@ -159,8 +159,40 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                 <div id="summaryReport" class="sectionWrapper">
                     <div id="summaryReportMain" class="innerSectionWrapper top">
                         <div id="worksheetSummaryDetails">
-                            <p id="worksheetSummaryDetailsCompleted">-</p>
-                            <p id="worksheetSummaryDetailsInfo">-</p>
+                            <!--<p id="worksheetSummaryDetailsCompleted">-</p>
+                            <p id="worksheetSummaryDetailsInfo">-</p>-->
+                            <table id="worksheetSummaryDetailsTable">
+                                <tbody>
+                                    <tr id="tableTitleRow">
+                                        <td colspan="2">Worksheets</td>
+                                        <td colspan="2">Handed In</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Completed:</td>
+                                        <td id="compValue" class="green">-</td>
+                                        <td>On Time:</td>
+                                        <td id="onTimeValue" class="green">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Partially Completed:</td>
+                                        <td id="partialValue" class="orange">-</td>
+                                        <td>Late:</td>
+                                        <td id="lateValue" class="red">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Incomplete:</td>
+                                        <td id="incompleteValue" class="red">-</td>
+                                        <td>Blank:</td>
+                                        <td id="dateNoInfoValue" class="grey">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Blank:</td>
+                                        <td id="compNoInfoValue" class="grey">-</td>
+                                        <td> </td>
+                                        <td id="showHideWorksheetText" style="text-align: right;">Show Worksheets</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div id="summaryReportUserAvg">
                             <p id="summaryReportUserAvgTitle" class="title">Student Average</p>

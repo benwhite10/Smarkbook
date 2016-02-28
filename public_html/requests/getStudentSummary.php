@@ -555,42 +555,49 @@ function setStudentWorksheetStatus(){
 function createCombinedList(){
     global $setWorksheets, $studentWorksheets;
     
-    $studentComp = 0;
-    $setComp = 0;
-    $lateCount = 0;
-    $partiallyCompletedCount = 0;
-    $incompleteCount = 0;
+    $compStatus = array(
+        "Completed" => 0,
+        "Partially Completed" => 0,
+        "Incomplete" => 0,
+        "-" => 0
+    );
+    $dateStatus = array(
+        "OnTime" => 0,
+        "Late" => 0,
+        "-" => 0
+    );
     $worksheetList = [];
     foreach($setWorksheets as $worksheet){
-        $setComp++;
         $gwid = $worksheet["GWID"];
         if(array_key_exists($gwid, $studentWorksheets)){
-            $studentComp++;
+            $worksheet["Results"] = TRUE;
             $worksheet["StuAVG"] = $studentWorksheets[$gwid]["AVG"];
             $worksheet["StuMark"] = $studentWorksheets[$gwid]["Mark"];
             $worksheet["StuMarks"] = $studentWorksheets[$gwid]["Marks"];
             $worksheet["StuNotes"] = $studentWorksheets[$gwid]["Notes"];
             $worksheet["StuComp"] = $studentWorksheets[$gwid]["Comp"];
             $worksheet["StuDays"] = $studentWorksheets[$gwid]["Days"];
-            if($studentWorksheets[$gwid]["Comp"] === "Partially Completed"){
-                $partiallyCompletedCount++;
-            } else if ($studentWorksheets[$gwid]["Comp"] === "Incomplete"){
-                $incompleteCount++;
-            }
+            $compStatus[$studentWorksheets[$gwid]["Comp"]] = $compStatus[$studentWorksheets[$gwid]["Comp"]] + 1;
             if(intval($studentWorksheets[$gwid]["Days"]) > 0){
-                $lateCount++;
+                $dateStatus["Late"] = $dateStatus["Late"] + 1;
+            } else if ($studentWorksheets[$gwid]["Days"] === 0 || $studentWorksheets[$gwid]["Days"] === "0") {
+                $dateStatus["OnTime"] = $dateStatus["OnTime"] + 1;
+            } else {
+                $dateStatus["-"] = $dateStatus["-"] + 1;
             }
+            $worksheetList[$gwid] = $worksheet;
+        } else {
+            $worksheet["Results"] = FALSE;
+            $dateStatus["-"] = $dateStatus["-"] + 1;
+            $compStatus["-"] = $compStatus["-"] + 1;
             $worksheetList[$gwid] = $worksheet;
         }
     }
     
     return array(
         "worksheetList" => $worksheetList,
-        "setComp" => $setComp,
-        "stuComp" => $studentComp,
-        "late" => $lateCount,
-        "partial" => $partiallyCompletedCount,
-        "incomplete" => $incompleteCount
+        "compStatus" => $compStatus,
+        "dateStatus" => $dateStatus
     );
 }
 
