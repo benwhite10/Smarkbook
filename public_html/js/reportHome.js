@@ -270,9 +270,12 @@ function reportRequestSuccess(json){
 
 function summaryRequestSuccess(json){
     if(json["success"]){
-        localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
-        localStorage.setItem("userAverage", parseInt(parseFloat(json["result"]["stuAvg"]) * 100));
-        localStorage.setItem("setAverage", parseInt(parseFloat(json["result"]["setAvg"]) * 100));
+        var results = json["result"];
+        if(results !== null){
+            localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
+            localStorage.setItem("userAverage", parseInt(parseFloat(json["result"]["stuAvg"]) * 100));
+            localStorage.setItem("setAverage", parseInt(parseFloat(json["result"]["setAvg"]) * 100));
+        }
         refreshSummaryResults();
     } else {
         console.log("Something went wrong generating the report summary.");
