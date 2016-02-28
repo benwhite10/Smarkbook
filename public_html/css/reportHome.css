@@ -330,6 +330,12 @@ table.fullResults{
     display: none;
 }
 
+.spinnerBox{
+    display: block;
+    width: 100%;
+    height: 100px;
+}
+
 .sectionWrapper{
     display: block;
     width: 100%;
