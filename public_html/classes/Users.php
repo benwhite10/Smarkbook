@@ -16,6 +16,7 @@ class User
     public $salt;
     public $lastFailedLogin;
     public $loginAttempts;
+    public $validation;
     
     function __construct() {
        
@@ -34,6 +35,7 @@ class User
         $userObject->setLoginAttempts($user[0]['Login Attempts']);
         $userObject->setPassword($user[0]['Password']);
         $userObject->setSalt($user[0]['Salt']);
+        $userObject->setValidation($user[0]['Validation']);
         return $userObject;
     }
     
@@ -124,8 +126,14 @@ class User
     function setLoginAttempts($loginAttempts) {
         $this->loginAttempts = $loginAttempts;
     }
+    
+    function setValidation($validation) {
+        $this->validation = $validation;
+    }
 
-
+    function getValidation() {
+        return $this->validation;
+    }
 }
 
 class Teacher extends User
@@ -154,6 +162,7 @@ class Teacher extends User
         $teacher->setPhoneNumber($user[0]['Phone Number']);
         $teacher->setRole($user[0]['Role']);
         $teacher->setInitials($user[0]['Initials']);
+        $teacher->setValidation($user[0]['Validation']);
         return $teacher;
     }
 
@@ -218,6 +227,7 @@ class Student extends User
         $student->setRole($user[0]['Role']);
         $student->setGender($user[0]['Gender']);
         $student->setDateOfBirth($user[0]['DOB']);
+        $student->setValidation($user[0]['Validation']);
         return $student;
     }
     

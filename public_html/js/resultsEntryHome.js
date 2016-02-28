@@ -5,8 +5,11 @@ $(document).ready(function(){
 });
 
 function setUpStaff(){
-    var infoArray = {};
-    infoArray["orderby"] = "Initials";
+    var infoArray = {
+        orderby: "Initials",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -45,7 +48,10 @@ function staffSuccess(json){
 }
 
 function setUpWorksheets(){
-    var infoArray = {};
+    var infoArray = {
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     infoArray["group"] = document.getElementById("group") ? document.getElementById("group").value : 0;
     infoArray["staff"] = document.getElementById("creatingStaffMember") ? document.getElementById("creatingStaffMember").value : 0;
     var url = "requests/getWorksheets.php";
@@ -113,10 +119,16 @@ function countForEachName(names){
 }
 
 function setUpSets(firstTime){
-    var infoArray = {orderby: "Name", desc: "FALSE"};
+    var infoArray = {
+        orderby: "Name", 
+        desc: "FALSE",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()};
     var type = "SETSBYSTAFF";
     infoArray["type"] = type;
     infoArray["staff"] = document.getElementById("creatingStaffMember") ? document.getElementById("creatingStaffMember").value : 0;
+    
+    
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -144,10 +156,15 @@ function setUpStudents(){
         }else{
             document.getElementById("students").style.display = "inline-block";
             document.getElementById("studentslabel").style.display = "inline-block";
-            var infoArray = {orderby: "SName", desc: "FALSE"};
-            var type = "STUDENTSBYSET";
-            infoArray["type"] = type;
-            infoArray["set"] = document.getElementById("group") ? document.getElementById("group").value : 0;
+            var set = document.getElementById("group") ? document.getElementById("group").value : 0;
+            var infoArray = {
+                orderby: "SName",
+                desc: "FALSE",
+                type: "STUDENTSBYSET",
+                set: set,
+                userid: $('#userid').val(),
+                userval: $('#userval').val()
+            };
             $.ajax({
                 type: "POST",
                 data: infoArray,

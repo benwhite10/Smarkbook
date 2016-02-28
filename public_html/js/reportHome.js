@@ -52,9 +52,14 @@ function setInputsTitle(){
 /* Requests */
 
 function getStaff(){
+    var infoArray = {
+        orderby: "Initials",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     $.ajax({
         type: "POST",
-        data: {"orderby": "Initials"},
+        data: infoArray,
         url: "/requests/getStaff.php",
         dataType: "json",
         success: function(json){
@@ -68,7 +73,9 @@ function updateSets(){
         orderby: "Name",
         desc: "FALSE",
         type: "SETSBYSTAFF",
-        staff: $('#staff').val()
+        staff: $('#staff').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",
@@ -86,7 +93,9 @@ function updateStudents(){
         orderby: "SName",
         desc: "FALSE",
         type: "STUDENTSBYSET",
-        set: $('#set').val()
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",
@@ -206,7 +215,7 @@ function showHideFullTagResults(){
 
 /* Generate Report */
 function generateReport(){
-    showAllSections()
+    showAllSections();
     showAllSpinners();
     sendReportRequest();
     sendSummaryRequest();
@@ -221,7 +230,9 @@ function sendSummaryRequest(){
         endDate: $('#endDate').val(),
         student: $('#student').val(),
         staff: $('#staff').val(),
-        set: $('#set').val()
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",
@@ -241,7 +252,9 @@ function sendReportRequest(){
         endDate: $('#endDate').val(),
         student: $('#student').val(),
         staff: $('#staff').val(),
-        set: $('#set').val()
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",
