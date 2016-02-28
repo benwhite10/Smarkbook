@@ -14,6 +14,13 @@ $staffId = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $setId = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 //$tagsArrayString = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
 $tagsArrayString = "";
+$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+
+$role = validateRequest($userid, $userval);
+if(!$role){
+    failRequest("There was a problem validating your request");
+}
 
 $questions = [];
 $tags = [];
@@ -28,6 +35,9 @@ $timeConstant = 0.0004;
 
 switch ($requestType){
     case "STUDENTREPORT":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     default:

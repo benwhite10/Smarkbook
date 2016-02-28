@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -96,6 +97,10 @@ function getInput($method, $name, $type){
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
+    <?php
+        echo "<input type='hidden' id='userid' value='$userid' />";
+        echo "<input type='hidden' id='userval' value='$userval' />";
+        ?>
     <div id="main">
     	<div id="header">
             <div id="title">

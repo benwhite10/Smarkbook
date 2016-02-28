@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -52,7 +53,9 @@ try{
 $postData = array(
     "set" => $setId,
     "staff" => $staffId,
-    "type" => "MARKBOOKFORSETANDTEACHER"
+    "type" => "MARKBOOKFORSETANDTEACHER",
+    "userid" => $userid,
+    "userval" => $userval
 );
         
 $resp = sendCURLRequest("/requests/getMarkbook.php", $postData);

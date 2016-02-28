@@ -13,9 +13,19 @@ $addstaffid2 = filter_input(INPUT_POST,'addstaff2',FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $versionid = filter_input(INPUT_POST,'worksheet',FILTER_SANITIZE_NUMBER_INT);
 $datedue = filter_input(INPUT_POST, 'datedue', FILTER_SANITIZE_STRING);
+$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+
+$role = validateRequest($userid, $userval);
+if(!$role){
+    failRequest("There was a problem validating your request");
+}
 
 switch ($requestType){
     case "NEW":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         createNewGroupWorksheet([$staffid, $addstaffid1, $addstaffid2], $setid, $versionid, $datedue);
         break;
     default:
@@ -71,4 +81,12 @@ function createNewGroupWorksheet($staff, $setid, $versionid, $datedue){
         "gwid" => $gwid
         );
     echo json_encode($resultArray);
+}
+
+function failRequest($message){
+    errorLog("There was an error in the get group request: " . $message);
+    $response = array(
+        "success" => FALSE);
+    echo json_encode($response);
+    exit();
 }

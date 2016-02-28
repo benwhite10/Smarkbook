@@ -12,12 +12,25 @@ $requestType = $postData['type'];
 $worksheetDetails = $postData['details'];
 $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
+$userid = $postData['userid'];
+$userval = base64_decode($postData['userval']);
+
+$role = validateRequest($userid, $userval);
+if(!$role){
+    failRequest("There was a problem validating your request");
+}
 
 switch ($requestType){
     case "UPDATE":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets);
         break;
     default:
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         getAllWorksheetNames($orderby, $desc);
         break;
 }
@@ -30,10 +43,8 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
     try{
         $gwid = $worksheetDetails["gwid"];
         $staff1 = $worksheetDetails["staff1"];
-        $staff2 = $worksheetDetails["staff2"];
-        $staff2 = (!$staff2 || $staff2 == "0") ? "null" : $staff2;
-        $staff3 = $worksheetDetails["staff3"];
-        $staff3 = (!$staff3 || $staff3 == "0") ? "null" : $staff3;
+        $staff2 = (!$worksheetDetails["staff2"] || $worksheetDetails["staff2"] == "0") ? "null" : $worksheetDetails["staff2"];
+        $staff3 = (!$worksheetDetails["staff3"] || $worksheetDetails["staff3"] == "0") ? "null" : $worksheetDetails["staff3"];
         $datedue = $worksheetDetails["dateDueMain"];
         $stuNotes = $worksheetDetails["studentNotes"];
         $staffNotes = $worksheetDetails["staffNotes"];
@@ -41,7 +52,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
                 . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
                 . "WHERE `Group Worksheet ID` = $gwid;";
-        //infoLog($query);
+
         db_query_exception($query);
     } catch (Exception $ex) {
         db_rollback_transaction();
@@ -161,4 +172,13 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         "result" => TRUE
         );
     echo json_encode($test);
+}
+
+function failRequest($message){
+    errorLog("There was an error in the get group request: " . $message);
+    $response = array(
+        "success" => FALSE,
+        "message" => $message);
+    echo json_encode($response);
+    exit();
 }

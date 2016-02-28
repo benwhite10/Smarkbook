@@ -28,9 +28,12 @@ $(function() {
 
 function setUpNotes() {
     var gwid = $("#gwid").val();
-    var infoArray = {"gwid": gwid};
-    var type = "JUSTNOTES";
-    infoArray["type"] = type;
+    var infoArray = {
+        gwid: gwid,
+        type: "JUSTNOTES",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -302,15 +305,23 @@ function updateResults(student){
 function checkAllCompleted(student){
     var elem = document.getElementById("questioncount");
     var count = elem.value;
-    var state = "INCOMPLETE";
+    var blank = 0;
+    var full = 0;
     for(i = 1; i <= count; i++){
         var stuMarks = document.getElementById(student + "-" + i)
-        if(stuMarks.value == ""){
-            return state;
+        if(stuMarks.value === ""){
+            blank++;
+        } else {
+            full++;
         }
-        state = "PARTIAL";
     }
-    return "COMPLETE";
+    if(blank === 0){
+        return "COMPLETE";
+    } else if (full === 0){
+        return "INCOMPLETE";
+    } else {
+        return "PARTIAL";
+    }
 }
 
 function validateResult(value, student, question){
