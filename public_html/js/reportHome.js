@@ -108,6 +108,26 @@ function updateStudents(){
     });
 }
 
+function generateQuestionsRequest(){
+    var tagsArray = localStorage.getItem("tagResults");
+    var infoArray = {
+        type: "STUDENT",
+        tagsList: tagsArray,
+        student: $('#student').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getSuggestedQuestions.php",
+        dataType: "json",
+        success: function(json){
+            console.log(json);
+        }
+    });
+}
+
 /* Responses */
 
 function getStaffSuccess(json){
@@ -293,6 +313,7 @@ function summaryRequestSuccess(json){
             localStorage.setItem("userAverage", null);
             localStorage.setItem("setAverage", null);
         }
+        generateQuestionsRequest();
         refreshSummaryResults();
     } else {
         console.log("Something went wrong generating the report summary.");
