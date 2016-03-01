@@ -165,8 +165,6 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div>
                     <div id="summaryReportMain" class="innerSectionWrapper top">
                         <div id="worksheetSummaryDetails">
-                            <!--<p id="worksheetSummaryDetailsCompleted">-</p>
-                            <p id="worksheetSummaryDetailsInfo">-</p>-->
                             <table id="worksheetSummaryDetailsTable">
                                 <tbody>
                                     <tr id="tableTitleRow">
