@@ -3,6 +3,10 @@ $(document).ready(function(){
         showHideButton("variablesInputMain", "variablesInputBoxShowHideButton");
     });
     
+    $("#worksheetSummaryDetails").click(function(){
+        showHideWorksheetDetails();
+    });
+    
     setUpVariableInputs();
 });
 
@@ -11,6 +15,15 @@ function setUpVariableInputs(){
     localStorage.setItem("initialRun", true);
     getStaff();
     setDates();
+}
+
+function showHideWorksheetDetails(){
+    if($("#summaryReportDetails").is(":visible")){
+        $("#showHideWorksheetText").text("Show Worksheets");
+    } else {
+        $("#showHideWorksheetText").text("Hide Worksheets");
+    }
+    $("#summaryReportDetails").slideToggle();
 }
 
 function setDates(){
@@ -202,11 +215,34 @@ function showHideFullTagResults(){
 
 /* Generate Report */
 function generateReport(){
-    showAllSections()
+    showAllSections();
     showAllSpinners();
     sendReportRequest();
+    sendSummaryRequest();
     setInputsTitle();
     return false;
+}
+
+function sendSummaryRequest(){
+    var infoArray = {
+        type: "STUDENTSUMMARY",
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        student: $('#student').val(),
+        staff: $('#staff').val(),
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            summaryRequestSuccess(json);
+        }
+    });
 }
 
 function sendReportRequest(){
@@ -220,7 +256,6 @@ function sendReportRequest(){
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
-    console.log(infoArray);
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -234,10 +269,33 @@ function sendReportRequest(){
 
 function reportRequestSuccess(json){
     if(json["success"]){
-        localStorage.setItem("tagResults", JSON.stringify(json["result"]));
+        var results = json["result"];
+        if(results !== null){
+            localStorage.setItem("tagResults", JSON.stringify(json["result"]["tags"]));
+        } else {
+            localStorage.setItem("tagResults", null);
+        }
         refreshTagResults();
     } else {
         console.log("Something went wrong generating the reports.");
+    }
+}
+
+function summaryRequestSuccess(json){
+    if(json["success"]){
+        var results = json["result"];
+        if(results !== null){
+            localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
+            localStorage.setItem("userAverage", parseInt(parseFloat(json["result"]["stuAvg"]) * 100));
+            localStorage.setItem("setAverage", parseInt(parseFloat(json["result"]["setAvg"]) * 100));
+        } else {
+            localStorage.setItem("summary", null);
+            localStorage.setItem("userAverage", null);
+            localStorage.setItem("setAverage", null);
+        }
+        refreshSummaryResults();
+    } else {
+        console.log("Something went wrong generating the report summary.");
     }
 }
 
@@ -268,6 +326,101 @@ function refreshTagResults(){
     }
 }
 
+function refreshSummaryResults(){
+    $('#worksheetSummaryTable tbody').html('');
+    setSummaryReportToDefaults();
+    
+    // Set the averages
+    var userAvg = parseInt(JSON.parse(localStorage.getItem("userAverage")));
+    var setAvg = parseInt(JSON.parse(localStorage.getItem("setAverage")));
+    $('#summaryReportUserAvgValue').text(userAvg + "%");
+    $('#summaryReportSetAvgValue').text(setAvg + "%");
+    $('#summaryReportSetAvgValue').css('color', getColourForPercentage(setAvg));
+    $('#summaryReportUserAvgValue').css('color', getColourForPercentage(userAvg));
+    
+    setWorksheetsSummary();
+    setWorksheetsTable();
+    showSummaryResults();
+}
+
+function setSummaryReportToDefaults(){
+    $('#compValue').text('0');
+    $('#partialValue').text('0');
+    $('#incompleteValue').text('0');
+    $('#onTimeValue').text('0');
+    $('#lateValue').text('0');
+    $('#dateNoInfoValue').text('0');
+    $('#compNoInfoValue').text('0');
+    $('#summaryReportUserAvgTitle').text('Student Average');
+    $('#summaryReportUserAvgValue').text('-');
+    $('#summaryReportSetAvgTitle').text('Set Average');
+    $('#summaryReportSetAvgValue').text('-');
+}
+
+function getColourForPercentage(value){
+    var red = Math.min(255, parseInt(255 + (5.1 * (50 - value))));
+    var green = parseInt(value * 2.55);
+    var blue = Math.max(0, parseInt(2 * (value - 50)));
+    return "rgb(" + red + ", " + green + ", " + blue + ")";
+}
+
+function setWorksheetsSummary(){
+    var summary = JSON.parse(localStorage.getItem("summary"));
+    if(summary !== null){
+        $('#compValue').text(summary["compStatus"]["Completed"]);
+        $('#partialValue').text(summary["compStatus"]["Partially Completed"]);
+        $('#incompleteValue').text(summary["compStatus"]["Incomplete"]);
+        $('#onTimeValue').text(summary["dateStatus"]["OnTime"]);
+        $('#lateValue').text(summary["dateStatus"]["Late"]);
+        $('#dateNoInfoValue').text(summary["dateStatus"]["-"]);
+        $('#compNoInfoValue').text(summary["compStatus"]["-"]);
+    }  
+}
+
+function setWorksheetsTable(){
+    var summary = JSON.parse(localStorage.getItem("summary"));
+    if(summary !== null){
+        var list = summary["worksheetList"];
+        for(var key in list){
+            var sheet = list[key];
+            var name = sheet["WName"];
+            var date = sheet["DateDue"];
+            var lateString = "-";
+            var comp = "-";
+            var student = "-";
+            var set = "-";
+            var classString = "worksheetSummaryTable noResults";
+            if(sheet["Results"]){
+                var stuScore = parseInt(100 * sheet["StuAVG"]);
+                student = sheet["StuMark"] + "/" + sheet["StuMarks"] + " (" + stuScore + "%)";
+                var setScore = parseInt(100 * sheet["AVG"]);
+                var setMarks = sheet["Marks"];
+                var setMark = parseInt(setMarks * sheet["AVG"]);
+                set = setMark + "/" + setMarks + " (" + setScore + "%)";
+                var late = sheet["StuDays"];
+                if(late === "" || late === null){
+                    lateString = "-";
+                } else if(late === 0 || late === "0") {
+                    lateString = "On Time";
+                } else {
+                    lateString = late + " Days Late";
+                }
+                comp = sheet["StuComp"];
+                classString = "worksheetSummaryTable";
+            }
+            var string = "<tr class='" + classString + "'>";
+            string += "<td class='worksheetName'>" + name + "</td>";
+            string += "<td>" + date + "</td>";
+            string += "<td>" + student + "</td>";
+            string += "<td>" + set + "</td>";
+            string += "<td>" + comp + "</td>";
+            string += "<td>" + lateString + "</td>";
+            string += "</tr>";
+            $('#worksheetSummaryTable tbody').append(string);
+        }
+    }
+}
+
 function setHalfWidthTagResults(results, key, length){
     var name = results[key]["Name"];
     var rel = parseInt(results[key]["Reliability"] * 100);
@@ -293,11 +446,13 @@ function setNoResults(){
 
 function hideAllSections(){
     $("#tagsReport").hide();
+    $("#summaryReport").hide();
     $("#noResults").show();
 }
 
 function showAllSections(){
     $("#tagsReport").show();
+    $("#summaryReport").show();
     $("#noResults").hide();
 }
 
@@ -305,11 +460,14 @@ function hideAllContent(){
     $("#tagsReportSummary").hide();
     $("#tagsReportShort").hide();
     $("#tagsReportFull").hide();
+    $("#summaryReportMain").hide();
+    $("#summaryReportDetails").hide();
 }
 
 function showAllSpinners(){
     hideAllContent();
     startSpinnerInDiv('tagsReportSpinner');
+    startSpinnerInDiv('summaryReportSpinner');
 }
 
 function startSpinnerInDiv(div){
@@ -346,4 +504,9 @@ function showTagResults(full){
         $("#tagsReportFull").hide();
         $("#showHideFullTagResultsText").text("Show Full Results");
     }
+}
+
+function showSummaryResults(){
+    stopSpinnerInDiv('summaryReportSpinner');
+    $("#summaryReportMain").show();
 }

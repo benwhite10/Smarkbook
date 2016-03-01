@@ -335,3 +335,143 @@ table.fullResults{
     width: 100%;
     height: 100px;
 }
+
+.sectionWrapper{
+    display: block;
+    width: 100%;
+    border: thin solid #323232;
+    margin-top: 20px;
+    min-height: 40px;
+    height: auto;
+}
+
+.innerSectionWrapper{
+    display: block;
+    width: 100%;
+    min-height: 20px;
+    border-top: thin solid #323232;
+    height: 100%;
+}
+
+.innerSectionWrapper:after{
+    content: "";
+    display: block;
+    clear: both;
+}
+
+.top{
+    border-top: none;
+}
+
+#worksheetSummaryDetails, #summaryReportSetAvg, #summaryReportUserAvg{
+    display: inline-block;
+    min-height: 20px;
+    height: 100%;
+    float: left;
+}
+
+#worksheetSummaryDetails{
+    width: 50%;
+    cursor: pointer;
+}
+
+#worksheetSummaryDetails p{
+    padding-left: 20px;
+    padding-top: 5px;
+    font-size: 1rem;
+}
+
+#summaryReportDetails{
+    display: none;
+}
+
+#summaryReportSetAvg, #summaryReportUserAvg{
+    width: 25%;
+}
+
+#summaryReportSetAvg p, #summaryReportUserAvg p{
+    font-size: 1.3rem;
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 0px;
+}
+
+#summaryReportSetAvg h1, #summaryReportUserAvg h1{
+    font-size: 2.5rem;
+    text-align: center;
+    padding-top: 0px;
+}
+
+.worksheetSummaryTable{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead.worksheetSummaryTable{
+    text-align: center;
+    font-size: 1rem;
+}
+
+tbody.worksheetSummaryTable{
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+tr.worksheetSummaryTable{
+    line-height: 25px;
+}
+
+tr.worksheetSummaryTable:nth-child(odd){
+    background-color: #DDD;
+}
+
+.worksheetName{
+    text-align: left;
+    padding-left: 10px;
+}
+
+tr.tableHead:nth-child(odd){
+    background-color: transparent;
+}
+
+.noResults{
+    color: #AAA;
+    font-style: italic;
+}
+
+#worksheetSummaryDetailsTable{
+    width: 100%;
+    float: left;
+    border-collapse: collapse;
+}
+
+#worksheetSummaryDetailsTable td{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#tableTitleRow{
+    font-size: 1rem;
+    text-align: center;
+}
+
+.green, .orange, .red, .grey{
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.green{
+    color: #00CC00;
+}
+
+.orange{
+    color: #e68a00;
+}
+
+.red{
+    color: #CC0000;
+}
+
+.grey{
+    color: #AAA;
+}

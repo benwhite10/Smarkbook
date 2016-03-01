@@ -160,6 +160,71 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     <h1>No results to display</h1>
                     <p>If you are expecting results then please check the start and end date for this set of results</p>
                 </div>
+                <div id="summaryReport" class="sectionWrapper">
+                    <div id="summaryReportSpinner" class="spinnerBox">
+                    </div>
+                    <div id="summaryReportMain" class="innerSectionWrapper top">
+                        <div id="worksheetSummaryDetails">
+                            <table id="worksheetSummaryDetailsTable">
+                                <tbody>
+                                    <tr id="tableTitleRow">
+                                        <td colspan="2">Worksheets</td>
+                                        <td colspan="2">Handed In</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Completed:</td>
+                                        <td id="compValue" class="green">-</td>
+                                        <td>On Time:</td>
+                                        <td id="onTimeValue" class="green">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Partially Completed:</td>
+                                        <td id="partialValue" class="orange">-</td>
+                                        <td>Late:</td>
+                                        <td id="lateValue" class="red">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Incomplete:</td>
+                                        <td id="incompleteValue" class="red">-</td>
+                                        <td>Blank:</td>
+                                        <td id="dateNoInfoValue" class="grey">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Blank:</td>
+                                        <td id="compNoInfoValue" class="grey">-</td>
+                                        <td> </td>
+                                        <td id="showHideWorksheetText" style="text-align: right;">Show Worksheets</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="summaryReportUserAvg">
+                            <p id="summaryReportUserAvgTitle" class="title">Student Average</p>
+                            <h1 id="summaryReportUserAvgValue" class="value"></h1>
+                        </div>
+                        <div id="summaryReportSetAvg">
+                            <p id="summaryReportSetAvgTitle" class="title">Set Average</p>
+                            <h1 id="summaryReportSetAvgValue" class="value"></h1>
+                        </div>
+                    </div>
+                    <div id="summaryReportDetails" class="innerSectionWrapper">
+                        <table id="worksheetSummaryTable" class="worksheetSummaryTable">
+                            <thead class="worksheetSummaryTable">
+                                <tr class="worksheetSummaryTable tableHead">
+                                    <th class="worksheetName">Worksheet</th>
+                                    <th>Date Due</th>
+                                    <th>Student</th>
+                                    <th>Set</th>
+                                    <th></th>
+                                    <th></th> 
+                                </tr>
+                            </thead>
+                            <tbody class="worksheetSummaryTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
                 <div id="tagsReport" class="fullSection">
                     <div id="tagsReportSpinner" class="spinnerBox">
                     </div>
