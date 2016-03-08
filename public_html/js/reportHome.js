@@ -113,6 +113,7 @@ function generateQuestionsRequest(){
     var infoArray = {
         type: "STUDENT",
         tagsList: tagsArray,
+        stuav: localStorage.getItem("userAverage"),
         student: $('#student').val(),
         userid: $('#userid').val(),
         userval: $('#userval').val()
