@@ -278,6 +278,42 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                         </table>
                     </div>
                 </div>
+                
+                <div id="questionsReport" class="sectionWrapper">
+                    <div id="questionsReportSpinner" class="spinnerBox" style="display:none;">
+                    </div>
+                    <div id="questionsReportMain" class="innerSectionWrapper top">
+                        <div id="questionsSummaryDetails">
+                            <table id="questionsSummaryDetailsTable">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th class="worksheetName">Worksheet</th>
+                                        <th>Marks</th>
+                                        <th>Last Completed</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td class="worksheetName"><a href="#">Test Worksheet</a></td>
+                                        <td>9</td>
+                                        <td>01/02/2016</td>
+                                        <td>7/9</td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td class="worksheetName"><a href="#">Test Worksheet 23</a></td>
+                                        <td>4</td>
+                                        <td>08/01/2016</td>
+                                        <td>0/4</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>
