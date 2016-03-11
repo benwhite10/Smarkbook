@@ -45,13 +45,20 @@ function generateQuestionsForStudent(){
     // Current doesn't penalise enough low scores
     // One option is to include a rank in there, or extend numbers below 0.
     // Also zero should equal 1 so negative is more than one
-    succeedRequest(getWorksheetInformationFor(getFirstSectionOfArray($scoredQuestions, 100, "score")));
+    if(count($scoredQuestions) > 0){
+        succeedRequest(getWorksheetInformationFor(getFirstSectionOfArray($scoredQuestions, 100, "score")));
+    } else {
+        succeedRequest(null);
+    }
+    
 }
 
 /* Function */
 
 function createQuestionsForStudent($student){
     global $tagList;
+    
+    if (count($tagList) == 0) return null;
     
     $query1 = "SELECT SQIDS.SQID, SQ.`Marks`, QT.`Tag ID` TagID, T.`Name` Name FROM (
                     SELECT `Stored Question ID` SQID FROM TQUESTIONTAGS 
@@ -103,6 +110,8 @@ function createQuestionsForStudent($student){
 
 function scoreQuestions($questions){
     global $tagList;
+    
+    if (count($questions) == 0) return null;
     
     foreach($questions as $key => $question){
         $score = 0;
