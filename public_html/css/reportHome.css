@@ -511,7 +511,10 @@ tr.tableHead:nth-child(odd){
 
 #questionsSummaryDetailsTable tr
 { 
-    background: #EEE;width:  100%;margin-left: 0px;margin-right: 0px;
+    background: #EEE;
+    width:  100%;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
 #questionsSummaryDetailsTable tr:nth-child(even) 

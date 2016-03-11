@@ -288,8 +288,8 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                 <thead>
                                     <tr>
                                         <th>No.</th>
-                                        <th class="worksheetName">Worksheet</th>
-                                        <th class="worksheetName">Tags</th>
+                                        <th class="worksheetName" style="min-width: 400px;">Worksheet</th>
+                                        <th class="worksheetName" style="max-width: 400px;">Tags</th>
                                         <th>Marks</th>
                                         <th>Last Completed</th>
                                         <th>Score</th>

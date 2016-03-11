@@ -34,6 +34,8 @@ switch ($requestType){
 function generateQuestionsForStudent(){
     global $studentId;
     
+    setUpTagList();
+    
     // Create question list for student
     $questions = createQuestionsForStudent($studentId);
 
@@ -54,6 +56,21 @@ function generateQuestionsForStudent(){
 }
 
 /* Function */
+
+function setUpTagList(){
+    global $tagList;
+    
+    if (count($tagList) == 0) return;
+    
+    foreach($tagList as $id => $tag){
+        if($tag["Score"] < 0){
+            $tag["Weight"] = 1.5 * $tag["Score"] * $tag["Reliability"];
+        } else {
+            $tag["Weight"] = $tag["Score"] * $tag["Reliability"];
+        }
+        $tagList[$id] = $tag;
+    }
+}
 
 function createQuestionsForStudent($student){
     global $tagList;
@@ -101,7 +118,7 @@ function createQuestionsForStudent($student){
                 $finalQuestions[$result["SQID"]]["days"] = $result["Days"];
                 $finalQuestions[$result["SQID"]]["date"] = $result["Date"];
             } 
-        }
+        } 
         return $finalQuestions;
     } catch (Exception $ex) {
         failRequestWithException("Something went wrong loading all of the questions", $ex);
@@ -119,7 +136,7 @@ function scoreQuestions($questions){
         foreach($question["tags"] as $tag){
             $count++;
             if(array_key_exists($tag, $tagList)){
-                $score += (1 - floatval($tagList[$tag]["Score"]));
+                $score += floatval($tagList[$tag]["Weight"]);
             }
         }
         $avScore = ($score / $count) * getCountWeight($count);
