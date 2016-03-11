@@ -212,6 +212,7 @@ function generateQuestionsRequestSuccess(json){
             localStorage.setItem("suggested", null);
         }
         refreshSuggestedQuestions();
+        showSuggestedQuestions();
     } else {
         console.log("Something went wrong generating the suggested questions");
     }
@@ -395,9 +396,10 @@ function setSummaryReportToDefaults(){
 
 function refreshSuggestedQuestions(){
     var suggested = JSON.parse(localStorage.getItem("suggested"));
+    var results = 20;
     $('#questionsSummaryDetailsTable tbody').html('');
     if(suggested !== null){
-        for(var i = 0; i < suggested.length; i++){
+        for(var i = 0; i < Math.min(suggested.length, results); i++){
             var question = suggested[i];
             var number = question["details"]["Number"];
             var name = question["details"]["WName"];
@@ -530,12 +532,14 @@ function setNoResults(){
 function hideAllSections(){
     $("#tagsReport").hide();
     $("#summaryReport").hide();
+    $("#questionsReport").hide();
     $("#noResults").show();
 }
 
 function showAllSections(){
     $("#tagsReport").show();
     $("#summaryReport").show();
+    $("#questionsReport").show();
     $("#noResults").hide();
 }
 
@@ -545,12 +549,14 @@ function hideAllContent(){
     $("#tagsReportFull").hide();
     $("#summaryReportMain").hide();
     $("#summaryReportDetails").hide();
+    $("#questionsReportMain").hide();
 }
 
 function showAllSpinners(){
     hideAllContent();
     startSpinnerInDiv('tagsReportSpinner');
     startSpinnerInDiv('summaryReportSpinner');
+    startSpinnerInDiv('questionsReportSpinner');
 }
 
 function startSpinnerInDiv(div){
@@ -592,4 +598,9 @@ function showTagResults(full){
 function showSummaryResults(){
     stopSpinnerInDiv('summaryReportSpinner');
     $("#summaryReportMain").show();
+}
+
+function showSuggestedQuestions(){
+    stopSpinnerInDiv('questionsReportSpinner');
+    $("#questionsReportMain").show();
 }
