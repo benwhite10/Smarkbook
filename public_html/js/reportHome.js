@@ -7,7 +7,9 @@ $(document).ready(function(){
         showHideWorksheetDetails();
     });
     
-    setUpVariableInputs();
+    showAllSections();
+    showAllSpinners();
+    setUpVariableInputs(); 
 });
 
 /* Section set up methods */
