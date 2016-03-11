@@ -289,26 +289,13 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                     <tr>
                                         <th>No.</th>
                                         <th class="worksheetName">Worksheet</th>
+                                        <th class="worksheetName">Tags</th>
                                         <th>Marks</th>
                                         <th>Last Completed</th>
                                         <th>Score</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td class="worksheetName"><a href="#">Test Worksheet</a></td>
-                                        <td>9</td>
-                                        <td>01/02/2016</td>
-                                        <td>7/9</td>
-                                    </tr>
-                                    <tr>
-                                        <td>6</td>
-                                        <td class="worksheetName"><a href="#">Test Worksheet 23</a></td>
-                                        <td>4</td>
-                                        <td>08/01/2016</td>
-                                        <td>0/4</td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>

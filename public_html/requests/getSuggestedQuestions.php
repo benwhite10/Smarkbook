@@ -64,9 +64,9 @@ function createQuestionsForStudent($student){
                 ) SQIDS JOIN TSTOREDQUESTIONS SQ ON SQIDS.SQID = SQ.`Stored Question ID`
                 JOIN TQUESTIONTAGS QT ON QT.`Stored Question ID` = SQIDS.SQID
                 JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID`
-                ORDER BY SQIDS.SQID;";
+                ORDER BY SQIDS.SQID, T.`Name`;";
     
-    $query2 = "SELECT CQ.`Stored Question ID` SQID, MAX(CQ.`Mark`) Mark, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Completed`), 0) Days
+    $query2 = "SELECT CQ.`Stored Question ID` SQID, MAX(CQ.`Mark`) Mark, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Completed`), 0) Days, DATE_FORMAT(CQ.`Date Completed`, '%d/%m/%Y') Date
                 FROM TCOMPLETEDQUESTIONS CQ
                 WHERE CQ.`Student ID` = $student
                 GROUP BY CQ.`Stored Question ID`;";
@@ -92,6 +92,7 @@ function createQuestionsForStudent($student){
             if(array_key_exists($result["SQID"], $finalQuestions)){
                 $finalQuestions[$result["SQID"]]["mark"] = $result["Mark"];
                 $finalQuestions[$result["SQID"]]["days"] = $result["Days"];
+                $finalQuestions[$result["SQID"]]["date"] = $result["Date"];
             } 
         }
         return $finalQuestions;

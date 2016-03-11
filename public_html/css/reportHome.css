@@ -499,8 +499,7 @@ tr.tableHead:nth-child(odd){
   color: #66E11B;
   font-size: 1rem;
   font-weight: 400;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding: 5px;
   text-align: center;
 }
 

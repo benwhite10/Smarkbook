@@ -124,7 +124,7 @@ function generateQuestionsRequest(){
         url: "/requests/getSuggestedQuestions.php",
         dataType: "json",
         success: function(json){
-            console.log(json);
+            generateQuestionsRequestSuccess(json);
         }
     });
 }
@@ -200,6 +200,20 @@ function studentChange(){
     if(localStorage.getItem("initialRun") === "true"){
         generateReport();
         localStorage.setItem("initialRun", false);
+    }
+}
+
+function generateQuestionsRequestSuccess(json){
+    if(json["success"]){
+        var results = json["result"];
+        if(results !== null){
+            localStorage.setItem("suggested", JSON.stringify(json["result"]));
+        } else {
+            localStorage.setItem("suggested", null);
+        }
+        refreshSuggestedQuestions();
+    } else {
+        console.log("Something went wrong generating the suggested questions");
     }
 }
 
@@ -377,6 +391,53 @@ function setSummaryReportToDefaults(){
     $('#summaryReportUserAvgValue').text('-');
     $('#summaryReportSetAvgTitle').text('Set Average');
     $('#summaryReportSetAvgValue').text('-');
+}
+
+function refreshSuggestedQuestions(){
+    var suggested = JSON.parse(localStorage.getItem("suggested"));
+    $('#questionsSummaryDetailsTable tbody').html('');
+    if(suggested !== null){
+        for(var i = 0; i < suggested.length; i++){
+            var question = suggested[i];
+            var number = question["details"]["Number"];
+            var name = question["details"]["WName"];
+            var marks = question["marks"];
+            var markString = "-";
+            var date = "-";
+            if(question["mark"]){
+                markString = question["mark"] + "/" + marks;
+            }
+            if(question["date"]){
+                date = question["date"];
+            }
+            var vid = question["details"]["VID"];
+            var tagString = "";
+            var tagNames = question["tagNames"];
+            for(var j = 0; j < tagNames.length; j++){
+                var tag = tagNames[j];
+                tagString += tag;
+                if(j < tagNames.length - 1){
+                    tagString += ', ';
+                }
+            }
+            var link = question["details"]["Link"] ? question["details"]["Link"] : null;
+            var string = "<tr>";
+            string += "<td>" + number + "</td>";
+            if(link === null){
+                string += "<td class='worksheetName'>" + name + "</td>";
+            } else {
+                string += "<td class='worksheetName'><a href='" + link + "'>" + name + "</a></td>";
+            } 
+            string += "<td class='worksheetName'>" + tagString + "</td>";
+            string += "<td>" + marks + "</td>";
+            string += "<td>" + date + "</td>";
+            string += "<td>" + markString + "</td>";
+            string += "</tr>";
+            $('#questionsSummaryDetailsTable tbody').append(string);
+        }
+    } else {
+        // Blank Table
+    }
 }
 
 function getColourForPercentage(value){
