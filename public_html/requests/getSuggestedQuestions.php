@@ -8,11 +8,10 @@ include_once $include_path . '/public_html/requests/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $tagList = json_decode($_POST["tagsList"], TRUE);
-$stuAvg = filter_input(INPUT_POST, 'stuav', FILTER_SANITIZE_NUMBER_INT);
-$stuAvg /= 100;
 $studentId = filter_input(INPUT_POST,'student',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$reqid = filter_input(INPUT_POST, 'reqid', FILTER_SANITIZE_NUMBER_INT);
 
 $role = validateRequest($userid, $userval);
 if(!$role){
@@ -64,9 +63,9 @@ function setUpTagList(){
     
     foreach($tagList as $id => $tag){
         if($tag["Score"] < 0){
-            $tag["Weight"] = 1.5 * $tag["Score"] * $tag["Reliability"];
+            $tag["Weight"] = (-1.5 * $tag["Score"]) + 0.5;
         } else {
-            $tag["Weight"] = $tag["Score"] * $tag["Reliability"];
+            $tag["Weight"] = 0.5 - (0.5 * $tag["Score"]);
         }
         $tagList[$id] = $tag;
     }
@@ -140,26 +139,20 @@ function scoreQuestions($questions){
             }
         }
         $avScore = ($score / $count) * getCountWeight($count);
-        $dateWeight = array_key_exists("days", $question) ? getTimeWeight($question["days"]) : 1;
-        $lastScoreWeight = array_key_exists("mark", $question) ? getLastScoreWeight($question["mark"]/$question["marks"]) : 1;
-        $questions[$key]["score"] = $avScore * $dateWeight * $lastScoreWeight;
+        $lastScoreWeight = array_key_exists("mark", $question) && array_key_exists("days", $question) ? getLastScoreWeight($question["mark"]/$question["marks"], $question["days"]) : 1;
+        $questions[$key]["score"] = $avScore * $lastScoreWeight;
     }
     
     return $questions;
 }
 
-function getTimeWeight($days){
-    return min($days * 0.04, 1);
-}
-
-function getLastScoreWeight($score){
-    global $stuAvg;  
-    $diff = $score - $stuAvg;
-    return max(0.7 - $diff, 0.2);
-}
-
-function sortByOrder($a, $b) {
-    return $a['score'] < $b['score'];
+function getLastScoreWeight($score, $days){
+    if($score < 0.5){
+        $length = 10 + $score * 60;
+    } else {
+        $length = 40 + $score * 120;
+    }  
+    return min($days/$length, 1);
 }
 
 function getCountWeight($count){
@@ -218,16 +211,20 @@ function failRequestWithException($message, $ex){
 }
 
 function failRequest($message){
+    global $reqid;
     $response = array(
         "success" => FALSE,
+        "reqid" => $reqid,
         "message" => $message);
     echo json_encode($response);
     exit();
 }
 
 function succeedRequest($array){
+    global $reqid;
     $response = array(
         "success" => TRUE,
+        "reqid" => $reqid,
         "result" => $array);
     echo json_encode($response);
     exit();

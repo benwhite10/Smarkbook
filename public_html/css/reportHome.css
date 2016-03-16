@@ -333,6 +333,10 @@ table.fullResults{
     border-bottom: solid thin #323232;
 }
 
+#tagsReportSpinner{
+    border-bottom: solid thin #323232;
+}
+
 #noResults{
     text-align: center; 
     margin-top: 20px;

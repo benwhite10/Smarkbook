@@ -15,6 +15,7 @@ $(document).ready(function(){
 /* Section set up methods */
 function setUpVariableInputs(){
     localStorage.setItem("initialRun", true);
+    disableGenerateReportButton();
     getStaff();
     setDates();
 }
@@ -71,6 +72,7 @@ function getStaff(){
 }
 
 function updateSets(){
+    disableGenerateReportButton()
     var infoArray = {
         orderby: "Name",
         desc: "FALSE",
@@ -91,6 +93,7 @@ function updateSets(){
 }
 
 function updateStudents(){
+    disableGenerateReportButton();
     var infoArray = {
         orderby: "SName",
         desc: "FALSE",
@@ -110,25 +113,23 @@ function updateStudents(){
     });
 }
 
-function generateQuestionsRequest(){
-    var tagsArray = localStorage.getItem("tagResults");
-    var infoArray = {
-        type: "STUDENT",
-        tagsList: tagsArray,
-        stuav: localStorage.getItem("userAverage"),
-        student: $('#student').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getSuggestedQuestions.php",
-        dataType: "json",
-        success: function(json){
-            generateQuestionsRequestSuccess(json);
-        }
-    });
+function generateQuestionsRequest(reqid, tagsArray){
+    var infoArray = JSON.parse(localStorage.getItem("activeReportRequest"));
+    if(parseInt(infoArray["reqid"]) === reqid){
+        infoArray["type"] = "STUDENT";
+        infoArray["tagsList"] = JSON.stringify(tagsArray);
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/getSuggestedQuestions.php",
+            dataType: "json",
+            success: function(json){
+                generateQuestionsRequestSuccess(json);
+            }
+        });
+    } else {
+        console.log("There was an error in sending the tag list.");
+    }   
 }
 
 /* Responses */
@@ -199,6 +200,7 @@ function updateStudentsSuccess(json){
 }
 
 function studentChange(){
+    enableGenerateReportButton();
     if(localStorage.getItem("initialRun") === "true"){
         generateReport();
         localStorage.setItem("initialRun", false);
@@ -206,13 +208,13 @@ function studentChange(){
 }
 
 function generateQuestionsRequestSuccess(json){
-    if(json["success"]){
-        var results = json["result"];
-        if(results !== null){
-            localStorage.setItem("suggested", JSON.stringify(json["result"]));
+    if(validateResponse(json)){
+        var result = json["result"]; 
+        if(result !== null){
+            localStorage.setItem("suggested", JSON.stringify(result));
         } else {
             localStorage.setItem("suggested", null);
-        }
+        } 
         refreshSuggestedQuestions();
         showSuggestedQuestions();
     } else {
@@ -256,22 +258,12 @@ function generateReport(){
     showAllSections();
     showAllSpinners();
     sendReportRequest();
-    sendSummaryRequest();
     setInputsTitle();
     return false;
 }
 
-function sendSummaryRequest(){
-    var infoArray = {
-        type: "STUDENTSUMMARY",
-        startDate: $('#startDate').val(),
-        endDate: $('#endDate').val(),
-        student: $('#student').val(),
-        staff: $('#staff').val(),
-        set: $('#set').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
+function sendSummaryRequest(infoArray){
+    infoArray["type"] = "STUDENTSUMMARY";
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -284,8 +276,9 @@ function sendSummaryRequest(){
 }
 
 function sendReportRequest(){
+    var reqid = Math.floor(Math.random() * 9999);
     var infoArray = {
-        type: "STUDENTREPORT",
+        reqid: reqid,
         startDate: $('#startDate').val(),
         endDate: $('#endDate').val(),
         student: $('#student').val(),
@@ -294,6 +287,8 @@ function sendReportRequest(){
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
+    localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
+    infoArray["type"] = "STUDENTREPORT";
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -303,13 +298,15 @@ function sendReportRequest(){
             reportRequestSuccess(json);
         }
     });
+    sendSummaryRequest(infoArray);
 }
 
 function reportRequestSuccess(json){
-    if(json["success"]){
+    if(validateResponse(json)){
         var results = json["result"];
         if(results !== null){
             localStorage.setItem("tagResults", JSON.stringify(json["result"]["tags"]));
+            generateQuestionsRequest(parseInt(json["reqid"]), json["result"]["tags"]);
         } else {
             localStorage.setItem("tagResults", null);
         }
@@ -320,7 +317,7 @@ function reportRequestSuccess(json){
 }
 
 function summaryRequestSuccess(json){
-    if(json["success"]){
+    if(validateResponse(json)){
         var results = json["result"];
         if(results !== null){
             localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
@@ -331,11 +328,26 @@ function summaryRequestSuccess(json){
             localStorage.setItem("userAverage", null);
             localStorage.setItem("setAverage", null);
         }
-        generateQuestionsRequest();
         refreshSummaryResults();
     } else {
         console.log("Something went wrong generating the report summary.");
     }
+}
+
+function validateResponse(json){
+    if(json["success"] || json["reqid"] === undefined){
+        var array = JSON.parse(localStorage.getItem("activeReportRequest"));
+        return parseInt(array["reqid"]) === parseInt(json["reqid"]);
+    }
+    return false;
+}
+
+function disableGenerateReportButton(){
+    $('#generateReportButton').hide();
+}
+
+function enableGenerateReportButton(){
+    $('#generateReportButton').show();
 }
 
 function refreshTagResults(){
@@ -439,8 +451,7 @@ function refreshSuggestedQuestions(){
             string += "</tr>";
             $('#questionsSummaryDetailsTable tbody').append(string);
         }
-    } else {
-        // Blank Table
+        showSuggestedQuestions();
     }
 }
 
@@ -562,6 +573,7 @@ function showAllSpinners(){
 }
 
 function startSpinnerInDiv(div){
+    stopSpinnerInDiv(div);
     var opts = {
       lines: 10             // The number of lines to draw
     , length: 9             // The length of each line
@@ -579,8 +591,10 @@ function startSpinnerInDiv(div){
 }
 
 function stopSpinnerInDiv(div){
-    $('#' + div).data('spinner').stop();
-    $('#' + div).hide();
+    if($('#' + div).data('spinner') !== undefined){
+        $('#' + div).data('spinner').stop();
+        $('#' + div).hide();
+    }
 }
 
 function showTagResults(full){
