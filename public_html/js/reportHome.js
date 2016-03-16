@@ -12,21 +12,22 @@ $(document).ready(function(){
     setUpVariableInputs(); 
 });
 
+$(function() {
+    $(".datepicker").pickadate({
+          format: 'dd/mm/yyyy',
+          formatSubmit: 'dd/mm/yyyy',
+          onClose: function(){
+            $(document.activeElement).blur();
+        }
+    });
+});
+
 /* Section set up methods */
 function setUpVariableInputs(){
     localStorage.setItem("initialRun", true);
     disableGenerateReportButton();
     getStaff();
     setDates();
-}
-
-function showHideWorksheetDetails(){
-    if($("#summaryReportDetails").is(":visible")){
-        $("#showHideWorksheetText").text("Show Worksheets");
-    } else {
-        $("#showHideWorksheetText").text("Hide Worksheets");
-    }
-    $("#summaryReportDetails").slideToggle();
 }
 
 function setDates(){
@@ -52,7 +53,37 @@ function setInputsTitle(){
     }
 }
 
-/* Requests */
+/* Display functions */
+
+function showHideWorksheetDetails(){
+    if($("#summaryReportDetails").is(":visible")){
+        $("#showHideWorksheetText").text("Show Worksheets");
+    } else {
+        $("#showHideWorksheetText").text("Hide Worksheets");
+    }
+    $("#summaryReportDetails").slideToggle();
+}
+
+function showHideButton(mainId, buttonId){
+    if($("#" + mainId).css("display") === "none"){
+        $("#" + buttonId).addClass("minus");
+    } else {
+        $("#" + buttonId).removeClass("minus");
+    }
+    $("#" + mainId).slideToggle();
+}
+
+function showHideFullTagResults(){
+    if($("#tagsReportShort").css("display") === "none"){
+        $("#showHideFullTagResultsText").text("Show Full Results");
+    } else {
+        $("#showHideFullTagResultsText").text("Hide Full Results");
+    }
+    $("#tagsReportShort").slideToggle(800);
+    $("#tagsReportFull").slideToggle(800);
+}
+
+/* Send Requests */
 
 function getStaff(){
     var infoArray = {
@@ -132,6 +163,45 @@ function generateQuestionsRequest(reqid, tagsArray){
     }   
 }
 
+function sendSummaryRequest(infoArray){
+    infoArray["type"] = "STUDENTSUMMARY";
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            summaryRequestSuccess(json);
+        }
+    });
+}
+
+function sendReportRequest(){
+    var reqid = generateNewReqId();
+    var infoArray = {
+        reqid: reqid,
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        student: $('#student').val(),
+        staff: $('#staff').val(),
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
+    infoArray["type"] = "STUDENTREPORT";
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            reportRequestSuccess(json);
+        }
+    });
+    sendSummaryRequest(infoArray);
+}
+
 /* Responses */
 
 function getStaffSuccess(json){
@@ -199,14 +269,6 @@ function updateStudentsSuccess(json){
     }
 }
 
-function studentChange(){
-    enableGenerateReportButton();
-    if(localStorage.getItem("initialRun") === "true"){
-        generateReport();
-        localStorage.setItem("initialRun", false);
-    }
-}
-
 function generateQuestionsRequestSuccess(json){
     if(validateResponse(json)){
         var result = json["result"]; 
@@ -221,94 +283,6 @@ function generateQuestionsRequestSuccess(json){
     } else {
         console.log("Something went wrong generating the suggested questions");
     }
-}
-
-/* Summary show/hide buttons */
-
-function showHideButton(mainId, buttonId){
-    if($("#" + mainId).css("display") === "none"){
-        $("#" + buttonId).addClass("minus");
-    } else {
-        $("#" + buttonId).removeClass("minus");
-    }
-    $("#" + mainId).slideToggle();
-}
-
-$(function() {
-    $(".datepicker").pickadate({
-          format: 'dd/mm/yyyy',
-          formatSubmit: 'dd/mm/yyyy',
-          onClose: function(){
-            $(document.activeElement).blur();
-        }
-    });
-});
-
-function showHideFullTagResults(){
-    if($("#tagsReportShort").css("display") === "none"){
-        $("#showHideFullTagResultsText").text("Show Full Results");
-    } else {
-        $("#showHideFullTagResultsText").text("Hide Full Results");
-    }
-    $("#tagsReportShort").slideToggle(800);
-    $("#tagsReportFull").slideToggle(800);
-}
-
-/* Generate Report */
-function generateReport(){
-    showAllSections();
-    showAllSpinners();
-    sendReportRequest();
-    setInputsTitle();
-    return false;
-}
-
-function sendSummaryRequest(infoArray){
-    infoArray["type"] = "STUDENTSUMMARY";
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getStudentSummary.php",
-        dataType: "json",
-        success: function(json){
-            summaryRequestSuccess(json);
-        }
-    });
-}
-
-function sendReportRequest(){
-    var reqid = generateNewReqId();
-    var infoArray = {
-        reqid: reqid,
-        startDate: $('#startDate').val(),
-        endDate: $('#endDate').val(),
-        student: $('#student').val(),
-        staff: $('#staff').val(),
-        set: $('#set').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
-    infoArray["type"] = "STUDENTREPORT";
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getStudentSummary.php",
-        dataType: "json",
-        success: function(json){
-            reportRequestSuccess(json);
-        }
-    });
-    sendSummaryRequest(infoArray);
-}
-
-function generateNewReqId(){
-    var reportRequest = JSON.parse(localStorage.getItem("activeReportRequest"));
-    var curreqid = reportRequest["reqid"];
-    do {
-        var reqid = Math.floor(Math.random() * 9999);
-    } while (reqid === curreqid);
-    return reqid;
 }
 
 function reportRequestSuccess(json){
@@ -344,6 +318,34 @@ function summaryRequestSuccess(json){
     }
 }
 
+function studentChange(){
+    enableGenerateReportButton();
+    if(localStorage.getItem("initialRun") === "true"){
+        generateReport();
+        localStorage.setItem("initialRun", false);
+    }
+}
+
+/* Generate Report */
+function generateReport(){
+    showAllSections();
+    showAllSpinners();
+    sendReportRequest();
+    setInputsTitle();
+    return false;
+}
+
+/* Request Validation */
+
+function generateNewReqId(){
+    var reportRequest = JSON.parse(localStorage.getItem("activeReportRequest"));
+    var curreqid = reportRequest["reqid"];
+    do {
+        var reqid = Math.floor(Math.random() * 9999);
+    } while (reqid === curreqid);
+    return reqid;
+}
+
 function validateResponse(json){
     if(json["success"] || json["reqid"] === undefined){
         var array = JSON.parse(localStorage.getItem("activeReportRequest"));
@@ -359,6 +361,8 @@ function disableGenerateReportButton(){
 function enableGenerateReportButton(){
     $('#generateReportButton').show();
 }
+
+/* Refresh Displays */
 
 function refreshTagResults(){
     $('#top5tags tbody').html('');
@@ -402,20 +406,6 @@ function refreshSummaryResults(){
     setWorksheetsSummary();
     setWorksheetsTable();
     showSummaryResults();
-}
-
-function setSummaryReportToDefaults(){
-    $('#compValue').text('0');
-    $('#partialValue').text('0');
-    $('#incompleteValue').text('0');
-    $('#onTimeValue').text('0');
-    $('#lateValue').text('0');
-    $('#dateNoInfoValue').text('0');
-    $('#compNoInfoValue').text('0');
-    $('#summaryReportUserAvgTitle').text('Student Average');
-    $('#summaryReportUserAvgValue').text('-');
-    $('#summaryReportSetAvgTitle').text('Set Average');
-    $('#summaryReportSetAvgValue').text('-');
 }
 
 function refreshSuggestedQuestions(){
@@ -465,11 +455,18 @@ function refreshSuggestedQuestions(){
     }
 }
 
-function getColourForPercentage(value){
-    var red = Math.min(255, parseInt(255 + (5.1 * (50 - value))));
-    var green = parseInt(value * 2.55);
-    var blue = Math.max(0, parseInt(2 * (value - 50)));
-    return "rgb(" + red + ", " + green + ", " + blue + ")";
+function setSummaryReportToDefaults(){
+    $('#compValue').text('0');
+    $('#partialValue').text('0');
+    $('#incompleteValue').text('0');
+    $('#onTimeValue').text('0');
+    $('#lateValue').text('0');
+    $('#dateNoInfoValue').text('0');
+    $('#compNoInfoValue').text('0');
+    $('#summaryReportUserAvgTitle').text('Student Average');
+    $('#summaryReportUserAvgValue').text('-');
+    $('#summaryReportSetAvgTitle').text('Set Average');
+    $('#summaryReportSetAvgValue').text('-');
 }
 
 function setWorksheetsSummary(){
@@ -548,6 +545,37 @@ function setHalfWidthTagResults(results, key, length){
     return string;
 }
 
+function showTagResults(full){
+    stopSpinnerInDiv('tagsReportSpinner');
+    $("#tagsReportSummary").show();
+    if(full){
+        $("#tagsReportFull").show();
+        $("#tagsReportShort").hide();
+        $("#showHideFullTagResultsText").text("Hide Full Results");
+    } else {
+        $("#tagsReportShort").show();
+        $("#tagsReportFull").hide();
+        $("#showHideFullTagResultsText").text("Show Full Results");
+    }
+}
+
+function showSummaryResults(){
+    stopSpinnerInDiv('summaryReportSpinner');
+    $("#summaryReportMain").show();
+}
+
+function showSuggestedQuestions(){
+    stopSpinnerInDiv('questionsReportSpinner');
+    $("#questionsReportMain").show();
+}
+
+function getColourForPercentage(value){
+    var red = Math.min(255, parseInt(255 + (5.1 * (50 - value))));
+    var green = parseInt(value * 2.55);
+    var blue = Math.max(0, parseInt(2 * (value - 50)));
+    return "rgb(" + red + ", " + green + ", " + blue + ")";
+}
+
 function setNoResults(){
     hideAllSections();
 }
@@ -605,28 +633,4 @@ function stopSpinnerInDiv(div){
         $('#' + div).data('spinner').stop();
         $('#' + div).hide();
     }
-}
-
-function showTagResults(full){
-    stopSpinnerInDiv('tagsReportSpinner');
-    $("#tagsReportSummary").show();
-    if(full){
-        $("#tagsReportFull").show();
-        $("#tagsReportShort").hide();
-        $("#showHideFullTagResultsText").text("Hide Full Results");
-    } else {
-        $("#tagsReportShort").show();
-        $("#tagsReportFull").hide();
-        $("#showHideFullTagResultsText").text("Show Full Results");
-    }
-}
-
-function showSummaryResults(){
-    stopSpinnerInDiv('summaryReportSpinner');
-    $("#summaryReportMain").show();
-}
-
-function showSuggestedQuestions(){
-    stopSpinnerInDiv('questionsReportSpinner');
-    $("#questionsReportMain").show();
 }
