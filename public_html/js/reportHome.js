@@ -217,6 +217,7 @@ function generateQuestionsRequestSuccess(json){
         } 
         refreshSuggestedQuestions();
         showSuggestedQuestions();
+        localStorage.setItem("activeReportRequest", null);
     } else {
         console.log("Something went wrong generating the suggested questions");
     }
@@ -276,7 +277,7 @@ function sendSummaryRequest(infoArray){
 }
 
 function sendReportRequest(){
-    var reqid = Math.floor(Math.random() * 9999);
+    var reqid = generateNewReqId();
     var infoArray = {
         reqid: reqid,
         startDate: $('#startDate').val(),
@@ -299,6 +300,15 @@ function sendReportRequest(){
         }
     });
     sendSummaryRequest(infoArray);
+}
+
+function generateNewReqId(){
+    var reportRequest = JSON.parse(localStorage.getItem("activeReportRequest"));
+    var curreqid = reportRequest["reqid"];
+    do {
+        var reqid = Math.floor(Math.random() * 9999);
+    } while (reqid === curreqid);
+    return reqid;
 }
 
 function reportRequestSuccess(json){
