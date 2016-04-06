@@ -30,9 +30,6 @@ if(isset($vid)){
     $query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
     $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
 
-$query = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`User ID` WHERE V.`Version ID` = $vid;";
-$worksheet = db_select($query);
-
     try{
         $worksheet = db_select_exception($query1);
         $questions = db_select_exception($query2);
@@ -115,7 +112,7 @@ $worksheet = db_select($query);
             
             <div id="top_bar">
                 <div id="title2">
-                    <h1><?php if(isset($worksheet)){ 
+                    <h1><?php if(isset($worksheet[0])){ 
                         echo $worksheet[0]['WName']; 
                         if($worksheet[0]['Deleted']){
                             echo " - Deleted";
@@ -160,7 +157,7 @@ $worksheet = db_select($query);
                 </table>
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
-                <?php if(isset($worksheet) && isset($vid)){
+                <?php if(isset($worksheet[0]) && isset($vid)){
                     if($worksheet[0]["Deleted"]){ ?>
                 <li onclick="restoreWorksheet()"><a>Restore Worksheet</a></li>
                 <?php } else { ?>
