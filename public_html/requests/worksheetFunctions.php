@@ -38,7 +38,10 @@ function restoreWorksheet($vid){
     
     $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = FALSE WHERE `Version ID` = $vid";
     try{
+        db_begin_transaction();
         db_query_exception($query);
+        updateRelatedCompletedQuestions($vid, FALSE);
+        db_commit_transaction();
     } catch (Exception $ex) {
         returnToPageError($ex, "There was an error restoring the worksheet.");
     }
@@ -54,8 +57,12 @@ function deleteWorksheet($vid){
     
     $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = TRUE WHERE `Version ID` = $vid";
     try{
+        db_begin_transaction();
         db_query_exception($query);
+        updateRelatedCompletedQuestions($vid, TRUE);
+        db_commit_transaction();
     } catch (Exception $ex) {
+        db_rollback_transaction();
         returnToPageError($ex, "There was an error deleting the worksheet.");
     }
     $response = array(
@@ -63,6 +70,33 @@ function deleteWorksheet($vid){
     echo json_encode($response);
     infoLog("Worksheet $vid succesfully deleted by $userid");
     exit();
+}
+
+function updateRelatedCompletedQuestions($vid, $delete){
+    if($delete){
+        $deleteVal = "1";
+    } else {
+        $deleteVal = "0";
+    }
+    $cqids = findRelatedCompletedQuestions($vid);
+    $query = "UPDATE TCOMPLETEDQUESTIONS SET `Deleted` = $deleteVal "
+            . "WHERE `Completed Question ID` IN (";
+    foreach ($cqids as $key => $cqid) {
+        if($key !== count($cqids) - 1){
+            $query .= $cqid["CQID"] . ", ";
+        } else {
+            $query .= $cqid["CQID"] . ");";
+        }
+    }
+    db_query_exception($query);
+}
+
+function findRelatedCompletedQuestions($vid){
+    $query = "SELECT CQ.`Completed Question ID` CQID FROM TCOMPLETEDQUESTIONS CQ
+                JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+                WHERE `Version ID` = $vid;";
+    $cqids = db_select_exception($query);
+    return $cqids;
 }
 
 function returnToPageError($ex, $message){
