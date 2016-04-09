@@ -43,6 +43,7 @@ function restoreWorksheet($vid){
         updateRelatedCompletedQuestions($vid, FALSE);
         db_commit_transaction();
     } catch (Exception $ex) {
+        db_rollback_transaction();
         returnToPageError($ex, "There was an error restoring the worksheet.");
     }
     $response = array(
@@ -63,7 +64,7 @@ function deleteWorksheet($vid){
         db_commit_transaction();
     } catch (Exception $ex) {
         db_rollback_transaction();
-        returnToPageError($ex, "There was an error deleting the worksheet.");
+        returnToPageError($ex, "There was an error deleting the worksheet");
     }
     $response = array(
         "success" => TRUE);
@@ -79,7 +80,8 @@ function updateRelatedCompletedQuestions($vid, $delete){
         $deleteVal = "0";
     }
     $cqids = findRelatedCompletedQuestions($vid);
-    $query = "UPDATE TCOMPLETEDQUESTIONS SET `Deleted` = $deleteVal "
+    if(count($cqids) > 0){
+        $query = "UPDATE TCOMPLETEDQUESTIONS SET `Deleted` = $deleteVal "
             . "WHERE `Completed Question ID` IN (";
     foreach ($cqids as $key => $cqid) {
         if($key !== count($cqids) - 1){
@@ -89,6 +91,7 @@ function updateRelatedCompletedQuestions($vid, $delete){
         }
     }
     db_query_exception($query);
+    }
 }
 
 function findRelatedCompletedQuestions($vid){
@@ -108,7 +111,7 @@ function returnToPageError($ex, $message){
 }
 
 function failRequest($message){
-    errorLog("There was an error in the worksheet functin request: " . $message);
+    errorLog("There was an error in the worksheet function request: " . $message);
     $response = array(
         "success" => FALSE);
     echo json_encode($response);
