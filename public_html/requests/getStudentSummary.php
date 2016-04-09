@@ -335,46 +335,61 @@ function getSetWorksheets(){
                JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                JOIN TWORKSHEETS W ON WV.`Worksheet ID` = W.`Worksheet ID`
                JOIN TSTOREDQUESTIONS SQ ON SQ.`Version ID` = GW.`Version ID`
-               JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID`
-                WHERE ";
+               JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID` ";
+    
+    $filters = [];
+    array_push($filters, "W.`Deleted` = 0");
+    array_push($filters, "WV.`Deleted` = 0");
+    
     if(array_key_exists("inputs", $returns)){
         $inputs = $returns["inputs"];
         if(array_key_exists("staff", $inputs)){
             $staff = $inputs["staff"];
-            $query .= "GW.`Primary Staff ID` = $staff AND ";
+            array_push($filters, "GW.`Primary Staff ID` = $staff");
         }
         if(array_key_exists("set", $inputs)){
             $set = $inputs["set"];
-            $query .= "GW.`Group ID` = $set AND ";
+            array_push($filters, "GW.`Group ID` = $set");
         }
         if(array_key_exists("tags", $inputs)){
             $tags = $returns["tags"];
             if(count($tags) > 0){
-                $query .= "(";
+                $filterString .= "(";
                 foreach($tags as $key => $tag){
                     if(count($tags) - 1 !== $key){
-                        $query .= "QT.`Tag ID` = $tag OR ";
+                        $filterString .= "QT.`Tag ID` = $tag OR ";
                     } else {
-                        $query .= "QT.`Tag ID` = $tag) AND ";
+                        $filterString .= "QT.`Tag ID` = $tag)";
                     }
                 }
-            }  
+            }
+            array_push($filters, $filterString);
         }
     }
+    
     if(array_key_exists("dates", $returns)){
         $dates = $returns["dates"];
         if(count($dates) === 1){
             // Only 1 date
             $date = $dates[0];
-            $query .= "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')";
+            array_push($filters, "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')");
         } else {
             $date1 = $dates[0];
             $date2 = $dates[1];
-            $query .= "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
+            array_push($filters, "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')");
         }
-    } else {
-        $query = substr($query, 0, -4);
     }
+    
+    if(count($filters) > 0) $query .= "WHERE ";
+    
+    foreach($filters as $key => $filter){
+        if(count($filters) - 1 !== $key){
+            $query .= $filters[$key] . " AND ";
+        } else {
+            $query .= $filters[$key] . " ";
+        }
+    }
+    
     $query .= " GROUP BY GW.`Group Worksheet ID`";
     $query .= " ORDER BY GW.`Date Due` DESC;";
     
