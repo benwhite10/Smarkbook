@@ -278,6 +278,29 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                         </table>
                     </div>
                 </div>
+                
+                <div id="questionsReport" class="sectionWrapper">
+                    <div id="questionsReportSpinner" class="spinnerBox" style="display:none;">
+                    </div>
+                    <div id="questionsReportMain" class="innerSectionWrapper top">
+                        <div id="questionsSummaryDetails">
+                            <table id="questionsSummaryDetailsTable">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th class="worksheetName" style="min-width: 400px;">Worksheet</th>
+                                        <th class="worksheetName" style="max-width: 400px;">Tags</th>
+                                        <th>Marks</th>
+                                        <th>Last Completed</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

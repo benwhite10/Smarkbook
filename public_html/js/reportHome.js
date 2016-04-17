@@ -7,23 +7,27 @@ $(document).ready(function(){
         showHideWorksheetDetails();
     });
     
-    setUpVariableInputs();
+    showAllSections();
+    showAllSpinners();
+    setUpVariableInputs(); 
+});
+
+$(function() {
+    $(".datepicker").pickadate({
+          format: 'dd/mm/yyyy',
+          formatSubmit: 'dd/mm/yyyy',
+          onClose: function(){
+            $(document.activeElement).blur();
+        }
+    });
 });
 
 /* Section set up methods */
 function setUpVariableInputs(){
     localStorage.setItem("initialRun", true);
+    disableGenerateReportButton();
     getStaff();
     setDates();
-}
-
-function showHideWorksheetDetails(){
-    if($("#summaryReportDetails").is(":visible")){
-        $("#showHideWorksheetText").text("Show Worksheets");
-    } else {
-        $("#showHideWorksheetText").text("Hide Worksheets");
-    }
-    $("#summaryReportDetails").slideToggle();
 }
 
 function setDates(){
@@ -49,7 +53,37 @@ function setInputsTitle(){
     }
 }
 
-/* Requests */
+/* Display functions */
+
+function showHideWorksheetDetails(){
+    if($("#summaryReportDetails").is(":visible")){
+        $("#showHideWorksheetText").text("Show Worksheets");
+    } else {
+        $("#showHideWorksheetText").text("Hide Worksheets");
+    }
+    $("#summaryReportDetails").slideToggle();
+}
+
+function showHideButton(mainId, buttonId){
+    if($("#" + mainId).css("display") === "none"){
+        $("#" + buttonId).addClass("minus");
+    } else {
+        $("#" + buttonId).removeClass("minus");
+    }
+    $("#" + mainId).slideToggle();
+}
+
+function showHideFullTagResults(){
+    if($("#tagsReportShort").css("display") === "none"){
+        $("#showHideFullTagResultsText").text("Show Full Results");
+    } else {
+        $("#showHideFullTagResultsText").text("Hide Full Results");
+    }
+    $("#tagsReportShort").slideToggle(800);
+    $("#tagsReportFull").slideToggle(800);
+}
+
+/* Send Requests */
 
 function getStaff(){
     var infoArray = {
@@ -69,6 +103,7 @@ function getStaff(){
 }
 
 function updateSets(){
+    disableGenerateReportButton()
     var infoArray = {
         orderby: "Name",
         desc: "FALSE",
@@ -89,6 +124,7 @@ function updateSets(){
 }
 
 function updateStudents(){
+    disableGenerateReportButton();
     var infoArray = {
         orderby: "SName",
         desc: "FALSE",
@@ -106,6 +142,64 @@ function updateStudents(){
             updateStudentsSuccess(json);
         }
     });
+}
+
+function generateQuestionsRequest(reqid, tagsArray){
+    var infoArray = JSON.parse(localStorage.getItem("activeReportRequest"));
+    if(parseInt(infoArray["reqid"]) === reqid){
+        infoArray["type"] = "STUDENT";
+        infoArray["tagsList"] = JSON.stringify(tagsArray);
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/getSuggestedQuestions.php",
+            dataType: "json",
+            success: function(json){
+                generateQuestionsRequestSuccess(json);
+            }
+        });
+    } else {
+        console.log("There was an error in sending the tag list.");
+    }   
+}
+
+function sendSummaryRequest(infoArray){
+    infoArray["type"] = "STUDENTSUMMARY";
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            summaryRequestSuccess(json);
+        }
+    });
+}
+
+function sendReportRequest(){
+    var reqid = generateNewReqId();
+    var infoArray = {
+        reqid: reqid,
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        student: $('#student').val(),
+        staff: $('#staff').val(),
+        set: $('#set').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
+    infoArray["type"] = "STUDENTREPORT";
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            reportRequestSuccess(json);
+        }
+    });
+    sendSummaryRequest(infoArray);
 }
 
 /* Responses */
@@ -175,103 +269,28 @@ function updateStudentsSuccess(json){
     }
 }
 
-function studentChange(){
-    if(localStorage.getItem("initialRun") === "true"){
-        generateReport();
-        localStorage.setItem("initialRun", false);
-    }
-}
-
-/* Summary show/hide buttons */
-
-function showHideButton(mainId, buttonId){
-    if($("#" + mainId).css("display") === "none"){
-        $("#" + buttonId).addClass("minus");
+function generateQuestionsRequestSuccess(json){
+    if(validateResponse(json)){
+        var result = json["result"]; 
+        if(result !== null){
+            localStorage.setItem("suggested", JSON.stringify(result));
+        } else {
+            localStorage.setItem("suggested", null);
+        } 
+        refreshSuggestedQuestions();
+        showSuggestedQuestions();
+        localStorage.setItem("activeReportRequest", null);
     } else {
-        $("#" + buttonId).removeClass("minus");
+        console.log("Something went wrong generating the suggested questions");
     }
-    $("#" + mainId).slideToggle();
-}
-
-$(function() {
-    $(".datepicker").pickadate({
-          format: 'dd/mm/yyyy',
-          formatSubmit: 'dd/mm/yyyy',
-          onClose: function(){
-            $(document.activeElement).blur();
-        }
-    });
-});
-
-function showHideFullTagResults(){
-    if($("#tagsReportShort").css("display") === "none"){
-        $("#showHideFullTagResultsText").text("Show Full Results");
-    } else {
-        $("#showHideFullTagResultsText").text("Hide Full Results");
-    }
-    $("#tagsReportShort").slideToggle(800);
-    $("#tagsReportFull").slideToggle(800);
-}
-
-/* Generate Report */
-function generateReport(){
-    showAllSections();
-    showAllSpinners();
-    sendReportRequest();
-    sendSummaryRequest();
-    setInputsTitle();
-    return false;
-}
-
-function sendSummaryRequest(){
-    var infoArray = {
-        type: "STUDENTSUMMARY",
-        startDate: $('#startDate').val(),
-        endDate: $('#endDate').val(),
-        student: $('#student').val(),
-        staff: $('#staff').val(),
-        set: $('#set').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getStudentSummary.php",
-        dataType: "json",
-        success: function(json){
-            summaryRequestSuccess(json);
-        }
-    });
-}
-
-function sendReportRequest(){
-    var infoArray = {
-        type: "STUDENTREPORT",
-        startDate: $('#startDate').val(),
-        endDate: $('#endDate').val(),
-        student: $('#student').val(),
-        staff: $('#staff').val(),
-        set: $('#set').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getStudentSummary.php",
-        dataType: "json",
-        success: function(json){
-            reportRequestSuccess(json);
-        }
-    });
 }
 
 function reportRequestSuccess(json){
-    if(json["success"]){
+    if(validateResponse(json)){
         var results = json["result"];
         if(results !== null){
             localStorage.setItem("tagResults", JSON.stringify(json["result"]["tags"]));
+            generateQuestionsRequest(parseInt(json["reqid"]), json["result"]["tags"]);
         } else {
             localStorage.setItem("tagResults", null);
         }
@@ -282,7 +301,7 @@ function reportRequestSuccess(json){
 }
 
 function summaryRequestSuccess(json){
-    if(json["success"]){
+    if(validateResponse(json)){
         var results = json["result"];
         if(results !== null){
             localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
@@ -298,6 +317,52 @@ function summaryRequestSuccess(json){
         console.log("Something went wrong generating the report summary.");
     }
 }
+
+function studentChange(){
+    enableGenerateReportButton();
+    if(localStorage.getItem("initialRun") === "true"){
+        generateReport();
+        localStorage.setItem("initialRun", false);
+    }
+}
+
+/* Generate Report */
+function generateReport(){
+    showAllSections();
+    showAllSpinners();
+    sendReportRequest();
+    setInputsTitle();
+    return false;
+}
+
+/* Request Validation */
+
+function generateNewReqId(){
+    var reportRequest = JSON.parse(localStorage.getItem("activeReportRequest"));
+    var curreqid = reportRequest !== null ? reportRequest["reqid"] : null;
+    do {
+        var reqid = Math.floor(Math.random() * 9999);
+    } while (reqid === curreqid);
+    return reqid;
+}
+
+function validateResponse(json){
+    if(json["success"] || json["reqid"] === undefined){
+        var array = JSON.parse(localStorage.getItem("activeReportRequest"));
+        return parseInt(array["reqid"]) === parseInt(json["reqid"]);
+    }
+    return false;
+}
+
+function disableGenerateReportButton(){
+    $('#generateReportButton').hide();
+}
+
+function enableGenerateReportButton(){
+    $('#generateReportButton').show();
+}
+
+/* Refresh Displays */
 
 function refreshTagResults(){
     $('#top5tags tbody').html('');
@@ -343,6 +408,53 @@ function refreshSummaryResults(){
     showSummaryResults();
 }
 
+function refreshSuggestedQuestions(){
+    var suggested = JSON.parse(localStorage.getItem("suggested"));
+    var results = 20;
+    $('#questionsSummaryDetailsTable tbody').html('');
+    if(suggested !== null){
+        for(var i = 0; i < Math.min(suggested.length, results); i++){
+            var question = suggested[i];
+            var number = question["details"]["Number"];
+            var name = question["details"]["WName"];
+            var marks = question["marks"];
+            var markString = "-";
+            var date = "-";
+            if(question["mark"]){
+                markString = question["mark"] + "/" + marks;
+            }
+            if(question["date"]){
+                date = question["date"];
+            }
+            var vid = question["details"]["VID"];
+            var tagString = "";
+            var tagNames = question["tagNames"];
+            for(var j = 0; j < tagNames.length; j++){
+                var tag = tagNames[j];
+                tagString += tag;
+                if(j < tagNames.length - 1){
+                    tagString += ', ';
+                }
+            }
+            var link = question["details"]["Link"] ? question["details"]["Link"] : null;
+            var string = "<tr>";
+            string += "<td>" + number + "</td>";
+            if(link === null){
+                string += "<td class='worksheetName'>" + name + "</td>";
+            } else {
+                string += "<td class='worksheetName'><a href='" + link + "'>" + name + "</a></td>";
+            } 
+            string += "<td class='worksheetName'>" + tagString + "</td>";
+            string += "<td>" + marks + "</td>";
+            string += "<td>" + date + "</td>";
+            string += "<td>" + markString + "</td>";
+            string += "</tr>";
+            $('#questionsSummaryDetailsTable tbody').append(string);
+        }
+        showSuggestedQuestions();
+    }
+}
+
 function setSummaryReportToDefaults(){
     $('#compValue').text('0');
     $('#partialValue').text('0');
@@ -355,13 +467,6 @@ function setSummaryReportToDefaults(){
     $('#summaryReportUserAvgValue').text('-');
     $('#summaryReportSetAvgTitle').text('Set Average');
     $('#summaryReportSetAvgValue').text('-');
-}
-
-function getColourForPercentage(value){
-    var red = Math.min(255, parseInt(255 + (5.1 * (50 - value))));
-    var green = parseInt(value * 2.55);
-    var blue = Math.max(0, parseInt(2 * (value - 50)));
-    return "rgb(" + red + ", " + green + ", " + blue + ")";
 }
 
 function setWorksheetsSummary(){
@@ -440,58 +545,6 @@ function setHalfWidthTagResults(results, key, length){
     return string;
 }
 
-function setNoResults(){
-    hideAllSections();
-}
-
-function hideAllSections(){
-    $("#tagsReport").hide();
-    $("#summaryReport").hide();
-    $("#noResults").show();
-}
-
-function showAllSections(){
-    $("#tagsReport").show();
-    $("#summaryReport").show();
-    $("#noResults").hide();
-}
-
-function hideAllContent(){
-    $("#tagsReportSummary").hide();
-    $("#tagsReportShort").hide();
-    $("#tagsReportFull").hide();
-    $("#summaryReportMain").hide();
-    $("#summaryReportDetails").hide();
-}
-
-function showAllSpinners(){
-    hideAllContent();
-    startSpinnerInDiv('tagsReportSpinner');
-    startSpinnerInDiv('summaryReportSpinner');
-}
-
-function startSpinnerInDiv(div){
-    var opts = {
-      lines: 10             // The number of lines to draw
-    , length: 9             // The length of each line
-    , width: 4              // The line thickness
-    , radius: 10            // The radius of the inner circle
-    , scale: 1.0            // Scales overall size of the spinner
-    , corners: 1           // Roundness (0..1)
-    , color: '#000'         // #rgb or #rrggbb
-    , left: '0%'           // center horizontally
-    , position: 'relative'  // Element positioning
-    };
-    $("#" + div).show();
-    var spinner = new Spinner(opts).spin($("#" + div).get(0));
-    $($("#" + div).get(0)).data('spinner', spinner);
-}
-
-function stopSpinnerInDiv(div){
-    $('#' + div).data('spinner').stop();
-    $('#' + div).hide();
-}
-
 function showTagResults(full){
     stopSpinnerInDiv('tagsReportSpinner');
     $("#tagsReportSummary").show();
@@ -509,4 +562,75 @@ function showTagResults(full){
 function showSummaryResults(){
     stopSpinnerInDiv('summaryReportSpinner');
     $("#summaryReportMain").show();
+}
+
+function showSuggestedQuestions(){
+    stopSpinnerInDiv('questionsReportSpinner');
+    $("#questionsReportMain").show();
+}
+
+function getColourForPercentage(value){
+    var red = Math.min(255, parseInt(255 + (5.1 * (50 - value))));
+    var green = parseInt(value * 2.55);
+    var blue = Math.max(0, parseInt(2 * (value - 50)));
+    return "rgb(" + red + ", " + green + ", " + blue + ")";
+}
+
+function setNoResults(){
+    hideAllSections();
+}
+
+function hideAllSections(){
+    $("#tagsReport").hide();
+    $("#summaryReport").hide();
+    $("#questionsReport").hide();
+    $("#noResults").show();
+}
+
+function showAllSections(){
+    $("#tagsReport").show();
+    $("#summaryReport").show();
+    $("#questionsReport").show();
+    $("#noResults").hide();
+}
+
+function hideAllContent(){
+    $("#tagsReportSummary").hide();
+    $("#tagsReportShort").hide();
+    $("#tagsReportFull").hide();
+    $("#summaryReportMain").hide();
+    $("#summaryReportDetails").hide();
+    $("#questionsReportMain").hide();
+}
+
+function showAllSpinners(){
+    hideAllContent();
+    startSpinnerInDiv('tagsReportSpinner');
+    startSpinnerInDiv('summaryReportSpinner');
+    startSpinnerInDiv('questionsReportSpinner');
+}
+
+function startSpinnerInDiv(div){
+    stopSpinnerInDiv(div);
+    var opts = {
+      lines: 10             // The number of lines to draw
+    , length: 9             // The length of each line
+    , width: 4              // The line thickness
+    , radius: 10            // The radius of the inner circle
+    , scale: 1.0            // Scales overall size of the spinner
+    , corners: 1           // Roundness (0..1)
+    , color: '#000'         // #rgb or #rrggbb
+    , left: '0%'           // center horizontally
+    , position: 'relative'  // Element positioning
+    };
+    $("#" + div).show();
+    var spinner = new Spinner(opts).spin($("#" + div).get(0));
+    $($("#" + div).get(0)).data('spinner', spinner);
+}
+
+function stopSpinnerInDiv(div){
+    if($('#' + div).data('spinner') !== undefined){
+        $('#' + div).data('spinner').stop();
+        $('#' + div).hide();
+    }
 }

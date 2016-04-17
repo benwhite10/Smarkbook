@@ -194,7 +194,7 @@ th.results
   padding-bottom: 5px;
   text-align: center;
   /* width:  100%; */
-  }
+}
 
 tr.results
 { 
@@ -301,13 +301,21 @@ label {
 }
 
 #tagsReportShort{
+    display: block;
     width: calc(100% + 4px);
 }
+
+#tagsReportShort:after{
+    content: "";
+    display: block;
+    clear: both; 
+}
+
 
 #tagsReportFull{
     height: 500px;
     overflow-y: scroll;
-    /* border: thin solid #323232; */
+    border-bottom: thin solid #323232;
     width: 100%;
 }
 
@@ -317,10 +325,15 @@ table.fullResults{
 
 .fullSection{
     border: thin solid #323232;
+    border-bottom: none;
 }
 
 #tagsReportSummary{
     border: none;
+    border-bottom: solid thin #323232;
+}
+
+#tagsReportSpinner{
     border-bottom: solid thin #323232;
 }
 
@@ -474,4 +487,61 @@ tr.tableHead:nth-child(odd){
 
 .grey{
     color: #AAA;
+}
+
+#questionsSummaryDetailsTable{
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+    position: relative;
+    padding-top:  20px;
+}
+
+#questionsSummaryDetailsTable th
+{
+  background: #323232;
+  color: #66E11B;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 5px;
+  text-align: center;
+}
+
+#questionsSummaryDetailsTable th.worksheetName, #questionsSummaryDetailsTable td.worksheetName
+{
+  text-align: left;
+  padding-left: 10px;
+}
+
+#questionsSummaryDetailsTable tr
+{ 
+    background: #EEE;
+    width:  100%;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+#questionsSummaryDetailsTable tr:nth-child(even) 
+{
+    background-color: #DDD;
+}
+
+#questionsSummaryDetailsTable tr:nth-child(even):hover, #questionsSummaryDetailsTable tr:hover
+{
+    background-color: #c2f4a4;
+}
+
+#questionsSummaryDetailsTable td, #questionsSummaryDetailsTable a 
+{
+    line-height: 30px;
+    font-size: 0.9rem;
+    padding-left: 0px;
+    text-align: center;
+    color: #323232;
+    font-weight: normal;
+}
+
+#questionsReport{
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
