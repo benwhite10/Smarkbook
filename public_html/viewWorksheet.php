@@ -11,6 +11,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -25,12 +26,9 @@ $vid = filter_input(INPUT_GET,'id',FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
 
 if(isset($vid)){
-    $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
+    $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, V.`Deleted` Deleted FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
     $query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
     $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
-
-$query = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`User ID` WHERE V.`Version ID` = $vid;";
-$worksheet = db_select($query);
 
     try{
         $worksheet = db_select_exception($query1);
@@ -65,11 +63,18 @@ $worksheet = db_select($query);
     <link rel="stylesheet" type="text/css" href="css/branding.css" />
     <link rel="stylesheet" type="text/css" href="css/table.css" />
     <link rel="shortcut icon" href="branding/favicon.ico">
+    <script src="js/jquery.js"></script>
     <script src="js/methods.js"></script>
     <script src="js/sorttable.js"></script>
+    <script src="js/viewWorksheet.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
+    <?php
+        echo "<input type='hidden' id='vid' value='$vid' />";
+        echo "<input type='hidden' id='userid' value='$userid' />";
+        echo "<input type='hidden' id='userval' value='$userval' />";
+    ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -107,7 +112,12 @@ $worksheet = db_select($query);
             
             <div id="top_bar">
                 <div id="title2">
-                    <h1><?php if(isset($worksheet)){ echo $worksheet[0]['WName']; }?></h1>
+                    <h1><?php if(isset($worksheet[0])){ 
+                        echo $worksheet[0]['WName']; 
+                        if($worksheet[0]['Deleted']){
+                            echo " - Deleted";
+                        }
+                    }?></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>
@@ -147,9 +157,13 @@ $worksheet = db_select($query);
                 </table>
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
-                <?php if(isset($vid)){ ?>
+                <?php if(isset($worksheet[0]) && isset($vid)){
+                    if($worksheet[0]["Deleted"]){ ?>
+                <li onclick="restoreWorksheet()"><a>Restore Worksheet</a></li>
+                <?php } else { ?>
                 <li><a href="editWorksheet.php?id=<?php echo $vid; ?>">Edit</a></li>
-                <?php } ?>
+                <li onclick="deleteWorksheet()"><a>Delete Worksheet</a></li>   
+                <?php } } ?>
                 <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($setid, $vid) && $setid <> ''){?>
                 <li><a href="editSetResults.php?vid=<?php echo $vid . '&setid=' . $setid; ?>">Enter Results</a></li>
                 <?php } ?>

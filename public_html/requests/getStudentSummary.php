@@ -106,7 +106,7 @@ function setDifficultyScores(){
     // Get the global average score for each question
     $query = "SELECT SUM(Mark)/SUM(Marks) GAvg, COUNT(Marks) GN, CQ.`Stored Question ID` SQID 
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE CQ.`Stored Question ID` IN (";
+            WHERE CQ.`Deleted` = 0 AND CQ.`Stored Question ID` IN (";
     foreach($questions as $question){
         $query .= $question["SQID"] . ", ";
     }
@@ -139,14 +139,14 @@ function getUserAverage($dates){
     $student = $returns["inputs"]["student"];
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, COUNT(Marks) N 
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE CQ.`Student ID` = $student";
+            WHERE CQ.`Deleted` = 0 AND CQ.`Student ID` = $student";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
-        $query .= " AND CQ.`Date Completed` BETWEEN STR_TO_DATE('$startDate', '%d/%m/%Y') AND STR_TO_DATE('$endDate','%d/%m/%Y')";
+        $query .= " AND CQ.`Date Added` BETWEEN STR_TO_DATE('$startDate', '%d/%m/%Y') AND STR_TO_DATE('$endDate','%d/%m/%Y')";
     } else if (count($dates) === 1) {
         $date = is_null($startDate) ? $endDate : $startDate;
-        $query .= " AND CQ.`Date Completed` > STR_TO_DATE('$date', '%d/%m/%Y')";
+        $query .= " AND CQ.`Date Added` > STR_TO_DATE('$date', '%d/%m/%Y')";
     }
     try{
         $results = db_select_exception($query);
@@ -163,14 +163,15 @@ function getSetAverage($dates){
     $set = $returns["inputs"]["set"];
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, Count(Mark) N
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE CQ.`Set ID` = $set";
+            LEFT JOIN TGROUPWORKSHEETS GW ON GW.`Group Worksheet ID` = CQ.`Group Worksheet ID`
+            WHERE CQ.`Deleted` = 0 AND (CQ.`Set ID` = $set OR GW.`Group ID` = $set) ";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
-        $query .= " AND CQ.`Date Completed` BETWEEN STR_TO_DATE('$startDate', '%d/%m/%Y') AND STR_TO_DATE('$endDate','%d/%m/%Y')";
+        $query .= " AND CQ.`Date Added` BETWEEN STR_TO_DATE('$startDate', '%d/%m/%Y') AND STR_TO_DATE('$endDate','%d/%m/%Y')";
     } else if (count($dates) === 1) {
         $date = is_null($startDate) ? $endDate : $startDate;
-        $query .= " AND CQ.`Date Completed` > STR_TO_DATE('$date', '%d/%m/%Y')";
+        $query .= " AND CQ.`Date Added` > STR_TO_DATE('$date', '%d/%m/%Y')";
     }
     try{
         $results = db_select_exception($query);
@@ -208,7 +209,7 @@ function combineQuestionsWithTags(){
     $query = "SELECT CQ.`Completed Question ID` CQID, QT.`Tag ID` TagID, T.`Name` Name FROM TCOMPLETEDQUESTIONS CQ
                 JOIN TQUESTIONTAGS QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
                 JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID`
-                WHERE CQ.`Completed Question ID` IN (";
+                WHERE CQ.`Deleted` = 0 AND CQ.`Completed Question ID` IN (";
     foreach($questions as $question){
         $query .= $question["CQID"] . ", ";
     }
@@ -267,52 +268,68 @@ function getFinalScoreForTags(){
 function getAnsweredQuestions(){
     global $returns, $questions;
     
-    $query = "SELECT CQ.`Stored Question ID` SQID, CQ.`Completed Question ID` CQID, CQ.`Mark`/SQ.`Marks` UMark, SQ.`Marks` Marks, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Completed`), 0) Days
+    $query = "SELECT CQ.`Stored Question ID` SQID, CQ.`Completed Question ID` CQID, CQ.`Mark`/SQ.`Marks` UMark, SQ.`Marks` Marks, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Added`), 0) Days
                 FROM TCOMPLETEDQUESTIONS CQ
                 JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
                 JOIN TQUESTIONTAGS QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
-                WHERE ";
+                JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID` ";
+    
+    $filters = [];
+    array_push($filters, "CQ.`Deleted` = 0");
+    
     if(array_key_exists("inputs", $returns)){
         $inputs = $returns["inputs"];
         if(array_key_exists("student", $inputs)){
             $student = $inputs["student"];
-            $query .= "CQ.`Student ID` = $student AND ";
+            array_push($filters, "CQ.`Student ID` = $student");
         }
         if(array_key_exists("staff", $inputs)){
             $staff = $inputs["staff"];
-            $query .= "CQ.`Staff ID` = $staff AND ";
+            array_push($filters, "(CQ.`Staff ID` = $staff OR GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff)");
         }
         if(array_key_exists("set", $inputs)){
             $set = $inputs["set"];
-            $query .= "CQ.`Set ID` = $set AND ";
+            array_push($filters, "(CQ.`Set ID` = $set OR GW.`Group ID` = $set)");
         }
         if(array_key_exists("tags", $inputs)){
+            $tags = $returns["tags"];
             if(count($tags) > 0){
-                $query .= "(";
+                $filterString .= "(";
                 foreach($tags as $key => $tag){
                     if(count($tags) - 1 !== $key){
-                        $query .= "QT.`Tag ID` = $tag OR ";
+                        $filterString .= "QT.`Tag ID` = $tag OR ";
                     } else {
-                        $query .= "QT.`Tag ID` = $tag) AND ";
+                        $filterString .= "QT.`Tag ID` = $tag)";
                     }
                 }
-            } 
+            }
+            array_push($filters, $filterString);
         }
     }
+    
     if(array_key_exists("dates", $returns)){
         $dates = $returns["dates"];
         if(count($dates) === 1){
             // Only 1 date
             $date = $dates[0];
-            $query .= "CQ.`Date Completed` > STR_TO_DATE('$date', '%d/%m/%Y')";
+            array_push($filters, "CQ.`Date Added` > STR_TO_DATE('$date', '%d/%m/%Y')");
         } else {
             $date1 = $dates[0];
             $date2 = $dates[1];
-            $query .= "CQ.`Date Completed` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
+            array_push($filters, "CQ.`Date Added` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')");
         }
-    } else {
-        $query = substr($query, 0, -4);
     }
+    
+    if(count($filters) > 0) $query .= "WHERE ";
+    
+    foreach($filters as $key => $filter){
+        if(count($filters) - 1 !== $key){
+            $query .= $filter . " AND ";
+        } else {
+            $query .= $filter . " ";
+        }
+    }
+    
     $query .= " GROUP BY CQ.`Completed Question ID`;";
     
     try{
@@ -335,46 +352,61 @@ function getSetWorksheets(){
                JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                JOIN TWORKSHEETS W ON WV.`Worksheet ID` = W.`Worksheet ID`
                JOIN TSTOREDQUESTIONS SQ ON SQ.`Version ID` = GW.`Version ID`
-               JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID`
-                WHERE ";
+               JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID` ";
+    
+    $filters = [];
+    array_push($filters, "W.`Deleted` = 0");
+    array_push($filters, "WV.`Deleted` = 0");
+    
     if(array_key_exists("inputs", $returns)){
         $inputs = $returns["inputs"];
         if(array_key_exists("staff", $inputs)){
             $staff = $inputs["staff"];
-            $query .= "GW.`Primary Staff ID` = $staff AND ";
+            array_push($filters, "GW.`Primary Staff ID` = $staff");
         }
         if(array_key_exists("set", $inputs)){
             $set = $inputs["set"];
-            $query .= "GW.`Group ID` = $set AND ";
+            array_push($filters, "GW.`Group ID` = $set");
         }
         if(array_key_exists("tags", $inputs)){
             $tags = $returns["tags"];
             if(count($tags) > 0){
-                $query .= "(";
+                $filterString .= "(";
                 foreach($tags as $key => $tag){
                     if(count($tags) - 1 !== $key){
-                        $query .= "QT.`Tag ID` = $tag OR ";
+                        $filterString .= "QT.`Tag ID` = $tag OR ";
                     } else {
-                        $query .= "QT.`Tag ID` = $tag) AND ";
+                        $filterString .= "QT.`Tag ID` = $tag)";
                     }
                 }
-            }  
+            }
+            array_push($filters, $filterString);
         }
     }
+    
     if(array_key_exists("dates", $returns)){
         $dates = $returns["dates"];
         if(count($dates) === 1){
             // Only 1 date
             $date = $dates[0];
-            $query .= "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')";
+            array_push($filters, "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')");
         } else {
             $date1 = $dates[0];
             $date2 = $dates[1];
-            $query .= "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
+            array_push($filters, "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')");
         }
-    } else {
-        $query = substr($query, 0, -4);
     }
+    
+    if(count($filters) > 0) $query .= "WHERE ";
+    
+    foreach($filters as $key => $filter){
+        if(count($filters) - 1 !== $key){
+            $query .= $filter . " AND ";
+        } else {
+            $query .= $filter . " ";
+        }
+    }
+    
     $query .= " GROUP BY GW.`Group Worksheet ID`";
     $query .= " ORDER BY GW.`Date Due` DESC;";
     
@@ -461,7 +493,7 @@ function setSetWorksheetResults(){
             
     $query = "select `Group Worksheet ID` GWID, SUM(CQ.Mark) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.Mark)/SUM(SQ.`Marks`) AVG from TCOMPLETEDQUESTIONS CQ
             JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE `Group Worksheet ID` IN (";
+            WHERE CQ.`Deleted` = 0 AND `Group Worksheet ID` IN (";
     foreach($setWorksheets as $worksheet){
         $query .= $worksheet["GWID"] . ", ";
     }
@@ -509,7 +541,7 @@ function setStudentWorksheetResults(){
             
     $query = "SELECT CQ.`Group Worksheet ID` GWID, SUM(CQ.Mark) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.Mark)/SUM(SQ.`Marks`) AVG FROM TCOMPLETEDQUESTIONS CQ
             JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE ";
+            WHERE CQ.`Deleted` = 0 AND ";
     $inputs = $returns["inputs"];
     if(array_key_exists("student", $inputs)){
         $student = $inputs["student"];
