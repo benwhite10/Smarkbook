@@ -275,8 +275,7 @@ function getAnsweredQuestions(){
                 JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID` ";
     
     $filters = [];
-    array_push($filters, "W.`Deleted` = 0");
-    array_push($filters, "WV.`Deleted` = 0");
+    array_push($filters, "CQ.`Deleted` = 0");
     
     if(array_key_exists("inputs", $returns)){
         $inputs = $returns["inputs"];

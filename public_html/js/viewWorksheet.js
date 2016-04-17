@@ -13,7 +13,7 @@ function deleteWorksheet(){
             url: "/requests/worksheetFunctions.php",
             dataType: "json",
             success: function(json){
-                requestSuccess(json, FALSE);
+                requestSuccess(json, new Boolean(false));
             }
         });
     }
@@ -34,7 +34,7 @@ function restoreWorksheet(){
             url: "/requests/worksheetFunctions.php",
             dataType: "json",
             success: function(json){
-                requestSuccess(json, TRUE);
+                requestSuccess(json, new Boolean(false));
             }
         });
     }

@@ -18,16 +18,11 @@ if(!$role){
 
 switch ($requestType){
     case "DELETE":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
-        deleteWorksheet($vid);
-        break;
     case "RESTORE":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        restoreWorksheet($vid);
+        updateWorksheet($vid, $requestType);
         break;
     default:
         break;
@@ -38,8 +33,8 @@ function updateWorksheet($vid, $type){
     
     if($type === "DELETE"){
         $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = TRUE WHERE `Version ID` = $vid";
-        $errorMsg = "There was an error restoring the worksheet.";
-        $successMsg = "Worksheet $vid succesfully restored by $userid";
+        $errorMsg = "There was an error deleted the worksheet.";
+        $successMsg = "Worksheet $vid succesfully deleted by $userid";
     } else if($type === "RESTORE") {
         $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = FALSE WHERE `Version ID` = $vid";
         $errorMsg = "There was an error restoring the worksheet.";
