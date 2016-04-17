@@ -41,8 +41,6 @@ function generateQuestionsForStudent(){
     //Compare that to their own tag list
     $scoredQuestions = scoreQuestions($questions);
     
-    //usort($scoredQuestions, 'sortByOrder');
-    
     // Current doesn't penalise enough low scores
     // One option is to include a rank in there, or extend numbers below 0.
     // Also zero should equal 1 so negative is more than one
@@ -91,7 +89,7 @@ function createQuestionsForStudent($student){
     
     $query2 = "SELECT CQ.`Stored Question ID` SQID, MAX(CQ.`Mark`) Mark, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Added`), 0) Days, DATE_FORMAT(CQ.`Date Added`, '%d/%m/%Y') Date
                 FROM TCOMPLETEDQUESTIONS CQ
-                WHERE CQ.`Student ID` = $student
+                WHERE CQ.`Student ID` = $student AND CQ.`Deleted` = 0
                 GROUP BY CQ.`Stored Question ID`;";
     try{
         $questionTags = db_select_exception($query1);
