@@ -339,7 +339,7 @@ function generateReport(){
 
 function generateNewReqId(){
     var reportRequest = JSON.parse(localStorage.getItem("activeReportRequest"));
-    var curreqid = reportRequest["reqid"];
+    var curreqid = reportRequest !== null ? reportRequest["reqid"] : null;
     do {
         var reqid = Math.floor(Math.random() * 9999);
     } while (reqid === curreqid);

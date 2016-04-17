@@ -85,6 +85,8 @@ function createQuestionsForStudent($student){
                 ) SQIDS JOIN TSTOREDQUESTIONS SQ ON SQIDS.SQID = SQ.`Stored Question ID`
                 JOIN TQUESTIONTAGS QT ON QT.`Stored Question ID` = SQIDS.SQID
                 JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID`
+                JOIN TWORKSHEETVERSION WV ON SQ.`Version ID` = WV.`Version ID`
+                WHERE WV.`Deleted` = 0
                 ORDER BY SQIDS.SQID, T.`Name`;";
     
     $query2 = "SELECT CQ.`Stored Question ID` SQID, MAX(CQ.`Mark`) Mark, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Added`), 0) Days, DATE_FORMAT(CQ.`Date Added`, '%d/%m/%Y') Date
