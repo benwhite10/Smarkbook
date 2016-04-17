@@ -35,10 +35,12 @@ function updateWorksheet($vid, $type){
         $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = TRUE WHERE `Version ID` = $vid";
         $errorMsg = "There was an error deleted the worksheet.";
         $successMsg = "Worksheet $vid succesfully deleted by $userid";
+        $delete = TRUE;
     } else if($type === "RESTORE") {
         $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = FALSE WHERE `Version ID` = $vid";
         $errorMsg = "There was an error restoring the worksheet.";
         $successMsg = "Worksheet $vid succesfully restored by $userid";
+        $delete = FALSE;
     } else {
         failRequest("There was an error completing your request;");
     }
@@ -46,7 +48,7 @@ function updateWorksheet($vid, $type){
     try{
         db_begin_transaction();
         db_query_exception($query);
-        updateRelatedCompletedQuestions($vid, FALSE);
+        updateRelatedCompletedQuestions($vid, $delete);
         db_commit_transaction();
     } catch (Exception $ex) {
         db_rollback_transaction();
