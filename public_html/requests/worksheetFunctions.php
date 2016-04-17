@@ -33,10 +33,21 @@ switch ($requestType){
         break;
 }
 
-function restoreWorksheet($vid){
+function updateWorksheet($vid, $type){
     global $userid;
     
-    $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = FALSE WHERE `Version ID` = $vid";
+    if($type === "DELETE"){
+        $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = TRUE WHERE `Version ID` = $vid";
+        $errorMsg = "There was an error restoring the worksheet.";
+        $successMsg = "Worksheet $vid succesfully restored by $userid";
+    } else if($type === "RESTORE") {
+        $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = FALSE WHERE `Version ID` = $vid";
+        $errorMsg = "There was an error restoring the worksheet.";
+        $successMsg = "Worksheet $vid succesfully restored by $userid";
+    } else {
+        failRequest("There was an error completing your request;");
+    }
+    
     try{
         db_begin_transaction();
         db_query_exception($query);
@@ -44,32 +55,12 @@ function restoreWorksheet($vid){
         db_commit_transaction();
     } catch (Exception $ex) {
         db_rollback_transaction();
-        returnToPageError($ex, "There was an error restoring the worksheet.");
+        returnToPageError($ex, $errorMsg);
     }
     $response = array(
         "success" => TRUE);
     echo json_encode($response);
-    infoLog("Worksheet $vid succesfully restored by $userid");
-    exit();
-}
-
-function deleteWorksheet($vid){
-    global $userid;
-    
-    $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = TRUE WHERE `Version ID` = $vid";
-    try{
-        db_begin_transaction();
-        db_query_exception($query);
-        updateRelatedCompletedQuestions($vid, TRUE);
-        db_commit_transaction();
-    } catch (Exception $ex) {
-        db_rollback_transaction();
-        returnToPageError($ex, "There was an error deleting the worksheet");
-    }
-    $response = array(
-        "success" => TRUE);
-    echo json_encode($response);
-    infoLog("Worksheet $vid succesfully deleted by $userid");
+    infoLog($successMsg);
     exit();
 }
 

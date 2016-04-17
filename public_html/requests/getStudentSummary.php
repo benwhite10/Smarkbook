@@ -272,49 +272,65 @@ function getAnsweredQuestions(){
                 FROM TCOMPLETEDQUESTIONS CQ
                 JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
                 JOIN TQUESTIONTAGS QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
-                JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
-                WHERE CQ.`Deleted` = 0 AND ";
+                JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID` ";
+    
+    $filters = [];
+    array_push($filters, "W.`Deleted` = 0");
+    array_push($filters, "WV.`Deleted` = 0");
+    
     if(array_key_exists("inputs", $returns)){
         $inputs = $returns["inputs"];
         if(array_key_exists("student", $inputs)){
             $student = $inputs["student"];
-            $query .= "CQ.`Student ID` = $student AND ";
+            array_push($filters, "CQ.`Student ID` = $student");
         }
         if(array_key_exists("staff", $inputs)){
             $staff = $inputs["staff"];
-            $query .= "(CQ.`Staff ID` = $staff OR GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff) AND ";
+            array_push($filters, "(CQ.`Staff ID` = $staff OR GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff)");
         }
         if(array_key_exists("set", $inputs)){
             $set = $inputs["set"];
-            $query .= "(CQ.`Set ID` = $set OR GW.`Group ID` = $set) AND ";
+            array_push($filters, "(CQ.`Set ID` = $set OR GW.`Group ID` = $set)");
         }
         if(array_key_exists("tags", $inputs)){
+            $tags = $returns["tags"];
             if(count($tags) > 0){
-                $query .= "(";
+                $filterString .= "(";
                 foreach($tags as $key => $tag){
                     if(count($tags) - 1 !== $key){
-                        $query .= "QT.`Tag ID` = $tag OR ";
+                        $filterString .= "QT.`Tag ID` = $tag OR ";
                     } else {
-                        $query .= "QT.`Tag ID` = $tag) AND ";
+                        $filterString .= "QT.`Tag ID` = $tag)";
                     }
                 }
-            } 
+            }
+            array_push($filters, $filterString);
         }
     }
+    
     if(array_key_exists("dates", $returns)){
         $dates = $returns["dates"];
         if(count($dates) === 1){
             // Only 1 date
             $date = $dates[0];
-            $query .= "CQ.`Date Added` > STR_TO_DATE('$date', '%d/%m/%Y')";
+            array_push($filters, "CQ.`Date Added` > STR_TO_DATE('$date', '%d/%m/%Y')");
         } else {
             $date1 = $dates[0];
             $date2 = $dates[1];
-            $query .= "CQ.`Date Added` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
+            array_push($filters, "CQ.`Date Added` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')");
         }
-    } else {
-        $query = substr($query, 0, -4);
     }
+    
+    if(count($filters) > 0) $query .= "WHERE ";
+    
+    foreach($filters as $key => $filter){
+        if(count($filters) - 1 !== $key){
+            $query .= $filter . " AND ";
+        } else {
+            $query .= $filter . " ";
+        }
+    }
+    
     $query .= " GROUP BY CQ.`Completed Question ID`;";
     
     try{
@@ -386,9 +402,9 @@ function getSetWorksheets(){
     
     foreach($filters as $key => $filter){
         if(count($filters) - 1 !== $key){
-            $query .= $filters[$key] . " AND ";
+            $query .= $filter . " AND ";
         } else {
-            $query .= $filters[$key] . " ";
+            $query .= $filter . " ";
         }
     }
     

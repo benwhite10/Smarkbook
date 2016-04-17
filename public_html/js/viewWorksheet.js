@@ -1,5 +1,5 @@
 function deleteWorksheet(){
-    var message = "Are you sure you want to delete this worksheet, doing so will also remove any results associated with this worksheet";
+    var message = "Are you sure you want to delete this worksheet? This will also remove any results associated with this worksheet.";
     if(confirm(message)){
         var infoArray = {
             type: "DELETE",
@@ -13,14 +13,14 @@ function deleteWorksheet(){
             url: "/requests/worksheetFunctions.php",
             dataType: "json",
             success: function(json){
-                deleteRequestSuccess(json);
+                requestSuccess(json, FALSE);
             }
         });
     }
 }
 
 function restoreWorksheet(){
-    var message = "Are you sure you want to restore this worksheet.";
+    var message = "Are you sure you want to restore this worksheet?";
     if(confirm(message)){
         var infoArray = {
             type: "RESTORE",
@@ -34,25 +34,22 @@ function restoreWorksheet(){
             url: "/requests/worksheetFunctions.php",
             dataType: "json",
             success: function(json){
-                restoreRequestSuccess(json);
+                requestSuccess(json, TRUE);
             }
         });
     }
 }
 
-function restoreRequestSuccess(json){
+function requestSuccess(json, restore){
     if(json["success"]){
         location.reload();
     } else {
-        alert("There was an problem restoring the worksheet, it has not been restored.");
-    }
-}
-
-function deleteRequestSuccess(json){
-    if(json["success"]){
-        location.reload();
-    } else {
-        alert("There was an problem deleting the worksheet, it has not been deleted.");
+        if(restore){
+            alert("There was an problem restoring the worksheet, it has not been restored.");
+        } else {
+            alert("There was an problem restoring the worksheet, it has not been deleted.");
+        }
+        
     }
 }
 
