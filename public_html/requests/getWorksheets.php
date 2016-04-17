@@ -35,7 +35,7 @@ switch ($requestType){
 }
 
 function getAllWorksheetNames($orderby, $desc){    
-    $query = "SELECT WV.`Version ID` ID, W.`Name` WName, WV.`Name` VName FROM TWORKSHEETS W JOIN TWORKSHEETVERSION WV ON W.`Worksheet ID` = WV.`Worksheet ID` WHERE W.`Deleted` = 0";
+    $query = "SELECT WV.`Version ID` ID, W.`Name` WName, WV.`Name` VName FROM TWORKSHEETS W JOIN TWORKSHEETVERSION WV ON W.`Worksheet ID` = WV.`Worksheet ID` WHERE W.`Deleted` = 0 AND WV.`Deleted` = 0";
     if(isset($orderby)){
         $query .= " ORDER BY $orderby";
         if(isset($desc) && $desc == "TRUE"){
@@ -63,7 +63,7 @@ function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                  JOIN TWORKSHEETS W ON W.`Worksheet ID` = WV.`Worksheet ID` ";
     
-    $query .= filterBy(["GW.`Group ID`", "GW.`Primary Staff ID`"], [$groupid, $staffid]);
+    $query .= filterBy(["GW.`Group ID`", "GW.`Primary Staff ID`", "W.`Deleted`", "WV.`Deleted`"], [$groupid, $staffid, "0", "0"]);
     $query .= orderBy([$orderby], [$desc]);
     
     try{

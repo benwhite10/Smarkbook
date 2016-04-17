@@ -37,7 +37,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 join TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 join TWORKSHEETS W ON WV.`Worksheet ID` = W.`Worksheet ID`
                 join TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                
-                where GW.`Primary Staff ID` = $staffid and GW.`Group ID` = $setid and W.`Deleted` = 0
+                where GW.`Primary Staff ID` = $staffid and GW.`Group ID` = $setid and W.`Deleted` = 0 and WV.`Deleted` = 0
                 group by GW.`Group Worksheet ID`                
                 order by GW.`Date Due`, WV.`Name`;";
 
