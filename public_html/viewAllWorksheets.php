@@ -23,9 +23,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 
 $setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
 
-$query = "SELECT W.`Worksheet ID` WID, V.`Version ID` VID, W.`Name` Name, V.`Name` Version, DATE_FORMAT(W.`Date Added`, '%d/%m/%y') Date, S.`Initials` Author "
-        . "FROM TWORKSHEETS W "
-        . "JOIN TWORKSHEETVERSION V ON W.`WORKSHEET ID` = V.`WORKSHEET ID` "
+$query = "SELECT V.`Worksheet ID` WID, V.`Version ID` VID, V.`WName` Name, V.`VName` Version, DATE_FORMAT(W.`Date Added`, '%d/%m/%y') Date, S.`Initials` Author "
+        . "FROM TWORKSHEETVERSION V "
         . "JOIN TSTAFF S ON S.`User ID` = V.`Author ID` "
         . "WHERE V.`Deleted` = 0 "
         . "ORDER BY Name;";
