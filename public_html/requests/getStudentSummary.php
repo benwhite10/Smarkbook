@@ -355,7 +355,6 @@ function getSetWorksheets(){
                JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID` ";
     
     $filters = [];
-    array_push($filters, "W.`Deleted` = 0");
     array_push($filters, "WV.`Deleted` = 0");
     
     if(array_key_exists("inputs", $returns)){

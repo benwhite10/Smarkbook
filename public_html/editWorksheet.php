@@ -174,11 +174,13 @@ function failWithMessage($msg, $ex){
                 <div id="main_content">
                     <input type="hidden" name = "version" value="<?php echo $vid ?>" />
                     <label for="worksheetname">Worksheet:
-                    </label><input type="text" name="worksheetname" id="worksheetname" placeholder="Name" value="<?php echo $worksheet[0]['WName'] ?>"></input>
+                    </label><input type="text" name="worksheetname" id="worksheetname" placeholder="Name" value="<?php echo $worksheet[0]['WName'] ?>" />
+                    <!--
                     <label for="versionname">Version:
-                    </label><input type="text" name="versionname" id="versionname" placeholder="Version" value="<?php echo $worksheet[0]['VName'] ?>"></input>
+                    </label><input type="text" name="versionname" id="versionname" placeholder="Version" value="<?php //echo $worksheet[0]['VName'] ?>" />
+                    -->
                     <label for="link">File Link:
-                    </label><input type="url" name="link" placeholder="File Link" id="test123" value="<?php echo $worksheet[0]['Link'] ?>"></input>
+                    </label><input type="url" name="link" placeholder="File Link" id="test123" value="<?php echo $worksheet[0]['Link'] ?>" />
                     <label for="author">Author:
                     </label><select name="author" id="author">
                         <option value=0>Author:</option>

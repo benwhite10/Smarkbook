@@ -29,7 +29,7 @@ $wid = filter_input(INPUT_POST, 'wid', FILTER_SANITIZE_NUMBER_INT);
 
 $informationArray = array($wname, $vname, $author, $date, $number, $rawTags, $link);
 
-if(validation($wname, $vname, $author, $date, $number)){
+if(validation($wname, $author, $date, $number)){
     
     db_begin_transaction();
     
@@ -99,7 +99,7 @@ if(validation($wname, $vname, $author, $date, $number)){
             }else if($type !== "CURRENT" && $type !== "NULL"){
                 db_rollback_transaction();
                 $message = "There was an error creating the tags for the worksheet, please try again.";
-                returnToPageError($message, "An invalid type was passed into a tag.");
+                returnToPageError($message);
             }
             
             if($type !== "NULL" && $tagId !== ""){
@@ -109,14 +109,14 @@ if(validation($wname, $vname, $author, $date, $number)){
                 } catch (Exception $ex) {
                     db_rollback_transaction();
                     $message = "There was a problem adding a tag to the worksheet, please try again.";
-                    returnToPageError($message, $ex);
+                    returnToPageErrorException($message, $ex);
                 }
             }
         }
     }
       
     db_commit_transaction();
-    $message = "Worksheet ($wname - $vname) added successfully.";
+    $message = "Worksheet ($wname) added successfully.";
     returnToPageSuccess($message, $vid);
 }else{
     $message = "Something went wrong adding the worksheet, please try again.";
@@ -168,12 +168,17 @@ function getTagId($string){
     }
 }
 
-function returnToPageError($message, $ex){
-    $type = 'ERROR';
+function returnToPageErrorException($message, $ex){
     if(!isset($message)){
         $message = 'Something has gone wrong';   
     }
     errorLog($message . ": " . $ex->getMessage());
+    returnToPageError($message);
+}
+
+function returnToPageError($message){
+    $type = 'ERROR';
+    errorLog($message);
     $_SESSION['message'] = new Message($type, $message);
     $_SESSION['formValues'] = $GLOBALS["informationArray"];
     header("Location: ../addNewWorksheet.php");
@@ -188,9 +193,9 @@ function returnToPageSuccess($message, $vid){
     exit;
 }
 
-function validation($wname, $vname, $author, $date, $number){
-    if(isset($wname, $vname, $author, $date, $number)){
-        if($wname === "" || $vname === "" || $author === "" || $date === "" || $number === ""){
+function validation($wname, $author, $date, $number){
+    if(isset($wname, $author, $date, $number)){
+        if($wname === "" || $author === "" || $date === "" || $number === ""){
             return false;
         }
         return true;

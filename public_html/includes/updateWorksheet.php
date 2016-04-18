@@ -23,7 +23,7 @@ $version = filter_input(INPUT_POST, 'version', FILTER_SANITIZE_STRING);
 
 $nberror = array();
 
-if(isset($wname, $vname, $author, $date, $version)){
+if(isset($wname, $author, $date, $version)){
     $link = filter_input(INPUT_POST, 'link', FILTER_SANITIZE_URL);
     $newdate = date('Y-m-d h:m:s',strtotime(str_replace('/','-', $date)));
     
