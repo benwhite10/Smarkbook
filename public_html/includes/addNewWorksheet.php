@@ -49,7 +49,7 @@ if(validation($wname, $vname, $author, $date, $number)){
         $wid = $vid;
     }
     
-    $query1 = "INSERT INTO TWORKSHEETVERSION (`Worksheet ID`) VALUES ($wid);";
+    $query1 = "UPDATE TWORKSHEETVERSION SET `Worksheet ID` =  $wid WHERE `Version ID` = $vid;";
     try{
         db_insert_query_exception($query1);
     } catch (Exception $ex) {

@@ -36,8 +36,8 @@ switch ($requestType){
 
 function getAllWorksheetNames($orderby, $desc){    
     $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName "
-            . "FROM TWORKSHEETVERSION "
-            . "WV.`Deleted` = 0";
+            . "FROM TWORKSHEETVERSION WV "
+            . "WHERE WV.`Deleted` = 0";
     if(isset($orderby)){
         $query .= " ORDER BY $orderby";
         if(isset($desc) && $desc == "TRUE"){
@@ -70,7 +70,7 @@ function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
     try{
         $worksheets = db_select_exception($query);
     } catch (Exception $ex) {
-        $message = "There was an error retrieving the worksheets.";
+        $message = "There was an error retrieving the worksheets";
         returnToPageError($ex, $message);
     }
     

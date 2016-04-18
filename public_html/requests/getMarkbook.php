@@ -39,7 +39,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 join TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                
                 where GW.`Primary Staff ID` = $staffid and GW.`Group ID` = $setid and WV.`Deleted` = 0
                 group by GW.`Group Worksheet ID`                
-                order by GW.`Date Due`, WV.`Name`;";
+                order by GW.`Date Due`, WV.`WName`;";
 
     try{
         $students = db_select_exception($query1);
