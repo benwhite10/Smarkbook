@@ -25,6 +25,7 @@ $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
 $number = filter_input(INPUT_POST, 'questions', FILTER_SANITIZE_STRING);
 $link = filter_input(INPUT_POST, 'link', FILTER_SANITIZE_URL);
 $rawTags = filter_input(INPUT_POST, 'tags', FILTER_SANITIZE_STRING);
+$wid = filter_input(INPUT_POST, 'wid', FILTER_SANITIZE_NUMBER_INT);
 
 $informationArray = array($wname, $vname, $author, $date, $number, $rawTags, $link);
 
@@ -34,20 +35,23 @@ if(validation($wname, $vname, $author, $date, $number)){
     
     $newdate = date('Y-d-m h:m:s',strtotime(str_replace('/','-', $date)));
     
-    $query = "INSERT INTO TWORKSHEETS (`Name`, `Link`) VALUES ('$wname', '$link');";
+    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`) VALUES ('$wname', '$vname', '$link', $author);";
     try{
         $resultArray = db_insert_query_exception($query);
-        $wid = $resultArray[1];
+        $vid = $resultArray[1];
     } catch (Exception $ex) {
         db_rollback_transaction();
         $message = "Something went wrong adding the worksheet, please try again.";
         returnToPageError($message, $ex);
     }
     
-    $query1 = "INSERT INTO TWORKSHEETVERSION (`Worksheet ID`, `Name`, `Author ID`) VALUES ($wid, '$vname', $author);";
+    if(!isset($wid)){
+        $wid = $vid;
+    }
+    
+    $query1 = "INSERT INTO TWORKSHEETVERSION (`Worksheet ID`) VALUES ($wid);";
     try{
-        $resultArray1 = db_insert_query_exception($query1);
-        $vid = $resultArray1[1];
+        db_insert_query_exception($query1);
     } catch (Exception $ex) {
         db_rollback_transaction();
         $message = "Something went wrong adding the worksheet, please try again.";
