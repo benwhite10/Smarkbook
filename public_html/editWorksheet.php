@@ -30,7 +30,10 @@ if(!isset($vid)){
 
 $stopFlag = FALSE;
 
-$query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`User ID` WHERE V.`Version ID` = $vid;";
+$query1 = "SELECT V.`Worksheet ID` WID, V.`WName` WName, V.`VName` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, V.`Link` Link "
+        . "FROM TWORKSHEETVERSION V "
+        . "JOIN TSTAFF S ON V.`Author ID` = S.`User ID` "
+        . "WHERE V.`Version ID` = $vid;";
 try{
     $worksheet = db_select_exception($query1);
 } catch (Exception $ex) {
@@ -39,7 +42,7 @@ try{
 }
 
 $queries = array(
-    "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, W.`Link` Link FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;",
+    "SELECT V.`Worksheet ID` WID, V.`WName` WName, V.`VName` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, V.`Link` Link FROM TWORKSHEETVERSION V JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;",
     "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;",
     "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;",
     "SELECT T.`Name` Name, T.`Tag ID` ID FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` GROUP BY T.`Name` ORDER BY COUNT(T.`Name`) DESC, T.`Name`; ",
