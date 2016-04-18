@@ -29,8 +29,8 @@ if(isset($wname, $vname, $author, $date, $version)){
     
     db_begin_transaction();
     
-    $query = "UPDATE TWORKSHEETS W JOIN TWORKSHEETVERSION V ON W.`Worksheet ID` = V.`Worksheet ID` 
-        SET W.`Name` = '$wname', V.`Name` = '$vname', W.`Link` = '$link', V.`Date Added` = '$newdate', V.`Author ID` = $author
+    $query = "UPDATE TWORKSHEETVERSION V 
+        SET V.`WName` = '$wname', V.`VName` = '$vname', V.`Link` = '$link', V.`Date Added` = '$newdate', V.`Author ID` = $author
         WHERE V.`Version ID` = $version;";
     try{
         db_query_exception($query);

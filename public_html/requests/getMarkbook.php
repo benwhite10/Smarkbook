@@ -33,11 +33,11 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` 
                 WHERE G.`Group ID` = $setid 
                 ORDER BY U.Surname;";
-    $query2 = "select WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, W.`Name` WName, WV.`Name` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, SUM(SQ.`Marks`) Marks from TGROUPWORKSHEETS GW
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, SUM(SQ.`Marks`) Marks 
+                FROM TGROUPWORKSHEETS GW
                 join TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
-                join TWORKSHEETS W ON WV.`Worksheet ID` = W.`Worksheet ID`
                 join TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                
-                where GW.`Primary Staff ID` = $staffid and GW.`Group ID` = $setid and W.`Deleted` = 0 and WV.`Deleted` = 0
+                where GW.`Primary Staff ID` = $staffid and GW.`Group ID` = $setid and WV.`Deleted` = 0
                 group by GW.`Group Worksheet ID`                
                 order by GW.`Date Due`, WV.`Name`;";
 
