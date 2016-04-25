@@ -21,11 +21,12 @@ $tag1 = filter_input(INPUT_POST, 'tag1', FILTER_SANITIZE_NUMBER_INT);
 $tag2 = filter_input(INPUT_POST, 'tag2', FILTER_SANITIZE_NUMBER_INT);
 $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
 $type = filter_input(INPUT_POST, 'type', FILTER_SANITIZE_STRING);
+$tagType = filter_input(INPUT_POST, 'tagType', FILTER_SANITIZE_STRING);
 
 if($type === "DELETE"){
     deleteTag($tag1);
 } else if ($type === "MODIFY") {
-    modifyTag($tag1, $name);
+    modifyTag($tag1, $name, $tagType);
 } else if ($type === "MERGE") {
     mergeTags($tag1, $tag2);
 }
@@ -56,9 +57,9 @@ function mergeTags($tag1, $tag2){
     }
 }
 
-function modifyTag($tag, $name){
+function modifyTag($tag, $name, $tagType){
     $ucname = ucwords($name);
-    $query = "update TTAGS set `Name` = '$ucname' WHERE `Tag ID` = $tag;";
+    $query = "update TTAGS set `Name` = '$ucname', `Type` = '$tagType' WHERE `Tag ID` = $tag;";
     try{
         db_query_exception($query);
         returnToPageSuccess("Tags succesfully modified");
