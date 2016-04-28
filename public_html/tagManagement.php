@@ -12,6 +12,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -21,6 +22,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
     header("Location: unauthorisedAccess.php");
     exit();
 }
+
+$tagId = filter_input(INPUT_GET,'tagid',FILTER_SANITIZE_NUMBER_INT);
 
 $query = "select `Tag ID`, `Name`, `Type` from TTAGS order by `Name`;";
 try{
@@ -54,7 +57,6 @@ if(isset($_SESSION['message'])){
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
     <script src="js/jquery.validate.min.js"></script>
-    <!--<script src="js/tagsList.js"></script>-->
     <script src="js/methods.js"></script>
     <script src="js/moment.js"></script>
     <script src="js/tagManagement.js"></script>
@@ -62,6 +64,10 @@ if(isset($_SESSION['message'])){
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
+    <?php
+        echo "<input type='hidden' id='userid' value='$userid' />";
+        echo "<input type='hidden' id='userval' value='$userval' />";
+    ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -122,7 +128,12 @@ if(isset($_SESSION['message'])){
                                 foreach($tags as $tag){
                                     $id = $tag['Tag ID'];
                                     $name = $tag['Name'];
-                                    echo "<option value='$id'>$name</option>";
+                                    if($id == $tagId){
+                                        echo "<option value='$id' selected>$name</option>";
+                                    } else {
+                                        echo "<option value='$id'>$name</option>";
+                                    }
+                                    
                                 }
                             }
                         ?>
@@ -160,7 +171,6 @@ if(isset($_SESSION['message'])){
             </form> 
     	</div>
     </div>  
-    <script src="js/tagsList.js"></script>
 </body>
 
 	

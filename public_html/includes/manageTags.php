@@ -51,7 +51,7 @@ function mergeTags($tag1, $tag2){
     try{
         db_query_exception($query1);
         db_query_exception($query2);
-        returnToPageSuccess("Tags succesfully merged");
+        returnToPageSuccess("Tags succesfully merged", $tag1);
     } catch (Exception $ex) {
         returnToPageError("There was a problem merging the tags.", $ex);
     }
@@ -62,7 +62,7 @@ function modifyTag($tag, $name, $tagType){
     $query = "update TTAGS set `Name` = '$ucname', `Type` = '$tagType' WHERE `Tag ID` = $tag;";
     try{
         db_query_exception($query);
-        returnToPageSuccess("Tags succesfully modified");
+        returnToPageSuccess("Tags succesfully modified", $tag);
     } catch (Exception $ex) {
         returnToPageError("There was a problem modifying the tag.", $ex);
     }
@@ -81,9 +81,9 @@ function returnToPageError($message, $ex){
     exit;
 }
 
-function returnToPageSuccess($message){
+function returnToPageSuccess($message, $tag){
     $messageType = 'SUCCESS';
     $_SESSION['message'] = new Message($messageType, $message);
-    header("Location: ../tagManagement.php");
+    header("Location: ../viewAllTags.php?tagid=$tag");
     exit;
 }

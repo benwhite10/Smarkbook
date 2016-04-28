@@ -1,5 +1,6 @@
 $(document).ready(function(){
     changeType();
+    changeTag();
 });
 
 function changeType(){
@@ -19,6 +20,7 @@ function setUpForModify(){
     $("#tagType").show();
     $("#tag1label").html("Tag:");
     $("#descText").hide();
+    $("#submit").val("Save");
 }
 
 function setUpForMerge(){
@@ -28,6 +30,7 @@ function setUpForMerge(){
     $("#tagType").hide();
     $("#tag1label").html("Tag 1:");
     $("#descText").show();
+    $("#submit").val("Merge");
 }
 
 function setUpForDelete(){
@@ -37,13 +40,15 @@ function setUpForDelete(){
     $("#tagType").hide();
     $("#tag1label").html("Tag:");
     $("#descText").hide();
+    $("#submit").val("Delete");
 }
 
 function changeTag(){
-    // Request tag information
     var infoArray = {
         tagid: $("#tag1input").val(),
-        type: "INFO"
+        type: "INFO",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",
@@ -72,6 +77,5 @@ function updateInfo(json){
         $("#typeInput").val(type);
     } else {
         console.log("There was an error requesting the tag information");
-    }
-    
+    }  
 }
