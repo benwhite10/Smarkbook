@@ -57,8 +57,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
         echo "<input type='hidden' id='setid' value='$setid' />";
         echo "<input type='hidden' id='start' value='$startdate' />";
         echo "<input type='hidden' id='end' value='$enddate' />";
-        echo "<input type='hidden' id='userid' value='$userid' />";
-        echo "<input type='hidden' id='userval' value='$userval' />";
+        setUpRequestAuthorisation($userid, $userval);
         ?>
         <div id="main">
             <div id="header">
