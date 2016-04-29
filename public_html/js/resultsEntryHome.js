@@ -58,7 +58,7 @@ function setUpWorksheets(){
 
     if(document.getElementById("type") && document.getElementById("type").value == 2){
         infoArray["type"] = "FILTERED";
-        infoArray["orderby"] = "DueDate";
+        infoArray["orderby"] = "GW.`Date Due`";
         infoArray["desc"] = "TRUE";
     }else{
         infoArray["type"] = "ALL";
@@ -94,8 +94,6 @@ function worksheetsSuccess(json){
                 var id = worksheet["ID"];
                 if(date !== undefined){
                     str += "<option value=" + id + ">" + name + " - " + date + "</option>";
-                }else if(vname !== undefined){
-                    str += "<option value=" + id + ">" + name + " - " + vname + "</option>";
                 }else{
                     str += "<option value=" + id + ">" + name + "</option>";
                 }
