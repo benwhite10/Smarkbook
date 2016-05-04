@@ -81,7 +81,6 @@ if($respArray["success"]){
 <html>
 <head lang="en">
     <?php pageHeader("Smarkbook"); ?>
-    <link rel="stylesheet" type="text/css" href="css/table.css" />
     <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css" />
     <link href="css/autocomplete.css" rel="stylesheet" />
     <script src="js/jquery-ui.js"></script>
