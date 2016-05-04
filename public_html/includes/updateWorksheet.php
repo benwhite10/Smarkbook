@@ -23,14 +23,14 @@ $version = filter_input(INPUT_POST, 'version', FILTER_SANITIZE_STRING);
 
 $nberror = array();
 
-if(isset($wname, $vname, $author, $date, $version)){
+if(isset($wname, $author, $date, $version)){
     $link = filter_input(INPUT_POST, 'link', FILTER_SANITIZE_URL);
     $newdate = date('Y-m-d h:m:s',strtotime(str_replace('/','-', $date)));
     
     db_begin_transaction();
     
-    $query = "UPDATE TWORKSHEETS W JOIN TWORKSHEETVERSION V ON W.`Worksheet ID` = V.`Worksheet ID` 
-        SET W.`Name` = '$wname', V.`Name` = '$vname', W.`Link` = '$link', V.`Date Added` = '$newdate', V.`Author ID` = $author
+    $query = "UPDATE TWORKSHEETVERSION V 
+        SET V.`WName` = '$wname', V.`VName` = '$vname', V.`Link` = '$link', V.`Date Added` = '$newdate', V.`Author ID` = $author
         WHERE V.`Version ID` = $version;";
     try{
         db_query_exception($query);

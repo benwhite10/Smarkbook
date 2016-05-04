@@ -155,11 +155,13 @@ if(isset($_SESSION['message'])){
             <form id="editForm" class="editWorksheet" action="includes/addNewWorksheet.php" method="POST">
                 <div id="main_content">
                     <label for="worksheetname">Worksheet:
-                    </label><input type="text" name="worksheetname" id="worksheetname" placeholder="Name" value="<?php if(isset($wname)){ echo $wname; } ?>"></input>
+                    </label><input type="text" name="worksheetname" id="worksheetname" placeholder="Name" value="<?php if(isset($wname)){ echo $wname; } ?>" />
+                    <!--
                     <label for="versionname">Version:
-                    </label><input type="text" name="versionname" id="versionname" placeholder="Version" value="<?php echo isset($vname)?$vname:"Original"; ?>"</input>
+                    </label><input type="text" name="versionname" id="versionname" placeholder="Version" value="<?php echo isset($vname)?$vname:"Original"; ?>" />
+                    -->
                     <label for="link">File Link:
-                    </label><input type="url" name="link" placeholder="File Link" id="test123" value="<?php if(isset($link)){ echo $link; } ?>"></input>
+                    </label><input type="url" name="link" placeholder="File Link" id="test123" value="<?php if(isset($link)){ echo $link; } ?>" />
                     <label for="author">Author:
                     </label><select name="author" id="author">
                         <option value=0>Author:</option>

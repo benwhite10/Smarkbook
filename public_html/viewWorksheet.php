@@ -26,9 +26,18 @@ $vid = filter_input(INPUT_GET,'id',FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
 
 if(isset($vid)){
-    $query1 = "SELECT W.`Worksheet ID` WID, W.`Name` WName, V.`Name` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, V.`Deleted` Deleted FROM TWORKSHEETVERSION V JOIN TWORKSHEETS W ON V.`Worksheet ID` = W.`Worksheet ID` JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;";
-    $query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
-    $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
+    $query1 = "SELECT V.`Worksheet ID` WID, V.`WName` WName, V.`VName` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, V.`Deleted` Deleted "
+            . "FROM TWORKSHEETVERSION V "
+            . "JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` "
+            . "WHERE V.`Version ID` = $vid;";
+    $query2 = "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks "
+            . "FROM TSTOREDQUESTIONS S "
+            . "WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;";
+    $query3 = "SELECT S.`Stored Question ID` ID, T.`Name` Name "
+            . "FROM TSTOREDQUESTIONS S "
+            . "JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` "
+            . "JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` "
+            . "WHERE S.`Version ID` = $vid ORDER BY T.`Name`;";
 
     try{
         $worksheet = db_select_exception($query1);

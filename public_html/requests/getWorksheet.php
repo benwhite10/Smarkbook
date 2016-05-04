@@ -47,9 +47,8 @@ function getWorksheetForGWID($gwid){
                 WHERE `Group Worksheet ID` = $gwid AND `Deleted` = 0;";
     
     //Details for the worksheet, date due, notes etc
-    $query3 = "SELECT W.`Name` WName, WV.`Name` VName, GW.`Group ID` SetID, G.`Name` SetName, GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Added` DateAdded, GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes FROM TGROUPWORKSHEETS GW
+    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Added` DateAdded, GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
-                JOIN TWORKSHEETS W ON W.`Worksheet ID` = WV.`Worksheet ID`
                 JOIN TGROUPS G ON G.`Group ID` = GW.`Group ID`
                 WHERE `Group Worksheet ID` = $gwid;";
     
