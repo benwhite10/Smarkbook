@@ -1,8 +1,10 @@
 <?php
-include_once('../includes/db_functions.php');
-include_once('../includes/session_functions.php');
-include_once('../includes/class.phpmailer.php');
-include_once('classes/AllClasses.php');
+$include_path = get_include_path();
+include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/includes/class.phpmailer.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
+include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -42,19 +44,8 @@ try{
 <!DOCTYPE html>
 <html>
 <head lang="en">
-	<meta charset="UTF-8">
-    <title>Smarkbook</title>
-    <meta name="description" content="Smarkbook" />
-    <meta name="keywords" content="Intelligent, personalised feedback through smart data analysis" />
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=9" />
-    <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
-    <link rel="stylesheet" type="text/css" href="css/branding.css" />
-    <link rel="stylesheet" type="text/css" href="css/table.css" />
-    <link rel="shortcut icon" href="branding/favicon.ico">
-    <script src="js/methods.js"></script>
+    <?php pageHeader("Worksheets"); ?>
     <script src="js/sorttable.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'/>
 </head>
 <body>
     <div id="main">

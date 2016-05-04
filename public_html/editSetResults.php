@@ -5,6 +5,7 @@ include_once $include_path . '/public_html/includes/mail_functions.php';
 include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -72,34 +73,19 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="UTF-8">
-    <title>Smarkbook</title>
-    <meta name="description" content="Smarkbook" />
-    <meta name="keywords" content="Intelligent, personalised feedback through smart data analysis" />
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=9" />
-    <!--<link rel="stylesheet" media="screen and (min-device-width: 668px)" type="text/css" href="css/branding.css" />-->
-    <link rel="stylesheet" type="text/css" href="css/branding.css" />
+    <?php pageHeader("Smarkbook"); ?>    
     <link rel="stylesheet" type="text/css" href="css/editSetResults.css" />
     <link href="css/autocomplete.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css"/>
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css"/>
-    <script src="js/jquery.js"></script>
     <script src="js/tagsList.js"></script>
-    <script src="js/methods.js"></script>
-    <script src="js/moment.js"></script>
     <script src="js/editSetResults.js"></script>
     <script src="pickadate/picker.js"></script>
     <script src="pickadate/picker.date.js"></script>
     <script src="pickadate/legacy.js"></script>
-    <link rel="shortcut icon" href="branding/favicon.ico" />
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
-    <?php
-        echo "<input type='hidden' id='userid' value='$userid' />";
-        echo "<input type='hidden' id='userval' value='$userval' />";
-        ?>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="popUpBackground">
             <div id="popUpBox">
