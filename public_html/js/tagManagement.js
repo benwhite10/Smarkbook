@@ -72,7 +72,7 @@ function updateInfo(json){
         if(tagInfo["Type"] === "CLASSIFICATION"){
             type = tagInfo["Type"];
         }
-        // Set that information to the values on the 
+        
         $("#nameInput").val(name);
         $("#typeInput").val(type);
     } else {

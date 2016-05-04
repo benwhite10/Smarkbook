@@ -50,10 +50,7 @@ if(isset($_SESSION['message'])){
     <script src="js/tagManagement.js"></script>
 </head>
 <body>
-    <?php
-        echo "<input type='hidden' id='userid' value='$userid' />";
-        echo "<input type='hidden' id='userval' value='$userval' />";
-    ?>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
