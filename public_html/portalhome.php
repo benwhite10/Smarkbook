@@ -101,8 +101,8 @@ if($resultArray[0]){
                 if(authoriseUserRoles($userRole, ["SUPER_USER"])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='tagManagement.php' class='title'>Manage Tags</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='tagManagement.php'>";
+                    echo "<a href='viewAllTags.php' class='title'>Manage Tags</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='viewAllTags.php'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-modify.png'>";
                     echo "</div>";
                 }

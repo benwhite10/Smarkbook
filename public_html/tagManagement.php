@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -23,7 +24,9 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
     exit();
 }
 
-$query = "select `Tag ID`, `Name` from TTAGS order by `Name`;";
+$tagId = filter_input(INPUT_GET,'tagid',FILTER_SANITIZE_NUMBER_INT);
+
+$query = "select `Tag ID`, `Name`, `Type` from TTAGS order by `Name`;";
 try{
     $tags = db_select_exception($query);
 } catch (Exception $ex) {
@@ -44,10 +47,10 @@ if(isset($_SESSION['message'])){
 <head lang="en">
     <?php pageHeader("Tags"); ?>
     <script src="js/jquery-ui.js"></script>
-    <script src="js/tagsList.js"></script>
     <script src="js/tagManagement.js"></script>
 </head>
 <body>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -96,19 +99,24 @@ if(isset($_SESSION['message'])){
                     <label for="type">Mode:
                     </label><select name="type" id="mode" onchange="changeType()">
                         <option value='MERGE'>Merge Tags</option>
-                        <option value='MODIFY'>Modify Tag</option>
+                        <option value='MODIFY' selected>Modify Tag</option>
                         <!--<option value='DELETE'>Delete Tag</option>-->
                     </select>
                     </div><div id="tag1">
                     <label for="tag1" id="tag1label">Tag:
-                    </label><select name="tag1">
+                    </label><select name="tag1" onchange="changeTag()" id="tag1input">
                         <option value=0>-No Tag Selected-</option>
                         <?php
                             if(isset($tags)){
                                 foreach($tags as $tag){
                                     $id = $tag['Tag ID'];
                                     $name = $tag['Name'];
-                                    echo "<option value='$id'>$name</option>";
+                                    if($id == $tagId){
+                                        echo "<option value='$id' selected>$name</option>";
+                                    } else {
+                                        echo "<option value='$id'>$name</option>";
+                                    }
+                                    
                                 }
                             }
                         ?>
@@ -129,7 +137,13 @@ if(isset($_SESSION['message'])){
                     </select>
                     </div><div id="name">
                     <label for="name">Name:
-                    </label><input type="text" name="name" placeholder="Name">
+                    </label><input type="text" name="name" placeholder="Name" id='nameInput'>
+                    </div><div id='tagType'>
+                    <label for="tagType">Type:
+                    </label><select name="tagType" id='typeInput'>
+                        <option value='TOPIC'>Topic</option>
+                        <option value='CLASSIFICATION'>Classification</option>
+                    </select>
                     </div>
                     <p id="descText" style="text-align: center;">This will replace all instances of tag 2 with the value of tag 1 and then delete tag 2. This process is irreversible.</p>
                 </div><div id="side_bar">
@@ -140,7 +154,6 @@ if(isset($_SESSION['message'])){
             </form> 
     	</div>
     </div>  
-    <script src="js/tagsList.js"></script>
 </body>
 
 	
