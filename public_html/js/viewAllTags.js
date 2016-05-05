@@ -1,5 +1,4 @@
 $(document).ready(function(){
-    // Load the list of all tags
     requestAllTags();
 });
 
