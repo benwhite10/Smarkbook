@@ -373,20 +373,14 @@ function refreshTagResults(){
         setNoResults();
     } else {
         showTagResults(false);
-        var length = Object.keys(results).length;
-        for(var count = 0; count < 5; count++){
-            for(var key in results){
-                if(count === results[key]["Rank"]){
-                    $('#bottom5tags tbody').append(setHalfWidthTagResults(results, key, length));
-                }
-                if((length - count - 1) === results[key]["Rank"]){
-                    $('#top5tags tbody').append(setHalfWidthTagResults(results, key, length));
-                }
-            }
+        var length = results.length;
+        for(var i = 0; i < 5; i++){
+            $('#bottom5tags tbody').append(setNewHalfWidthTagResults(results[i], i));
+            $('#top5tags tbody').append(setNewHalfWidthTagResults(results[length - (i+1)], i));
         }
-
-        for(var key in results){
-            $('#alltags tbody').append(setHalfWidthTagResults(results, key, length));
+        
+        for(var i = 0; i < length; i++){
+            $('#alltags tbody').append(setNewHalfWidthTagResults(results[i], i));
         }
     }
 }
@@ -530,7 +524,7 @@ function setHalfWidthTagResults(results, key, length){
     var name = results[key]["Name"];
     var rel = parseInt(results[key]["Reliability"] * 100);
     var rank = length - parseInt(results[key]["Rank"]);
-    var score = results[key]["Score"].toPrecision(2);
+    //var score = results[key]["Score"].toPrecision(2);
     var colourString = "rgb(" 
             + Math.min(parseInt(255 - (255 * score)), 255) 
             + ", " 
@@ -541,6 +535,32 @@ function setHalfWidthTagResults(results, key, length){
     string += "<td class='results' style='text-align:left;'>" + name + "</td>";
     string += "<td class='results'>" + rel + "% </td>";
     string += "<td class='results' style='background: " + colourString + ";' >" + score + "</td>";
+    string += "</tr>";
+    return string;
+}
+
+function setNewHalfWidthTagResults(tag, position){
+    var name = tag["name"];
+    var marks = tag["marks"];
+    var mark = tag["mark"];
+    var recentMarks = tag["recentmarks"];
+    var recentMark = tag["recentmark"];
+    var totalScore = parseInt(mark / marks * 100);;
+    var recentScore = parseInt(recentMark / recentMarks * 100);
+    var totalMarks = mark + "/" + marks;
+    var recentMarks = recentMark + "/" + recentMarks;
+    var questionsAnswered = tag["count"];
+    var colourString = "rgb(" 
+            + Math.min(parseInt(255 - (255 * totalScore)), 255) 
+            + ", " 
+            + Math.min(parseInt(255 + (totalScore * 255)), 255) 
+            + ", 0)";
+    var string = "<tr class='results'>";
+    string += "<td class='results' style='text-align:left;'>" + name + "</td>";
+    string += "<td class='results'>" + totalScore + "% </td>";
+    string += "<td class='results'>" + recentScore + "% </td>";
+    string += "<td class='results'>" + questionsAnswered + "</td>";
+    //string += "<td class='results' style='background: " + colourString + ";' >" + score + "</td>";
     string += "</tr>";
     return string;
 }

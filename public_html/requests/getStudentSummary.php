@@ -27,6 +27,9 @@ $questions = [];
 $tags = [];
 $setWorksheets = [];
 $studentWorksheets = [];
+$questionTags = [];
+$tags = [];
+$recentQuestions = 5;
 $userAvg;
 $reliabilityConstant = 0.2;
 $reliabilityBase = 0.2;
@@ -42,7 +45,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+        getUpdatedReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "STUDENTSUMMARY":
         getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
@@ -73,6 +76,18 @@ function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId,
     getFinalScoreForTags();
     
     reorderTagsAndSucceedRequest();
+}
+
+function getUpdatedReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){
+    global $questions, $userAvg, $tags;
+    
+    validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+    unset($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+    
+    getAnsweredQuestionsAndTags();
+    groupResultsByTag();
+    
+    reorderTagsAndSucceedRequest2();
 }
 
 function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){    
@@ -343,6 +358,139 @@ function getAnsweredQuestions(){
         $message = "There was an error generating the report.";
         failRequestWithException($message, $ex);
     }
+}
+
+function getAnsweredQuestionsAndTags(){
+    global $returns, $questionTags;
+    
+    $query = "SELECT CQ.`Stored Question ID` SQID, CQ.`Completed Question ID` CQID, QT.`Tag ID` TagID, T.`Name` Name, CQ.`Mark` Mark, SQ.`Marks` Marks, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Added`), 0) Days, 1 Difficulty
+                FROM TCOMPLETEDQUESTIONS CQ
+                JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+                JOIN TQUESTIONTAGS QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
+                JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
+                JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID` ";
+    
+    $filters = [];
+    array_push($filters, "CQ.`Deleted` = 0");
+    
+    if(array_key_exists("inputs", $returns)){
+        $inputs = $returns["inputs"];
+        if(array_key_exists("student", $inputs)){
+            $student = $inputs["student"];
+            array_push($filters, "CQ.`Student ID` = $student");
+        }
+        if(array_key_exists("staff", $inputs)){
+            $staff = $inputs["staff"];
+            array_push($filters, "(CQ.`Staff ID` = $staff OR GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff)");
+        }
+        if(array_key_exists("set", $inputs)){
+            $set = $inputs["set"];
+            array_push($filters, "(CQ.`Set ID` = $set OR GW.`Group ID` = $set)");
+        }
+        if(array_key_exists("tags", $inputs)){
+            $tags = $returns["tags"];
+            if(count($tags) > 0){
+                $filterString .= "(";
+                foreach($tags as $key => $tag){
+                    if(count($tags) - 1 !== $key){
+                        $filterString .= "QT.`Tag ID` = $tag OR ";
+                    } else {
+                        $filterString .= "QT.`Tag ID` = $tag)";
+                    }
+                }
+            }
+            array_push($filters, $filterString);
+        }
+    }
+    
+    if(array_key_exists("dates", $returns)){
+        $dates = $returns["dates"];
+        if(count($dates) === 1){
+            // Only 1 date
+            $date = $dates[0];
+            array_push($filters, "CQ.`Date Added` > STR_TO_DATE('$date', '%d/%m/%Y')");
+        } else {
+            $date1 = $dates[0];
+            $date2 = $dates[1];
+            array_push($filters, "CQ.`Date Added` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')");
+        }
+    }
+    
+    if(count($filters) > 0) $query .= "WHERE ";
+    
+    foreach($filters as $key => $filter){
+        if(count($filters) - 1 !== $key){
+            $query .= $filter . " AND ";
+        } else {
+            $query .= $filter . " ";
+        }
+    }
+    
+    $query .= " ORDER BY QT.`Tag ID`, CQ.`Date Added` DESC;";
+    
+    try{
+        $results = db_select_exception($query);
+        foreach($results as $result){
+            $result["TimeWeight"] = getTimeWeight($result["Days"]);
+            array_push($questionTags, $result);
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the report.";
+        failRequestWithException($message, $ex);
+    }
+}
+
+function groupResultsByTag(){
+    global $questionTags, $tags, $recentQuestions, $returns;
+    
+    $userAvgArray = getUserAverage($returns["dates"]);
+    $userAvg = $userAvgArray["AVG"];
+    
+    $currentTagId = "";
+    foreach ($questionTags as $result){
+        $mark = $result["Mark"];
+        $marks = $result["Marks"];
+        $tagId = $result["TagID"];
+        $name = $result["Name"];
+        $score = $mark * $result["TimeWeight"];
+        $weight = $marks * $result["TimeWeight"];
+        if($currentTagId == $tagId){
+            // Looping through a tag and building the array
+            $resultArray["mark"] += $mark;
+            $resultArray["marks"] += $marks;
+            if($resultArray["count"] < $recentQuestions){
+                $resultArray["recentmark"] += $mark;
+                $resultArray["recentmarks"] += $marks; 
+            }
+            $resultArray["count"]++;
+            $resultArray["score"] += $score;
+            $resultArray["weight"] += $weight;
+        } else {
+            // Save the last tag
+            if($currentTagId != ""){
+                $weightedScore = ($resultArray["score"] / $resultArray["weight"]) - $userAvg;
+                $resultArray["weightedScore"] = $weightedScore * getReliabilityScore($count);
+                array_push($tags, $resultArray);
+            }
+            $resultArray = array(
+                "mark" => floatval($mark),
+                "marks" => floatval($marks),
+                "recentmark" => floatval($mark),
+                "recentmarks" => floatval($marks),
+                "score" => floatval($score),
+                "weight" => floatval($weight),
+                "weightedScore" => floatval($score/$weight),
+                "TagID" => $tagId,
+                "name" => $name,
+                "count" => 1
+            );
+            $currentTagId = $tagId;
+        }
+    }
+}
+
+function calculateQuestionWeight($marks, $timeWeight){
+    
 }
 
 function getSetWorksheets(){
@@ -740,6 +888,35 @@ function reorderTagsAndSucceedRequest(){
     );
     
     succeedRequest($result);
+}
+
+function reorderTagsAndSucceedRequest2(){
+    global $tags, $userAvg;
+    
+    // Set up bubble sort
+    $flag = true;
+    while($flag) {
+        $flag = false;
+        for($i = 0; $i < count($tags) - 1; $i++){
+            if($tags[$i]["weightedScore"] > $tags[$i + 1]["weightedScore"]){
+                $tags = swapObjectsForKeys($tags, $i, $i + 1);
+                $flag = true;
+            }
+        }
+    }
+    
+    $result = array(
+        "tags" => $tags
+    );
+    
+    succeedRequest($result);
+}
+
+function swapObjectsForKeys($array, $key1, $key2) {
+    $temp = $array[$key1];
+    $array[$key1] = $array[$key2];
+    $array[$key2] = $temp;
+    return $array;
 }
 
 function succeedSummaryRequest($list, $userAvg, $setAvg){
