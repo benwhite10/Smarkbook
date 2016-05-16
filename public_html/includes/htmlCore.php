@@ -9,7 +9,7 @@ function pageHeader($title) {
     echo "<meta http-equiv='X-UA-Compatible' content='IE=9' />";
     echo "<!--<link rel='stylesheet' media='screen and (min-device-width: 668px)' type='text/css' href='css/branding.css' />-->";
     echo "<link rel='stylesheet' type='text/css' href='css/branding.css' />";
-    echo "<!--<link rel='stylesheet' type='text/css' href='css/table.css' />-->";
+    echo "<link rel='stylesheet' type='text/css' href='css/table.css' />";
     echo "<script src='js/jquery.js'></script>";
     echo "<script src='js/moment.js'></script>";
     echo "<script src='js/methods.js'></script>";
