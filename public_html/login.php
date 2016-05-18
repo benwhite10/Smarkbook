@@ -32,7 +32,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader(); ?>
+    <?php pageHeader("Login"); ?>
     <link rel="stylesheet" type="text/css" href="css/login.css" />
     <script src="js/sha512.js"></script>
     <script type="text/javascript" src="js/userFunctions.js"></script>
