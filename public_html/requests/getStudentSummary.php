@@ -469,7 +469,7 @@ function groupResultsByTag(){
             // Save the last tag
             if($currentTagId != ""){
                 $weightedScore = ($resultArray["score"] / $resultArray["weight"]) - $userAvg;
-                $resultArray["weightedScore"] = $weightedScore * getReliabilityScore($count);
+                $resultArray["weightedScore"] = $weightedScore * getReliabilityScore($resultArray["count"]);
                 array_push($tags, $resultArray);
             }
             $resultArray = array(

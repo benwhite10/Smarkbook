@@ -31,25 +31,21 @@ switch ($requestType){
 }
 
 function generateQuestionsForStudent(){
-    global $studentId;
+    global $studentId, $tagList;
     
-    setUpTagList();
+    $tagList = setUpTagList();
     
     // Create question list for student
     $questions = createQuestionsForStudent($studentId);
-
+    
     //Compare that to their own tag list
     $scoredQuestions = scoreQuestions($questions);
     
-    // Current doesn't penalise enough low scores
-    // One option is to include a rank in there, or extend numbers below 0.
-    // Also zero should equal 1 so negative is more than one
     if(count($scoredQuestions) > 0){
         succeedRequest(getWorksheetInformationFor(getFirstSectionOfArray($scoredQuestions, 100, "score")));
     } else {
         succeedRequest(null);
     }
-    
 }
 
 /* Function */
@@ -59,14 +55,15 @@ function setUpTagList(){
     
     if (count($tagList) == 0) return;
     
-    foreach($tagList as $id => $tag){
-        if($tag["Score"] < 0){
-            $tag["Weight"] = (-1.5 * $tag["Score"]) + 0.5;
-        } else {
-            $tag["Weight"] = 0.5 - (0.5 * $tag["Score"]);
-        }
-        $tagList[$id] = $tag;
+    $newTagList = [];
+    
+    foreach ($tagList as $tag) {
+        $newTagList[$tag["TagID"]] = array (
+            "score" => $tag["weightedScore"]
+        );
     }
+    
+    return $newTagList;
 }
 
 function createQuestionsForStudent($student){
@@ -99,13 +96,11 @@ function createQuestionsForStudent($student){
         $finalQuestions = [];
         foreach($questionTags as $question){
             if(array_key_exists($question["SQID"], $finalQuestions)){
-                array_push($finalQuestions[$question["SQID"]]["tags"], $question["TagID"]);
-                array_push($finalQuestions[$question["SQID"]]["tagNames"], $question["Name"]);
+                array_push($finalQuestions[$question["SQID"]]["tags"], [$question["TagID"], $question["Name"]]);
             } else {
                 $array = array(
                     "marks" => $question["Marks"],
-                    "tags" => [$question["TagID"]],
-                    "tagNames" => [$question["Name"]],
+                    "tags" => [[$question["TagID"], $question["Name"]]],
                     "sqid" => $question["SQID"]
                 );
                 $finalQuestions[$question["SQID"]] = $array;
@@ -134,13 +129,16 @@ function scoreQuestions($questions){
         $count = 0;
         foreach($question["tags"] as $tag){
             $count++;
-            if(array_key_exists($tag, $tagList)){
-                $score += floatval($tagList[$tag]["Weight"]);
+            if(array_key_exists($tag[0], $tagList)){
+                $score += floatval($tagList[$tag[0]]["score"]);
             }
         }
+        // Possibly the count weight should have more of an effect
         $avScore = ($score / $count) * getCountWeight($count);
+        // Maybe this should penalise more heavily, dependent on if they have completed similar questions
         $lastScoreWeight = array_key_exists("mark", $question) && array_key_exists("days", $question) ? getLastScoreWeight($question["mark"]/$question["marks"], $question["days"]) : 1;
         $questions[$key]["score"] = $avScore * $lastScoreWeight;
+        // Add something to find the relevance of the question to that student based on classification tags
     }
     
     return $questions;
@@ -159,13 +157,13 @@ function getCountWeight($count){
     return min($count * 0.3, 1);
 }
 
-function getFirstSectionOfArray($array, $num, $key){
+function  getFirstSectionOfArray($array, $num, $key){
     $returnArray = [];
     for($i = 0; $i < $num; $i++){
         $select = "";
-        $limit = -10000;
+        $limit = 10000;
         foreach($array as $rowKey => $row){
-            if($row[$key] > $limit){
+            if($row[$key] < $limit){
                 $limit = $row[$key];
                 $select = $rowKey;
             }

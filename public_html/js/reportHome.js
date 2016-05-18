@@ -422,11 +422,11 @@ function refreshSuggestedQuestions(){
             }
             var vid = question["details"]["VID"];
             var tagString = "";
-            var tagNames = question["tagNames"];
-            for(var j = 0; j < tagNames.length; j++){
-                var tag = tagNames[j];
+            var tags = question["tags"];
+            for(var j = 0; j < tags.length; j++){
+                var tag = tags[j][1];
                 tagString += tag;
-                if(j < tagNames.length - 1){
+                if(j < tags.length - 1){
                     tagString += ', ';
                 }
             }
