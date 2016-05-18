@@ -24,7 +24,6 @@ if(!$role){
 }
 
 $questions = [];
-$tags = [];
 $setWorksheets = [];
 $studentWorksheets = [];
 $questionTags = [];
@@ -33,10 +32,6 @@ $recentQuestions = 5;
 $userAvg;
 $reliabilityConstant = 0.2;
 $reliabilityBase = 0.2;
-$diffRelWeight = 1;
-$userRelWeight = 1;
-$numRelWeight = 2;
-$quesRelWeight = 1;
 $timeBase = 0.1;
 $timeConstant = 0.0004;
 
@@ -45,7 +40,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        getUpdatedReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+        getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "STUDENTSUMMARY":
         getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
@@ -56,29 +51,6 @@ switch ($requestType){
 }
 
 function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){
-    global $questions, $userAvg;
-    
-    validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
-    unset($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
-    
-    getAnsweredQuestions();
-    
-    if(count($questions) === 0){
-        succeedRequest(null);
-    }
-
-    setDifficultyScores();
-    $userAvg = getUserAverage(null);
-    
-    calculateRelativeScorePerQuestion($userAvg);
-    
-    combineQuestionsWithTags();
-    getFinalScoreForTags();
-    
-    reorderTagsAndSucceedRequest();
-}
-
-function getUpdatedReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){
     global $questions, $userAvg, $tags;
     
     validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
@@ -87,7 +59,7 @@ function getUpdatedReportForStudent($startDate, $endDate, $studentId, $setId, $s
     getAnsweredQuestionsAndTags();
     groupResultsByTag();
     
-    reorderTagsAndSucceedRequest2();
+    reorderTagsAndSucceedRequest();
 }
 
 function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){    
@@ -113,41 +85,6 @@ function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId
 
     // Set average score (probably not here though)
     succeedSummaryRequest($list, $userAvgArray["AVG"], $setAvgArray["AVG"]);
-}
-
-
-/*Query Creation*/
-function setDifficultyScores(){
-    global $questions;
-    // Get the global average score for each question
-    $query = "SELECT SUM(Mark)/SUM(Marks) GAvg, COUNT(Marks) GN, CQ.`Stored Question ID` SQID 
-            FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE CQ.`Deleted` = 0 AND CQ.`Stored Question ID` IN (";
-    foreach($questions as $question){
-        $query .= $question["SQID"] . ", ";
-    }
-    $query = substr($query, 0, -2);
-    $query .= ") ";
-    $query .= "GROUP BY SQ.`Stored Question ID`";
-    
-    try{
-        $results = db_select_exception($query);
-        $processedResults = [];
-        foreach($results as $result){
-            $sqid = $result["SQID"];
-            $processedResults[$sqid]["GAvg"] = $result["GAvg"];
-            $processedResults[$sqid]["GRel"] = getReliabilityScore($result["GN"]);
-        }
-        foreach($questions as $cqid => $question){
-            $sqid = $question["SQID"];
-            $question["Gavg"] = $processedResults[$sqid]["GAvg"];
-            $question["GRel"] = $processedResults[$sqid]["GRel"];
-            $questions[$cqid] = $question;
-        }
-    } catch (Exception $ex) {
-	$message = "There was an error generating the report.";
-        failRequestWithException($message, $ex);	
-    }
 }
 
 function getUserAverage($dates){
@@ -207,78 +144,6 @@ function getReliabilityScore($n){
 function getTimeWeight($days){
     global $timeConstant, $timeBase;
     return ((1 - $timeBase) * exp(-1 * $timeConstant * $days * $days)) + $timeBase;
-}
-
-function calculateRelativeScorePerQuestion($userAvg){
-    global $questions;
-    $avg = $userAvg["AVG"];
-    foreach($questions as $key => $question){
-        $expectedScore = ($avg + $question["Gavg"] ) / 2;
-        $relativeScore = $question["UMark"] - $expectedScore;
-        $questions[$key]["RelativeScore"] = $relativeScore;
-        $questions[$key]["URel"] = $userAvg["URel"];
-    }
-}
-
-function combineQuestionsWithTags(){
-    global $questions, $tags;
-    $query = "SELECT CQ.`Completed Question ID` CQID, QT.`Tag ID` TagID, T.`Name` Name FROM TCOMPLETEDQUESTIONS CQ
-                JOIN TQUESTIONTAGS QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
-                JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID`
-                WHERE CQ.`Deleted` = 0 AND CQ.`Completed Question ID` IN (";
-    foreach($questions as $question){
-        $query .= $question["CQID"] . ", ";
-    }
-    $query = substr($query, 0, -2);
-    $query .= ") ORDER BY QT.`Tag ID`;";
-    try{
-        $results = db_select_exception($query);
-        foreach($results as $result){
-            $tagid = $result["TagID"];
-            if(!array_key_exists($tagid, $tags)) $tags[$tagid] = [];
-            $questions[$result["CQID"]]["Name"] = $result["Name"];
-            array_push($tags[$tagid], $questions[$result["CQID"]]);
-        }
-    } catch (Exception $ex) {
-        $message = "There was an error generating the report.";
-        failRequestWithException($message, $ex);
-    }
-}
-
-function getFinalScoreForTags(){
-    global $tags, $diffRelWeight, $numRelWeight, $userRelWeight, $quesRelWeight;
-    foreach($tags as $key => $tag){
-        $total = 0;
-        $marks = 0;
-        $totalRel = 0;
-        $totalRelCount = 0;
-        $name = $tag[0]["Name"];
-        $numRel = getReliabilityScore(count($tag));
-        $totalMark = 0;
-        $totalMarks = 0;
-        foreach($tag as $result){
-            $diffRel = $result["GRel"];
-            $userRel = $result["URel"];
-            $timeWeight = $result["TimeWeight"];
-            $totalRel += $diffRelWeight * $diffRel + $userRelWeight * $userRel;
-            $totalRelCount += $diffRelWeight + $userRelWeight;
-            $total += $result["RelativeScore"] * $result["Marks"] * $timeWeight;
-            $marks += $result["Marks"] * $timeWeight;
-            
-            $totalMark += $result["UMark"] * $result["Marks"];
-            $totalMarks += $result["Marks"];
-        }
-        $quesRel = $totalRel / $totalRelCount;
-        $reliability = ($numRelWeight * $numRel + $quesRelWeight * $quesRel) / ($numRelWeight + $quesRelWeight);
-        $score = $total / $marks;
-        $array = [];
-        $array["Score"] = $score;
-        $array["Reliability"] = $reliability;
-        $array["Name"] = $name;
-        $array["TotalMark"] = $totalMark;
-        $array["TotalMarks"] = $totalMarks;
-        $tags[$key]["Result"] = $array;
-    }
 }
 
 function getAnsweredQuestions(){
@@ -487,10 +352,6 @@ function groupResultsByTag(){
             $currentTagId = $tagId;
         }
     }
-}
-
-function calculateQuestionWeight($marks, $timeWeight){
-    
 }
 
 function getSetWorksheets(){
@@ -816,13 +677,6 @@ function checkValidDates($startDate, $endDate){
     return [$startDate, $endDate];
 }
 
-function checkStudentInput($studentId){
-    //If student is not set or not a valid integer then fail
-    if(!isset($studentId) || !is_int($studentId) || $studentId <= 0){
-        failRequest("No valid student id was provided.");
-    }
-}
-
 function checkValidInputs($staffId, $tagsArrayString, $setId, $studentId){
     $returns = [];
     if(checkIdInputIsValid($setId)){
@@ -860,37 +714,6 @@ function checkIdInputIsValid($id){
 }
 
 function reorderTagsAndSucceedRequest(){
-    global $tags, $userAvg;
-    
-    foreach($tags as $key1 => $tag){
-        foreach($tags as $key2 => $tag){
-            if($tags[$key1]["Result"]["Score"] < $tags[$key2]["Result"]["Score"]){
-                $temp = $tags[$key1];
-                $tags[$key1] = $tags[$key2];
-                $tags[$key2] = $temp;
-            }
-        }
-    }
-    
-    $count = 0;
-    $newtags = [];
-    foreach($tags as $key => $tag){
-        $tag["Result"]["Rank"] = $count;
-        $newtags[$key] = $tag["Result"];
-        $count++;
-    }
-    
-    $average = $userAvg["AVG"];
-    
-    $result = array(
-        "tags" => $newtags,
-        "average" => $average
-    );
-    
-    succeedRequest($result);
-}
-
-function reorderTagsAndSucceedRequest2(){
     global $tags, $userAvg;
     
     // Set up bubble sort
