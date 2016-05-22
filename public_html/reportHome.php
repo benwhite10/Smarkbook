@@ -225,7 +225,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                     <th colspan="4" class="results">Hot Topics</th>
                                 </tr>
                                 <tr class="results">
-                                    <th class="results" style="width: 99%; text-align: left; margin-left: 10px;">Tag</th>
+                                    <th class="results" style="width: 99%; text-align: left; padding-left: 10px;">Tag</th>
                                     <th class="results" style="min-width: 100px">Avg. Score</th>
                                     <th class="results" style="min-width: 100px">Last 5 questions</th>
                                     <th class="results" style="min-width: 100px">No. of Questions</th>
@@ -240,7 +240,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                     <th colspan="4" class="results">Areas To Work On</th>
                                 </tr>
                                 <tr class="results">
-                                    <th class="results" style="width: 99%; text-align: left;">Tag</th>
+                                    <th class="results" style="width: 99%; text-align: left; padding-left: 10px;">Tag</th>
                                     <th class="results" style="min-width: 100px">Avg. Score</th>
                                     <th class="results" style="min-width: 100px">Last 5 questions</th>
                                     <th class="results" style="min-width: 100px">No. of Questions</th>
@@ -254,8 +254,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                         <table class="results fullResults" id="alltags">
                             <thead class="results">
                                 <tr class="results">
-                                    <!--<th class="results" style="min-width: 60px">No.</th>-->
-                                    <th class="results" style="width: 99%; text-align: left;">Tag</th>
+                                    <th class="results" style="width: 99%; text-align: left; padding-left: 10px;">Tag</th>
                                     <th class="results" style="min-width: 100px">Avg. Score</th>
                                     <th class="results" style="min-width: 100px">Last 5 questions</th>
                                     <th class="results" style="min-width: 100px">No. of Questions</th>

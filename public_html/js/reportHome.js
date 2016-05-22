@@ -550,17 +550,11 @@ function setNewHalfWidthTagResults(tag, position){
     var totalMarks = mark + "/" + marks;
     var recentMarks = recentMark + "/" + recentMarks;
     var questionsAnswered = tag["count"];
-    var colourString = "rgb(" 
-            + Math.min(parseInt(255 - (255 * totalScore)), 255) 
-            + ", " 
-            + Math.min(parseInt(255 + (totalScore * 255)), 255) 
-            + ", 0)";
     var string = "<tr class='results'>";
-    string += "<td class='results' style='text-align:left;'>" + name + "</td>";
-    string += "<td class='results'>" + totalScore + "% </td>";
-    string += "<td class='results'>" + recentScore + "% </td>";
+    string += "<td class='results' style='text-align:left; padding-left: 10px;'>" + name + "</td>";
+    string += "<td class='results' title='" + totalMarks + "'>" + totalScore + "% </td>";
+    string += "<td class='results' title='" + recentMarks + "'>" + recentScore + "% </td>";
     string += "<td class='results'>" + questionsAnswered + "</td>";
-    //string += "<td class='results' style='background: " + colourString + ";' >" + score + "</td>";
     string += "</tr>";
     return string;
 }
