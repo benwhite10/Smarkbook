@@ -201,7 +201,6 @@ td.results {
     font-size: 0.9rem;
     padding-left: 0px;
     text-align: center;
-    overflow: hidden;
 }
 
 th.results
@@ -559,7 +558,6 @@ tr.tableHead:nth-child(odd){
     text-align: center;
     color: #323232;
     font-weight: normal;
-    overflow: hidden;
 }
 
 #questionsReport{

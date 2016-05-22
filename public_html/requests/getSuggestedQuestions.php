@@ -157,7 +157,7 @@ function getCountWeight($count){
     return min($count * 0.3, 1);
 }
 
-function  getFirstSectionOfArray($array, $num, $key){
+function getFirstSectionOfArray($array, $num, $key){
     $returnArray = [];
     for($i = 0; $i < $num; $i++){
         $select = "";

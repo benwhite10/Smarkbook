@@ -520,25 +520,6 @@ function setWorksheetsTable(){
     }
 }
 
-function setHalfWidthTagResults(results, key, length){
-    var name = results[key]["Name"];
-    var rel = parseInt(results[key]["Reliability"] * 100);
-    var rank = length - parseInt(results[key]["Rank"]);
-    //var score = results[key]["Score"].toPrecision(2);
-    var colourString = "rgb(" 
-            + Math.min(parseInt(255 - (255 * score)), 255) 
-            + ", " 
-            + Math.min(parseInt(255 + (score * 255)), 255) 
-            + ", 0)";
-    var string = "<tr class='results'>";
-    string += "<td class='results'>" + rank + ".</td>";
-    string += "<td class='results' style='text-align:left;'>" + name + "</td>";
-    string += "<td class='results'>" + rel + "% </td>";
-    string += "<td class='results' style='background: " + colourString + ";' >" + score + "</td>";
-    string += "</tr>";
-    return string;
-}
-
 function setNewHalfWidthTagResults(tag, position){
     var name = tag["name"];
     var marks = tag["marks"];

@@ -12,7 +12,6 @@ $endDate = filter_input(INPUT_POST,'endDate',FILTER_SANITIZE_STRING);
 $studentId = filter_input(INPUT_POST,'student',FILTER_SANITIZE_NUMBER_INT);
 $staffId = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $setId = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
-//$tagsArrayString = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
 $tagsArrayString = "";
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
@@ -51,7 +50,6 @@ switch ($requestType){
 }
 
 function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){
-    global $questions, $userAvg, $tags;
     
     validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
     unset($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
@@ -716,7 +714,6 @@ function checkIdInputIsValid($id){
 function reorderTagsAndSucceedRequest(){
     global $tags, $userAvg;
     
-    // Set up bubble sort
     $flag = true;
     while($flag) {
         $flag = false;
