@@ -373,20 +373,14 @@ function refreshTagResults(){
         setNoResults();
     } else {
         showTagResults(false);
-        var length = Object.keys(results).length;
-        for(var count = 0; count < 5; count++){
-            for(var key in results){
-                if(count === results[key]["Rank"]){
-                    $('#bottom5tags tbody').append(setHalfWidthTagResults(results, key, length));
-                }
-                if((length - count - 1) === results[key]["Rank"]){
-                    $('#top5tags tbody').append(setHalfWidthTagResults(results, key, length));
-                }
-            }
+        var length = results.length;
+        for(var i = 0; i < 5; i++){
+            $('#bottom5tags tbody').append(setNewHalfWidthTagResults(results[i], i));
+            $('#top5tags tbody').append(setNewHalfWidthTagResults(results[length - (i+1)], i));
         }
-
-        for(var key in results){
-            $('#alltags tbody').append(setHalfWidthTagResults(results, key, length));
+        
+        for(var i = 0; i < length; i++){
+            $('#alltags tbody').append(setNewHalfWidthTagResults(results[i], i));
         }
     }
 }
@@ -428,11 +422,11 @@ function refreshSuggestedQuestions(){
             }
             var vid = question["details"]["VID"];
             var tagString = "";
-            var tagNames = question["tagNames"];
-            for(var j = 0; j < tagNames.length; j++){
-                var tag = tagNames[j];
+            var tags = question["tags"];
+            for(var j = 0; j < tags.length; j++){
+                var tag = tags[j][1];
                 tagString += tag;
-                if(j < tagNames.length - 1){
+                if(j < tags.length - 1){
                     tagString += ', ';
                 }
             }
@@ -526,21 +520,22 @@ function setWorksheetsTable(){
     }
 }
 
-function setHalfWidthTagResults(results, key, length){
-    var name = results[key]["Name"];
-    var rel = parseInt(results[key]["Reliability"] * 100);
-    var rank = length - parseInt(results[key]["Rank"]);
-    var score = results[key]["Score"].toPrecision(2);
-    var colourString = "rgb(" 
-            + Math.min(parseInt(255 - (255 * score)), 255) 
-            + ", " 
-            + Math.min(parseInt(255 + (score * 255)), 255) 
-            + ", 0)";
+function setNewHalfWidthTagResults(tag, position){
+    var name = tag["name"];
+    var marks = tag["marks"];
+    var mark = tag["mark"];
+    var recentMarks = tag["recentmarks"];
+    var recentMark = tag["recentmark"];
+    var totalScore = parseInt(mark / marks * 100);;
+    var recentScore = parseInt(recentMark / recentMarks * 100);
+    var totalMarks = mark + "/" + marks;
+    var recentMarks = recentMark + "/" + recentMarks;
+    var questionsAnswered = tag["count"];
     var string = "<tr class='results'>";
-    string += "<td class='results'>" + rank + ".</td>";
-    string += "<td class='results' style='text-align:left;'>" + name + "</td>";
-    string += "<td class='results'>" + rel + "% </td>";
-    string += "<td class='results' style='background: " + colourString + ";' >" + score + "</td>";
+    string += "<td class='results' style='text-align:left; padding-left: 10px;'>" + name + "</td>";
+    string += "<td class='results' title='" + totalMarks + "'>" + totalScore + "% </td>";
+    string += "<td class='results' title='" + recentMarks + "'>" + recentScore + "% </td>";
+    string += "<td class='results'>" + questionsAnswered + "</td>";
     string += "</tr>";
     return string;
 }

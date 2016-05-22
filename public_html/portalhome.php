@@ -25,7 +25,7 @@ if($resultArray[0]){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader(); ?>
+    <?php pageHeader("Smarkbook"); ?>
     <script src='js/portalhome.js'></script>
     <link rel='stylesheet' type='text/css' href='css/portalhome.css' />
 </head>

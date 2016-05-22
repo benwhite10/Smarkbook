@@ -222,13 +222,13 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                         <table class="results half" id="top5tags" style="border-right: solid thin #323232;">
                             <thead class="results">
                                 <tr class="results">
-                                    <th colspan="4" class="results">Top 5 Tags</th>
+                                    <th colspan="4" class="results">Hot Topics</th>
                                 </tr>
                                 <tr class="results">
-                                    <th class="results" style="min-width: 60px">No.</th>
-                                    <th class="results" style="width: 99%; text-align: left;">Tag</th>
-                                    <th class="results" style="min-width: 100px">Reliability</th>
-                                    <th class="results" style="min-width: 100px">Total Marks</th>
+                                    <th class="results" style="width: 99%; text-align: left; padding-left: 10px;">Tag</th>
+                                    <th class="results" style="min-width: 100px">Avg. Score</th>
+                                    <th class="results" style="min-width: 100px">Last 5 questions</th>
+                                    <th class="results" style="min-width: 100px">No. of Questions</th>
                                 </tr>
                             </thead>
                             <tbody class="results">
@@ -237,13 +237,13 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                         <table class="results half" id="bottom5tags">
                             <thead class="results">
                                 <tr class="results">
-                                    <th colspan="4" class="results">Bottom 5 Tags</th>
+                                    <th colspan="4" class="results">Areas To Work On</th>
                                 </tr>
                                 <tr class="results">
-                                    <th class="results" style="min-width: 60px">No.</th>
-                                    <th class="results" style="width: 99%; text-align: left;">Tag</th>
-                                    <th class="results" style="min-width: 100px">Reliability</th>
-                                    <th class="results" style="min-width: 100px">Total Marks</th>
+                                    <th class="results" style="width: 99%; text-align: left; padding-left: 10px;">Tag</th>
+                                    <th class="results" style="min-width: 100px">Avg. Score</th>
+                                    <th class="results" style="min-width: 100px">Last 5 questions</th>
+                                    <th class="results" style="min-width: 100px">No. of Questions</th>
                                 </tr>
                             </thead>
                             <tbody class="results">
@@ -254,10 +254,10 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                         <table class="results fullResults" id="alltags">
                             <thead class="results">
                                 <tr class="results">
-                                    <th class="results" style="min-width: 60px">No.</th>
-                                    <th class="results" style="width: 99%; text-align: left;">Tag</th>
-                                    <th class="results" style="min-width: 100px">Reliability</th>
-                                    <th class="results" style="min-width: 100px">Total Marks</th>
+                                    <th class="results" style="width: 99%; text-align: left; padding-left: 10px;">Tag</th>
+                                    <th class="results" style="min-width: 100px">Avg. Score</th>
+                                    <th class="results" style="min-width: 100px">Last 5 questions</th>
+                                    <th class="results" style="min-width: 100px">No. of Questions</th>
                                 </tr>
                             </thead>
                             <tbody class="results">
