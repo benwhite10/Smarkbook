@@ -23,7 +23,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-$query = "SELECT G.`Group ID` ID, G.Name, U2.`User ID`, COUNT(U3.Surname) Count FROM TGROUPS G JOIN TUSERGROUPS U ON U.`Group ID` = G.`Group ID` JOIN TUSERGROUPS U2 ON U.`Group ID` = U2.`Group ID` JOIN TUSERS U3 ON U2.`User ID` = U3.`User ID` WHERE U.`User ID` = $userid AND G.`Type ID` = 3 AND U3.Role = 'STUDENT' GROUP BY U.`Group ID` ORDER BY G.Name;";
+$query = "SELECT G.`Group ID` ID, G.Name, U2.`User ID`, COUNT(U3.Surname) Count FROM TGROUPS G JOIN TUSERGROUPS U ON U.`Group ID` = G.`Group ID` JOIN TUSERGROUPS U2 ON U.`Group ID` = U2.`Group ID` JOIN TUSERS U3 ON U2.`User ID` = U3.`User ID` WHERE U.`User ID` = $userid AND G.`Type ID` = 3 AND U3.Role = 'STUDENT' AND U.`Archived` <> 1 GROUP BY U.`Group ID` ORDER BY G.Name;";
 $sets = db_select($query);
 
 ?>

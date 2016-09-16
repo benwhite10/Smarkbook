@@ -30,7 +30,7 @@ $staffId = isset($_GET['staffid']) ? filter_input(INPUT_GET,'staffid', FILTER_SA
 
 $query = "SELECT G.`Group ID` ID, G.Name Name "
         . "FROM TUSERGROUPS U JOIN TGROUPS G ON U.`Group ID` = G.`Group ID` "
-        . "WHERE `User ID` = $staffId AND G.`Type ID` = 3 ORDER BY G.Name;";
+        . "WHERE `User ID` = $staffId AND G.`Type ID` = 3 AND U.`Archived` <> 1 ORDER BY G.Name;";
 try{
     $sets = db_select_exception($query);
     if($setId == 0 && count($sets)>0){

@@ -76,11 +76,6 @@ function getInput($method, $name, $type){
     <?php pageHeader("Results") ?>
     <link rel="stylesheet" type="text/css" href="css/resultsEntryHome.css" />
     <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css"/>
-    <script>
-        $(function() {
-          $( "#datepicker" ).datepicker({ dateFormat: 'dd/mm/yy' });
-        });
-    </script>
     <script src="js/resultsEntryHome.js"></script>
 </head>
 <body>
