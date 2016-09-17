@@ -1,6 +1,6 @@
 /*Form objects*/
 
-input[type="text"], input[type="password"], input[type="submit"], select, input[type="url"], input[type="date"]{
+input[type="text"], textarea, input[type="password"], input[type="submit"], select, input[type="url"], input[type="date"]{
     display: inline-block;
     font: normal 'Open Sans', sans-serif;
     line-height: 20px;
@@ -50,4 +50,9 @@ legend {
   color:#323232;
   font-size:100%;
   text-align:left;
+}
+
+textarea {
+  height: 60px;
+  vertical-align: top;
 }
