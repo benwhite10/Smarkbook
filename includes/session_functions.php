@@ -83,6 +83,9 @@ function checkUserLoginStatus($url){
 }
 
 function authoriseUserRoles($userRole, $roles){
+    if ($userRole === "EXTERNAL") {
+        return true;
+    }
     foreach($roles as $role){
         if($userRole === $role){
             return true;

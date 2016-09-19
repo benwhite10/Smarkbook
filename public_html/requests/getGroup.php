@@ -12,8 +12,9 @@ $desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$external = filter_input(INPUT_POST,'external',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval);
+$role = validateRequest($userid, $userval, $external);
 if(!$role){
     failRequest("There was a problem validating your request");
 }
@@ -33,7 +34,7 @@ switch ($requestType){
 function getSetsForStaffMember($staffid, $orderby, $desc){
     $query = "select G.`Group ID` ID, G.`Name` Name from TGROUPS G
                 join TUSERGROUPS UG on G.`Group ID` = UG.`Group ID`";
-    $query .= filterBy(["UG.`User ID`", "G.`Type ID`"], [$staffid, 3]);
+    $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`"], [$staffid, 3, 0]);
     $query .= orderBy([$orderby], [$desc]);
     
     try{

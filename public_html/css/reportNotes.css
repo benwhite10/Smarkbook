@@ -1,0 +1,62 @@
+label {
+    display: inline-block;
+    width: 150px;
+    height:32px;
+    line-height: 32px;
+    padding-left: 10px;
+    font-size: 1.1rem;
+    vertical-align: middle;
+}
+
+input[type="text"], select{
+    display: inline-block;
+    font: normal 'Open Sans', sans-serif;
+    line-height: 20px;
+    height: 32px;
+    width: calc(100% - 164px);
+    background: #FFF;
+    margin: 10px 0px;
+    padding: 0 10px;
+    border: 1px solid;
+    -moz-border-radius: 2px; /* Firefox */
+    -webkit-border-radius: 2px; /* Safari, Chrome */
+    -khtml-border-radius: 2px; /* KHTML */
+    border-radius: 2px; /* CSS3 */ 
+    font-size: 0.9rem;
+    color: #323232;
+    outline: none;
+}
+
+#form, #buttons {
+    width: 90%;
+    max-width: 700px;
+    margin: 10px auto;
+}
+
+#note {
+    display: block;
+    width: calc(100% - 30px);
+    margin: 0px 10px;
+    padding: 10px;
+    height: 200px;
+    line-height: 22px;
+    font-size: 0.9rem;
+}
+
+#save {
+    width: 100%;
+    max-width: 200px;
+    background: #FFF;
+    border: 2px solid #00CC00;
+    color: #00CC00;
+    border-radius: 10px;
+    height: 50px;
+    cursor: pointer;
+    text-align: center;
+}
+
+#save:hover {
+    background: #00CC00;
+    color: #FFF;
+    border-color: #FFF;
+}

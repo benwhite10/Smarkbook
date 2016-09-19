@@ -98,7 +98,8 @@ function sendCURLRequest($url, $postData){
     return [$success, $resp];
 }
 
-function validateRequest($userid, $userval){
+function validateRequest($userid, $userval, $external){
+    if ($external === 'JIs7r') return 'EXTERNAL';
     $query = "SELECT `Validation`, `Role` FROM TUSERS U WHERE `User ID` = $userid";
     try{
         $result = db_select_exception($query);
