@@ -145,7 +145,6 @@ function saveNote(){
 function noteSavedSuccess(json){
     if(json["success"]){
         $('#note').val("");
-        getStaff();
     } else {
         console.log("Something went wrong saving the note");
     }
