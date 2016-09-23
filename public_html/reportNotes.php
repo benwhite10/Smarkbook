@@ -31,24 +31,7 @@ $setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
                 </div>
             </div>
             <div id="body">
-                <?php
-                    if (isset($message)) {
-                        $type = $message->getType();
-                        $string = $message->getMessage();
-                        if ($type == "ERROR") {
-                            $div = 'class="error"';
-                        } else if ($type == "SUCCESS") {
-                            $div = 'class="success"';
-                        }
-                    } else {
-                        $div = 'style="display:none;"';
-                    }
-                ?>
-
-                <div id="message" <?php echo $div; ?>>
-                    <div id="messageText"><p><?php if (isset($string)) { echo $string; } ?></p></div>
-                    <div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-                </div>
+                <div id="temp_message"></div>
                 
                 <div id="form">
                     <label for="staffInput">Staff:</label>
