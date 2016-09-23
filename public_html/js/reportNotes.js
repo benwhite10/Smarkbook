@@ -150,9 +150,7 @@ function noteSavedSuccess(json){
             closeMessage(); 
         }, 3000);
     } else {
-        $('#temp_message').html('<p>Error</p>');
-        $('#temp_message').css('background', '#F00');
-        $('#temp_message').css('display', 'block');
+        showErrorMessage('Error');
         console.log("Something went wrong saving the note");
     }
 }
@@ -160,18 +158,16 @@ function noteSavedSuccess(json){
 function showSavedMessage() {
     $('#temp_message').css('background', '#c2f4a4');
     $('#temp_message').html('<p>Saved &#x2713;</p>');
-    //$('#temp_message').css('display', 'block');
     $('#temp_message').slideDown(600);
 }
 
 function showErrorMessage(message) {
     $('#temp_message').css('background', '#F00');
     $('#temp_message').html('<p>' + message + '</p>');
-    $('#temp_message').css('display', 'block');
+    $('#temp_message').slideDown(600);
 }
 
 function closeMessage() {
-    //$('#temp_message').css('display', 'none');
     $('#temp_message').slideUp(600);
 }
 

@@ -48,6 +48,11 @@ input[type="text"], select{
     border: solid 1px #666;
 }
 
+#save h1, #cancel h1 {
+    font-size: 1.7rem;
+    font-weight: 400;
+}
+
 #save, #cancel {
     display: inline-block;
     width: 50%;
