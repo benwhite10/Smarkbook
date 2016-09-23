@@ -174,3 +174,7 @@ function closeMessage() {
     //$('#temp_message').css('display', 'none');
     $('#temp_message').slideUp(600);
 }
+
+function cancelNote() {
+    $('#note').val("");
+}

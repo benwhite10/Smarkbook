@@ -50,7 +50,9 @@ $setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
                     <textarea name="note" id="note"></textarea>
                 </div>
                 <div id="buttons">
-                    <div id="save" onclick="saveNote()">
+                    <div id="cancel" onclick="cancelNote()">
+                        <h1>Cancel</h1>
+                    </div><div id="save" onclick="saveNote()">
                         <h1>Save</h1>
                     </div>
                 </div>

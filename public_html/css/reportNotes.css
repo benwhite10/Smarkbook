@@ -35,8 +35,8 @@ input[type="text"], select{
 
 #note {
     display: block;
-    width: calc(100% - 30px);
-    margin: 0px 10px;
+    width: calc(100% - 20px);
+    margin: 0px;
     padding: 10px;
     height: 200px;
     line-height: 22px;
@@ -44,24 +44,34 @@ input[type="text"], select{
     font-family: 'Open Sans', sans-serif;
 }
 
-#save {
-    width: 100%;
-    max-width: 200px;
-    background: #FFF;
-    border: 2px solid #00CC00;
-    color: #00CC00;
-    border-radius: 10px;
+#buttons {
+    border: solid 1px #666;
+}
+
+#save, #cancel {
+    display: inline-block;
+    width: 50%;
+    background: transparent;
     height: 50px;
     cursor: pointer;
     text-align: center;
 }
 
-#save:hover {
-    background: #00CC00;
-    color: #FFF;
-    border-color: #FFF;
+#save {
+    background: #c2f4a4;
 }
 
+#save:hover {
+    background: #a2d484;
+}
+
+#cancel {
+    background: #ff9999;
+}
+
+#cancel:hover {
+    background: #df7979;
+}
 #temp_message{
     width: 90%;
     max-width: 700px;
