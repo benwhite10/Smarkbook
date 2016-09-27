@@ -41,7 +41,7 @@ function getNotesForStaff($staffId) {
             LEFT JOIN TSTUDENTS S ON S.`User ID` = R.`StudentID`
             LEFT JOIN TGROUPS G ON G.`Group ID` = R.GroupID
             WHERE StaffID = $staffId ";      
-        $query .= "ORDER BY U.Surname, G.Name, R.Date DESC;";
+        $query .= "ORDER BY G.Name, U.Surname, R.Date DESC;";
         succeedRequest(db_select_exception($query));
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
