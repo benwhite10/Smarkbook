@@ -51,7 +51,7 @@ function checkUserLoginStatus($url){
         $username = $user->getEmail();
         $timeout = $_SESSION['timeout'];
         if(isset($timeout)){
-            if($timeout + 30*60 < time()){
+            if($timeout + 12*60*60 < time()){
                 //Session timed out so save the users url and log them out
                 $msg = "User $userid has been timed out.";
                 infoLog($msg);
