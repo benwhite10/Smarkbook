@@ -484,7 +484,7 @@ function getQuestionAverages(){
     var totalAvMark = Math.round(10*total/totalCount)/10;
     var totalAvMarks = Math.round(10*totalMarks/totalCount)/10;
     $("#averagePerc-ALL").text(totalAveragePercentage + "%");
-    $("#average-ALL").text(totalAvMark + "/" + totalAvMarks);
+    $("#average-ALL").text(totalAvMark + " / " + totalAvMarks);
     for (var i = 1; i < qAv.length; i++) {
         var average = qAv[i] /qAvCount[i];
         var rounded = Math.round(10 * average)/10;
