@@ -411,7 +411,7 @@ if(isset($_SESSION['message'])){
                                 $count = 1;
                                 foreach ($worksheet as $question){
                                     $marks = $question['Marks'];
-                                    echo "<td class='averages display' style='padding:0px;' id='average-$count'>$count</td>";
+                                    echo "<td class='averages display' style='padding:0px;' id='average-$count'></td>";
                                     echo "<input type='hidden' id='average-mark-$count' value='$marks'>";
                                     $count++;
                                 }
@@ -420,7 +420,7 @@ if(isset($_SESSION['message'])){
                                 echo "<td class='averages'>Average (%)</td>";
                                 $count = 1;
                                 foreach ($worksheet as $question){
-                                    echo "<td class='averages display' style='padding:0px;' id='averagePerc-$count'>$count %</td>";
+                                    echo "<td class='averages display' style='padding:0px;' id='averagePerc-$count'> %</td>";
                                     $count++;
                                 }
                                 echo "<td class='averages display' id='averagePerc-ALL'>ALL</td><td class='averages'></td><td class='averages'></td></tr>";
