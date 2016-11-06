@@ -144,6 +144,28 @@ td.results {
     padding-left: 0px;
 }
 
+td.averages {
+    height: 32px;
+    background: rgba(50,50,50,0.7);
+    color: #66E11B;
+    cursor:default;
+}
+
+td.averages:hover {
+    background: rgba(50,50,50,0.7);
+}
+
+td.display {
+    text-align: center;
+    padding: 0;
+    margin: 0;
+}
+
+tr.averages:nth-child(even):hover, tr.averages:hover
+{
+    background: rgba(50,50,50,0.7);
+}
+
 #main_content
 { width: 100%;margin-bottom: 20px;}
 

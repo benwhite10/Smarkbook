@@ -366,7 +366,7 @@ if(isset($_SESSION['message'])){
                                         echo "<td class='results' style='padding:0px;'><input type='text' class='markInput' name='resultInput[$id]' value='$mark' id='$stuID-$count' onBlur='changeResult(this.value, $stuID, $count)'></td>";
                                         $count++;
                                     }
-                                    echo "<td class='results' style='padding:0px; text-align: center;'><b id='total$stuID'>$totalMark / $totalMarks</b></td>";
+                                    echo "<td class='results' style='padding:0px; text-align: center;'><b class='totalMarks' id='total$stuID'>$totalMark / $totalMarks</b></td>";
                                     echo "<input type='hidden' id='count$stuID' value=$count />";
                                     $completionStatus = "Not Required";
                                     $daysLate = "";
@@ -406,6 +406,24 @@ if(isset($_SESSION['message'])){
                                     echo "<input type='hidden' id='lock$stuID' value='$lock' />";
                                     echo "</tr>";
                                 }
+                                echo "<tr class='averages'>";
+                                echo "<td class='averages'>Average</td>";
+                                $count = 1;
+                                foreach ($worksheet as $question){
+                                    $marks = $question['Marks'];
+                                    echo "<td class='averages display' style='padding:0px;' id='average-$count'>$count</td>";
+                                    echo "<input type='hidden' id='average-mark-$count' value='$marks'>";
+                                    $count++;
+                                }
+                                echo "<td class='averages display' id='average-ALL'>ALL</td><td class='averages'></td><td class='averages'></td></tr>";
+                                echo "<tr class='averages'>";
+                                echo "<td class='averages'>Average (%)</td>";
+                                $count = 1;
+                                foreach ($worksheet as $question){
+                                    echo "<td class='averages display' style='padding:0px;' id='averagePerc-$count'>$count %</td>";
+                                    $count++;
+                                }
+                                echo "<td class='averages display' id='averagePerc-ALL'>ALL</td><td class='averages'></td><td class='averages'></td></tr>";
                             ?> 
                         </tbody>
                     </table>
