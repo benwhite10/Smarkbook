@@ -58,6 +58,7 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
                         <h1>Report Notes</h1>
                     </div>
                     <ul class="menu navbar">
+                        <li><a href="reportNotes.php?t=<?php echo $userid; ?>">Add New Notes</a></li>
                     </ul>
                 </div>
                 <div id="main_notes">

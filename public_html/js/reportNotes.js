@@ -174,3 +174,7 @@ function closeMessage() {
 function cancelNote() {
     $('#note').val("");
 }
+
+function viewNotes() {
+    window.location.href = 'viewReportNotes.php';
+}

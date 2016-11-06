@@ -31,6 +31,12 @@ $setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
                 </div>
             </div>
             <div id="body">
+                <div id="top_button">
+                    <div id="top_button_view" onclick="viewNotes()">
+                        <h1>View My Notes</h1>
+                    </div>
+                </div>
+                
                 <div id="temp_message"></div>
                 
                 <div id="form">

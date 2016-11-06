@@ -27,12 +27,20 @@ input[type="text"], select{
     outline: none;
 }
 
-#form, #buttons {
+#form, #buttons, #top_button {
     width: 90%;
     max-width: 700px;
     margin: 10px auto;
 }
 
+#top_button {
+    text-align: center;
+    cursor: pointer;
+}
+
+#top_button:hover {
+    background: rgba(0,0,0,0.2);
+}
 #note {
     display: block;
     width: calc(100% - 20px);
@@ -48,7 +56,7 @@ input[type="text"], select{
     border: solid 1px #666;
 }
 
-#save h1, #cancel h1 {
+#save h1, #cancel h1, #top_button_view h1 {
     font-size: 1.7rem;
     font-weight: 400;
 }
