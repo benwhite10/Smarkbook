@@ -407,6 +407,13 @@ if(isset($_SESSION['message'])){
                                     echo "</tr>";
                                 }
                                 echo "<tr class='averages'>";
+                                echo "<td class='averages'>Question</td>";
+                                foreach($worksheet as $question){
+                                    $qno = $question['Number'];
+                                    echo "<td class='averages display' style='text-align: center; padding-left: 0px;'>$qno</ts>";
+                                }
+                                echo "<td class='averages'></td><td class='averages'></td><td class='averages'></td></tr>";
+                                echo "<tr class='averages'>";
                                 echo "<td class='averages'>Average</td>";
                                 $count = 1;
                                 foreach ($worksheet as $question){
