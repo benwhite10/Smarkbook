@@ -7,9 +7,8 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
-$orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
-$desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
-$staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
+$studentid = filter_input(INPUT_POST,'studentid',FILTER_SANITIZE_NUMBER_INT);
+$groupid = filter_input(INPUT_POST,'groupid',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 $external = filter_input(INPUT_POST,'external',FILTER_SANITIZE_STRING);
@@ -24,24 +23,36 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        addToGroup($userid, $groupid);
+        addToGroup($studentid, $groupid);
         break;
     case "REMOVEFROMGROUP":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        removeFromGroup($userid, $groupid);
+        removeFromGroup($studentid, $groupid);
         break;
     default:
         failRequest("There was a problem with your request, please try again.");
         break;
 }
 
-function addToGroup($userid, $groupid) {
-    $query = "INSERT INTO `TUSERGROUPS`(`User ID`, `Group ID`, `Archived`) VALUES ($userid,$groupid,0)";
+function addToGroup($studentid, $groupid) {
+    $query1 = "SELECT `Link ID` FROM TUSERGROUPS WHERE `User ID` = $studentid AND `Group ID` = $groupid;";
     try {
         db_begin_transaction();
-        db_insert_query_exception($query);
+        $links = db_select_exception($query1);
+        if (count($links) == 0) {
+            $query2 = "INSERT INTO `TUSERGROUPS`(`User ID`, `Group ID`, `Archived`) VALUES ($studentid,$groupid,0)";
+            db_insert_query_exception($query2);
+        } else {
+            $query3 = "UPDATE `TUSERGROUPS` SET `Archived` = 0 WHERE ";
+            foreach ($links as $link) {
+                $id = $link["Link ID"];
+                $query3 .= "`Link ID` = $id AND "; 
+            }
+            $query3 = substr($query3, 0, -5);
+            db_query_exception($query3);
+        }
         db_commit_transaction();
     } catch (Exception $ex) {
         db_rollback_transaction();
@@ -50,8 +61,8 @@ function addToGroup($userid, $groupid) {
     succeedRequest();
 }
 
-function removeFromGroup($userid, $groupid) {
-    $query = "UPDATE `TUSERGROUPS` SET `Archived`= 1 WHERE `User ID` = $userid AND `Group ID` = $groupid;";
+function removeFromGroup($studentid, $groupid) {
+    $query = "UPDATE `TUSERGROUPS` SET `Archived`= 1 WHERE `User ID` = $studentid AND `Group ID` = $groupid;";
     try {
         db_begin_transaction();
         db_query_exception($query);
@@ -66,7 +77,8 @@ function removeFromGroup($userid, $groupid) {
 function failRequest($message){
     errorLog("There was an error in the edit group request: " . $message);
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message);
     echo json_encode($response);
     exit();
 }

@@ -98,7 +98,7 @@ if($resultArray[0]){
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 } 
-                if(authoriseUserRoles($userRole, ["SUPER_USER"])){
+                if(authoriseUserRoles($userRole, [])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
                     echo "<a href='viewAllTags.php' class='title'>Manage Tags</a>";

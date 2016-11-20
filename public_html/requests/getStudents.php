@@ -26,6 +26,12 @@ switch ($requestType){
         }
         getStudentsForSet($setid, $orderby, $desc);
         break;
+    case "ALLSTUDENTS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getAllStudents($orderby, $desc);
+        break;
     default:
         break;
 }
@@ -51,10 +57,29 @@ function getStudentsForSet($setid, $orderby, $desc){
     echo json_encode($response);
 }
 
+function getAllStudents($orderby, $desc){
+    $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName FROM TUSERS U "
+            . "JOIN TSTUDENTS S ON S.`User ID` = U.`User ID` ";
+    $query .= orderBy([$orderby], [$desc]);
+    
+    try{
+        $users = db_select_exception($query);
+    } catch (Exception $ex) {
+        $message = "There was an error loading the students";
+        returnToPageError($ex, $message);
+    }
+    
+    $response = array(
+        "success" => TRUE,
+        "users" => $users);
+    echo json_encode($response);
+}
+
 function returnToPageError($ex, $message){
     errorLog("There was an error in the get students request: " . $ex->getMessage());
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message . ": " . $ex->getMessage());
     echo json_encode($response);
     exit();
 }

@@ -65,3 +65,26 @@ tr:nth-child(even) {
 tr:hover, tr:nth-child(even):hover {
     background-color: #a4ef76;
 }
+
+.row_left {
+    float:left;
+    width:calc(100% - 100px);
+    height: 40px;
+    line-height: 40px;
+}
+
+.row_right{
+    float: right;
+    width: 100px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    -webkit-user-select: none; /* Chrome/Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+ */
+    cursor: pointer;
+}
+
+.row_right:hover {
+    background: #86ea48
+}

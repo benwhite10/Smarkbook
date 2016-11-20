@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -28,14 +29,15 @@ if($_GET['id'])
     $groupid = $_GET['id'];
 }
 
-$query = "SELECT U.`First Name`, S.`Preferred Name`, U.Surname FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $groupid;";
+$query = "SELECT U.`First Name`, S.`Preferred Name`, U.Surname, U.`User ID` ID FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $groupid AND G.`Archived` = 0;";
 $students = db_select($query);
 
-$query2 = "SELECT  S.`Title`, U.`First Name`, U.Surname, U.Email FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID` JOIN TSTAFF S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $groupid;";
+$query2 = "SELECT  S.`Title`, U.`First Name`, U.Surname, U.Email FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID` JOIN TSTAFF S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $groupid AND G.`Archived` = 0;";
 $staff = db_select($query2);
 
 $query3 = "SELECT Name FROM TGROUPS WHERE `Group ID` = $groupid;";
-$worksheetName = db_select($query3);
+$groupNameResult = db_select($query3);
+$groupName = $groupNameResult[0]['Name'];
 
 ?>
 
@@ -44,8 +46,11 @@ $worksheetName = db_select($query3);
 <head lang="en">
     <?php pageHeader("Smarkbook"); ?>
     <script src="js/sorttable.js"></script>
+    <script src="js/manageGroups.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/viewGroup.css" />
 </head>
 <body>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -65,9 +70,7 @@ $worksheetName = db_select($query3);
     	<div id="body">
             <div id="top_bar">
                 <div id="title2">
-                    <h1><?php
-                        $title = $worksheetName[0]['Name'] . ' (' . count($students) . ' Students)';
-                        echo $title; ?></h1>
+                    <h1><?php echo $groupName . ' (' . count($students) . ' Students)';; ?></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>
@@ -89,12 +92,23 @@ $worksheetName = db_select($query3);
                                     $frstName = $prefName . ' (<i>' . $firstName . '</i>)';
                                 }
                                 $surname = $student['Surname'];
+                                $id = $student['ID'];
                                 $fullName = $frstName . ' ' . $surname;
-                                echo "<tr><td>$fullName</td></tr>";
+                                echo "<tr><td style='height: 40px;'><div class='row_left'>$fullName</div><div class='row_right' onClick='removeStudentPrompt($groupid,$id, &quot;$firstName $surname&quot;, &quot;$groupName&quot;);'>Remove</div></td></tr>";
                             }
                         ?> 
                     </tbody>
                 </table>
+                <div id="add_student">
+                    <h1 style="margin-left: 10px;">Add New Student</h1>
+                    <div id="students_input_div">
+                    <input id="students_input" type="text" list="students" placeholder="Student">
+                    <datalist id="students">
+                        <option value="0">No Students</option>
+                    </datalist>
+                    </div>
+                    <div id="students_button_div" onclick="addStudent(<?php echo $groupid ?>)"><h4 style="text-align: center; line-height: 35px; font-weight: 400;">Add</h4></div>
+                </div>
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
                 <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
