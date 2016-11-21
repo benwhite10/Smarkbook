@@ -67,7 +67,7 @@ if($respArray["success"]){
     $worksheets = $respArray["worksheets"];
     $results = $respArray["results"];
 
-    $noResults = (count($results) == 0);
+    $blankCols = max([10 - count($results), 0]);
     $noStudents = (count($students) == 0);
 } else {
     $success = FALSE;
@@ -159,35 +159,40 @@ if($respArray["success"]){
                         <tr class="no_hover">
                             <th class="blank_cell" ></th>
                             <?php
-                                if(!$noResults){
-                                    foreach($worksheets as $worksheet){
-                                        $name = $worksheet['WName'];
-                                        $gwid = $worksheet['GWID'];
-                                        echo "<th style='text-align: center' class='rotate'><div title='$name' onclick='viewWorksheet($gwid);'><span title='$name'>$name</fiv></span></th>";
-                                    }
+                                foreach($worksheets as $worksheet){
+                                    $name = $worksheet['WName'];
+                                    $gwid = $worksheet['GWID'];
+                                    echo "<th style='text-align: center' class='rotate'><div title='$name' onclick='viewWorksheet($gwid);'><span title='$name'>$name</span></div></th>";
+                                }
+                                for ($i = 0; $i < $blankCols; $i++) {
+                                    echo "<th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>";
                                 }
                             ?>
                         </tr>
                     </thead>
                     <tbody>
                         <?php 
-                            if(!$noResults){
-                                echo "<tr class='no_hover blank_cell'><td class='blank_cell'></td>";
-                                foreach ($worksheets as $worksheet){
-                                    $date = $worksheet['Date'];
-                                    $shortdate = $worksheet['ShortDate'];
-                                    $gwid = $worksheet['GWID'];
-                                    echo "<td style='text-align: center; cursor:pointer;' title='$date' onclick='viewWorksheet($gwid);'><b>$shortdate</b></td>";
-                                }
-                                echo "</tr>";
-
-                                echo "<tr class='no_hover'><td class='blank_cell'></td>";
-                                foreach ($worksheets as $worksheet){
-                                    $marks = $worksheet['Marks'];
-                                    echo "<td style='text-align: center; cursor:default;'><b>/ $marks</b></td>";
-                                }
-                                echo "</tr>";
+                            echo "<tr class='no_hover blank_cell'><td class='blank_cell'></td>";
+                            foreach ($worksheets as $worksheet){
+                                $date = $worksheet['Date'];
+                                $shortdate = $worksheet['ShortDate'];
+                                $gwid = $worksheet['GWID'];
+                                echo "<td class='date' title='$date' onclick='viewWorksheet($gwid);'><b>$shortdate</b></td>";
                             }
+                            for ($i = 0; $i < $blankCols; $i++) {
+                                echo "<td class='date'></td>";
+                            }
+                            echo "</tr>";
+
+                            echo "<tr class='no_hover'><td class='blank_cell'></td>";
+                            foreach ($worksheets as $worksheet){
+                                $marks = $worksheet['Marks'];
+                                echo "<td class='total_marks'><b>/ $marks</b></td>";
+                            }
+                            for ($i = 0; $i < $blankCols; $i++) {
+                                echo "<td class='total_marks'></td>";
+                            }
+                            echo "</tr>";
                             foreach($students as $student){
                                 $stuId = $student['ID'];
                                 $stuName = $student['Name'];
@@ -207,19 +212,22 @@ if($respArray["success"]){
                                     }
                                     echo "<td class='marks'>$mark</td>";
                                 }
+                                for ($i = 0; $i < $blankCols; $i++) {
+                                    echo "<td class='marks'></td>";
+                                }
                                 echo "</tr>";
                             }
                         ?> 
                     </tbody>
                 </table>
             </div>
-            <div id="side_bar">
+            <!--<div id="side_bar">
                 <ul class="menu sidebar">
-                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                    <li><a href="resultsEntryHome.php?level=1&type=2&staffid=<?php echo "$staffId&groupid=$setId"; ?>">Enter New Results</a></li>
-                    <?php } ?>
+                    <?php //if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
+                    <li><a href="resultsEntryHome.php?level=1&type=2&staffid=<?php //echo "$staffId&groupid=$setId"; ?>">Enter New Results</a></li>
+                    <?php //} ?>
                 </ul>
-            </div>
+            </div>-->
             <?php } ?>
     	</div>
     </div>

@@ -13,8 +13,9 @@ td.marks{
 }
 
 table {
-    width: 100%;
+    width: auto;
     overflow: visible;
+    float: left;
 }
 
 td, th {
@@ -36,6 +37,22 @@ td.name{
     cursor: pointer;
 }
 
+td.date {
+    text-align: center; 
+    cursor:pointer;
+    padding-left: 0px;
+}
+
+td.date:hover {
+    color: #a4ef76;
+}
+
+td.total_marks {
+    text-align: center; 
+    cursor:default;
+    padding-left: 0px;
+}
+
 th.rotate {
   /* Something you can count on */
   height: 200px;
@@ -46,7 +63,7 @@ th.rotate {
 
 th.rotate > div {
   transform: 
-    translate(6px, -1px)
+    translate(0px, -2px)
     rotate(315deg);
   width: 250px;
   text-align: left;
@@ -61,7 +78,7 @@ th.rotate > div {
 }
 
 th.rotate > div > span:hover {
-    color: #00CC00;
+    color: #a4ef76;
 }
 
 th.rotate > div > span {
@@ -86,4 +103,8 @@ td.blank_cell {
 
 input[type="text"].markInput{
     cursor: default;
+}
+
+#main_content {
+    width: 100%;
 }
