@@ -85,6 +85,15 @@ if($respArray["success"]){
     <link href="css/autocomplete.css" rel="stylesheet" />
     <script src="js/jquery-ui.js"></script>
     <script src="js/tagsList.js"></script>
+    <script>
+        function viewWorksheet(gwid) {
+            window.location.href = "editSetResults.php?gwid=" + gwid;
+        }
+        
+        function viewStudent(stuid, setid, staffid) {
+            window.location.href = "individualSummary.php?stuid=" + stuid + "&setid=" + setid + "&staffid=" + staffid;
+        }
+    </script>
 </head>
 <body>
     <div id="main">
@@ -147,14 +156,14 @@ if($respArray["success"]){
                 <input type="hidden" name = "staff" value="<?php echo $staffId ?>" />
                 <table border="1">
                     <thead>
-                        <tr>
-                            <th>Students</th>
+                        <tr class="no_hover">
+                            <th class="blank_cell" ></th>
                             <?php
                                 if(!$noResults){
                                     foreach($worksheets as $worksheet){
                                         $name = $worksheet['WName'];
                                         $gwid = $worksheet['GWID'];
-                                        echo "<th style='text-align: center'><a href='editSetResults.php?gwid=$gwid'>$name</a></th>";
+                                        echo "<th style='text-align: center' class='rotate'><div title='$name' onclick='viewWorksheet($gwid);'><span title='$name'>$name</fiv></span></th>";
                                     }
                                 }
                             ?>
@@ -163,24 +172,26 @@ if($respArray["success"]){
                     <tbody>
                         <?php 
                             if(!$noResults){
-                                echo "<tr><td></td>";
+                                echo "<tr class='no_hover blank_cell'><td class='blank_cell'></td>";
                                 foreach ($worksheets as $worksheet){
                                     $date = $worksheet['Date'];
-                                    echo "<td style='text-align: center'><b>$date</b></td>";
+                                    $shortdate = $worksheet['ShortDate'];
+                                    $gwid = $worksheet['GWID'];
+                                    echo "<td style='text-align: center; cursor:pointer;' title='$date' onclick='viewWorksheet($gwid);'><b>$shortdate</b></td>";
                                 }
                                 echo "</tr>";
 
-                                echo "<tr><td></td>";
+                                echo "<tr class='no_hover'><td class='blank_cell'></td>";
                                 foreach ($worksheets as $worksheet){
                                     $marks = $worksheet['Marks'];
-                                    echo "<td style='text-align: center'><b>/ $marks</b></td>";
+                                    echo "<td style='text-align: center; cursor:default;'><b>/ $marks</b></td>";
                                 }
                                 echo "</tr>";
                             }
                             foreach($students as $student){
                                 $stuId = $student['ID'];
                                 $stuName = $student['Name'];
-                                echo "<tr><td class='name'><a href='individualSummary.php?stuid=$stuId&setid=$setId&staffid=$staffId'>$stuName</a></td>";
+                                echo "<tr><td class='name' onclick='viewStudent($stuId, $setId, $staffId);'>$stuName</td>";
                                 foreach ($worksheets as $worksheet){
                                     $gwid = $worksheet['GWID'];
                                     $marks = $worksheet['Marks'];
@@ -194,7 +205,7 @@ if($respArray["success"]){
                                     }else{
                                         $mark = "";
                                     }
-                                    echo "<td class='marks'><input type='text' class='markInput' name='resultInput[]' value=$mark></td>";
+                                    echo "<td class='marks'>$mark</td>";
                                 }
                                 echo "</tr>";
                             }

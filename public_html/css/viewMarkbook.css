@@ -6,11 +6,84 @@ table
 td
 { height: 32px; }
 
-td.name{
-  min-width: 180px;
-}
-
 td.marks{
     padding: 0px;
     text-align: center;
+    cursor: default;
+}
+
+table {
+    width: 100%;
+    overflow: visible;
+}
+
+td, th {
+    max-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+th {
+    background: transparent;
+    border: none;
+}
+
+td.name{
+    min-width: 180px;
+    max-width: 300px;
+    width: 200px;
+    cursor: pointer;
+}
+
+th.rotate {
+  /* Something you can count on */
+  height: 200px;
+  white-space: nowrap;
+  overflow: visible;
+  cursor: pointer;
+}
+
+th.rotate > div {
+  transform: 
+    translate(6px, -1px)
+    rotate(315deg);
+  width: 250px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-bottom: 1px solid #000;
+  font-size: 1.0rem;
+  color: #323232;
+  font-weight: 700;
+  line-height: 40px;
+}
+
+th.rotate > div > span:hover {
+    color: #00CC00;
+}
+
+th.rotate > div > span {
+  margin-left: 0px;
+  font-size: 1.0rem;
+  color: #323232;
+  font-weight: 700;
+}
+
+tr.no_hover:hover {
+    background-color: transparent;
+}
+
+tr.no_hover:nth-child(even):hover {
+    background-color: #DDD;
+}
+
+td.blank_cell {
+    background-color: #EEE;
+    border: none;
+}
+
+input[type="text"].markInput{
+    cursor: default;
 }
