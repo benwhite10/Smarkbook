@@ -31,9 +31,10 @@ switch ($requestType){
 function getMarkbookForSetAndTeacher($setid, $staffid){
     $query1 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G 
                 JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` 
-                WHERE G.`Group ID` = $setid 
+                WHERE G.`Group ID` = $setid
+                AND G.`Archived` <> 1
                 ORDER BY U.Surname;";
-    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, SUM(SQ.`Marks`) Marks 
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks 
                 FROM TGROUPWORKSHEETS GW
                 join TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 join TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                

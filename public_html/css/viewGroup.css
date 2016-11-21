@@ -1,0 +1,42 @@
+/* 
+    Created on : 19-Nov-2016, 16:04:00
+    Author     : benwhite
+*/
+
+#add_student {
+    width: calc(100% - 2px);
+    height: 100px;
+    margin: 10px 0px;
+    border: 1px solid #000;
+}
+
+#students_input {
+    width: 90%;
+    margin: 0;
+}
+
+#students_input_div {
+    display: inline-block;
+    float: left;
+    margin-left: 10px;
+    width: 60%;    
+}
+
+#students_button_div {
+    display: inline-block;
+    float: left;
+    width: 200px;  
+    height: 35px;
+    background: #DDD;
+    color: #000;
+    cursor: pointer;
+}
+
+#students_button_div:hover {
+    background: #323232;
+    color: #66E11B;
+}
+
+#main_content > table {
+    border: 1px solid #000;
+}

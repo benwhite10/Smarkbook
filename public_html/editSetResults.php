@@ -347,7 +347,7 @@ if(isset($_SESSION['message'])){
                                     $stuName = $student['Name'];
                                     $resultArray = $results[$stuID];
                                     $completedWorksheet = array_key_exists($stuID, $completedWorksheets) ? $completedWorksheets[$stuID] : null;
-                                    echo "<tr class='results'><td class='results' id='stu$stuID' style='min-width: 180px; padding-left: 10px;'>$stuName</td>";
+                                    echo "<tr class='results'><td class='results student_name' id='stu$stuID'>$stuName</td>";
                                     $count = 1;
                                     $totalMark = 0;
                                     $totalMarks = 0;
@@ -366,7 +366,7 @@ if(isset($_SESSION['message'])){
                                         echo "<td class='results' style='padding:0px;'><input type='text' class='markInput' name='resultInput[$id]' value='$mark' id='$stuID-$count' onBlur='changeResult(this.value, $stuID, $count)'></td>";
                                         $count++;
                                     }
-                                    echo "<td class='results' style='padding:0px; text-align: center;'><b id='total$stuID'>$totalMark / $totalMarks</b></td>";
+                                    echo "<td class='results total_mark'><b class='totalMarks' id='total$stuID'>$totalMark / $totalMarks</b></td>";
                                     echo "<input type='hidden' id='count$stuID' value=$count />";
                                     $completionStatus = "Not Required";
                                     $daysLate = "";
@@ -397,8 +397,11 @@ if(isset($_SESSION['message'])){
                                         $cwid = getArrayValueForKey($completedWorksheet, "Completed Worksheet ID");
                                     }
                                     $id = $stuID . '-' . $cwid;
-                                    echo "<td class='results'><input type='text' id='comp$stuID' class='status $compClass' name='completion[$stuID]' value='$completionStatus' onClick='showStatusPopUp($stuID)'></input></td>";
-                                    echo "<td class='results'><input type='text' id='date$stuID' class='status $lateClass' name='date[$stuID]' value='$dateStatus' onClick='showStatusPopUp($stuID)'></input></td>";
+                                    echo "<td class='results date_completion'><input type='text' id='comp$stuID' class='status $compClass' name='completion[$stuID]' value='$completionStatus' onClick='showStatusPopUp($stuID)'></input></td>";
+                                    echo "<td class='results date_completion'><input type='text' id='date$stuID' class='status $lateClass' name='date[$stuID]' value='$dateStatus' onClick='showStatusPopUp($stuID)'></input></td>";
+                                    //echo "<td id='comp$stuID' class='results date_completion $compClass status'><input type='text' name='completion[$stuID]' value='$completionStatus' onClick='showStatusPopUp($stuID)'></input></td>";
+                                    //echo "<td id='date$stuID' class='results date_completion $lateClass status'><input type='text' name='date[$stuID]' value='$dateStatus' onClick='showStatusPopUp($stuID)'></input></td>";
+                                    
                                     echo "<input type='hidden' name='notes[$stuID]' id='note$stuID' value='' />";
                                     echo "<input type='hidden' name='dates[$stuID]' id='daysLate$stuID' value='$daysLate' />";
                                     echo "<input type='hidden' name='ids[$stuID]' value='$cwid' />";
@@ -406,6 +409,31 @@ if(isset($_SESSION['message'])){
                                     echo "<input type='hidden' id='lock$stuID' value='$lock' />";
                                     echo "</tr>";
                                 }
+                                echo "<tr class='averages'>";
+                                echo "<td class='averages'>Question</td>";
+                                foreach($worksheet as $question){
+                                    $qno = $question['Number'];
+                                    echo "<td class='averages display' style='text-align: center; padding-left: 0px;'>$qno</ts>";
+                                }
+                                echo "<td class='averages'></td><td class='averages'></td><td class='averages'></td></tr>";
+                                echo "<tr class='averages'>";
+                                echo "<td class='averages'>Average</td>";
+                                $count = 1;
+                                foreach ($worksheet as $question){
+                                    $marks = $question['Marks'];
+                                    echo "<td class='averages display' style='padding:0px;' id='average-$count'></td>";
+                                    echo "<input type='hidden' id='average-mark-$count' value='$marks'>";
+                                    $count++;
+                                }
+                                echo "<td class='averages display' id='average-ALL'>ALL</td><td class='averages'></td><td class='averages'></td></tr>";
+                                echo "<tr class='averages'>";
+                                echo "<td class='averages'>Average (%)</td>";
+                                $count = 1;
+                                foreach ($worksheet as $question){
+                                    echo "<td class='averages display' style='padding:0px;' id='averagePerc-$count'> %</td>";
+                                    $count++;
+                                }
+                                echo "<td class='averages display' id='averagePerc-ALL'>ALL</td><td class='averages'></td><td class='averages'></td></tr>";
                             ?> 
                         </tbody>
                     </table>

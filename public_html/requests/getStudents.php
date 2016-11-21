@@ -12,8 +12,9 @@ $desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$external = filter_input(INPUT_POST,'external',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval);
+$role = validateRequest($userid, $userval, $external);
 if(!$role){
     failRequest("There was a problem validating your request");
 }
@@ -24,6 +25,12 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         getStudentsForSet($setid, $orderby, $desc);
+        break;
+    case "ALLSTUDENTS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getAllStudents($orderby, $desc);
         break;
     default:
         break;
@@ -50,10 +57,29 @@ function getStudentsForSet($setid, $orderby, $desc){
     echo json_encode($response);
 }
 
+function getAllStudents($orderby, $desc){
+    $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName FROM TUSERS U "
+            . "JOIN TSTUDENTS S ON S.`User ID` = U.`User ID` ";
+    $query .= orderBy([$orderby], [$desc]);
+    
+    try{
+        $users = db_select_exception($query);
+    } catch (Exception $ex) {
+        $message = "There was an error loading the students";
+        returnToPageError($ex, $message);
+    }
+    
+    $response = array(
+        "success" => TRUE,
+        "users" => $users);
+    echo json_encode($response);
+}
+
 function returnToPageError($ex, $message){
     errorLog("There was an error in the get students request: " . $ex->getMessage());
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message . ": " . $ex->getMessage());
     echo json_encode($response);
     exit();
 }

@@ -98,12 +98,20 @@ if($resultArray[0]){
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 } 
-                if(authoriseUserRoles($userRole, ["SUPER_USER"])){
+                if(authoriseUserRoles($userRole, [])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
                     echo "<a href='viewAllTags.php' class='title'>Manage Tags</a>";
                     echo "<input type='hidden' id='menuObjectLink$count' value='viewAllTags.php'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-modify.png'>";
+                    echo "</div>";
+                }
+                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+                    $count++;
+                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='reportNotes.php?t=$userid' class='title'>Report Notes</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='reportNotes.php?t=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 }
                 echo "<input type='hidden' id='menuCount' value=$count />";

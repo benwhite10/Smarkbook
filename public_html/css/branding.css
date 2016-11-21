@@ -309,7 +309,7 @@ ul.topbar a{
   color: #66E11B;
 }
 
-ul.navbar li:hover a, ul.sidebar li:hover a{
+ul.navbar li:hover a, ul.sidebar li:hover a, ul.sidebar li:hover{
   color: #66E11B;
 }
 
@@ -418,5 +418,3 @@ label.error{
 #editForm input.error{
     border: 1px solid red;
 }
-
-

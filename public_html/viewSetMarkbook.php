@@ -67,7 +67,7 @@ if($respArray["success"]){
     $worksheets = $respArray["worksheets"];
     $results = $respArray["results"];
 
-    $noResults = (count($results) == 0);
+    $blankCols = max([10 - count($results), 0]);
     $noStudents = (count($students) == 0);
 } else {
     $success = FALSE;
@@ -85,6 +85,15 @@ if($respArray["success"]){
     <link href="css/autocomplete.css" rel="stylesheet" />
     <script src="js/jquery-ui.js"></script>
     <script src="js/tagsList.js"></script>
+    <script>
+        function viewWorksheet(gwid) {
+            window.location.href = "editSetResults.php?gwid=" + gwid;
+        }
+        
+        function viewStudent(stuid, setid, staffid) {
+            window.location.href = "individualSummary.php?stuid=" + stuid + "&setid=" + setid + "&staffid=" + staffid;
+        }
+    </script>
 </head>
 <body>
     <div id="main">
@@ -147,40 +156,47 @@ if($respArray["success"]){
                 <input type="hidden" name = "staff" value="<?php echo $staffId ?>" />
                 <table border="1">
                     <thead>
-                        <tr>
-                            <th>Students</th>
+                        <tr class="no_hover">
+                            <th class="blank_cell" ></th>
                             <?php
-                                if(!$noResults){
-                                    foreach($worksheets as $worksheet){
-                                        $name = $worksheet['WName'];
-                                        $gwid = $worksheet['GWID'];
-                                        echo "<th style='text-align: center'><a href='editSetResults.php?gwid=$gwid'>$name</a></th>";
-                                    }
+                                foreach($worksheets as $worksheet){
+                                    $name = $worksheet['WName'];
+                                    $gwid = $worksheet['GWID'];
+                                    echo "<th style='text-align: center' class='rotate'><div title='$name' onclick='viewWorksheet($gwid);'><span title='$name'>$name</span></div></th>";
+                                }
+                                for ($i = 0; $i < $blankCols; $i++) {
+                                    echo "<th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>";
                                 }
                             ?>
                         </tr>
                     </thead>
                     <tbody>
                         <?php 
-                            if(!$noResults){
-                                echo "<tr><td></td>";
-                                foreach ($worksheets as $worksheet){
-                                    $date = $worksheet['Date'];
-                                    echo "<td style='text-align: center'><b>$date</b></td>";
-                                }
-                                echo "</tr>";
-
-                                echo "<tr><td></td>";
-                                foreach ($worksheets as $worksheet){
-                                    $marks = $worksheet['Marks'];
-                                    echo "<td style='text-align: center'><b>/ $marks</b></td>";
-                                }
-                                echo "</tr>";
+                            echo "<tr class='no_hover blank_cell'><td class='blank_cell'></td>";
+                            foreach ($worksheets as $worksheet){
+                                $date = $worksheet['Date'];
+                                $shortdate = $worksheet['ShortDate'];
+                                $gwid = $worksheet['GWID'];
+                                echo "<td class='date' title='$date' onclick='viewWorksheet($gwid);'><b>$shortdate</b></td>";
                             }
+                            for ($i = 0; $i < $blankCols; $i++) {
+                                echo "<td class='date'></td>";
+                            }
+                            echo "</tr>";
+
+                            echo "<tr class='no_hover'><td class='blank_cell'></td>";
+                            foreach ($worksheets as $worksheet){
+                                $marks = $worksheet['Marks'];
+                                echo "<td class='total_marks'><b>/ $marks</b></td>";
+                            }
+                            for ($i = 0; $i < $blankCols; $i++) {
+                                echo "<td class='total_marks'></td>";
+                            }
+                            echo "</tr>";
                             foreach($students as $student){
                                 $stuId = $student['ID'];
                                 $stuName = $student['Name'];
-                                echo "<tr><td class='name'><a href='individualSummary.php?stuid=$stuId&setid=$setId&staffid=$staffId'>$stuName</a></td>";
+                                echo "<tr><td class='name' onclick='viewStudent($stuId, $setId, $staffId);'>$stuName</td>";
                                 foreach ($worksheets as $worksheet){
                                     $gwid = $worksheet['GWID'];
                                     $marks = $worksheet['Marks'];
@@ -194,7 +210,10 @@ if($respArray["success"]){
                                     }else{
                                         $mark = "";
                                     }
-                                    echo "<td class='marks'><input type='text' class='markInput' name='resultInput[]' value=$mark></td>";
+                                    echo "<td class='marks'>$mark</td>";
+                                }
+                                for ($i = 0; $i < $blankCols; $i++) {
+                                    echo "<td class='marks'></td>";
                                 }
                                 echo "</tr>";
                             }
@@ -202,13 +221,13 @@ if($respArray["success"]){
                     </tbody>
                 </table>
             </div>
-            <div id="side_bar">
+            <!--<div id="side_bar">
                 <ul class="menu sidebar">
-                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                    <li><a href="resultsEntryHome.php?level=1&type=2&staffid=<?php echo "$staffId&groupid=$setId"; ?>">Enter New Results</a></li>
-                    <?php } ?>
+                    <?php //if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
+                    <li><a href="resultsEntryHome.php?level=1&type=2&staffid=<?php //echo "$staffId&groupid=$setId"; ?>">Enter New Results</a></li>
+                    <?php //} ?>
                 </ul>
-            </div>
+            </div>-->
             <?php } ?>
     	</div>
     </div>
