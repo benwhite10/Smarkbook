@@ -16,6 +16,7 @@ table {
     width: auto;
     overflow: visible;
     float: left;
+    border-color: #000;
 }
 
 td, th {
