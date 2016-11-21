@@ -64,6 +64,7 @@ function getWorksheetForGWID($gwid){
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
                 WHERE GW.`Group Worksheet ID` = $gwid
+                AND UG.`Archived` <> 1
                 ORDER BY U.`Surname`;";
     
     try{
