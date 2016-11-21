@@ -38,7 +38,7 @@ input[type="text"].status{
     background: transparent;
     border: 0px;
     text-align: center;
-    cursor: pointer;
+    cursor: pointer !important;
 }
 
 textarea{
@@ -88,8 +88,11 @@ table.form
   color: #000;
   border-collapse: collapse;
   background: transparent;
-  }
+}
 
+th {
+    height: 25px;
+}
 th.results
 { background: #323232;
   color: #66E11B;
@@ -164,6 +167,25 @@ td.display {
 tr.averages:nth-child(even):hover, tr.averages:hover
 {
     background: rgba(50,50,50,0.7);
+}
+
+td.student_name{
+    min-width: 180px;
+    padding-left: 10px;
+    cursor: default;
+    user-select: none;
+}
+
+td.total_mark {
+    text-align: center;
+    padding-left: 10px;
+    cursor: default;
+    user-select: none;
+}
+
+td.date_completion {
+    cursor: pointer;
+    user-select: none;
 }
 
 #main_content

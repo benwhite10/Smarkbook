@@ -36,6 +36,7 @@ td.name{
     max-width: 300px;
     width: 200px;
     cursor: pointer;
+    user-select: none;
 }
 
 td.date {
