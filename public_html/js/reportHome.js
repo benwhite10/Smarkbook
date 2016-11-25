@@ -57,9 +57,9 @@ function setInputsTitle(){
 
 function showHideWorksheetDetails(){
     if($("#summaryReportDetails").is(":visible")){
-        $("#showHideWorksheetText").text("Show Worksheets");
+        $("#showHideWorksheetText").text("Show Worksheets \u2193");
     } else {
-        $("#showHideWorksheetText").text("Hide Worksheets");
+        $("#showHideWorksheetText").text("Hide Worksheets \u2191");
     }
     $("#summaryReportDetails").slideToggle();
 }
@@ -587,7 +587,7 @@ function showAllSections(){
     $("#summaryReport").show();
     $("#questionsReport").show();
     $("#noResults").hide();
-    $("#showHideWorksheetText").text("Show Worksheets");
+    $("#showHideWorksheetText").text("Show Worksheets \u2193");
 }
 
 function hideAllContent(){
