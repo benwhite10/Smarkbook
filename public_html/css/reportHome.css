@@ -564,3 +564,11 @@ tr.tableHead:nth-child(odd){
     margin-top: 20px;
     margin-bottom: 20px;
 }
+
+#showHideWorksheetText {
+    color: #888;
+}
+
+#showHideWorksheetText:hover {
+    color: #323232;
+}

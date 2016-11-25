@@ -57,9 +57,9 @@ function setInputsTitle(){
 
 function showHideWorksheetDetails(){
     if($("#summaryReportDetails").is(":visible")){
-        $("#showHideWorksheetText").text("Show Worksheets");
+        $("#showHideWorksheetText").text("Show Worksheets \u2193");
     } else {
-        $("#showHideWorksheetText").text("Hide Worksheets");
+        $("#showHideWorksheetText").text("Hide Worksheets \u2191");
     }
     $("#summaryReportDetails").slideToggle();
 }
@@ -305,8 +305,8 @@ function summaryRequestSuccess(json){
         var results = json["result"];
         if(results !== null){
             localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
-            localStorage.setItem("userAverage", parseInt(parseFloat(json["result"]["stuAvg"]) * 100));
-            localStorage.setItem("setAverage", parseInt(parseFloat(json["result"]["setAvg"]) * 100));
+            localStorage.setItem("userAverage", Math.round(parseFloat(json["result"]["stuAvg"]) * 100));
+            localStorage.setItem("setAverage", Math.round(parseFloat(json["result"]["setAvg"]) * 100));
         } else {
             localStorage.setItem("summary", null);
             localStorage.setItem("userAverage", null);
@@ -369,7 +369,7 @@ function refreshTagResults(){
     $('#bottom5tags tbody').html('');
     $('#alltags tbody').html('');
     var results = JSON.parse(localStorage.getItem("tagResults"));
-    if(results === null){
+    if(results === null || results.length === 0){
         setNoResults();
     } else {
         showTagResults(false);
@@ -587,6 +587,7 @@ function showAllSections(){
     $("#summaryReport").show();
     $("#questionsReport").show();
     $("#noResults").hide();
+    $("#showHideWorksheetText").text("Show Worksheets \u2193");
 }
 
 function hideAllContent(){
