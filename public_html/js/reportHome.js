@@ -306,7 +306,7 @@ function summaryRequestSuccess(json){
         if(results !== null){
             localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
             localStorage.setItem("userAverage", Math.round(parseFloat(json["result"]["stuAvg"]) * 100));
-            localStorage.setItem("setAverage", parseInt(parseFloat(json["result"]["setAvg"]) * 100));
+            localStorage.setItem("setAverage", Math.round(parseFloat(json["result"]["setAvg"]) * 100));
         } else {
             localStorage.setItem("summary", null);
             localStorage.setItem("userAverage", null);

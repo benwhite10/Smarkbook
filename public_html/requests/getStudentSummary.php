@@ -89,9 +89,10 @@ function getUserAverage($dates){
     global $returns;
     $student = $returns["inputs"]["student"];
     $staff = $returns["inputs"]["staff"];
+    $set = $returns["inputs"]["set"];
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, COUNT(Marks) N 
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID` JOIN TGROUPWORKSHEETS GW ON GW.`Group Worksheet ID` = CQ.`Group Worksheet ID`
-            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND CQ.`Student ID` = $student AND GW.`Primary Staff ID` = $staff";
+            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND CQ.`Student ID` = $student AND GW.`Primary Staff ID` = $staff AND GW.`Group ID` = $set ";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
@@ -117,7 +118,7 @@ function getSetAverage($dates){
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, Count(Mark) N
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             LEFT JOIN TGROUPWORKSHEETS GW ON GW.`Group Worksheet ID` = CQ.`Group Worksheet ID`
-            WHERE CQ.`Deleted` = 0 AND GW.`Group ID` = $set AND GW.`Primary Staff ID` = $staff ";
+            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND GW.`Group ID` = $set AND GW.`Primary Staff ID` = $staff ";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
