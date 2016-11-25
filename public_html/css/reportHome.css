@@ -565,6 +565,10 @@ tr.tableHead:nth-child(odd){
     margin-bottom: 20px;
 }
 
+#showHideWorksheetText {
+    color: #888;
+}
+
 #showHideWorksheetText:hover {
-    color: #AAA;
+    color: #323232;
 }

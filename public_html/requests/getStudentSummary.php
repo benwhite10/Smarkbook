@@ -88,9 +88,10 @@ function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId
 function getUserAverage($dates){
     global $returns;
     $student = $returns["inputs"]["student"];
+    $staff = $returns["inputs"]["staff"];
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, COUNT(Marks) N 
-            FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE CQ.`Deleted` = 0 AND CQ.`Student ID` = $student";
+            FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID` JOIN TGROUPWORKSHEETS GW ON GW.`Group Worksheet ID` = CQ.`Group Worksheet ID`
+            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND CQ.`Student ID` = $student AND GW.`Primary Staff ID` = $staff";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
@@ -112,10 +113,11 @@ function getUserAverage($dates){
 function getSetAverage($dates){
     global $returns;
     $set = $returns["inputs"]["set"];
+    $staff = $returns["inputs"]["staff"];
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, Count(Mark) N
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             LEFT JOIN TGROUPWORKSHEETS GW ON GW.`Group Worksheet ID` = CQ.`Group Worksheet ID`
-            WHERE CQ.`Deleted` = 0 AND (CQ.`Set ID` = $set OR GW.`Group ID` = $set) ";
+            WHERE CQ.`Deleted` = 0 AND GW.`Group ID` = $set AND GW.`Primary Staff ID` = $staff ";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
@@ -553,11 +555,11 @@ function setStudentWorksheetResults(){
         $student = $inputs["student"];
         $query .= "CQ.`Student ID` = $student AND ";
     }
-        $query .= "CQ.`Group Worksheet ID` IN (";
-        foreach($studentWorksheets as $worksheet){
-            $query .= $worksheet["GWID"] . ", ";
-        }
-        $query = substr($query, 0, -2);
+    $query .= "CQ.`Group Worksheet ID` IN (";
+    foreach($studentWorksheets as $worksheet){
+        $query .= $worksheet["GWID"] . ", ";
+    }
+    $query = substr($query, 0, -2);
     $query .= ") GROUP BY CQ.`Group Worksheet ID`;";
     try{
         $results = db_select_exception($query);
