@@ -204,7 +204,7 @@ function getWorksheetInformationFor($array){
 
 function failRequestWithException($message, $ex){
     errorLog("There was an error requesting the report: " . $ex->getMessage());
-    failRequest($message);
+    failRequest($message . ": " . $ex->getMessage());
 }
 
 function failRequest($message){

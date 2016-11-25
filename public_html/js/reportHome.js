@@ -369,7 +369,7 @@ function refreshTagResults(){
     $('#bottom5tags tbody').html('');
     $('#alltags tbody').html('');
     var results = JSON.parse(localStorage.getItem("tagResults"));
-    if(results === null){
+    if(results === null || results.length === 0){
         setNoResults();
     } else {
         showTagResults(false);
