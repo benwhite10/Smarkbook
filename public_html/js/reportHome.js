@@ -587,6 +587,7 @@ function showAllSections(){
     $("#summaryReport").show();
     $("#questionsReport").show();
     $("#noResults").hide();
+    $("#showHideWorksheetText").text("Show Worksheets");
 }
 
 function hideAllContent(){
