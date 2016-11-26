@@ -165,7 +165,7 @@ if(isset($vid)){
                 <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($setid, $vid) && $setid <> ''){?>
                 <li><a href="editSetResults.php?vid=<?php echo $vid . '&setid=' . $setid; ?>">Enter Results</a></li>
                 <?php } ?>
-                <li><a href="viewAllWorksheets.php">Back To Worksheets</a></li>
+                <li><a href="viewAllWorksheets.php#v<?php echo $vid ?>">Back To Worksheets</a></li>
             </ul>
             </div>
     	</div>

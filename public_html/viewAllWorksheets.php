@@ -46,6 +46,8 @@ try{
 <head lang="en">
     <?php pageHeader("Worksheets"); ?>
     <script src="js/sorttable.js"></script>
+    <script src="js/viewAllWorksheets.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/viewAllWorksheets.css" />
 </head>
 <body>
     <div id="main">
@@ -94,7 +96,7 @@ try{
                         <tr>
                             <th class="sortable">Worksheet</th>
                             <th class="sortable">Author</th>
-                            <th class="sortable">Date Added</th> 
+                            <th class="sortable reversed">Date Added</th> 
                         </tr>
                     </thead>
                     <tbody>
@@ -105,7 +107,7 @@ try{
                                     $date = $worksheet['Date'];
                                     $author = $worksheet['Author'];
                                     $vid = $worksheet['VID'];
-                                    echo "<tr><td><a href='viewWorksheet.php?id=$vid&setid=$setid'>$name</a></td><td>$author</td><td>$date</td></tr>";
+                                    echo "<tr onclick='goToWorksheet($vid)' id='v$vid'><td>$name</td><td>$author</td><td>$date</td></tr>";
                                 }
                             }
                         ?> 

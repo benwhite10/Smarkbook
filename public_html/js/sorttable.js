@@ -137,6 +137,9 @@ sorttable = {
 	        //sorttable.shaker_sort(row_array, this.sorttable_sortfunction);
 	        /* and comment out this one */
 	        row_array.sort(this.sorttable_sortfunction);
+                if(this.classList.contains('reversed')) {
+                    row_array.reverse();
+                }
 
 	        tb = this.sorttable_tbody;
 	        for (var j=0; j<row_array.length; j++) {
@@ -252,8 +255,8 @@ sorttable = {
     return aa-bb;
   },
   sort_alpha: function(a,b) {
-    if (a[0]==b[0]) return 0;
-    if (a[0]<b[0]) return -1;
+    if (a[0].toLowerCase()==b[0].toLowerCase()) return 0;
+    if (a[0].toLowerCase()<b[0].toLowerCase()) return -1;
     return 1;
   },
   sort_ddmm: function(a,b) {

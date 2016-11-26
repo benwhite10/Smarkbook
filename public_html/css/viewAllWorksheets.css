@@ -1,0 +1,15 @@
+td, th {
+    height: 40px;
+}
+
+th {
+    font-weight: 300;
+}
+
+tr {
+    cursor: pointer;
+}
+
+table {
+    border: 1px solid #000;
+}
