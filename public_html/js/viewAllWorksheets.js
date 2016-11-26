@@ -1,5 +1,11 @@
 $(document).ready(function(){
     getWorksheets();
+    
+    $("#search_bar_text_input").keyup(function(event){
+        if(event.keyCode == 13){
+            searchWorksheets();;
+        }
+    });
 });
 
 function getWorksheets() {
@@ -62,8 +68,50 @@ function parseWorksheets(ids) {
                 }
             }
         }
+    }   
+}
+
+function searchWorksheets() {
+    var searchTerm = $("#search_bar_text_input").val();
+    var infoArray = {
+        type: "SEARCH",
+        search: searchTerm,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/searchWorksheets.php",
+        dataType: "json",
+        success: function(json){
+            searchSuccess(json);
+        },
+        error: function() {
+            console.log("There was an error sending the search worksheets request.");
+        }
+    });
+}
+
+function searchSuccess(json) {
+    if(json["success"]) {
+        var ids = getIdsFromResult(json["vids"]);
+        if(ids.length === 0) {
+            ids.push(0);
+        }
+        parseWorksheets(ids);
+    } else {
+        console.log("There was an error searching the worksheets.");
+        console.log(json["message"]);
     }
-    
+}
+
+function getIdsFromResult(input) {
+    var ids = [];
+    for(var key in input) {
+       ids.push(input[key]["Version ID"]);
+    }
+    return ids;
 }
 
 function goToWorksheet(vid) {
