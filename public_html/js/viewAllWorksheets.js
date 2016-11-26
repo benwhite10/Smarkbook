@@ -27,7 +27,7 @@ function getWorksheets() {
 function getWorksheetsSuccess(json) {
     if(json["success"]) {
         localStorage.setItem("worksheets", JSON.stringify(json["worksheets"]));
-        parseWorksheets();
+        parseWorksheets([]);
     } else {
         console.log("There was an error getting the worksheets.");
         console.log(json["message"]);
@@ -37,13 +37,31 @@ function getWorksheetsSuccess(json) {
 function parseWorksheets(ids) {
     var worksheets = JSON.parse(localStorage.getItem("worksheets"));
     $('#worksheetsTable tbody').html('');
-    for(var key in worksheets){
-        var worksheet = worksheets[key];
-        var date = worksheet["Date"];
-        var custom_date = worksheet["CustomDate"];
-        var string = "<tr onclick='goToWorksheet(" + worksheet["ID"] +")' id='v" + worksheet["ID"] + "'>";
-        string += "<td>" + worksheet["WName"] + "</td><td>" + worksheet["Author"] + "</td><td sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
-        $('#worksheetsTable tbody').append(string);
+    if(ids === undefined || ids.length === 0) {
+        // If no ids then show all worksheets
+        for(var key in worksheets){
+            var worksheet = worksheets[key];
+            var date = worksheet["Date"];
+            var custom_date = worksheet["CustomDate"];
+            var string = "<tr onclick='goToWorksheet(" + worksheet["ID"] +")' id='v" + worksheet["ID"] + "'>";
+            string += "<td>" + worksheet["WName"] + "</td><td>" + worksheet["Author"] + "</td><td sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
+            $('#worksheetsTable tbody').append(string);
+        }
+    } else {
+        for(var id_key in ids){
+            var id = ids[id_key];
+            for(var key in worksheets){
+                var worksheet = worksheets[key];
+                if(id == worksheet["ID"]) {
+                    var date = worksheet["Date"];
+                    var custom_date = worksheet["CustomDate"];
+                    var string = "<tr onclick='goToWorksheet(" + worksheet["ID"] +")' id='v" + worksheet["ID"] + "'>";
+                    string += "<td>" + worksheet["WName"] + "</td><td>" + worksheet["Author"] + "</td><td sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
+                    $('#worksheetsTable tbody').append(string);
+                    break;
+                }
+            }
+        }
     }
     
 }
