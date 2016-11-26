@@ -455,14 +455,13 @@ tbody.worksheetSummaryTable{
 
 tr.worksheetSummaryTable{
     line-height: 25px;
-    text-align: center;
 }
 
 tr.worksheetSummaryTable:nth-child(odd){
     background-color: #DDD;
 }
 
-.worksheetSummaryTable td,.worksheetSummaryTable th{
+.worksheetSummaryTable td, .worksheetSummaryTable th{
     text-align: center;
 }
 
