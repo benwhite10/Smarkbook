@@ -24,22 +24,6 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-$setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
-
-$query = "SELECT V.`Worksheet ID` WID, V.`Version ID` VID, V.`WName` Name, V.`VName` Version, DATE_FORMAT(V.`Date Added`, '%d/%m/%y') Date, S.`Initials` Author "
-        . "FROM TWORKSHEETVERSION V "
-        . "JOIN TSTAFF S ON S.`User ID` = V.`Author ID` "
-        . "WHERE V.`Deleted` = 0 "
-        . "ORDER BY Name;";
-try{
-    $worksheets = db_select_exception($query);
-} catch (Exception $ex) {
-    $msg = "There was an error loading all of the worksheets: " . $ex->getMessage();
-    errorLog($msg);
-    $message = "Sorry but there was an error loading the worksheets, please try again. If the problem persists then contact customer support";
-    $type = "ERROR";
-}
-
 ?>
 
 <!DOCTYPE html>
