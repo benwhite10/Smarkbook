@@ -390,12 +390,12 @@ function refreshSummaryResults(){
     setSummaryReportToDefaults();
     
     // Set the averages
-    var userAvg = parseInt(JSON.parse(localStorage.getItem("userAverage")));
-    var setAvg = parseInt(JSON.parse(localStorage.getItem("setAverage")));
+    var userAvg = Math.round(JSON.parse(localStorage.getItem("userAverage")));
+    var setAvg = Math.round(JSON.parse(localStorage.getItem("setAverage")));
     $('#summaryReportUserAvgValue').text(userAvg + "%");
     $('#summaryReportSetAvgValue').text(setAvg + "%");
-    $('#summaryReportSetAvgValue').css('color', getColourForPercentage(setAvg));
-    $('#summaryReportUserAvgValue').css('color', getColourForPercentage(userAvg));
+    $('#summaryReportSetAvgValue').css('color', getColour(setAvg, 60, 40, [220, 0, 0], [240, 160, 0], [0, 240, 0]));
+    $('#summaryReportUserAvgValue').css('color', getColour(userAvg, 60, 40, [220, 0, 0], [240, 160, 0], [0, 240, 0]));
     
     setWorksheetsSummary();
     setWorksheetsTable();
@@ -489,13 +489,25 @@ function setWorksheetsTable(){
             var student = "-";
             var set = "-";
             var classString = "worksheetSummaryTable noResults";
+            var colour = "";
             if(sheet["Results"]){
-                var stuScore = parseInt(100 * sheet["StuAVG"]);
-                student = sheet["StuMark"] + "/" + sheet["StuMarks"] + " (" + stuScore + "%)";
-                var setScore = parseInt(100 * sheet["AVG"]);
+                var stuScore = sheet["StuAVG"] ? Math.round(100 * sheet["StuAVG"]) : 0;
+                var stuMark = sheet["StuMark"] ? sheet["StuMark"] : 0;
+                var stuMarks = sheet["StuMarks"] ? sheet["StuMarks"] : 0;
+                student = stuMark + "/" + stuMarks + " (" + stuScore + "%)";
+                var setScore = sheet["AVG"] ? Math.round(100 * sheet["AVG"]) : 0;
+                var diff = stuScore - setScore;
+                if (diff === 0) {
+                    set = "-";
+                } else if (diff < 0) {
+                    set = "\u2193" + Math.abs(diff) + "%";
+                } else {
+                    set = "\u2191" + Math.abs(diff) + "%";
+                }
                 var setMarks = sheet["Marks"];
-                var setMark = parseInt(setMarks * sheet["AVG"]);
-                set = setMark + "/" + setMarks + " (" + setScore + "%)";
+                var setMark = Math.round(setMarks * sheet["AVG"]);
+                var setOutput = setMark + "/" + setMarks + " (" + setScore + "%)";
+                var colour = getColour(diff, 0, 20, [255, 0, 0], [80, 80, 80], [0, 210, 0]);
                 var late = sheet["StuDays"];
                 if(late === "" || late === null){
                     lateString = "-";
@@ -511,7 +523,7 @@ function setWorksheetsTable(){
             string += "<td class='worksheetName'>" + name + "</td>";
             string += "<td>" + date + "</td>";
             string += "<td>" + student + "</td>";
-            string += "<td>" + set + "</td>";
+            string += "<td style='color: " + colour + "' title='" + setOutput + "'>" + set + "</td>";
             string += "<td>" + comp + "</td>";
             string += "<td>" + lateString + "</td>";
             string += "</tr>";
@@ -564,11 +576,39 @@ function showSuggestedQuestions(){
     $("#questionsReportMain").show();
 }
 
-function getColourForPercentage(value){
-    var red = Math.min(255, parseInt(255 + (5.1 * (50 - value))));
-    var green = parseInt(value * 2.55);
-    var blue = Math.max(0, parseInt(2 * (value - 50)));
-    return "rgb(" + red + ", " + green + ", " + blue + ")";
+function getColour(value, centre, width, colour1, colour2, colour3) {
+    var r1 = colour1[0];
+    var g1 = colour1[1];
+    var b1 = colour1[2];
+    var r2 = colour2[0];
+    var g2 = colour2[1];
+    var b2 = colour2[2];
+    var r3 = colour3[0];
+    var g3 = colour3[1];
+    var b3 = colour3[2];
+    var min = centre - width;
+    var max = centre + width;
+    var r = 0;
+    var g = 0;
+    var b = 0;
+    if(value < min) {
+        r = parseInt(r1);
+        g = parseInt(g1);
+        b = parseInt(b1);
+    } else if (value < centre) {
+        r = parseInt(r1 + (r2 - r1) * (value - min) / width);
+        g = parseInt(g1 + (g2 - g1) * (value - min) / width);
+        b = parseInt(b1 + (b2 - b1) * (value - min) / width);
+    } else if (value < max) {
+        r = parseInt(r2 + (r3 - r2) * (value - centre) / width);
+        g = parseInt(g2 + (g3 - g2) * (value - centre) / width);
+        b = parseInt(b2 + (b3 - b2) * (value - centre) / width);
+    } else {
+        r = parseInt(r3);
+        g = parseInt(g3);
+        b = parseInt(b3);
+    }
+    return "rgb(" + r + ", " + g + ", " + b + ")";
 }
 
 function setNoResults(){

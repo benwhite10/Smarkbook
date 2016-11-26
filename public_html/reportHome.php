@@ -199,11 +199,9 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                             <thead class="worksheetSummaryTable">
                                 <tr class="worksheetSummaryTable tableHead">
                                     <th class="worksheetName">Worksheet</th>
-                                    <th>Date Due</th>
-                                    <th>Student</th>
-                                    <th>Set</th>
-                                    <th></th>
-                                    <th></th> 
+                                    <th>Date</th>
+                                    <th colspan="2">Mark</th>
+                                    <th colspan="2">Status</th> 
                                 </tr>
                             </thead>
                             <tbody class="worksheetSummaryTable">
