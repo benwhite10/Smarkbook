@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -50,6 +51,7 @@ try{
     <link rel="stylesheet" type="text/css" href="css/viewAllWorksheets.css" />
 </head>
 <body>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -91,7 +93,7 @@ try{
                 <ul class="menu navbar">
                 </ul>
             </div><div id="main_content">
-                <table class="sortable">
+                <table class="sortable" id="worksheetsTable">
                     <thead>
                         <tr>
                             <th class="sortable">Worksheet</th>
@@ -100,17 +102,6 @@ try{
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
-                            if(isset($worksheets)){
-                                foreach ($worksheets as $key=>$worksheet){
-                                    $name = $worksheet['Name'];
-                                    $date = $worksheet['Date'];
-                                    $author = $worksheet['Author'];
-                                    $vid = $worksheet['VID'];
-                                    echo "<tr onclick='goToWorksheet($vid)' id='v$vid'><td>$name</td><td>$author</td><td>$date</td></tr>";
-                                }
-                            }
-                        ?> 
                     </tbody>
                 </table>
             </div><div id="side_bar" class="menu_bar">

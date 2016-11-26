@@ -26,6 +26,11 @@ switch ($requestType){
         }
         getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc);
         break;
+    case "ALLWORKSHEETS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getAllWorksheets($orderby, $desc);
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
@@ -60,6 +65,33 @@ function getAllWorksheetNames($orderby, $desc){
 
 }
 
+function getAllWorksheets($orderby, $desc){        
+    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, S.`Initials` Author "
+            . "FROM TWORKSHEETVERSION WV "
+            . "JOIN TSTAFF S ON S.`User ID` = WV.`Author ID` "
+            . "WHERE WV.`Deleted` = 0";
+    if(isset($orderby)){
+        $query .= " ORDER BY $orderby";
+        if(isset($desc) && $desc == "TRUE"){
+            $query .= " DESC";
+        }
+    }
+
+    try{
+        $worksheets = db_select_exception($query);
+    } catch (Exception $ex) {
+        $message = "There was an error retrieving the worksheets.";
+        returnToPageError($ex, $message);
+    }
+    
+    $response = array(
+        "success" => TRUE,
+        "worksheets" => $worksheets);
+    
+    echo json_encode($response);
+    exit();
+}
+
 function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
     $query = "SELECT GW.`Group Worksheet ID` ID, WV.`WName` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DueDate FROM TGROUPWORKSHEETS GW 
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID` ";
@@ -79,20 +111,23 @@ function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
         "worksheets" => $worksheets);
     
     echo json_encode($response);
+    exit();
 }
 
 function returnToPageError($ex, $message){
     errorLog("$message: " . $ex->getMessage());
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $ex->getMessage());
     echo json_encode($response);
     exit();
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get group request: " . $message);
+    errorLog("There was an error in the get worksheet request: " . $message);
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message);
     echo json_encode($response);
     exit();
 }
