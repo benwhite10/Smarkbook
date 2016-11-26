@@ -13,3 +13,48 @@ tr {
 table {
     border: 1px solid #000;
 }
+
+#main_content {
+    margin-top: 0px;
+}
+
+#search_bar {
+    height: 50px;
+    width: calc(100% - 2px);
+    background: #CCC;
+    border: 1px solid #323232;
+    margin-bottom: 20px;
+}
+
+#search_bar_text {
+    background: transparent;
+    width: calc(100% - 52px);
+    height: 50px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+}
+
+#search_bar_button {
+    background-image: url("/images/search.png");
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+    float: left;
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+}
+
+#search_bar input {
+    background: transparent;
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    margin: 0;
+    padding: 0 0 0 10px;
+    border: none;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+}

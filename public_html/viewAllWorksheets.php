@@ -77,6 +77,13 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <ul class="menu navbar">
                 </ul>
             </div><div id="main_content">
+                <div id="search_bar">
+                    <div id="search_bar_text">
+                        <input type="text" placeholder="Search Worksheets">
+                    </div>
+                    <div id="search_bar_button">
+                    </div>
+                </div>
                 <table class="sortable" id="worksheetsTable">
                     <thead>
                         <tr>
