@@ -137,17 +137,14 @@ if(isset($vid)){
                                     $marks = $question['Marks'];
                                     $qid = $question['ID'];
                                     $tagstring = "";
-
                                     foreach($tags as $tag){
                                         if($tag['ID'] == $qid){
                                             $name = $tag['Name'];
                                             $tagstring = $tagstring . $name . ", ";
                                         }
                                     }
-
-                                    $tagstring = substr($tagstring, 0, -2);
-
-                                    echo "<tr><td>$number</td><td>$marks</td><td>$tagstring</td></tr>";
+                                    $subtagstring = substr($tagstring, 0, -2);
+                                    echo "<tr><td>$number</td><td>$marks</td><td>$subtagstring</td></tr>";
                                 }
                             }
                         ?> 
@@ -162,10 +159,10 @@ if(isset($vid)){
                 <li><a href="editWorksheet.php?id=<?php echo $vid; ?>">Edit</a></li>
                 <li onclick="deleteWorksheet()"><a>Delete Worksheet</a></li>   
                 <?php } } ?>
-                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($setid, $vid) && $setid <> ''){?>
-                <li><a href="editSetResults.php?vid=<?php echo $vid . '&setid=' . $setid; ?>">Enter Results</a></li>
+                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($vid)){?>
+                <li><a href="resultsEntryHome.php?level=1&vid=<?php echo $vid ?>">Enter New Results</a></li>
                 <?php } ?>
-                <li><a href="viewAllWorksheets.php">Back To Worksheets</a></li>
+                <li><a href="viewAllWorksheets.php?v=<?php echo $vid ?>">Back To Worksheets</a></li>
             </ul>
             </div>
     	</div>

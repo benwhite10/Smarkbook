@@ -93,9 +93,9 @@ function worksheetsSuccess(json){
                 var date = worksheet["DueDate"];
                 var id = worksheet["ID"];
                 if(date !== undefined){
-                    str += "<option value=" + id + ">" + name + " - " + date + "</option>";
+                    str += "<option value=" + id + " id='w" + id + "'>" + name + " - " + date + "</option>";
                 }else{
-                    str += "<option value=" + id + ">" + name + "</option>";
+                    str += "<option value=" + id + " id='w" + id + "'>" + name + "</option>";
                 }
             }
         }
@@ -103,6 +103,9 @@ function worksheetsSuccess(json){
         console.log("There was an error retrieving the worksheets.");
     }
     document.getElementById("worksheet").innerHTML = str;
+    var vid = $("#originalWorksheet").val();
+    var option = document.getElementById("w" + vid);
+    if(option) option.selected = true;
 }
 
 function countForEachName(names){

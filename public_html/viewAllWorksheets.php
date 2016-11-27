@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -23,22 +24,6 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-$setid = filter_input(INPUT_GET,'setid',FILTER_SANITIZE_STRING);
-
-$query = "SELECT V.`Worksheet ID` WID, V.`Version ID` VID, V.`WName` Name, V.`VName` Version, DATE_FORMAT(V.`Date Added`, '%d/%m/%y') Date, S.`Initials` Author "
-        . "FROM TWORKSHEETVERSION V "
-        . "JOIN TSTAFF S ON S.`User ID` = V.`Author ID` "
-        . "WHERE V.`Deleted` = 0 "
-        . "ORDER BY Name;";
-try{
-    $worksheets = db_select_exception($query);
-} catch (Exception $ex) {
-    $msg = "There was an error loading all of the worksheets: " . $ex->getMessage();
-    errorLog($msg);
-    $message = "Sorry but there was an error loading the worksheets, please try again. If the problem persists then contact customer support";
-    $type = "ERROR";
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -46,8 +31,11 @@ try{
 <head lang="en">
     <?php pageHeader("Worksheets"); ?>
     <script src="js/sorttable.js"></script>
+    <script src="js/viewAllWorksheets.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/viewAllWorksheets.css" />
 </head>
 <body>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -89,26 +77,22 @@ try{
                 <ul class="menu navbar">
                 </ul>
             </div><div id="main_content">
-                <table class="sortable">
+                <div id="search_bar">
+                    <div id="search_bar_text">
+                        <input id="search_bar_text_input" type="text" placeholder="Search Worksheets">
+                    </div>
+                    <div id="search_bar_cancel" onclick="clearSearch()"></div>
+                    <div id="search_bar_button" onclick="searchWorksheets()"></div>
+                </div>
+                <table class="sortable" id="worksheetsTable">
                     <thead>
                         <tr>
                             <th class="sortable">Worksheet</th>
-                            <th class="sortable">Author</th>
-                            <th class="sortable">Date Added</th> 
+                            <th class="sortable author_column">Author</th>
+                            <th class="sortable reversed date_column">Date</th> 
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
-                            if(isset($worksheets)){
-                                foreach ($worksheets as $key=>$worksheet){
-                                    $name = $worksheet['Name'];
-                                    $date = $worksheet['Date'];
-                                    $author = $worksheet['Author'];
-                                    $vid = $worksheet['VID'];
-                                    echo "<tr><td><a href='viewWorksheet.php?id=$vid&setid=$setid'>$name</a></td><td>$author</td><td>$date</td></tr>";
-                                }
-                            }
-                        ?> 
                     </tbody>
                 </table>
             </div><div id="side_bar" class="menu_bar">
