@@ -50,7 +50,7 @@ function parseWorksheets(ids) {
             var date = worksheet["Date"];
             var custom_date = worksheet["CustomDate"];
             var string = "<tr onclick='goToWorksheet(" + worksheet["ID"] +")' id='v" + worksheet["ID"] + "'>";
-            string += "<td>" + worksheet["WName"] + "</td><td>" + worksheet["Author"] + "</td><td sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
+            string += "<td>" + worksheet["WName"] + "</td><td class='author_column'>" + worksheet["Author"] + "</td><td class='date_column' sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
             $('#worksheetsTable tbody').append(string);
         }
     } else {
@@ -62,7 +62,7 @@ function parseWorksheets(ids) {
                     var date = worksheet["Date"];
                     var custom_date = worksheet["CustomDate"];
                     var string = "<tr onclick='goToWorksheet(" + worksheet["ID"] +")' id='v" + worksheet["ID"] + "'>";
-                    string += "<td>" + worksheet["WName"] + "</td><td>" + worksheet["Author"] + "</td><td sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
+                    string += "<td>" + worksheet["WName"] + "</td><td class='author_column'>" + worksheet["Author"] + "</td><td class='date_column' sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
                     $('#worksheetsTable tbody').append(string);
                     break;
                 }
@@ -112,6 +112,11 @@ function getIdsFromResult(input) {
        ids.push(input[key]["Version ID"]);
     }
     return ids;
+}
+
+function clearSearch() {
+    $("#search_bar_text_input").val("");
+    parseWorksheets();
 }
 
 function goToWorksheet(vid) {

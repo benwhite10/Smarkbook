@@ -81,15 +81,15 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     <div id="search_bar_text">
                         <input id="search_bar_text_input" type="text" placeholder="Search Worksheets">
                     </div>
-                    <div id="search_bar_button" onclick="searchWorksheets()">
-                    </div>
+                    <div id="search_bar_cancel" onclick="clearSearch()"></div>
+                    <div id="search_bar_button" onclick="searchWorksheets()"></div>
                 </div>
                 <table class="sortable" id="worksheetsTable">
                     <thead>
                         <tr>
                             <th class="sortable">Worksheet</th>
-                            <th class="sortable">Author</th>
-                            <th class="sortable reversed">Date Added</th> 
+                            <th class="sortable author_column">Author</th>
+                            <th class="sortable reversed date_column">Date</th> 
                         </tr>
                     </thead>
                     <tbody>
