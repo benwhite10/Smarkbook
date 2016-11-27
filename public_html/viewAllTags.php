@@ -42,13 +42,7 @@ if(isset($_SESSION['message'])){
     <link rel='stylesheet' type='text/css' href='css/viewAllTags.css' />
 </head>
 <body>
-    <?php
-        $tagId = filter_input(INPUT_GET,'tagid',FILTER_SANITIZE_NUMBER_INT);
-        if(isset($tagId)){
-            echo "<input type='hidden' id='redirectTo' value='$tagId' />";
-        }
-        setUpRequestAuthorisation($userid, $userval);
-    ?>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">

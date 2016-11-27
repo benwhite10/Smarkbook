@@ -49,13 +49,29 @@ function failedRequest(json){
 }
 
 function redirectToTag(){
-    if($('#redirectTo')){
-        var tagId = "#tag" + $('#redirectTo').val();
-        $('html, body').scrollTop($(tagId).offset().top - $(window).height()/2);
+    var tagid = getParameterByName("tagid");
+    if(tagid){
+        var element = document.getElementById("tag" + tagid);
+        if(element){
+            element.scrollIntoView();
+            window.scrollTo(window.scrollX, window.scrollY - 200);
+        }
     }
+    
 }
 
 function goToTag(tagid) {
     window.location.href = "/tagManagement.php?tagid=" + tagid;
 }
 
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
