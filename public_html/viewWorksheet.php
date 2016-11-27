@@ -162,8 +162,8 @@ if(isset($vid)){
                 <li><a href="editWorksheet.php?id=<?php echo $vid; ?>">Edit</a></li>
                 <li onclick="deleteWorksheet()"><a>Delete Worksheet</a></li>   
                 <?php } } ?>
-                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($setid, $vid) && $setid <> ''){?>
-                <li><a href="editSetResults.php?vid=<?php echo $vid . '&setid=' . $setid; ?>">Enter Results</a></li>
+                <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"]) && isset($vid)){?>
+                <li><a href="resultsEntryHome.php?level=1&vid=<?php echo $vid ?>">Enter New Results</a></li>
                 <?php } ?>
                 <li><a href="viewAllWorksheets.php#v<?php echo $vid ?>">Back To Worksheets</a></li>
             </ul>
