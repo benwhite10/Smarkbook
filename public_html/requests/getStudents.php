@@ -41,7 +41,7 @@ function getStudentsForSet($setid, $orderby, $desc){
                 join TSTUDENTS S ON S.`User ID` = UG.`User ID`
                 join TUSERS U ON U.`User ID` = S.`User ID`";
     
-    $query .= filterBy(["UG.`Group ID`"], [$setid]);
+    $query .= filterBy(["UG.`Group ID`", "UG.`Archived`"], [$setid,"0"]);
     $query .= orderBy([$orderby], [$desc]);
     
     try{
