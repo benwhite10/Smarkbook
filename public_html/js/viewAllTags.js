@@ -30,9 +30,8 @@ function allTagsRequestSuccess(json){
         for (var i = 0; i < tags.length; i++){
             var id = tags[i]["Tag ID"];
             var name = tags[i]["Name"];
-            var type = tags[i]["Type"] !== null ? tags[i]["Type"] : "TOPIC";
             var date = moment(tags[i]["Date Added"], "YYYY-MM-DD HH:II:SS").format("DD/MM/YY");
-            str = "<tr id='tag" + id + "'><td style='height: 30px'><a href='/tagManagement.php?tagid=" + id + "'>" + name + "</a></td><td style='height: 30px'>" + type + "</td><td style='height: 30px'>" + date + "</td></tr>"; 
+            str = "<tr id='tag" + id + "' class='tag_row' onclick='goToTag(" + id + ")'><td class='name'>" + name + "</td><td class='date'>" + date + "</td></tr>"; 
             $('#tagsTable tbody').append(str);
         }
         redirectToTag();
@@ -54,5 +53,9 @@ function redirectToTag(){
         var tagId = "#tag" + $('#redirectTo').val();
         $('html, body').scrollTop($(tagId).offset().top - $(window).height()/2);
     }
+}
+
+function goToTag(tagid) {
+    window.location.href = "/tagManagement.php?tagid=" + tagid;
 }
 
