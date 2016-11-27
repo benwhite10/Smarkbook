@@ -1,8 +1,10 @@
 $(document).ready(function(){
+    sessionStorage.setItem("first_time", "TRUE");
+    
     getWorksheets();
     
     $("#search_bar_text_input").keyup(function(event){
-        if(event.keyCode == 13){
+        if(event.keyCode === 13){
             searchWorksheets();;
         }
     });
@@ -68,7 +70,8 @@ function parseWorksheets(ids) {
                 }
             }
         }
-    }   
+    }
+    goToOriginalWorksheet();
 }
 
 function searchWorksheets() {
@@ -123,12 +126,24 @@ function goToWorksheet(vid) {
     window.location.href = "viewWorksheet.php?id=" + vid;
 }
 
-function offsetAnchor() {
-    if(location.hash.length !== 0) {
+function goToOriginalWorksheet() {
+    var vid = getParameterByName("v");
+    var firsttime = sessionStorage.getItem("first_time");
+    if (firsttime && vid && firsttime === "TRUE") {
+        document.getElementById("v" + vid).scrollIntoView();
         window.scrollTo(window.scrollX, window.scrollY - 200);
     }
+    sessionStorage.setItem("first_time", "FALSE");
 }
 
-window.addEventListener("hashchange", offsetAnchor);
-
-window.setTimeout(offsetAnchor, 1);
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
