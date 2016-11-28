@@ -122,7 +122,7 @@ if(isset($_SESSION['message'])){
                     </select>
                     </div><div id="tag2">
                     <label for="tag2" id="tag2label">Tag 2:</label>
-                    <select name="tag2">
+                    <select name="tag2" id="tag2input">
                         <option value=0>-No Tag Selected-</option>
                         <?php
                             if(isset($tags)){
@@ -141,7 +141,7 @@ if(isset($_SESSION['message'])){
                     <p id="descText" style="text-align: center;">This will replace all instances of tag 2 with the value of tag 1 and then delete tag 2. This process is irreversible.</p>
                 </div><div id="side_bar">
                     <ul class="menu sidebar">
-                        <li><input type="submit" value="Submit" id="submit"/></li>
+                        <li id="submit"></li>
                     </ul>
                 </div>
             </form> 
