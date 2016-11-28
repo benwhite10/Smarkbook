@@ -1,0 +1,15 @@
+table {
+    border: 1px solid #323232;
+}
+
+th.date, td.date {
+    width: 120px;
+}
+
+.tag_row {
+    cursor: pointer;
+}
+
+th.date, th.name, td.date, td.name {
+    height: 40px;
+}

@@ -39,15 +39,10 @@ if(isset($_SESSION['message'])){
     <?php pageHeader("Tags"); ?>
     <script src="js/sorttable.js"></script>
     <script src="js/viewAllTags.js"></script>
+    <link rel='stylesheet' type='text/css' href='css/viewAllTags.css' />
 </head>
 <body>
-    <?php
-        $tagId = filter_input(INPUT_GET,'tagid',FILTER_SANITIZE_NUMBER_INT);
-        if(isset($tagId)){
-            echo "<input type='hidden' id='redirectTo' value='$tagId' />";
-        }
-        setUpRequestAuthorisation($userid, $userval);
-    ?>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -92,9 +87,8 @@ if(isset($_SESSION['message'])){
                 <table class="sortable" id="tagsTable">
                     <thead>
                         <tr>
-                            <th class="sortable">Name</th>
-                            <th class="sortable">Type</th>
-                            <th>Date Added</th> 
+                            <th class="sortable name">Name</th>
+                            <th class="sortable date">Date Added</th> 
                         </tr>
                     </thead>
                     <tbody>
