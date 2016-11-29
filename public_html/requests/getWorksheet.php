@@ -38,13 +38,13 @@ function getWorksheetForGWID($gwid){
     // List of questions and their marks
     $query1 = "SELECT SQ.`Stored Question ID` SQID, SQ.`Number` Number, SQ.`Marks` Marks FROM TSTOREDQUESTIONS SQ
                 JOIN TGROUPWORKSHEETS GW ON SQ.`Version ID` = GW.`Version ID`
-                WHERE GW.`Group Worksheet ID` = $gwid AND `Deleted` = 0
+                WHERE GW.`Group Worksheet ID` = $gwid AND SQ.`Deleted` = 0
                 ORDER BY SQ.`Question Order`;";
 
     // Results for every student in the group
     $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark
                 FROM TCOMPLETEDQUESTIONS C
-                WHERE `Group Worksheet ID` = $gwid AND `Deleted` = 0;";
+                WHERE `Group Worksheet ID` = $gwid AND C.`Deleted` = 0;";
     
     //Details for the worksheet, date due, notes etc
     $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Added` DateAdded, GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes FROM TGROUPWORKSHEETS GW
@@ -78,7 +78,8 @@ function getWorksheetForGWID($gwid){
     } catch (Exception $ex) {
         errorLog("Something went wrong loading the data for the worksheet: " . $ex->getMessage());
         $test = array(
-            "success" => FALSE);
+            "success" => FALSE,
+            "message" => $ex->getMessage());
         echo json_encode($test);
         exit();
     }
@@ -139,7 +140,8 @@ function getNotesForGWID($gwid){
 function failRequest($message){
     errorLog("There was an error in the get group request: " . $message);
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message);
     echo json_encode($response);
     exit();
 }
