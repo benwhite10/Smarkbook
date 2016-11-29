@@ -292,6 +292,7 @@ function getAnsweredQuestionsAndTags(){
         }
     }
     
+    $query .= " AND (GW.`Deleted` IS NULL OR GW.`Deleted` = 0) ";
     $query .= " ORDER BY QT.`Tag ID`, CQ.`Date Added` DESC;";
     
     try{
@@ -398,11 +399,11 @@ function getSetWorksheets(){
         if(count($dates) === 1){
             // Only 1 date
             $date = $dates[0];
-            array_push($filters, "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')");
+            array_push($filters, "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y %H:%i:%s')");
         } else {
             $date1 = $dates[0];
             $date2 = $dates[1];
-            array_push($filters, "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')");
+            array_push($filters, "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y %H:%i:%s') AND STR_TO_DATE('$date2','%d/%m/%Y %H:%i:%s')");
         }
     }
     
@@ -416,6 +417,7 @@ function getSetWorksheets(){
         }
     }
     
+    $query .= " AND (GW.`Deleted` IS NULL OR GW.`Deleted` = 0) ";
     $query .= " GROUP BY GW.`Group Worksheet ID`";
     $query .= " ORDER BY GW.`Date Due` DESC;";
     
@@ -471,15 +473,16 @@ function getStudentWorksheets(){
         if(count($dates) === 1){
             // Only 1 date
             $date = $dates[0];
-            $query .= "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y')";
+            $query .= "GW.`Date Due` > STR_TO_DATE('$date', '%d/%m/%Y %H:%i:%s')";
         } else {
             $date1 = $dates[0];
             $date2 = $dates[1];
-            $query .= "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y') AND STR_TO_DATE('$date2','%d/%m/%Y')";
+            $query .= "GW.`Date Due` BETWEEN STR_TO_DATE('$date1', '%d/%m/%Y %H:%i:%s') AND STR_TO_DATE('$date2','%d/%m/%Y %H:%i:%s')";
         }
     } else {
         $query = substr($query, 0, -4);
     }
+    $query .= " AND (GW.`Deleted` IS NULL OR GW.`Deleted` = 0) ";
     $query .= " GROUP BY GW.`Group Worksheet ID`, CW.`Completed Worksheet ID`";
     $query .= " ORDER BY GW.`Date Due` DESC;";
     
@@ -670,10 +673,15 @@ function validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staf
 function checkValidDates($startDate, $endDate){
     //Get both dates
     if(!isset($startDate) || !date_create_from_format('d/m/Y', $startDate)){
-        $startDate = '01/01/2010';
+        $startDate = '01/01/2010 23:59:59';
+    } else {
+        $startDate .= "23:59:59";
     }
+    
     if(!isset($endDate) || !date_create_from_format('d/m/Y', $endDate)){
-        $endDate = date('d/m/Y');
+        $endDate = date('d/m/Y') . " 23:59:59";
+    } else {
+        $endDate .= " 23:59:59";
     }
     return [$startDate, $endDate];
 }
