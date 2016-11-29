@@ -97,6 +97,7 @@ function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID` ";
     
     $query .= filterBy(["GW.`Group ID`", "GW.`Primary Staff ID`", "WV.`Deleted`"], [$groupid, $staffid, "0"]);
+    $query .= "AND (GW.`Deleted` IS NULL OR GW.`Deleted` = 0) ";
     $query .= orderBy([$orderby], [$desc]);
     
     try{
