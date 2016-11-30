@@ -48,9 +48,11 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         $datedue = $worksheetDetails["dateDueMain"];
         $stuNotes = $worksheetDetails["studentNotes"];
         $staffNotes = $worksheetDetails["staffNotes"];
+        $hidden = $worksheetDetails["hidden"] ? "0" : "1";
         
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
                 . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
+                . ",`Hidden` = $hidden, `Date Last Modified` = NOW() "
                 . "WHERE `Group Worksheet ID` = $gwid;";
 
         db_query_exception($query);

@@ -436,12 +436,10 @@ function changeDateDueMain(){
 }
 
 function clickSave(){
-    console.log("save");
     return true;
 }
 
 function clickCancel(){
-    console.log("cancel");
     location.reload();
     return false;
 }

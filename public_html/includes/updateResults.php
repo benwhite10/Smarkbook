@@ -29,7 +29,8 @@ $worksheetColumns = array(
     "staff2",
     "staff3",
     "studentNotes",
-    "staffNotes"
+    "staffNotes",
+    "hidden"
 );
 $worksheetDetails = array();
 foreach($worksheetColumns as $variable)
