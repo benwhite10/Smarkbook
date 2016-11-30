@@ -8,12 +8,13 @@ include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/errorReporting.php';
 
 $postData = json_decode($_POST["data"], TRUE);
-$requestType = $postData['type'];
 $worksheetDetails = $postData['details'];
 $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
-$userid = $postData['userid'];
-$userval = base64_decode($postData['userval']);
+$requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
+$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
 $role = validateRequest($userid, $userval);
 if(!$role){
@@ -26,6 +27,12 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets);
+        break;
+    case "DELETEGW":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        deleteGroupWorksheet($gwid);
         break;
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
@@ -174,6 +181,17 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         "result" => TRUE
         );
     echo json_encode($test);
+}
+
+function deleteGroupWorksheet($gwid) {
+    $query = "UPDATE TGROUPWORKSHEETS SET `Deleted` = 1 WHERE `Group Worksheet ID` = $gwid";
+    try {
+        db_query_exception($query);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    $result = array("success" => TRUE);
+    echo json_encode($result);
 }
 
 function failRequest($message){
