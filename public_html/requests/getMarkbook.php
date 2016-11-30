@@ -36,11 +36,12 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 ORDER BY U.Surname;";
     $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks 
                 FROM TGROUPWORKSHEETS GW
-                join TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
-                join TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                
-                where GW.`Primary Staff ID` = $staffid and GW.`Group ID` = $setid and WV.`Deleted` = 0
-                group by GW.`Group Worksheet ID`                
-                order by GW.`Date Due`, WV.`WName`;";
+                JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
+                JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                
+                WHERE GW.`Primary Staff ID` = $staffid AND GW.`Group ID` = $setid AND WV.`Deleted` = 0  
+                AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1) AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1)
+                GROUP BY GW.`Group Worksheet ID`                
+                ORDER BY GW.`Date Due`, WV.`WName`;";
 
     try{
         $students = db_select_exception($query1);

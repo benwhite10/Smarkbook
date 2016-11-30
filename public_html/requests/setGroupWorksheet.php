@@ -41,7 +41,7 @@ function createNewGroupWorksheet($staff, $setid, $versionid, $datedue){
                 `Additional Staff ID 2`,
                 `Version ID`,
                 `Date Due`,
-                `Date Added`)
+                `Date Last Modified`)
                 values(
                 $setid,";
     

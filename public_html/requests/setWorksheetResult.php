@@ -8,12 +8,13 @@ include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/errorReporting.php';
 
 $postData = json_decode($_POST["data"], TRUE);
-$requestType = $postData['type'];
 $worksheetDetails = $postData['details'];
 $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
-$userid = $postData['userid'];
-$userval = base64_decode($postData['userval']);
+$requestType = $postData['type'] ? $postData['type'] : filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
+$userid = $postData['userid'] ? $postData['userid'] : filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = $postData['userval'] ? base64_decode($postData['userval']) : base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
 $role = validateRequest($userid, $userval);
 if(!$role){
@@ -26,6 +27,12 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets);
+        break;
+    case "DELETEGW":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        deleteGroupWorksheet($gwid);
         break;
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
@@ -48,9 +55,11 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         $datedue = $worksheetDetails["dateDueMain"];
         $stuNotes = $worksheetDetails["studentNotes"];
         $staffNotes = $worksheetDetails["staffNotes"];
+        $hidden = $worksheetDetails["hidden"] ? "0" : "1";
         
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
                 . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
+                . ",`Hidden` = $hidden, `Date Last Modified` = NOW() "
                 . "WHERE `Group Worksheet ID` = $gwid;";
 
         db_query_exception($query);
@@ -172,6 +181,17 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         "result" => TRUE
         );
     echo json_encode($test);
+}
+
+function deleteGroupWorksheet($gwid) {
+    $query = "UPDATE TGROUPWORKSHEETS SET `Deleted` = 1 WHERE `Group Worksheet ID` = $gwid";
+    try {
+        db_query_exception($query);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    $result = array("success" => TRUE);
+    echo json_encode($result);
 }
 
 function failRequest($message){

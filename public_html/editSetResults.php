@@ -209,6 +209,7 @@ if(isset($_SESSION['message'])){
                     $dateString = date('d/m/Y', strtotime($details["DateDue"]));
                     $staffNotes = isset($details["StaffNotes"]) ? $details["StaffNotes"] : "";
                     $studentNotes = isset($details["StudentNotes"]) ? $details["StudentNotes"] : "";
+                    $hidden = isset($details["Hidden"]) ? $details["Hidden"] : "0";
                     echo "<input type='hidden' id = 'gwid' name='gwid' value=$gwid />";  
                 ?>
       
@@ -289,16 +290,26 @@ if(isset($_SESSION['message'])){
                                     </select>
                                 </td>
                             </tr>
-                            <tr class="form">
+                            <!--<tr class="form">
                                 <td class="form" colspan="2">
                                     <label for="studentNotes">Notes (Students)</label>
-                                    <textarea name="studentNotes"><?php echo $studentNotes; ?></textarea>
+                                    <textarea name="studentNotes"><?php //echo $studentNotes; ?></textarea>
                                 </td>
-                            </tr>
+                            </tr>-->
                             <tr class="form">
-                                <td class="form" colspan="2">
-                                    <label for="staffNotes">Notes (Staff)</label>
+                                <td class="form">
+                                    <label for="staffNotes">Notes</label>
                                     <textarea name="staffNotes"><?php echo $staffNotes; ?></textarea>
+                                </td>
+                                <td class="form">
+                                    <div class="hide_button" onclick="hideButton()">
+                                        <label style="margin:4px 0 0 0" for="checkbox">Show in mark book</label><input style="margin: 4px 0 0 5px" type="checkbox" name="hidden" <?php if($hidden <> 1) echo checked; ?> id="hide_checkbox" onclick="clickCheckbox()"/>
+                                    </div>
+                                    <div class="delete_button_container" onclick="deleteButton()">
+                                        <div class="delete_button">
+                                            <h3>Delete Worksheet</h3>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -405,8 +416,8 @@ if(isset($_SESSION['message'])){
                                     echo "<input type='hidden' name='notes[$stuID]' id='note$stuID' value='' />";
                                     echo "<input type='hidden' name='dates[$stuID]' id='daysLate$stuID' value='$daysLate' />";
                                     echo "<input type='hidden' name='ids[$stuID]' value='$cwid' />";
-                                    $lock = $cwid != null;
-                                    echo "<input type='hidden' id='lock$stuID' value='$lock' />";
+                                    //$lock = $cwid != null;
+                                    //echo "<input type='hidden' id='lock$stuID' value='$lock' />";
                                     echo "</tr>";
                                 }
                                 echo "<tr class='averages'>";
