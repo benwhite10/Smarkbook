@@ -11,10 +11,13 @@ $postData = json_decode($_POST["data"], TRUE);
 $worksheetDetails = $postData['details'];
 $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
-$requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+//$requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$requestType = $postData['type'] ? $postData['type'] : filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
-$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+//$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+//$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$userid = $postData['userid'] ? $postData['userid'] : filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$userval = $postData['userval'] ? base64_decode($postData['userval']) : base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
 $role = validateRequest($userid, $userval);
 if(!$role){
