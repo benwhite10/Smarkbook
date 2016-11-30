@@ -209,6 +209,7 @@ if(isset($_SESSION['message'])){
                     $dateString = date('d/m/Y', strtotime($details["DateDue"]));
                     $staffNotes = isset($details["StaffNotes"]) ? $details["StaffNotes"] : "";
                     $studentNotes = isset($details["StudentNotes"]) ? $details["StudentNotes"] : "";
+                    $hidden = isset($details["Hidden"]) ? $details["Hidden"] : "0";
                     echo "<input type='hidden' id = 'gwid' name='gwid' value=$gwid />";  
                 ?>
       
@@ -299,6 +300,14 @@ if(isset($_SESSION['message'])){
                                 <td class="form" colspan="2">
                                     <label for="staffNotes">Notes (Staff)</label>
                                     <textarea name="staffNotes"><?php echo $staffNotes; ?></textarea>
+                                </td>
+                            </tr>
+                            <tr class="form">
+                                <td class="form">
+                                    <label for="checkbox">Show in mark book</label><input type="checkbox" name="hidden" <?php if($hidden <> 1) echo checked; ?>/>
+                                </td>
+                                <td class="form">
+                                    
                                 </td>
                             </tr>
                         </tbody>
