@@ -290,24 +290,26 @@ if(isset($_SESSION['message'])){
                                     </select>
                                 </td>
                             </tr>
-                            <tr class="form">
+                            <!--<tr class="form">
                                 <td class="form" colspan="2">
                                     <label for="studentNotes">Notes (Students)</label>
-                                    <textarea name="studentNotes"><?php echo $studentNotes; ?></textarea>
+                                    <textarea name="studentNotes"><?php //echo $studentNotes; ?></textarea>
                                 </td>
-                            </tr>
+                            </tr>-->
                             <tr class="form">
-                                <td class="form" colspan="2">
-                                    <label for="staffNotes">Notes (Staff)</label>
+                                <td class="form">
+                                    <label for="staffNotes">Notes</label>
                                     <textarea name="staffNotes"><?php echo $staffNotes; ?></textarea>
                                 </td>
-                            </tr>
-                            <tr class="form">
                                 <td class="form">
-                                    <label for="checkbox">Show in mark book</label><input type="checkbox" name="hidden" <?php if($hidden <> 1) echo checked; ?>/>
-                                </td>
-                                <td class="form">
-                                    
+                                    <div class="hide_button" onclick="hideButton()">
+                                        <label style="margin:4px 0 0 0" for="checkbox">Show in mark book</label><input style="margin: 4px 0 0 5px" type="checkbox" name="hidden" <?php if($hidden <> 1) echo checked; ?> id="hide_checkbox" onclick="clickCheckbox()"/>
+                                    </div>
+                                    <div class="delete_button_container" onclick="deleteButton()">
+                                        <div class="delete_button">
+                                            <h3>Delete Worksheet</h3>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>

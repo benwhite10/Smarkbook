@@ -120,7 +120,8 @@ td.form
   padding-left: 0px;
   font-size: 0.9rem;
   font-weight: normal;
-  color: #323232; }
+  color: #323232;
+  vertical-align: top; }
 
 tr.form
 { background: transparent; }
@@ -228,7 +229,7 @@ td.date_completion {
 
 #cancelButton:hover
 {
-    background: #ff9999;;
+    background: #ff9999;
     color: #323232;
 }
 
@@ -527,4 +528,31 @@ input[type="text"].partial
 input[type='checkbox'] {     
     vertical-align: middle;
     height: 32px;
+}
+
+.hide_button, .delete_button_container {
+    height: 40px;
+    display: inline-block;
+    width: calc(50% - 6px);
+    vertical-align: top;
+}
+
+.hide_button, .hide_button > label, .hide_button > input[type='checkbox'] {
+    cursor: pointer;
+}
+
+.hide_button:hover {
+    background: #c2f4a4;
+}
+
+.delete_button > h3{
+    color: #323232;
+    font-size: 0.9rem;
+    font-weight: bolder;
+    line-height: 40px;
+}
+
+.delete_button:hover {
+    background: #ff9999;
+    color: #323232;
 }

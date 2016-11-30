@@ -492,3 +492,15 @@ function getQuestionAverages(){
         $("#averagePerc-" + i).text(percentage + "%");
     }
 }
+
+function hideButton() {
+    document.getElementById("hide_checkbox").checked = !document.getElementById("hide_checkbox").checked;
+}
+
+function deleteButton() {
+    console.log("Delete");
+}
+
+function clickCheckbox() {
+    document.getElementById("hide_checkbox").checked = !document.getElementById("hide_checkbox").checked;
+}
