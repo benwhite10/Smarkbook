@@ -253,11 +253,8 @@ function getWorksheetClass(totalMarks, outOf){
 /* Updates */
 
 function changeResult(value, student, question){
-    var lock = $("#lock" + student).val();
     if(validateResult(value, student, question)){
-        if(!lock){
-            updateCompletionStatus(student);
-        }
+        updateCompletionStatus(student);
         updateResults(student);
     } else {
         $("#" + student + "-" + question).val("");

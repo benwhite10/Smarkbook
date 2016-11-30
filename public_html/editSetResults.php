@@ -416,8 +416,8 @@ if(isset($_SESSION['message'])){
                                     echo "<input type='hidden' name='notes[$stuID]' id='note$stuID' value='' />";
                                     echo "<input type='hidden' name='dates[$stuID]' id='daysLate$stuID' value='$daysLate' />";
                                     echo "<input type='hidden' name='ids[$stuID]' value='$cwid' />";
-                                    $lock = $cwid != null;
-                                    echo "<input type='hidden' id='lock$stuID' value='$lock' />";
+                                    //$lock = $cwid != null;
+                                    //echo "<input type='hidden' id='lock$stuID' value='$lock' />";
                                     echo "</tr>";
                                 }
                                 echo "<tr class='averages'>";
