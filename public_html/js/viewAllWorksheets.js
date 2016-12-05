@@ -40,7 +40,7 @@ function getWorksheetsSuccess(json) {
     }
 }
 
-function parseWorksheets(ids) {
+function parseWorksheets(ids, searchTerm) {
     var worksheets = JSON.parse(localStorage.getItem("worksheets"));
     $('#worksheetsTable tbody').html('');
     if(ids === undefined || ids.length === 0) {
@@ -61,8 +61,9 @@ function parseWorksheets(ids) {
                 if(id == worksheet["ID"]) {
                     var date = worksheet["Date"];
                     var custom_date = worksheet["CustomDate"];
+                    var name = highlightSearchTerms(worksheet["WName"], searchTerm);
                     var string = "<tr onclick='goToWorksheet(" + worksheet["ID"] +")' id='v" + worksheet["ID"] + "'>";
-                    string += "<td>" + worksheet["WName"] + "</td><td class='author_column'>" + worksheet["Author"] + "</td><td class='date_column' sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
+                    string += "<td>" + name + "</td><td class='author_column'>" + worksheet["Author"] + "</td><td class='date_column' sorttable_customkey='" + custom_date + "'>" + date + "</td></tr>";
                     $('#worksheetsTable tbody').append(string);
                     break;
                 }
@@ -72,8 +73,21 @@ function parseWorksheets(ids) {
     goToOriginalWorksheet();
 }
 
+function highlightSearchTerms(string, searchTerm) {
+    var terms = searchTerm ? searchTerm.split(" ") : null;
+    for (var key in terms) {
+        var term = terms[key];
+        var replace = "/" + term + "/";
+        string = string.replace(term,"<span class='highlight'>" + term + "</span>")
+    }
+    return string;
+}
+
 function searchWorksheets() {
     var searchTerm = $("#search_bar_text_input").val();
+    if(searchTerm.length < 2) {
+        parseWorksheets([]);
+    }
     var infoArray = {
         type: "SEARCH",
         search: searchTerm,
@@ -86,7 +100,7 @@ function searchWorksheets() {
         url: "/requests/searchWorksheets.php",
         dataType: "json",
         success: function(json){
-            searchSuccess(json);
+            searchSuccess(json, searchTerm);
         },
         error: function() {
             console.log("There was an error sending the search worksheets request.");
@@ -94,14 +108,14 @@ function searchWorksheets() {
     });
 }
 
-function searchSuccess(json) {
+function searchSuccess(json, searchTerm) {
     if(json["success"]) {
         if(!json["noresults"]) {
             var ids = getIdsFromResult(json["vids"]);
             if(ids.length === 0) {
                 ids.push(0);
             }
-            parseWorksheets(ids);
+            parseWorksheets(ids, searchTerm);
         }
     } else {
         console.log("There was an error searching the worksheets.");
