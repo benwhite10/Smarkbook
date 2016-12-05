@@ -53,8 +53,8 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         $staff2 = (!$worksheetDetails["staff2"] || $worksheetDetails["staff2"] == "0") ? "null" : $worksheetDetails["staff2"];
         $staff3 = (!$worksheetDetails["staff3"] || $worksheetDetails["staff3"] == "0") ? "null" : $worksheetDetails["staff3"];
         $datedue = $worksheetDetails["dateDueMain"];
-        $stuNotes = $worksheetDetails["studentNotes"];
-        $staffNotes = $worksheetDetails["staffNotes"];
+        $stuNotes = mysql_real_escape_string($worksheetDetails["studentNotes"]);
+        $staffNotes = mysql_real_escape_string($worksheetDetails["staffNotes"]);
         $hidden = $worksheetDetails["hidden"] ? "0" : "1";
         
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
@@ -125,7 +125,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
             $cwid = array_key_exists($stuId, $cwids) ? $cwids[$stuId] : null;
             $late = array_key_exists($stuId, $daysLate) ? $daysLate[$stuId] : null;
             if($late == ""){$late = 'null';}
-            $note = array_key_exists($stuId, $notes) ? $notes[$stuId] : null;
+            $note = array_key_exists($stuId, $notes) ? mysql_real_escape_string($notes[$stuId]) : null;
             if($compStatus == "Not Required" && $note == null){
                 // Not required so no CW
                 if($cwid != ""){
