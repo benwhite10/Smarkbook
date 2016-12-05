@@ -528,6 +528,7 @@ input[type="text"].partial
 input[type='checkbox'] {     
     vertical-align: middle;
     height: 32px;
+    margin: 4px 0 0 5px;
 }
 
 .hide_button, .delete_button_container {
@@ -545,6 +546,10 @@ input[type='checkbox'] {
     background: #c2f4a4;
 }
 
+.hide_button > label {
+    margin: 4px 0 0 0;
+}
+
 .delete_button > h3{
     color: #323232;
     font-size: 0.9rem;
@@ -555,4 +560,14 @@ input[type='checkbox'] {
 .delete_button:hover {
     background: #ff9999;
     color: #323232;
+}
+
+.results_header {
+    text-align: center; 
+    padding-left: 0px;
+}
+
+th.results_header {
+    font-size: 1.1rem;
+    font-weight: 300;
 }

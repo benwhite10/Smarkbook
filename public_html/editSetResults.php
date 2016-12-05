@@ -78,8 +78,8 @@ if(isset($_SESSION['message'])){
     <link href="css/autocomplete.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css"/>
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css"/>
-    <script src="js/tagsList.js"></script>
     <script src="js/editSetResults.js"></script>
+    <script src="js/editSetResults2.js"></script>
     <script src="pickadate/picker.js"></script>
     <script src="pickadate/picker.date.js"></script>
     <script src="pickadate/legacy.js"></script>
@@ -194,29 +194,24 @@ if(isset($_SESSION['message'])){
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
             </div>
             
-            <?php if($success) { ?>
-            
             <div id="top_bar">
-                <div id="title2">
-                    <h1><?php echo $details['WName']; ?></h1>
-                </div>
-                <ul class="menu navbar">
-                </ul>
+                <div id="title2"></div>
+                <ul class="menu navbar"></ul>
             </div>
             
             <form id="editForm" class="editResults" action="includes/updateResults.php" method="POST">
+                <input type='hidden' id ='gwid' name='gwid' />
                 <?php
                     $dateString = date('d/m/Y', strtotime($details["DateDue"]));
                     $staffNotes = isset($details["StaffNotes"]) ? $details["StaffNotes"] : "";
                     $studentNotes = isset($details["StudentNotes"]) ? $details["StudentNotes"] : "";
-                    $hidden = isset($details["Hidden"]) ? $details["Hidden"] : "0";
-                    echo "<input type='hidden' id = 'gwid' name='gwid' value=$gwid />";  
+                    $hidden = isset($details["Hidden"]) ? $details["Hidden"] : "0"; 
                 ?>
       
                 <div id="summaryBox">
                     <div id="summaryBoxDetails">
                         <div id="summaryBoxShowDetailsText">
-                            <h2 onclick="showHideDetails()" id="summaryBoxShowDetailsTextMain" ><?php echo $details["SetName"] . " - " . $dateString; ?></h2>
+                            <h2 onclick="showHideDetails()" id="summaryBoxShowDetailsTextMain" ></h2>
                         </div><div id="summaryBoxShowHide">
                         </div>
                     </div><div id="summaryBoxButtons">
@@ -231,79 +226,31 @@ if(isset($_SESSION['message'])){
                             <tr class="form">
                                 <td class="form">
                                     <label for="date">Date Due:</label><!--
-                                    --><input type="text" name="dateDueMain" id="dateDueMain" class="datepicker" placeholder="DD/MM/YYYY" onChange="changeDateDueMain()" value="<?php echo $dateString; ?>"/>
+                                    --><input type="text" name="dateDueMain" id="dateDueMain" class="datepicker" placeholder="DD/MM/YYYY" onChange="changeDateDueMain()" />
                                 </td>
                                 <td class="form">
                                     <label for="staff1">Teacher:</label>
-                                    <select name="staff1" id="staff1">
-                                        <option value="0">Teacher</option>
-                                            <?php
-                                            $staff1 = $details["StaffID1"];
-                                            foreach($staff as $teacher){
-                                                $id = $teacher['User ID'];
-                                                $initials = $teacher['Initials'];
-                                                if($id == $staff1){
-                                                    echo "<option value='$id' selected>$initials</option>";
-                                                }else{
-                                                    echo "<option value='$id'>$initials</option>";
-                                                }
-                                            }
-                                            ?>
-                                    </select>
+                                    <select name="staff1" id="staff1"></select>
                                 </td>
                             </tr>
                             <tr class="form">
                                 <td class="form">
                                     <label for="staff2">Extra Teacher:</label>
-                                    <select name="staff2" id="staff2">
-                                        <option value="0">Extra Teacher</option>
-                                            <?php
-                                            $staff2 = $details["StaffID2"];
-                                            foreach($staff as $teacher){
-                                                $id = $teacher['User ID'];
-                                                $initials = $teacher['Initials'];
-                                                if($id == $staff2){
-                                                    echo "<option value='$id' selected>$initials</option>";
-                                                }else{
-                                                    echo "<option value='$id'>$initials</option>";
-                                                }
-                                            }
-                                            ?>
-                                    </select>
+                                    <select name="staff2" id="staff2"></select>
                                 </td>
                                 <td class="form">
                                     <label for="staff3">Extra Teacher:</label>
-                                    <select name="staff3" id="staff3">
-                                        <option value="0">Extra Teacher</option>
-                                            <?php
-                                            $staff3 = $details["StaffID3"];
-                                            foreach($staff as $teacher){
-                                                $id = $teacher['User ID'];
-                                                $initials = $teacher['Initials'];
-                                                if($id == $staff3){
-                                                    echo "<option value='$id' selected>$initials</option>";
-                                                }else{
-                                                    echo "<option value='$id'>$initials</option>";
-                                                }
-                                            }
-                                            ?>
-                                    </select>
+                                    <select name="staff3" id="staff3"></select>
                                 </td>
                             </tr>
-                            <!--<tr class="form">
-                                <td class="form" colspan="2">
-                                    <label for="studentNotes">Notes (Students)</label>
-                                    <textarea name="studentNotes"><?php //echo $studentNotes; ?></textarea>
-                                </td>
-                            </tr>-->
                             <tr class="form">
                                 <td class="form">
                                     <label for="staffNotes">Notes</label>
-                                    <textarea name="staffNotes"><?php echo $staffNotes; ?></textarea>
+                                    <textarea name="staffNotes" id="staffNotes"></textarea>
                                 </td>
                                 <td class="form">
                                     <div class="hide_button" onclick="hideButton()">
-                                        <label style="margin:4px 0 0 0" for="checkbox">Show in mark book</label><input style="margin: 4px 0 0 5px" type="checkbox" name="hidden" <?php if($hidden <> 1) echo checked; ?> id="hide_checkbox" onclick="clickCheckbox()"/>
+                                        <label>Show in mark book</label><input type="checkbox" name="hide_checkbox" id="hide_checkbox" />
                                     </div>
                                     <div class="delete_button_container" onclick="deleteButton()">
                                         <div class="delete_button">
@@ -320,137 +267,14 @@ if(isset($_SESSION['message'])){
                     <input type="hidden" name="questioncount" id="questioncount" value="<?php echo count($worksheet) ?>" />
                     <table class="results" border="1">
                         <thead class="results">
-                            <tr class="results">
-                                <th class="results"></th>
-                                <?php
-                                    foreach($worksheet as $question){
-                                        $qno = $question['Number'];
-                                        echo "<th class='results' style='text-align: center; padding-left: 0px;'>$qno</th>";
-                                    }
-                                    echo "<th class='results'></th>";
-                                    echo "<th class='results'></th>";
-                                    echo "<th class='results'></th>";
-                                ?>
-                            </tr>
-                            <tr class="results">
-                                <?php
-                                    echo "<th class='results' style='padding: 10px 0px 10px 10px;'>Students</th>";
-                                    $count = 1;
-                                    $totalMarks = 0;
-                                    foreach ($worksheet as $question){
-                                        $marks = $question['Marks'];
-                                        echo "<th class='results' style='text-align: center'>/ $marks</th>";
-                                        echo "<input type='hidden' id='ques$count' value='$marks' />";
-                                        $count++;
-                                        $totalMarks += $marks;
-                                    }
-                                    echo "<input id='totalMarks' type='hidden' value='$totalMarks' />";
-                                    echo "<th class='results' style='text-align: center; min-width: 100px;'>Total</th>";
-                                    echo "<th class='results' style='text-align: center; min-width: 150px;'>Status</th>";
-                                    echo "<th class='results' style='text-align: center; min-width: 150px;'>Date</th>"; 
-                                ?>
-                            </tr>
+                            <tr class="results" id="row_head_1"></tr>
+                            <tr class="results" id="row_head_2"></tr>
                         </thead>
-                        <tbody class="results">
-                            <?php                           
-                                foreach ($students as $student){
-                                    $stuID = $student["ID"];
-                                    $stuName = $student['Name'];
-                                    $resultArray = $results[$stuID];
-                                    $completedWorksheet = array_key_exists($stuID, $completedWorksheets) ? $completedWorksheets[$stuID] : null;
-                                    echo "<tr class='results'><td class='results student_name' id='stu$stuID'>$stuName</td>";
-                                    $count = 1;
-                                    $totalMark = 0;
-                                    $totalMarks = 0;
-                                    foreach ($worksheet as $question){
-                                        $sqid = $question["SQID"];
-                                        if(array_key_exists($sqid, $resultArray)){
-                                            $mark = $resultArray[$sqid]["Mark"];
-                                            $cqid = $resultArray[$sqid]["CQID"];
-                                            $totalMark += $mark;
-                                            $totalMarks += $question["Marks"];
-                                        }else{
-                                            $mark = "";
-                                            $cqid = 0;
-                                        }
-                                        $id = $stuID . '-' . $sqid . '-' . $cqid . '-' . $mark;
-                                        echo "<td class='results' style='padding:0px;'><input type='text' class='markInput' name='resultInput[$id]' value='$mark' id='$stuID-$count' onBlur='changeResult(this.value, $stuID, $count)'></td>";
-                                        $count++;
-                                    }
-                                    echo "<td class='results total_mark'><b class='totalMarks' id='total$stuID'>$totalMark / $totalMarks</b></td>";
-                                    echo "<input type='hidden' id='count$stuID' value=$count />";
-                                    $completionStatus = "Not Required";
-                                    $daysLate = "";
-                                    $dateStatus = "-";
-                                    $cwid = null;
-                                    $lateClass = "";
-                                    $compClass = "";
-                                    if($completedWorksheet != null)
-                                    { 
-                                        $completionStatus = getArrayValueForKey($completedWorksheet, "Completion Status");
-                                        $daysLate = getArrayValueForKey($completedWorksheet, "Date Status");
-                                        if($completionStatus == "Incomplete"){
-                                            $compClass = "late";
-                                        } else if ($completionStatus == "Partially Completed") {
-                                            $compClass = "partial";
-                                        }
-                                        if($daysLate === "" || $daysLate === null){
-                                            $datestatus = "-";
-                                        } else if ($daysLate == 0) {
-                                            $dateStatus = "On Time";
-                                        } else if ($daysLate == 1) {
-                                            $dateStatus = "1 day late";
-                                            $lateClass = "late";
-                                        } else {
-                                            $dateStatus = $daysLate . " days late";
-                                            $lateClass = "late";
-                                        }
-                                        $cwid = getArrayValueForKey($completedWorksheet, "Completed Worksheet ID");
-                                    }
-                                    $id = $stuID . '-' . $cwid;
-                                    echo "<td class='results date_completion'><input type='text' id='comp$stuID' class='status $compClass' name='completion[$stuID]' value='$completionStatus' onClick='showStatusPopUp($stuID)'></input></td>";
-                                    echo "<td class='results date_completion'><input type='text' id='date$stuID' class='status $lateClass' name='date[$stuID]' value='$dateStatus' onClick='showStatusPopUp($stuID)'></input></td>";
-                                    //echo "<td id='comp$stuID' class='results date_completion $compClass status'><input type='text' name='completion[$stuID]' value='$completionStatus' onClick='showStatusPopUp($stuID)'></input></td>";
-                                    //echo "<td id='date$stuID' class='results date_completion $lateClass status'><input type='text' name='date[$stuID]' value='$dateStatus' onClick='showStatusPopUp($stuID)'></input></td>";
-                                    
-                                    echo "<input type='hidden' name='notes[$stuID]' id='note$stuID' value='' />";
-                                    echo "<input type='hidden' name='dates[$stuID]' id='daysLate$stuID' value='$daysLate' />";
-                                    echo "<input type='hidden' name='ids[$stuID]' value='$cwid' />";
-                                    //$lock = $cwid != null;
-                                    //echo "<input type='hidden' id='lock$stuID' value='$lock' />";
-                                    echo "</tr>";
-                                }
-                                echo "<tr class='averages'>";
-                                echo "<td class='averages'>Question</td>";
-                                foreach($worksheet as $question){
-                                    $qno = $question['Number'];
-                                    echo "<td class='averages display' style='text-align: center; padding-left: 0px;'>$qno</ts>";
-                                }
-                                echo "<td class='averages'></td><td class='averages'></td><td class='averages'></td></tr>";
-                                echo "<tr class='averages'>";
-                                echo "<td class='averages'>Average</td>";
-                                $count = 1;
-                                foreach ($worksheet as $question){
-                                    $marks = $question['Marks'];
-                                    echo "<td class='averages display' style='padding:0px;' id='average-$count'></td>";
-                                    echo "<input type='hidden' id='average-mark-$count' value='$marks'>";
-                                    $count++;
-                                }
-                                echo "<td class='averages display' id='average-ALL'>ALL</td><td class='averages'></td><td class='averages'></td></tr>";
-                                echo "<tr class='averages'>";
-                                echo "<td class='averages'>Average (%)</td>";
-                                $count = 1;
-                                foreach ($worksheet as $question){
-                                    echo "<td class='averages display' style='padding:0px;' id='averagePerc-$count'> %</td>";
-                                    $count++;
-                                }
-                                echo "<td class='averages display' id='averagePerc-ALL'>ALL</td><td class='averages'></td><td class='averages'></td></tr>";
-                            ?> 
+                        <tbody class="results" id="table_body">
                         </tbody>
                     </table>
                 </div>
             </form> 
-            <?php } ?>
     	</div>
     </div>
 </body>

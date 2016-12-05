@@ -252,16 +252,16 @@ function getWorksheetClass(totalMarks, outOf){
 
 /* Updates */
 
-function changeResult(value, student, question){
-    if(validateResult(value, student, question)){
-        updateCompletionStatus(student);
-        updateResults(student);
-    } else {
-        $("#" + student + "-" + question).val("");
-        $("#" + student + "-" + question).focus();
-    }
-    getQuestionAverages();
-}
+//function changeResult(value, student, question){
+//    if(validateResult(value, student, question)){
+//        updateCompletionStatus(student);
+//        updateResults(student);
+//    } else {
+//        $("#" + student + "-" + question).val("");
+//        $("#" + student + "-" + question).focus();
+//    }
+//    getQuestionAverages();
+//}
 
 function updateCompletionStatus(student){
     var state = checkAllCompleted(student);
@@ -488,50 +488,4 @@ function getQuestionAverages(){
         $("#average-" + i).text(rounded);
         $("#averagePerc-" + i).text(percentage + "%");
     }
-}
-
-function hideButton() {
-    document.getElementById("hide_checkbox").checked = !document.getElementById("hide_checkbox").checked;
-}
-
-function deleteButton() {
-    if(confirm("Are you sure you want to delete this group worksheet? This process is irreversible and you will lose any data entered.")){
-        deleteRequest();
-    }
-    
-}
-
-function deleteRequest() {
-    var gwid = $("#gwid").val();
-    var infoArray = {
-        gwid: gwid,
-        type: "DELETEGW",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/setWorksheetResult.php",
-        dataType: "json",
-        success: function(json){
-            deleteRequestSuccess(json);
-        },
-        error: function(json){
-            console.log("There was an error deleting the worksheet.");
-        }
-    });
-}
-
-function deleteRequestSuccess(json) {
-    if(json["success"]) {
-        alert("Worksheet succesfully deleted");
-        window.location.href = "/portalhome.php";
-    } else {
-        alert("There was an error deleting the worksheet, please try again.");
-    }
-}
-
-function clickCheckbox() {
-    document.getElementById("hide_checkbox").checked = !document.getElementById("hide_checkbox").checked;
 }
