@@ -30,6 +30,8 @@ switch ($requestType){
 function searchWorksheets($searchTerms){
     $searchArray = convertSearchTerms($searchTerms);
     
+    if (count($searchArray) === 0) { returnToPageNoResults(); }
+        
     $query = "SELECT `Version ID`, `WName` Name FROM `TWORKSHEETVERSION` WHERE ";
     foreach($searchArray as $key => $searchTerm) {
         if ($key != 0) $query .= " OR ";
@@ -39,6 +41,7 @@ function searchWorksheets($searchTerms){
     
     try {
         $worksheets = db_select_exception($query);
+        if (count($worksheets) === 0) { returnToPageNoResults(); }
     } catch (Exception $ex) {
         returnToPageError($ex, "There was an error running the search query");
     }
@@ -113,6 +116,14 @@ function returnToPageError($ex, $message){
     $response = array(
         "success" => FALSE,
         "message" => $ex->getMessage());
+    echo json_encode($response);
+    exit();
+}
+
+function returnToPageNoResults() {
+    $response = array(
+        "success" => TRUE,
+        "noresults" => TRUE);
     echo json_encode($response);
     exit();
 }

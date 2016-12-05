@@ -4,9 +4,7 @@ $(document).ready(function(){
     getWorksheets();
     
     $("#search_bar_text_input").keyup(function(event){
-        if(event.keyCode === 13){
-            searchWorksheets();;
-        }
+        searchWorksheets();
     });
 });
 
@@ -98,11 +96,13 @@ function searchWorksheets() {
 
 function searchSuccess(json) {
     if(json["success"]) {
-        var ids = getIdsFromResult(json["vids"]);
-        if(ids.length === 0) {
-            ids.push(0);
+        if(!json["noresults"]) {
+            var ids = getIdsFromResult(json["vids"]);
+            if(ids.length === 0) {
+                ids.push(0);
+            }
+            parseWorksheets(ids);
         }
-        parseWorksheets(ids);
     } else {
         console.log("There was an error searching the worksheets.");
         console.log(json["message"]);
