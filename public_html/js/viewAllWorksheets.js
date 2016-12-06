@@ -77,7 +77,6 @@ function highlightSearchTerms(string, searchTerm) {
     var terms = searchTerm ? searchTerm.split(" ") : null;
     for (var key in terms) {
         var term = terms[key];
-        var replace = "/" + term + "/";
         string = string.replace(term,"<span class='highlight'>" + term + "</span>")
     }
     return string;
