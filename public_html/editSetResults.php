@@ -78,6 +78,7 @@ if(isset($_SESSION['message'])){
     <link href="css/autocomplete.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css"/>
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css"/>
+    <script src='js/jquery-ui.js'></script>
     <script src="js/editSetResults.js"></script>
     <script src="js/editSetResults2.js"></script>
     <script src="pickadate/picker.js"></script>

@@ -13,7 +13,7 @@ $(document).ready(function(){
     
     setUpNotes();
     
-    getQuestionAverages();
+    //getQuestionAverages();
 });
 
 $(function() {
@@ -48,20 +48,6 @@ function setUpNotes() {
             console.log("There was an error retrieving the notes");
         }
     });
-}
-
-function addNotesToInputs(json){
-    if(json["success"]){
-        var notes = json["notes"]
-        for (var note in notes)
-        {
-            var stuID = note;
-            var realNote = notes[stuID]["Notes"];
-            $("#note" + stuID).val(realNote);
-        }
-    } else {
-        console.log("There was an error retrieving the notes");
-    } 
 }
 
 /* DOM interaction methods */
@@ -439,53 +425,4 @@ function clickSave(){
 function clickCancel(){
     location.reload();
     return false;
-}
-
-function getQuestionAverages(){
-    // Main questions
-    var x = document.getElementsByClassName("markInput");
-    var qAv = [];
-    var qAvCount = [];
-    for (var i = 0; i < x.length; i++){
-        var mark = x[i];
-        var markInfo = mark["id"].split("-");
-        if(markInfo.length > 1) {
-            var question = markInfo[1];
-            if(qAv[question] && mark.value) {
-                qAv[question] = parseInt(qAv[question]) + parseInt(mark.value);
-                qAvCount[question]++;
-            } else if (mark.value){
-                qAv[question] = parseInt(mark.value);
-                qAvCount[question] = 1;
-            }
-            
-        }
-    }
-    
-    var totals = document.getElementsByClassName("totalMarks");
-    var total = 0;
-    var totalMarks = 0;
-    var totalCount = 0;
-    for (var i = 0; i < totals.length; i++) {
-        var marks = totals[i].innerText.split("/");
-        if (marks[1] > 0) {
-            total += parseInt(marks[0]);
-            totalMarks += parseInt(marks[1]);
-            totalCount++;
-        }   
-    }
-    //Averages
-    var totalAveragePercentage = Math.round(100 * total / totalMarks);
-    var totalAvMark = Math.round(10*total/totalCount)/10;
-    var totalAvMarks = Math.round(10*totalMarks/totalCount)/10;
-    $("#averagePerc-ALL").text(totalAveragePercentage + "%");
-    $("#average-ALL").text(totalAvMark + " / " + totalAvMarks);
-    for (var i = 1; i < qAv.length; i++) {
-        var average = qAv[i] /qAvCount[i];
-        var rounded = Math.round(10 * average)/10;
-        var marks = $("#average-mark-" + i).val();
-        var percentage = Math.round(100 * average / marks);
-        $("#average-" + i).text(rounded);
-        $("#averagePerc-" + i).text(percentage + "%");
-    }
 }

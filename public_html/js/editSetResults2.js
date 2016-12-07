@@ -3,6 +3,8 @@ $(document).ready(function(){
     
     requestWorksheet(gwid);
     requestAllStaff();
+    
+    setUpNotes(gwid);
 });
 
 /* Get worksheets */
@@ -38,6 +40,7 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("students", JSON.stringify(json["students"]));
         setUpWorksheetInfo();
         parseMainTable();
+        getQuestionAverages();
     } else {
         console.log("There was an error getting the worksheet: " + json["message"]);
     }
@@ -110,8 +113,6 @@ function setUpWorksheetInfo() {
     $("#title2").html("<h1>" + details["WName"] + "</h1>");
     $("#gwid").val(getParameterByName("gwid"));
     $("#summaryBoxShowDetailsTextMain").text(details["SetName"] + " - " + dateString);
-//    var datepicker = $('#dateDueMain');
-//    datepicker.datepicker('setDate', new Date(dateString));
     $("#dateDueMain").val(dateString);
     setUpStaffInput("staff1", details["StaffID1"],"Teacher");
     setUpStaffInput("staff2", details["StaffID2"],"Extra Teacher");
@@ -143,6 +144,7 @@ function parseMainTable() {
         average_row_1 += "<td class='averages display' style='text-align: center; padding-left: 0px;'>" + question["Number"] + "</ts>";
         average_row_2 += "<td class='averages display' style='padding:0px;' id='average-" + col + "'></td>";
         average_row_3 += "<td class='averages display' style='padding:0px;' id='averagePerc-" + col + "'> %</td>";
+        col++;
 
     }
     row_head_1 += "<th class='results results_header'></th><th class='results results_header'></th><th class='results results_header'></th>";
@@ -262,10 +264,10 @@ function changeResult(value, id_string){
     if(validateResult(value, parseInt(result_array["marks"]), id_string)){
         //updateCompletionStatus(stuid);
         updateValues(id_string);
+        getQuestionAverages(id_string);
     } else {
         resetQuestion(id_string);
     }
-    //getQuestionAverages();
 }
 
 function validateResult(value, marks, id_string){
@@ -306,7 +308,7 @@ function getMarks(id_string) {
 }
 
 function updateValues(id_string) {
-    var info = id_string.split("");
+    var info = id_string.split("-");
     var row = info[0];
     var col = info[1];
     updateTotal(row);
@@ -320,13 +322,123 @@ function updateTotal(row) {
         var marks = getMarks(id_string);
         if (marks) {
             if (marks !== "") {
-                totalMark += parseFloat($("#" + id_string).val());
-                totalMarks += parseFloat(marks);
+                var markString = $("#" + id_string).val();
+                if (markString !== "") {
+                    totalMark += parseFloat(markString);
+                    totalMarks += parseFloat(marks);
+                }
             }
         } else {
             $("#total" + row).text(totalMark + " / " + totalMarks);
+            break;
         }
     }
+}
+
+function getQuestionAverages(id_string){
+    if(id_string) {
+        var info = id_string.split("-");
+        var row = info[0];
+        var col = info[1];
+        parseAverageArrayForCol(col); 
+    } else {
+        for(var i = 0; i < 1000; i++) {
+            var id_string = "0-" + i;
+            if (document.getElementById(id_string)) {
+                parseAverageArrayForCol(i); 
+            }   else {
+                break;
+            }
+        }
+    }
+    parseTotalsAverage();
+}
+
+function parseAverageArrayForCol(col) {
+    var totalMark = 0;
+    var totalCount = 0;
+    var marks = getMarks(0 + "-" + col);
+    for(var i = 0; i < 1000; i++) {
+        var id_string = i + "-" + col;
+        if (document.getElementById(id_string)) {
+            var markString = $("#" + id_string).val();
+            if (markString !== "") {
+                totalMark += parseFloat(markString);
+                totalCount++;
+            }
+        } else {
+            break;
+        }
+    }
+    var average = totalMark / totalCount;
+    var rounded = Math.round(10 * average)/10;
+    var percentage = Math.round(100 * average / marks);
+    $("#average-" + col).text(rounded);
+    $("#averagePerc-" + col).text(percentage + "%");
+}
+
+function parseTotalsAverage() {
+    var totalMark = 0;
+    var totalMarks = 0;
+    var totalCount = 0;
+    for (var i = 0; i < 1000; i++) {
+        var id_string = "total" + i;
+        if (document.getElementById(id_string)) {
+            var totalString = $("#" + id_string).text();
+            var totals = totalString.split(" / ");
+            totalMark += parseFloat(totals[0]);
+            totalMarks += parseFloat(totals[1]);
+            totalCount++;
+        } else {
+            break;
+        }
+    }
+    var average = totalMark / totalCount;
+    var averageMarks = totalMarks / totalCount;
+    var rounded = Math.round(10 * average)/10;
+    var roundedAvMarks = Math.round(10 * averageMarks)/10;
+    var percentage = Math.round(100 * average / averageMarks);
+    $("#average-ALL").text(rounded + " / " + roundedAvMarks);
+    $("#averagePerc-ALL").text(percentage + "%");
+}
+
+function setUpNotes(gwid) {
+    if(!gwid) {
+        gwid = getParameterByName("gwid");
+    }
+    
+    var infoArray = {
+        gwid: gwid,
+        type: "JUSTNOTES",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getWorksheet.php",
+        dataType: "json",
+        success: function(json){
+            addNotesToInputs(json);
+        },
+        error: function(json){
+            console.log("There was an error retrieving the notes");
+        }
+    });
+}
+
+function addNotesToInputs(json){
+    if(json["success"]){
+        var notes = json["notes"];
+        for (var note in notes)
+        {
+            var stuID = note;
+            var realNote = notes[stuID]["Notes"];
+            $("#note" + stuID).val(realNote);
+        }
+    } else {
+        console.log("There was an error retrieving the notes");
+    } 
 }
 
 function getParameterByName(name, url) {
