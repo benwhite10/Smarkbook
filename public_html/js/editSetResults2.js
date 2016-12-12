@@ -3,8 +3,6 @@ $(document).ready(function(){
     
     requestWorksheet(gwid);
     requestAllStaff();
-    
-    setUpNotes(gwid);
 });
 
 /* Get worksheets */
@@ -147,15 +145,16 @@ function parseMainTable() {
         col++;
 
     }
-    row_head_1 += "<th class='results results_header'></th><th class='results results_header'></th><th class='results results_header'></th>";
+    row_head_1 += "<th class='results results_header'></th><th class='results results_header'></th><th class='results results_header'></th><th class='results results_header'></th>";
     
     row_head_2 += "<th class='results results_header' style='min-width: 100px;'>Total</th>";
     row_head_2 += "<th class='results results_header' style='min-width: 150px;'>Status</th>";
     row_head_2 += "<th class='results results_header' style='min-width: 150px;'>Date</th>";
+    row_head_2 += "<th class='results results_header'>Note</th>";
     
-    average_row_1 += "<td class='averages'></td><td class='averages'></td><td class='averages'></td></tr>";
-    average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages'></td><td class='averages'></td></tr>";
-    average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages'></td><td class='averages'></td></tr>";
+    average_row_1 += "<td class='averages'></td><td class='averages' colspan='3'></td></tr>";
+    average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages' colspan='3'></td></tr>";
+    average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages' colspan='3'></td></tr>";
     
     /* Students */
     var student_rows = "";
@@ -183,43 +182,13 @@ function parseMainTable() {
             }
             var id_string = row + "-" + col;
             local_results_data_array[id_string] = {cqid: cqid, stuid: stuid, sqid: sqid, marks:marks};
-            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\")'></td>";
+            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")'></td>";
             col++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
-        
-        var completionStatus = "Not Required";
-        var daysLate = "";
-        var dateStatus = "-";
-        var cwid = "";
-        var lateClass = "";
-        var compClass = "";
-        if(completed_worksheets[stuid])
-        { 
-            var completed_worksheet = completed_worksheets[stuid];
-            completionStatus = completed_worksheet["Completion Status"];
-            daysLate = completed_worksheet["Date Status"];
-            if(completionStatus == "Incomplete"){
-                compClass = "late";
-            } else if (completionStatus == "Partially Completed") {
-                compClass = "partial";
-            }
-            if(daysLate == ""){
-                dateStatus = "-";
-            } else if (daysLate == 0) {
-                dateStatus = "On Time";
-            } else if (daysLate == 1) {
-                dateStatus = "1 day late";
-                lateClass = "late";
-            } else {
-                dateStatus = daysLate + " days late";
-                lateClass = "late";
-            }
-            cwid = completed_worksheet["Completed Worksheet ID"];
-        }
-        var id = stuid + "-" + cwid;
-        student_rows += "<td class='results date_completion'><input type='text' id='comp" + stuid + "' class='status " + compClass + "' name='completion[" + stuid + "]' value='" + completionStatus + "' onClick='showStatusPopUp(" + stuid + ")'></input></td>";
-        student_rows += "<td class='results date_completion'><input type='text' id='date" + stuid + "' class='status " + lateClass + "' name='date[" + stuid + "]' value='" + dateStatus + "' onClick='showStatusPopUp(" + stuid + ")'></input></td></tr>";
+        student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
+        student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
+        student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
         
         row++;
     }
@@ -228,6 +197,40 @@ function parseMainTable() {
     $("#row_head_1").html(row_head_1);
     $("#row_head_2").html(row_head_2);
     $("#table_body").html(student_rows + average_row_1 + average_row_2 + average_row_3);
+    
+    for (var key in students) {
+        updateStatusRow(key);
+    }
+}
+
+function getCompClass(status) {
+    if(status == "Incomplete"){
+        return "late";
+    } else if (status == "Partially Completed") {
+        return "partial";
+    } else {
+        return "";
+    }
+}
+
+function getLateText(daysLate) {
+    if(daysLate == ""){
+        return "-";
+    } else if (daysLate == 0) {
+        return "On Time";
+    } else if (daysLate == 1) {
+        return "1 day late";
+    } else {
+        return daysLate + " days late";
+    }
+}
+
+function getLateClass(daysLate) {
+    if(daysLate == "" || daysLate == 0){
+        return "";
+    } else {
+        return "late";
+    }
 }
 
 function setUpStaffInput(title, selected, initial_text) {
@@ -258,15 +261,64 @@ function deleteButton() {
     }  
 }
 
-function changeResult(value, id_string){
+function changeResult(value, id_string, row){
     var result_array = returnQuestionInfo(id_string);
     var stuid = result_array["stuid"];
     if(validateResult(value, parseInt(result_array["marks"]), id_string)){
-        //updateCompletionStatus(stuid);
+        updateCompletionStatus(stuid, row);
         updateValues(id_string);
         getQuestionAverages(id_string);
     } else {
         resetQuestion(id_string);
+    }
+}
+
+function updateCompletionStatus(student, row){
+    var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
+    var current_late = "NONE";
+    var completed_worksheet = {};
+    if (completed_worksheets[student]) {
+        completed_worksheet = completed_worksheets[student];
+        current_late = completed_worksheet["Date Status"];
+    }
+    var state = checkAllCompleted(row);
+    
+    completed_worksheet["Completion Status"] = state;
+    if (state === "Completed" || state === "Partially Completed") {
+        completed_worksheet["Date Status"] = current_late === "NONE" ? "0": current_late;
+    } else {
+        completed_worksheet["Date Status"] = current_late === "NONE" ? "": current_late;
+    }
+    completed_worksheets[student] = completed_worksheet;
+    sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
+    
+    updateStatusRow(student);
+}
+
+function checkAllCompleted(row){
+    var blank = 0;
+    var full = 0;
+    for(var i = 0; i < 1000; i++) {
+        var id_string = row + "-" + i;
+        var marks = getMarks(id_string);
+        if (document.getElementById(id_string)) {
+            var markString = $("#" + id_string).val();
+            if (markString !== "") {
+                full++;
+            } else {
+                blank++;
+            }
+        } else {
+            break;
+        }
+    }
+    
+    if(blank === 0){
+        return "Completed";
+    } else if (full === 0){
+        return "Not Required";
+    } else {
+        return "Partially Completed";
     }
 }
 
@@ -402,42 +454,244 @@ function parseTotalsAverage() {
     $("#averagePerc-ALL").text(percentage + "%");
 }
 
-function setUpNotes(gwid) {
-    if(!gwid) {
-        gwid = getParameterByName("gwid");
+function showStatusPopUp(stuID, row, type){
+    var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
+    if(completed_worksheets[stuID])
+    { 
+        var completed_worksheet = completed_worksheets[stuID];
+        var completion_status = completed_worksheet["Completion Status"];
+        var days_late = completed_worksheet["Date Status"];
+        var note = completed_worksheet["Notes"];
+        
+        setTitleAndMarks(stuID, row, completion_status);
+        setPopUpCompletionStatus(completion_status, days_late);
+        setDateDue(days_late);
+        setNote(note);
     }
     
-    var infoArray = {
-        gwid: gwid,
-        type: "JUSTNOTES",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getWorksheet.php",
-        dataType: "json",
-        success: function(json){
-            addNotesToInputs(json);
-        },
-        error: function(json){
-            console.log("There was an error retrieving the notes");
-        }
-    });
+    $("#popUpStudent").val(stuID);
+    $("#popUpBackground").fadeIn();
+    repositionStatusPopUp();
+    if(type === "note") $("#popUpNoteText").focus();
 }
 
-function addNotesToInputs(json){
-    if(json["success"]){
-        var notes = json["notes"];
-        for (var note in notes)
-        {
-            var stuID = note;
-            var realNote = notes[stuID]["Notes"];
-            $("#note" + stuID).val(realNote);
+function setTitleAndMarks(stuID, row, completion_status){
+    var id = "#stu" + stuID;
+    $("#popUpName").text($(id).text());
+    $("#popUpMarks").text(getStudentMarks(stuID, row));
+    var marks_class = "incomplete";
+    if (completion_status === "Completed") marks_class = "complete";
+    if (completion_status === "Partially Completed") marks_class = "partial";
+    $("#popUpMarks").attr('class', marks_class);
+}
+
+function getStudentMarks(stuID, row) {
+    var totalMark = 0;
+    var totalMarks = 0;
+    for(var i = 0; i < 1000; i++) {
+        var id_string = row + "-" + i;
+        var marks = getMarks(id_string);
+        if (marks) {
+            if (marks !== "") {
+                var markString = $("#" + id_string).val();
+                if (markString !== "") {
+                    totalMark += parseFloat(markString);
+                    totalMarks += parseFloat(marks);
+                }
+            }
+        } else {
+            return(totalMark + " / " + totalMarks);
+            break;
         }
+    }
+    return(totalMark + " / " + totalMarks);
+}
+
+function completionStatusChange(completion_status) {
+    if(completion_status === "Completed" || completion_status === "Partially Completed"){
+        $("#popUpDateStatusSelect").prop("disabled", false);
+        setDateStatus("0");
     } else {
-        console.log("There was an error retrieving the notes");
+        $("#popUpDateStatusSelect").val("0");
+        $("#popUpDateStatusSelect").prop("disabled", true);
+    }
+    dateStatusChange(parseInt($("#popUpDateStatusSelect").val()));
+}
+
+function setPopUpCompletionStatus(completion_status, days_late){
+    $("#popUpCompletionStatusSelect").val(completion_status);
+    if(completion_status === "Completed" || completion_status === "Partially Completed"){
+        $("#popUpDateStatusSelect").prop("disabled", false);
+        setDateStatus(days_late);
+    } else {
+        $("#popUpDateStatusSelect").val("0");
+        $("#popUpDateStatusSelect").prop("disabled", true);
+    }
+    dateStatusChange(parseInt($("#popUpDateStatusSelect").val()));
+}
+
+function dateStatusChange(value){
+    showHideDate(value);
+    repositionStatusPopUp();
+}
+
+function setDateStatus(status){
+    if(status == ""){
+        $("#popUpDateStatusSelect").val(0);
+        showHideDate(0);
+    } else if (status == 0) {
+        $("#popUpDateStatusSelect").val(1);
+        showHideDate(1);
+    } else {
+        $("#popUpDateStatusSelect").val(2);
+        showHideDate(2);
+    }
+}
+
+function setDateDue(days_late){
+    //Get the date the worksheet was due in
+    var dateDueString = $("#dateDueMain").val();
+    var dateDue = moment(dateDueString, "DD/MM/YYYY");
+    
+    if(days_late == "" || days_late == 0){
+        days_late = 1;
+    }
+    
+    var dateHandedIn = moment(dateDueString, "DD/MM/YYYY");
+    dateHandedIn.add(days_late, 'd');
+    
+    //Set the day, month and year for that date
+    $("#day").val(parseInt(dateHandedIn.format("DD")));
+    $("#month").val(parseInt(dateHandedIn.format("MM")));
+    $("#year").val(parseInt(dateHandedIn.format("YYYY")));
+    
+    //Set the date due text
+    $("#dateDueText").text(dateDueString);
+    
+    //Set the number of days late
+    parseDaysLate(calculateHowLate(dateDue, dateHandedIn));
+}
+
+function div_hide(save){
+    if(save) saveChanges();
+    document.getElementById("popUpBackground").style.display = "none";
+}
+
+function saveChanges(){
+    var student = $("#popUpStudent").val();
+    // Save to completed worksheet array
+    var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
+    var completed_worksheet = completed_worksheets[student] ? completed_worksheets[student] : [];
+    completed_worksheet["Completion Status"] = $("#popUpCompletionStatusSelect").val();
+    completed_worksheet["Date Status"] = getDaysLateFromPopUp($("#popUpDateStatusSelect").val());
+    completed_worksheet["Notes"] = $("#popUpNoteText").val();
+    completed_worksheets[student] = completed_worksheet;
+    sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
+    
+    //Set comp status
+    updateStatusRow(student);
+}
+
+function getDaysLateFromPopUp(value) {
+    if (value == 0) {
+        return "";
+    } else if (value == 1){
+        return "0";
+    } else {
+        var dateHandedIn = getDateFromPicker();
+        var dateDue = moment($("#dateDueText").text(), "DD/MM/YYYY");
+        var daysLate = calculateHowLate(dateDue, dateHandedIn);
+        return parseInt(daysLate);
+    }
+}
+
+function getDateFromPicker(){
+    var day = $("#day").val();
+    var month = $("#month").val();
+    var year = $("#year").val();
+    var date = moment();
+    date.date(day);
+    date.month(parseInt(month) - 1);
+    date.year(year);
+    return date;
+}
+
+function calculateHowLate(dateDue, dateHandedIn){
+    var duration = moment.duration(dateHandedIn.diff(dateDue));
+    var durationDays = duration.asDays();
+    return Math.floor(durationDays) >= 0 ? Math.floor(durationDays) : -1;
+}
+
+function updateStatusRow(student) {
+    var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
+    var completed_worksheet = completed_worksheets[student] ? completed_worksheets[student] : null;
+    if (!completed_worksheet) return;
+    
+    var completionStatus = completed_worksheet["Completion Status"];
+    var daysLate = completed_worksheet["Date Status"];
+    var note = completed_worksheet["Notes"];
+
+    var compClass = getCompClass(completionStatus);
+    var dateStatus = getLateText(daysLate);
+    var lateClass = getLateClass(daysLate);
+    var noteClass = note === "" ? "note_none" : "note_note";
+    
+    setCompletionStatus(student, compClass, completionStatus);
+    setLateStatus(student, lateClass, dateStatus);
+    setNoteStatus(student, noteClass);
+}
+
+function setCompletionStatus(student, comp_class, status){
+    $("#comp" + student).removeClass("partial");
+    $("#comp" + student).removeClass("late");
+    $("#comp" + student).addClass(comp_class);
+    $("#comp_div_" + student).text(status);
+}
+
+function setLateStatus(student, late_class, status) {
+    $("#late" + student).removeClass("late");
+    $("#late" + student).addClass(late_class);
+    $("#late_div_" + student).text(status);
+}
+
+function setNoteStatus(student, note_class) {
+    $("#note" + student).removeClass("note_none");
+    $("#note" + student).removeClass("note_note");
+    $("#note" + student).addClass(note_class);
+}
+
+function parseDaysLate(daysLate){
+    if(daysLate < 0){
+        $("#daysLateText").text("Not late");
+        $("#daysLateText").addClass("notLate");
+    }else if(daysLate == 0){
+        $("#daysLateText").text("On Time");
+        $("#daysLateText").addClass("notLate");
+    }else if(daysLate == 1){
+        $("#daysLateText").text(daysLate + " day late");
+        $("#daysLateText").removeClass("notLate");
+    } else {
+        $("#daysLateText").text(daysLate + " days late");
+        $("#daysLateText").removeClass("notLate");
+    } 
+}
+
+function setNote(note){
+    $("#popUpNoteText").val(note);
+}
+
+function repositionStatusPopUp(){
+    var height = $("#popUpBox").height() / 2;
+    $("#popUpBox").attr("style", "margin-top: -" + height + "px");
+}
+
+function showHideDate(value){
+    if(value == 2){
+        $("#popUpDateHandedIn").show();
+        $("#popUpDateDue").show();
+    } else {
+        $("#popUpDateHandedIn").hide();
+        $("#popUpDateDue").hide();
     } 
 }
 
