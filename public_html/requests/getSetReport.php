@@ -130,12 +130,14 @@ function convertResultsToTable($results, $students, $tag_array) {
                     $marks += $result["Marks"];
                 }
             }
-            $tag_scores_array[$tag_id] = array(
+            $temp_array = array(
                 "name" => $tag_name,
+                "tag_id" => $tag_id,
                 "mark" => $mark,
                 "marks" => $marks,
                 "count" => $count
             );
+            array_push($tag_scores_array, $temp_array);
         }
         $student_array = array(
             "details" => $details,
