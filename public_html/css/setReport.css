@@ -1,0 +1,84 @@
+textarea.autocomplete {
+    width: calc(100% - 20px);
+    background: transparent;
+    height: 60px;
+}
+
+#main_tables {
+    min-height: 200px;
+    width: 100%;
+}
+
+table.student_table {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+tr.student_table_body:nth-child(odd) {
+    background-color: #ddd;
+}
+
+th.student_table {
+    background: transparent;
+    color: #323232;
+}
+
+tr.student_table_body {
+   height: 30px;
+   border: solid 1px #323232;
+}
+
+th.value, td.value {
+    text-align: center;
+    width: 100px;
+}
+
+th.name, td.name {
+    padding-left: 10px;
+}
+
+thead {
+   border: solid 1px #323232; 
+}
+
+#variablesInputBoxDetails {
+    width: 60%;
+}
+
+#variablesInputBoxButtons {
+    width: 40%;
+}
+
+#generateReportButton, #printReportButton
+{
+    width: calc(50% - 1px);
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+    background: transparent;
+    height: 60px;
+    text-align: center;
+    font-size: 1.3rem;
+    border: none;
+    border-left: thin solid #323232;
+    border-radius: 0px;
+    line-height: 60px;
+}
+
+#printReportButton:hover {
+    background: #cfe0fc;
+}
+
+@media print {
+    footer {page-break-after: always;}
+    
+    #variablesInput, #header, #message {
+        display: none;
+    }
+    
+    #main_tables {
+        margin-top: -50px;
+    }
+    
+    @page { margin: 0; }
+}
