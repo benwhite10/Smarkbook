@@ -1,5 +1,5 @@
 $(document).ready(function(){  
-    setUpVariableInputs(); 
+    setUpVariableInputs();
 });
 
 /* Section set up methods */
@@ -146,9 +146,9 @@ function getReportSuccess(json) {
                 var score = scores[key2];
                 var tag_name = score["name"];
                 var mark = score["mark"];
-                var marks = score["marks"];
-                var count = score["count"];
-                var percentage = Math.round(100*mark/marks);
+                var marks = score["marks"] !== 0 ? score["marks"] : "-";
+                var count = marks !== "-" ? score["count"] : "-";
+                var percentage = marks !== "-" ? Math.round(100*mark/marks) : "-";
                 table_str += "<tr class='student_table_body'><td class='student_table name'>" + tag_name + "</td><td class='student_table value'>" + percentage + "</td>";
                 table_str += "<td class='student_table value'>" + marks + "</td><td class='student_table value'>" + count + "</td></tr>";
             }
@@ -161,5 +161,5 @@ function getReportSuccess(json) {
 }
 
 function printReport() {
-    window.print();
+        window.print();
 }
