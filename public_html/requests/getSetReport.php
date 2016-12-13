@@ -92,7 +92,11 @@ function convertTagNamesToArray($tag_name_array) {
         if(strlen($tag_name) > 0 && $tag_name !== " ") {
             $name = trim($tag_name);
             $query = "SELECT `Tag ID` ID, `Name` From TTAGS WHERE Name = '$name'";
-            $tag = db_select_exception($query);
+            try {
+                $tag = db_select_exception($query);
+            } catch (Exception $ex) {
+                failRequestWithException("Error getting tags", $ex);
+            }
             if (count($tag) > 0) {
                 array_push($tag_array, $tag[0]);
             }
