@@ -114,6 +114,7 @@ $groupName = $groupNameResult[0]['Name'];
                 <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     echo "<li><a href='resultsEntryHome.php?level=1&type=2&staffid=$userid&groupid=$groupid'>Enter Results</a></li>";
                     echo "<li><a href='resultsEntryHome.php?level=2&type=2&staffid=$userid&groupid=$groupid'>Edit Results</a></li>";
+                    echo "<li><a href='setReport.php?staff=$userid&set=$groupid'>Set Report</a></li>";
                 } ?>
                 <li><a href="viewMySets.php">Back To My Sets</a></li>
             </ul>

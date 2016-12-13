@@ -80,6 +80,7 @@ $sets = db_select($query);
             </div><div id="side_bar" class="menu_bar">
             <ul class="menu sidebar">
                 <!--<li><a href="viewAllWorksheets.php">Back To Groups</a></li>-->
+                <?php echo "<li><a href='setReport.php?staff=$userid'>Set Reports</a></li>"; ?>
             </ul>
             </div>
     	</div>
