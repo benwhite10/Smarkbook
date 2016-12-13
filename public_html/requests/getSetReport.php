@@ -34,7 +34,9 @@ function getSetTagReport($staffId, $setId, $tags) {
     // Split tags
     $tag_array = convertTagNamesToArray(explode(",", $tags));
     // Get students
-    $query = "SELECT * FROM TUSERGROUPS UG JOIN TUSERS U ON UG.`User ID` = U.`User ID` " . 
+    $query = "SELECT * FROM TUSERGROUPS UG "
+            . "JOIN TUSERS U ON UG.`User ID` = U.`User ID` "
+            . "JOIN TSTUDENTS S ON S.`User ID` = U.`User ID` " . 
             "WHERE UG.`Group ID` = $setId AND U.`Role` = 'STUDENT';";
     try {
         $students = db_select_exception($query);
@@ -109,7 +111,7 @@ function convertResultsToTable($results, $students, $tag_array) {
     $final_array = [];
     foreach($students as $student) {
         $stu_id = $student["User ID"];
-        $name = $student["First Name"] . " " . $student["Surname"];
+        $name = $student["Preferred Name"] . " " . $student["Surname"];
         $details = array (
             "id" => $stu_id,
             "name" => $name
