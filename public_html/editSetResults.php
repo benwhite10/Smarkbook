@@ -94,13 +94,14 @@ if(isset($_SESSION['message'])){
                     <h2 id="popUpName">Name</h2><!--
                     --><h2 id="popUpMarks">Marks</h2>
                     <input type="hidden" value="" id="popUpStudent" />
+                    <input type="hidden" value="" id="popUpLate" />
                     <select id="popUpCompletionStatusSelect" onchange="completionStatusChange(this.value)">
                         <option value="Completed">Completed</option>
                         <option value="Partially Completed">Partially Completed</option>
                         <option value="Incomplete" class="incomplete">Incomplete</option>
                         <option value="Not Required">Not Required</option>
                     </select><!--
-                    --><select id="popUpDateStatusSelect" onChange="dateStatusChange(this.value)">
+                    --><select id="popUpDateStatusSelect" onChange="dateStatusChange(this.value, true)">
                         <option value=0> - </option>
                         <option value=1>On Time</option>
                         <option value=2>Late</option>

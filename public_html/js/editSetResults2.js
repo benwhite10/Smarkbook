@@ -30,12 +30,11 @@ function requestWorksheet(gwid) {
 
 function requestWorksheetSuccess(json) {
     if(json["success"]) {
-        sessionStorage.setItem("worksheet", JSON.stringify(json["worksheet"]));
-        sessionStorage.setItem("results", JSON.stringify(json["results"]));
-        sessionStorage.setItem("details", JSON.stringify(json["details"]));
-        sessionStorage.setItem("completedWorksheets", JSON.stringify(json["completedWorksheets"]));
-        sessionStorage.setItem("notes", JSON.stringify(json["notes"]));
-        sessionStorage.setItem("students", JSON.stringify(json["students"]));
+        sessionStorage.setItem("worksheet", safelyGetObject(json["worksheet"]));
+        sessionStorage.setItem("results", safelyGetObject(json["results"]));
+        sessionStorage.setItem("details", safelyGetObject(json["details"]));
+        sessionStorage.setItem("completedWorksheets", safelyGetObject(json["completedWorksheets"]));
+        sessionStorage.setItem("students", safelyGetObject(json["students"]));
         setUpWorksheetInfo();
         parseMainTable();
         getQuestionAverages();
@@ -125,7 +124,6 @@ function parseMainTable() {
     var worksheet = JSON.parse(sessionStorage.getItem("worksheet"));
     var results = JSON.parse(sessionStorage.getItem("results"));
     var students = JSON.parse(sessionStorage.getItem("students"));
-    var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
     
     /*First header*/
     var row_head_1 = "<th class='results results_header'></th>";
@@ -187,7 +185,7 @@ function parseMainTable() {
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
-        student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
+        student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
         
         row++;
@@ -204,9 +202,9 @@ function parseMainTable() {
 }
 
 function getCompClass(status) {
-    if(status == "Incomplete"){
+    if(status === "Incomplete"){
         return "late";
-    } else if (status == "Partially Completed") {
+    } else if (status === "Partially Completed") {
         return "partial";
     } else {
         return "";
@@ -214,11 +212,11 @@ function getCompClass(status) {
 }
 
 function getLateText(daysLate) {
-    if(daysLate == ""){
+    if(daysLate === "" || !daysLate){
         return "-";
-    } else if (daysLate == 0) {
+    } else if (daysLate <= 0) {
         return "On Time";
-    } else if (daysLate == 1) {
+    } else if (daysLate === 1) {
         return "1 day late";
     } else {
         return daysLate + " days late";
@@ -226,7 +224,7 @@ function getLateText(daysLate) {
 }
 
 function getLateClass(daysLate) {
-    if(daysLate == "" || daysLate == 0){
+    if(daysLate === "" || daysLate <= 0){
         return "";
     } else {
         return "late";
@@ -290,7 +288,7 @@ function updateCompletionStatus(student, row){
         completed_worksheet["Date Status"] = current_late === "NONE" ? "": current_late;
     }
     completed_worksheets[student] = completed_worksheet;
-    sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
+    sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
     
     updateStatusRow(student);
 }
@@ -456,18 +454,20 @@ function parseTotalsAverage() {
 
 function showStatusPopUp(stuID, row, type){
     var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
+    var completion_status = "Not Required";
+    var days_late = "";
+    var note = "";
     if(completed_worksheets[stuID])
     { 
         var completed_worksheet = completed_worksheets[stuID];
-        var completion_status = completed_worksheet["Completion Status"];
-        var days_late = completed_worksheet["Date Status"];
-        var note = completed_worksheet["Notes"];
-        
-        setTitleAndMarks(stuID, row, completion_status);
-        setPopUpCompletionStatus(completion_status, days_late);
-        setDateDue(days_late);
-        setNote(note);
+        completion_status = completed_worksheet["Completion Status"];
+        days_late = completed_worksheet["Date Status"];
+        note = completed_worksheet["Notes"]; 
     }
+    setTitleAndMarks(stuID, row, completion_status);
+    setPopUpCompletionStatus(completion_status, days_late);
+    setDateDue(days_late);
+    setNote(note);
     
     $("#popUpStudent").val(stuID);
     $("#popUpBackground").fadeIn();
@@ -510,16 +510,17 @@ function getStudentMarks(stuID, row) {
 function completionStatusChange(completion_status) {
     if(completion_status === "Completed" || completion_status === "Partially Completed"){
         $("#popUpDateStatusSelect").prop("disabled", false);
-        setDateStatus("0");
+        setDateStatus($("#popUpLate").val());
     } else {
         $("#popUpDateStatusSelect").val("0");
         $("#popUpDateStatusSelect").prop("disabled", true);
     }
-    dateStatusChange(parseInt($("#popUpDateStatusSelect").val()));
+    dateStatusChange(parseInt($("#popUpDateStatusSelect").val()), false);
 }
 
 function setPopUpCompletionStatus(completion_status, days_late){
     $("#popUpCompletionStatusSelect").val(completion_status);
+    $("#popUpLate").val(getLate(days_late));
     if(completion_status === "Completed" || completion_status === "Partially Completed"){
         $("#popUpDateStatusSelect").prop("disabled", false);
         setDateStatus(days_late);
@@ -527,10 +528,23 @@ function setPopUpCompletionStatus(completion_status, days_late){
         $("#popUpDateStatusSelect").val("0");
         $("#popUpDateStatusSelect").prop("disabled", true);
     }
-    dateStatusChange(parseInt($("#popUpDateStatusSelect").val()));
+    dateStatusChange(parseInt($("#popUpDateStatusSelect").val()), false);
 }
 
-function dateStatusChange(value){
+function getLate(days_late) {
+    if (days_late === "" || days_late === "0") {
+        return "0";
+    } else {
+        return "1";
+    }
+}
+
+function dateStatusChange(value, manual){
+    var int_value = parseInt(value);
+    if (manual) {
+        var late = int_value === 2 ? 1 : 0;
+        $("#popUpLate").val(late);
+    }
     showHideDate(value);
     repositionStatusPopUp();
 }
@@ -581,21 +595,21 @@ function saveChanges(){
     var student = $("#popUpStudent").val();
     // Save to completed worksheet array
     var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
-    var completed_worksheet = completed_worksheets[student] ? completed_worksheets[student] : [];
+    var completed_worksheet = completed_worksheets[student] ? completed_worksheets[student] : {};
     completed_worksheet["Completion Status"] = $("#popUpCompletionStatusSelect").val();
     completed_worksheet["Date Status"] = getDaysLateFromPopUp($("#popUpDateStatusSelect").val());
     completed_worksheet["Notes"] = $("#popUpNoteText").val();
     completed_worksheets[student] = completed_worksheet;
-    sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
+    sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
     
     //Set comp status
     updateStatusRow(student);
 }
 
 function getDaysLateFromPopUp(value) {
-    if (value == 0) {
+    if (value === "0") {
         return "";
-    } else if (value == 1){
+    } else if (value === "1"){
         return "0";
     } else {
         var dateHandedIn = getDateFromPicker();
@@ -625,19 +639,22 @@ function calculateHowLate(dateDue, dateHandedIn){
 function updateStatusRow(student) {
     var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
     var completed_worksheet = completed_worksheets[student] ? completed_worksheets[student] : null;
-    if (!completed_worksheet) return;
+    var completionStatus = "Not Required";
+    var daysLate = "";
+    var note = "";
+    if (completed_worksheet){
+        completionStatus = completed_worksheet["Completion Status"];
+        daysLate = completed_worksheet["Date Status"];
+        note = completed_worksheet["Notes"];
+    }
     
-    var completionStatus = completed_worksheet["Completion Status"];
-    var daysLate = completed_worksheet["Date Status"];
-    var note = completed_worksheet["Notes"];
-
     var compClass = getCompClass(completionStatus);
     var dateStatus = getLateText(daysLate);
     var lateClass = getLateClass(daysLate);
-    var noteClass = note === "" ? "note_none" : "note_note";
+    var noteClass = note === undefined || note === "" ? "note_none" : "note_note";
     
     setCompletionStatus(student, compClass, completionStatus);
-    setLateStatus(student, lateClass, dateStatus);
+    setLateStatus(student, lateClass, dateStatus, daysLate);
     setNoteStatus(student, noteClass);
 }
 
@@ -648,10 +665,11 @@ function setCompletionStatus(student, comp_class, status){
     $("#comp_div_" + student).text(status);
 }
 
-function setLateStatus(student, late_class, status) {
+function setLateStatus(student, late_class, status, daysLate) {
     $("#late" + student).removeClass("late");
     $("#late" + student).addClass(late_class);
     $("#late_div_" + student).text(status);
+    $("#late_value_" + student).val(daysLate);
 }
 
 function setNoteStatus(student, note_class) {
@@ -674,6 +692,21 @@ function parseDaysLate(daysLate){
         $("#daysLateText").text(daysLate + " days late");
         $("#daysLateText").removeClass("notLate");
     } 
+}
+
+function dueDateChange(){
+    setDaysLate();
+}
+
+function setDaysLate(){
+    //Get current hand in date for student
+    var dateHandedIn = getDateFromPicker();
+    
+    //Get the due date
+    var dueDate = moment($("#dateDueText").text(), "DD/MM/YYYY");
+    
+    var daysLate = calculateHowLate(dueDate, dateHandedIn);
+    parseDaysLate(daysLate);
 }
 
 function setNote(note){
@@ -705,4 +738,21 @@ function getParameterByName(name, url) {
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function isEmptyObject(object) {
+    for (var prop in object) {
+        if (Object.prototype.hasOwnProperty.call(object, prop)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function safelyGetObject(object) {
+    if(!isEmptyObject(object)){
+        return JSON.stringify(object);
+    } else {
+        return "{}";
+    }
 }

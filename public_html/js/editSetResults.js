@@ -58,23 +58,6 @@ function clickBackground(e, background){
     }
 }
 
-function dueDateChange(){
-    setDaysLate();
-}
-
-
-
-function setDaysLate(){
-    //Get current hand in date for student
-    var dateHandedIn = getDateFromPicker();
-    
-    //Get the due date
-    var dueDate = moment($("#dateDueText").text(), "DD/MM/YYYY");
-    
-    var daysLate = calculateHowLate(dueDate, dateHandedIn);
-    parseDaysLate(daysLate);
-}
-
 /* Helper methods */
 
 /* Updates */
