@@ -112,11 +112,17 @@ input[type="text"].markInput
   background: transparent;
   border: none;
   font-size: 0.9rem;
+  font-weight: normal;
   padding: 0px;
   color: #323232;
   margin: auto;
   outline: none;
   text-align: center;
+}
+
+input[type="text"].awaiting_save
+{ 
+    font-weight: bold;
 }
 
 input[type="submit"]
