@@ -12,6 +12,7 @@ $worksheetDetails = $postData['details'];
 $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
 $requestType = $postData['type'] ? $postData['type'] : filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$save_changes = $_POST["save_changes_array"];
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
 $userid = $postData['userid'] ? $postData['userid'] : filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = $postData['userval'] ? base64_decode($postData['userval']) : base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
@@ -34,6 +35,12 @@ switch ($requestType){
         }
         deleteGroupWorksheet($gwid);
         break;
+    case "SAVERESULTS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        saveResults($gwid, $save_changes);
+        break;
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
@@ -43,6 +50,60 @@ switch ($requestType){
 }
 
 
+function saveResults($gwid, $save_changes) {    
+    foreach($save_changes as $key => $change) {
+        if ($change["cqid"] !== "0") {
+            $change["success"] = updateResult($change);
+        } else {
+            $result = addNewResult($change, $gwid);
+            if (!is_null($result)) {
+                $change["cqid"] = $result[1];
+                $change["success"] = TRUE;
+            } else {
+                $change["success"] = FALSE;
+            }
+        }
+        $save_changes[$key] = $change;
+    }
+    $return = array(
+        "success" => TRUE,
+        "saved_changes" => $save_changes);
+    echo json_encode($return);
+}
+
+function updateResult($change) {
+    $cqid = $change["cqid"];
+    $value = $change["new_value"];
+    if ($value == "") {
+        $query = "UPDATE `TCOMPLETEDQUESTIONS` SET `Deleted` = 1 WHERE `Completed Question ID` = $cqid;";
+    } else {
+        $query = "UPDATE `TCOMPLETEDQUESTIONS` SET `Mark` = $value, `Deleted` = 0 WHERE `Completed Question ID` = $cqid;";
+    }
+    
+    try {
+        db_query_exception($query);
+        return true;
+    } catch (Exception $ex) {
+        return false;
+    }
+}
+
+function addNewResult($change, $gwid) {
+    $value = $change["new_value"];
+    $stuid = $change["stuid"];
+    $sqid = $change["sqid"];
+    if ($value == "") {
+        $query = "INSERT INTO `TCOMPLETEDQUESTIONS`(`Stored Question ID`, `Mark`, `Student ID`, `Date Added`, `Deleted`, `Group Worksheet ID`) VALUES ($sqid,0,$stuid,NOW(),1,$gwid)";
+    } else {
+        $query = "INSERT INTO `TCOMPLETEDQUESTIONS`(`Stored Question ID`, `Mark`, `Student ID`, `Date Added`, `Deleted`, `Group Worksheet ID`) VALUES ($sqid,$value,$stuid,NOW(),0,$gwid)";
+    }
+    try {
+        $result = db_insert_query_exception($query);
+        return $result;
+    } catch (Exception $ex) {
+        return null;
+    }
+}
 function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets){
     db_begin_transaction();
     

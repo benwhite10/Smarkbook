@@ -42,9 +42,9 @@ function getWorksheetForGWID($gwid){
                 ORDER BY SQ.`Question Order`;";
 
     // Results for every student in the group
-    $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark
+    $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark, C.`Deleted` Deleted
                 FROM TCOMPLETEDQUESTIONS C
-                WHERE `Group Worksheet ID` = $gwid AND C.`Deleted` = 0;";
+                WHERE `Group Worksheet ID` = $gwid;";
     
     //Details for the worksheet, date due, notes etc
     $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded, GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden, GW.`Deleted` Deleted FROM TGROUPWORKSHEETS GW

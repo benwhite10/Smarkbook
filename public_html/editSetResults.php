@@ -81,6 +81,7 @@ if(isset($_SESSION['message'])){
     <script src='js/jquery-ui.js'></script>
     <script src="js/editSetResults.js"></script>
     <script src="js/editSetResults2.js"></script>
+    <script src="libraries/lockablestorage.js"></script>
     <script src="pickadate/picker.js"></script>
     <script src="pickadate/picker.date.js"></script>
     <script src="pickadate/legacy.js"></script>
@@ -201,7 +202,7 @@ if(isset($_SESSION['message'])){
                 <ul class="menu navbar"></ul>
             </div>
             
-            <form id="editForm" class="editResults" action="includes/updateResults.php" method="POST">
+            <form id="editForm" class="editResults" action="" method="POST">
                 <input type='hidden' id ='gwid' name='gwid' />
                 <?php
                     $dateString = date('d/m/Y', strtotime($details["DateDue"]));
@@ -217,8 +218,8 @@ if(isset($_SESSION['message'])){
                         </div><div id="summaryBoxShowHide">
                         </div>
                     </div><div id="summaryBoxButtons">
-                        <input id="saveButton" type="submit" value="Save" onclick="return clickSave()"/><!--
-                        --><input id="cancelButton" type="submit" value="Cancel" onclick="return clickCancel()"/>
+                        <div id="saveButton" onclick="clickSave()">Save</div><!--
+                        --><div id="cancelButton" onclick="clickCancel()">Cancel</div>
                     </div>
                 </div>
                 

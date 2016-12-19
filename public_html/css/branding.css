@@ -108,16 +108,22 @@ input[type="text"].markInput
 { display: block;
   line-height: 20px;
   height: 32px;
-  width: 40px;
+  width: 100%;
   background: transparent;
   border: none;
   font-size: 0.9rem;
   font-weight: normal;
   padding: 0px;
   color: #323232;
-  margin: auto;
+  margin: 0px;
   outline: none;
   text-align: center;
+  border-radius: 0px;
+}
+
+input[type="text"].failed
+{
+    background: #FF8282;
 }
 
 input[type="text"].awaiting_save

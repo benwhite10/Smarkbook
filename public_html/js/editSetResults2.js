@@ -4,6 +4,10 @@ $(document).ready(function(){
     clearSaveChangesArray();
     requestWorksheet(gwid);
     requestAllStaff();
+    
+    window.setInterval(function(){
+        saveResults();
+    }, 5000);
 });
 
 /* Get worksheets */
@@ -174,14 +178,16 @@ function parseMainTable() {
             var cqid = 0;
             var marks = question["Marks"];
             if(results_array[sqid]){
-                mark = results_array[sqid]["Mark"];
                 cqid = results_array[sqid]["CQID"];
-                totalMark += parseFloat(mark);
-                totalMarks += parseFloat(marks);
+                if (results_array[sqid]["Deleted"] === "0") {
+                    mark = results_array[sqid]["Mark"];
+                    totalMark += parseFloat(mark);
+                    totalMarks += parseFloat(marks);
+                }
             }
             var id_string = row + "-" + col;
             local_results_data_array[id_string] = {cqid: cqid, stuid: stuid, sqid: sqid, marks:marks};
-            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ", " + cqid + ")'></td>";
+            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")'></td>";
             col++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
@@ -260,11 +266,11 @@ function deleteButton() {
     }  
 }
 
-function changeResult(value, id_string, row, cqid){
+function changeResult(value, id_string, row){
     var result_array = returnQuestionInfo(id_string);
     var stuid = result_array["stuid"];
     if(validateResult(value, parseInt(result_array["marks"]), id_string)){
-        updateSaveChangesArray(value, id_string, cqid);
+        updateSaveChangesArray(value, id_string);
         updateCompletionStatus(stuid, row);
         updateValues(id_string);
         getQuestionAverages(id_string);
@@ -279,31 +285,144 @@ function clearSaveChangesArray() {
     });
 }
 
-function updateSaveChangesArray(value, id_string, cqid) {
+function updateSaveChangesArray(value, id_string) {
     if (updateMarkIfNew(id_string, value)) {
         LockableStorage.lock("save_changes_array", function () { 
             var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
-            save_changes_array = checkForExistingChangesAndUpdate(save_changes_array, id_string, value, cqid);
+            save_changes_array = checkForExistingChangesAndUpdate(save_changes_array, id_string, value);
             sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
             setAwatingSaveClass(id_string);
         });
     }
 }
 
-function checkForExistingChangesAndUpdate(save_changes_array, id_string, value, cqid) {
+function clickSave(){
+    saveResults();
+}
+
+function saveResults() {
+    LockableStorage.lock("save_changes_array", function () { 
+        var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+        if (save_changes_array.length > 0) {
+            sendSaveResultsRequest(save_changes_array);
+        } else {
+            console.log("Nothing to save 1");
+        }
+    });
+}
+
+function sendSaveResultsRequest(save_changes_array) {
+    var save_changes_send = getChangesToSend(save_changes_array);
+    if (save_changes_send.length === 0) {
+        console.log("Nothing to save 2");
+        return;
+    }
+    console.log("Request changes");
+    var gwid = $("#gwid").val();
+    var infoArray = {
+        gwid: gwid,
+        type: "SAVERESULTS",
+        save_changes_array: save_changes_send,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/setWorksheetResult.php",
+        dataType: "json",
+        success: function(json){
+            saveResultsSuccess(json);
+        },
+        error: function(json){
+            //console.log("There was an error deleting the worksheet.");
+            console.log("error");
+        }
+    });
+}
+
+function getChangesToSend(save_changes_array) {
+    var save_changes_send = [];
     for (var i in save_changes_array) {
         var change = save_changes_array[i];
-        if (!change["request_sent"] && change["id_string"] === id_string) {
+        if (!change["saved"]) {
+            change["request_sent"] = true;
+            save_changes_send.push(change);
+        }
+        
+    }
+    sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
+    return save_changes_send;
+}
+
+function saveResultsSuccess(json) {
+    if (json["success"]) {
+        LockableStorage.lock("save_changes_array", function () { 
+            var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+            var saved_changes = json["saved_changes"];
+            for (var i in saved_changes) {
+                var saved_change = saved_changes[i];
+                var id_string = saved_change["id_string"];
+                if (saved_change["success"]) {
+                    // Updated completed question id and class
+                    removeAwatingSaveClass(id_string);
+                    // Remove sent requests
+                    for (var j in save_changes_array) {
+                        var change = save_changes_array[j];
+                        if (change["id_string"] === saved_change["id_string"] && change["request_sent"] && !change["saved"]) {
+                            if (change["cqid"] === 0) {
+                                updateCompletedQuestionId(id_string, saved_change["cqid"]);
+                                // Update unsent requests
+                                for (var k in save_changes_array) {
+                                    var change2 = save_changes_array[k];
+                                    if (change2["id_string"] === saved_change["id_string"] && !change2["request_sent"]) {
+                                        save_changes_array[k]["cqid"] = saved_change["cqid"];
+                                    }
+                                }
+                            }
+                            save_changes_array[j]["saved"] = true;
+                            break;
+                        }
+                    }
+                    
+                } else {
+                    // Set failed class and remove request_sent tag
+                    for (var j in save_changes_array) {
+                        var change = save_changes_array[j];
+                        if (change["id_string"] === saved_change["id_string"]) {
+                            save_changes_array[j]["request_sent"] = false;
+                        }
+                    }
+                    addFailedClass(id_string);
+                }
+            }
+            sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
+            console.log("Changes saved");
+        }); 
+    } else {
+        console.log("Something didn't go well");
+    }
+}
+
+function checkForExistingChangesAndUpdate(save_changes_array, id_string, value) {
+    for (var i in save_changes_array) {
+        var change = save_changes_array[i];
+        if (!change["request_sent"] && !change["saved"] && change["id_string"] === id_string) {
             save_changes_array[i]["new_value"] = value;
             return save_changes_array;
         }
     }
     
+    var question_info = returnQuestionInfo(id_string);
+
     var change_object = {
         new_value: value,
         id_string: id_string,
-        cqid: cqid,
-        request_sent: false
+        cqid: question_info["cqid"],
+        stuid: question_info["stuid"],
+        sqid: question_info["sqid"],
+        request_sent: false,
+        saved: false
     };
     save_changes_array.push(change_object);
     return save_changes_array;
@@ -314,7 +433,16 @@ function setAwatingSaveClass(id_string) {
 }
 
 function removeAwatingSaveClass(id_string) {
+    $("#" + id_string).removeClass("failed");
     $("#" + id_string).removeClass("awaiting_save");
+    $("#" + id_string).css({backgroundColor: '#c2f4a4'});
+    setTimeout(function(){
+      $("#" + id_string).animate({backgroundColor: 'transparent'}, 'slow');  
+    }, 1000);
+}
+
+function addFailedClass(id_string) {
+    $("#" + id_string).addClass("failed");
 }
 
 function updateCompletionStatus(student, row){
@@ -401,6 +529,12 @@ function returnQuestionInfo(id_string) {
 function getMarks(id_string) {
     var local_results_data_array = JSON.parse(sessionStorage.getItem("local_results_data_array"));
     return local_results_data_array[id_string] ? local_results_data_array[id_string]["marks"] : null;
+}
+
+function updateCompletedQuestionId(id_string, cqid) {
+    var local_results_data_array = JSON.parse(sessionStorage.getItem("local_results_data_array"));
+    local_results_data_array[id_string]["cqid"] = cqid;
+    sessionStorage.setItem("local_results_data_array", JSON.stringify(local_results_data_array));
 }
 
 function updateMarkIfNew(id_string, new_mark) {

@@ -111,10 +111,6 @@ function changeDateDueMain(){
     $("#summaryBoxShowDetailsTextMain").text(currentDateString.slice(0,-10) + newDate);
 }
 
-function clickSave(){
-    return true;
-}
-
 function clickCancel(){
     location.reload();
     return false;
