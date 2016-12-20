@@ -248,10 +248,12 @@ label {
 #title2
 { width: auto;
   float: left;
-  height: 100%; }
+  height: 100%;
+  overflow: hidden; }
 
 #title2 h1
 { line-height: 60px;
+  height: 100%;
   padding-left: 20px;
   color: #323232; }
 

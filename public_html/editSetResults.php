@@ -80,7 +80,6 @@ if(isset($_SESSION['message'])){
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css"/>
     <script src='js/jquery-ui.js'></script>
     <script src="js/editSetResults.js"></script>
-    <script src="js/editSetResults2.js"></script>
     <script src="libraries/lockablestorage.js"></script>
     <script src="pickadate/picker.js"></script>
     <script src="pickadate/picker.date.js"></script>
@@ -218,8 +217,8 @@ if(isset($_SESSION['message'])){
                         </div><div id="summaryBoxShowHide">
                         </div>
                     </div><div id="summaryBoxButtons">
-                        <div id="saveButton" onclick="clickSave()">Save</div><!--
-                        --><div id="cancelButton" onclick="clickCancel()">Cancel</div>
+                        <div id="saveButton" onclick="clickSave()">Force Save</div><!--
+                        --><div id="cancelButton" onclick="clickBack()">Back</div>
                     </div>
                 </div>
                 

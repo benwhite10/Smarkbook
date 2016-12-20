@@ -178,8 +178,10 @@ td.date_completion {
     user-select: none;
 }
 
-#main_content
-{ width: 100%;margin-bottom: 20px;}
+#main_content{ 
+    width: 100%;
+    margin-bottom: 20px;
+}
 
 #saveButton
 {
@@ -488,7 +490,7 @@ td.date_completion:hover {
 #summaryBoxDetails
 {
     display: inline-block;
-    width: 70%;
+    width: calc(100% - 300px);
     background: transparent;
     height: 60px;
     margin: 0px;
@@ -507,7 +509,7 @@ td.date_completion:hover {
 #summaryBoxButtons
 {
     display: inline-block;
-    width: 30%;
+    width: 300px;
     background: transparent;
     height: 60px;
     margin: 0px;
@@ -523,6 +525,7 @@ td.date_completion:hover {
     margin: 0px;
     padding: 0px;
     vertical-align: middle;
+    overflow: hidden;
 }
 
 #summaryBoxShowHide
@@ -603,4 +606,33 @@ th.results_header {
 
 td.awaiting_save {
     font-weight: bold;
+}
+
+#body {
+    max-width: 1000px;
+}
+
+th.names_col {
+    width: 100%;
+    min-width: 150px;
+}
+
+th.questions_col {
+    max-width: 40px;
+    min-width: 40px;
+}
+
+th.total_col {
+    min-width: 80px;
+    max-width: 100px;
+}
+
+th.status_col {
+    min-width: 120px;
+    max-width: 160px;
+}
+
+th.notes_col {
+    min-width: 60px;
+    max-width: 80px;
 }
