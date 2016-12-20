@@ -858,11 +858,16 @@ function parseAverageArrayForCol(col) {
             break;
         }
     }
-    var average = totalMark / totalCount;
-    var rounded = Math.round(10 * average)/10;
-    var percentage = Math.round(100 * average / marks);
+    var rounded = "-"
+    var percentage = "-";
+    if (totalCount !== 0) {
+        var average = totalMark / totalCount;
+        rounded = Math.round(10 * average)/10;
+        percentage = Math.round(100 * average / marks) + "%";
+    }
+    
     $("#average-" + col).text(rounded);
-    $("#averagePerc-" + col).text(percentage + "%");
+    $("#averagePerc-" + col).text(percentage);
 }
 
 function parseTotalsAverage() {
@@ -874,20 +879,28 @@ function parseTotalsAverage() {
         if (document.getElementById(id_string)) {
             var totalString = $("#" + id_string).text();
             var totals = totalString.split(" / ");
-            totalMark += parseFloat(totals[0]);
-            totalMarks += parseFloat(totals[1]);
-            totalCount++;
+            if(totals[1] !== "0") {
+                totalMark += parseFloat(totals[0]);
+                totalMarks += parseFloat(totals[1]);
+                totalCount++;
+            }
         } else {
             break;
         }
     }
-    var average = totalMark / totalCount;
-    var averageMarks = totalMarks / totalCount;
-    var rounded = Math.round(10 * average)/10;
-    var roundedAvMarks = Math.round(10 * averageMarks)/10;
-    var percentage = Math.round(100 * average / averageMarks);
-    $("#average-ALL").text(rounded + " / " + roundedAvMarks);
-    $("#averagePerc-ALL").text(percentage + "%");
+    var all_text = "-";
+    var percentage = "-";
+    if (totalCount !== 0) {
+        var average = totalMark / totalCount;
+        var averageMarks = totalMarks / totalCount;
+        var rounded = Math.round(10 * average)/10;
+        var roundedAvMarks = Math.round(10 * averageMarks)/10;
+        percentage = Math.round(100 * average / averageMarks) + "%";
+        all_text = rounded + " / " + roundedAvMarks;
+    }
+    
+    $("#average-ALL").text(all_text);
+    $("#averagePerc-ALL").text(percentage);
 }
 
 function showStatusPopUp(stuID, row, type){
