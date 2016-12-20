@@ -13,9 +13,12 @@ $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
 $requestType = $postData['type'] ? $postData['type'] : filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $save_changes = $_POST["save_changes_array"];
+$save_worksheets = $_POST["save_worksheets_array"];
+$worksheet_details = $_POST["worksheet_details"];
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
 $userid = $postData['userid'] ? $postData['userid'] : filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = $postData['userval'] ? base64_decode($postData['userval']) : base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$req_id = filter_input(INPUT_POST, 'req_id', FILTER_SANITIZE_NUMBER_INT);
 
 $role = validateRequest($userid, $userval);
 if(!$role){
@@ -39,7 +42,19 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        saveResults($gwid, $save_changes);
+        saveResults($gwid, $save_changes, $req_id);
+        break;
+    case "SAVEWORKSHEETS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        saveWorksheets($gwid, $save_worksheets, $req_id);
+        break;
+    case "SAVEGROUPWORKSHEET":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        saveGroupWorksheet($worksheet_details);
         break;
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
@@ -50,7 +65,7 @@ switch ($requestType){
 }
 
 
-function saveResults($gwid, $save_changes) {    
+function saveResults($gwid, $save_changes, $req_id) {    
     foreach($save_changes as $key => $change) {
         if ($change["cqid"] !== "0") {
             $change["success"] = updateResult($change);
@@ -67,8 +82,70 @@ function saveResults($gwid, $save_changes) {
     }
     $return = array(
         "success" => TRUE,
+        "req_id" => $req_id,
         "saved_changes" => $save_changes);
     echo json_encode($return);
+}
+
+function saveWorksheets($gwid, $worksheets, $req_id) {
+    foreach($worksheets as $key => $worksheet) {
+        $worksheets[$key] = addNewWorksheet($worksheet);
+    }
+    $return = array(
+        "success" => TRUE,
+        "req_id" => $req_id,
+        "worksheets" => $worksheets);
+    echo json_encode($return);
+}
+
+function addNewWorksheet($worksheet) {
+    $gwid = $worksheet["Group Worksheet ID"];
+    $stu_id = $worksheet["Student ID"];
+    $notes = mysql_real_escape_string($worksheet["Notes"]);
+    $comp_status = $worksheet["Completion Status"];
+    $date_status = $worksheet["Date Status"] == "" ? "NULL" : $worksheet["Date Status"];
+    $update = FALSE;
+    // Try and get an ID
+    db_begin_transaction();
+    $query = "SELECT `Completed Worksheet ID` CWID FROM TCOMPLETEDWORKSHEETS WHERE `Student ID` = $stu_id AND `Group Worksheet ID` = $gwid;";
+    try {
+        $result = db_select_exception($query);
+        if (count($result) > 0) {
+            $cwid = $result[0]["CWID"];
+            $update = TRUE;
+        }
+    } catch (Exception $ex) {
+    }
+    
+    if ($update) {
+        $query1 = "UPDATE `TCOMPLETEDWORKSHEETS` SET "
+            . "`Group Worksheet ID`= $gwid,"
+            . "`Student ID`= $stu_id,"
+            . "`Notes`= '$notes',"
+            . "`Completion Status`= '$comp_status',"
+            . "`Date Status`= $date_status "
+            . "WHERE `Completed Worksheet ID` = $cwid;";
+        try {
+            db_query_exception($query1);
+            db_commit_transaction();
+            $worksheet["success"] = TRUE;
+        } catch (Exception $ex) {
+            db_rollback_transaction();
+            $worksheet["success"] = FALSE;
+        }
+    } else {
+        $query1 = "INSERT INTO `TCOMPLETEDWORKSHEETS`(`Group Worksheet ID`, `Student ID`, `Notes`, `Completion Status`, `Date Status`) "
+                . "VALUES ($gwid,$stu_id,'$notes','$comp_status',$date_status)";
+        try {
+            db_insert_query_exception($query1);
+            db_commit_transaction();
+            $worksheet["success"] = TRUE;
+        } catch (Exception $ex) {
+            db_rollback_transaction();
+            $worksheet["success"] = FALSE;
+        }
+    }
+    return $worksheet;
 }
 
 function updateResult($change) {
@@ -104,6 +181,40 @@ function addNewResult($change, $gwid) {
         return null;
     }
 }
+
+function saveGroupWorksheet($worksheetDetails) {
+    // Update the details for the group worksheet
+    try{
+        $gwid = $worksheetDetails["gwid"];
+        $staff1 = $worksheetDetails["staff1"];
+        $staff2 = (!$worksheetDetails["staff2"] || $worksheetDetails["staff2"] == "0") ? "null" : $worksheetDetails["staff2"];
+        $staff3 = (!$worksheetDetails["staff3"] || $worksheetDetails["staff3"] == "0") ? "null" : $worksheetDetails["staff3"];
+        $datedue = $worksheetDetails["dateDueMain"];
+        $stuNotes = mysql_real_escape_string($worksheetDetails["studentNotes"]);
+        $staffNotes = mysql_real_escape_string($worksheetDetails["staffNotes"]);
+        $hidden = $worksheetDetails["hide"] == "true" ? "0" : "1";
+        
+        $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
+                . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
+                . ",`Hidden` = $hidden, `Date Last Modified` = NOW() "
+                . "WHERE `Group Worksheet ID` = $gwid;";
+
+        db_query_exception($query);
+    } catch (Exception $ex) {
+        $message = "There was an error saving the details for the worksheet.";
+        errorLog($message . " Exception: " . $ex->getMessage());
+        $array = array(
+            "result" => FALSE,
+            "message" => $message
+        );
+        echo json_encode($array);
+        exit();
+    }
+    $response = array("result" => TRUE);
+    echo json_encode($response);
+    exit();
+}
+
 function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets){
     db_begin_transaction();
     

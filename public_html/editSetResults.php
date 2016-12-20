@@ -233,27 +233,27 @@ if(isset($_SESSION['message'])){
                                 </td>
                                 <td class="form">
                                     <label for="staff1">Teacher:</label>
-                                    <select name="staff1" id="staff1"></select>
+                                    <select name="staff1" id="staff1" onchange="changeGWValue()"></select>
                                 </td>
                             </tr>
                             <tr class="form">
                                 <td class="form">
                                     <label for="staff2">Extra Teacher:</label>
-                                    <select name="staff2" id="staff2"></select>
+                                    <select name="staff2" id="staff2" onchange="changeGWValue()"></select>
                                 </td>
                                 <td class="form">
                                     <label for="staff3">Extra Teacher:</label>
-                                    <select name="staff3" id="staff3"></select>
+                                    <select name="staff3" id="staff3" onchange="changeGWValue()"></select>
                                 </td>
                             </tr>
                             <tr class="form">
                                 <td class="form">
                                     <label for="staffNotes">Notes</label>
-                                    <textarea name="staffNotes" id="staffNotes"></textarea>
+                                    <textarea name="staffNotes" id="staffNotes" onchange="changeGWValue()"></textarea>
                                 </td>
                                 <td class="form">
                                     <div class="hide_button" onclick="hideButton()">
-                                        <label>Show in mark book</label><input type="checkbox" name="hide_checkbox" id="hide_checkbox" />
+                                        <label>Show in mark book</label><input type="checkbox" name="hide_checkbox" id="hide_checkbox" onchange="changeGWValue()"/>
                                     </div>
                                     <div class="delete_button_container" onclick="deleteButton()">
                                         <div class="delete_button">

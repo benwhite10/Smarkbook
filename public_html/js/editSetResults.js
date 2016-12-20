@@ -105,12 +105,6 @@ function showHideDetails(){
     $("#details").slideToggle();
 }
 
-function changeDateDueMain(){
-    var currentDateString = $("#summaryBoxShowDetailsTextMain").text();
-    var newDate = $("#dateDueMain").val();
-    $("#summaryBoxShowDetailsTextMain").text(currentDateString.slice(0,-10) + newDate);
-}
-
 function clickCancel(){
     location.reload();
     return false;

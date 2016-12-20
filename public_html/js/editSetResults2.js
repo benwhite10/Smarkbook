@@ -2,12 +2,12 @@ $(document).ready(function(){
     var gwid = getParameterByName("gwid");
     
     clearSaveChangesArray();
+    clearSaveWorksheetsArray();
+    clearGWChanges();
     requestWorksheet(gwid);
     requestAllStaff();
     
-    window.setInterval(function(){
-        saveResults();
-    }, 5000);
+    setAutoSave(5000);
 });
 
 /* Get worksheets */
@@ -46,6 +46,14 @@ function requestWorksheetSuccess(json) {
     } else {
         console.log("There was an error getting the worksheet: " + json["message"]);
     }
+}
+
+function setAutoSave(interval) {
+    window.setInterval(function(){
+        saveResults();
+        saveWorksheets();
+        saveGroupWorksheet();
+    }, interval);
 }
 
 /* Get Staff */
@@ -258,6 +266,7 @@ function hideButton() {
     var val = sessionStorage.getItem("hidden_selected") === "true" ? false : true;
     document.getElementById("hide_checkbox").checked = val;
     sessionStorage.setItem("hidden_selected", val);
+    changeGWValue();
 }
 
 function deleteButton() {
@@ -285,6 +294,12 @@ function clearSaveChangesArray() {
     });
 }
 
+function clearSaveWorksheetsArray() {
+    LockableStorage.lock("save_worksheets_array", function () { 
+        sessionStorage.setItem("save_worksheets_array", "[]");
+    });
+}
+
 function updateSaveChangesArray(value, id_string) {
     if (updateMarkIfNew(id_string, value)) {
         LockableStorage.lock("save_changes_array", function () { 
@@ -296,8 +311,35 @@ function updateSaveChangesArray(value, id_string) {
     }
 }
 
+function updateSaveWorksheetsArray(worksheet, stu_id) {
+    LockableStorage.lock("save_worksheets_array", function () { 
+        var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
+        save_worksheets_array = updateCompletedWorksheet(save_worksheets_array, worksheet, stu_id);
+        sessionStorage.setItem("save_worksheets_array", JSON.stringify(save_worksheets_array));
+        setAwatingSaveClassWorksheets(stu_id);
+    });
+}
+
+function updateCompletedWorksheet(save_worksheets_array, worksheet, stu_id) {
+    worksheet["Student ID"] = stu_id;
+    worksheet["request_sent"] = false;
+    worksheet["saved"] = false;
+    for (var i in save_worksheets_array) {
+        var existing_worksheet = save_worksheets_array[i];
+        if (existing_worksheet["Student ID"] === stu_id) {
+            if (!existing_worksheet["request_sent"]) {
+                save_worksheets_array[i] = worksheet;
+                return save_worksheets_array;
+            }
+        }
+    }
+    save_worksheets_array.push(worksheet);
+    return save_worksheets_array;
+}
 function clickSave(){
     saveResults();
+    saveWorksheets();
+    saveGroupWorksheet();
 }
 
 function saveResults() {
@@ -305,22 +347,122 @@ function saveResults() {
         var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
         if (save_changes_array.length > 0) {
             sendSaveResultsRequest(save_changes_array);
-        } else {
-            console.log("Nothing to save 1");
+        }
+    });
+}
+
+function saveWorksheets() {
+    LockableStorage.lock("save_worksheets_array", function () { 
+        var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
+        if (save_worksheets_array.length > 0) {
+            sendSaveWorksheetsRequest(save_worksheets_array);
+        }
+    });
+}
+
+function saveGroupWorksheet() {
+    var changed = sessionStorage.getItem("update_gw");
+    if (changed === "false") return;
+    
+    var gwid = $("#gwid").val();
+    var date_due = $("#dateDueMain").val();
+    var staff1 = $("#staff1").val();
+    var staff2 = $("#staff2").val();
+    var staff3 = $("#staff3").val();
+    var notes = $("#staffNotes").val();
+    var hide = document.getElementById('hide_checkbox').checked;
+    
+    var worksheet_details = {
+        gwid: gwid,
+        dateDueMain: date_due,
+        staff1: staff1,
+        staff2: staff2,
+        staff3: staff3,
+        staffNotes: notes,
+        hide: hide,
+    }
+    var infoArray = {
+        type: "SAVEGROUPWORKSHEET",
+        worksheet_details: worksheet_details,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/setWorksheetResult.php",
+        dataType: "json",
+        success: function(json){
+            if (!json["result"]) {
+                console.log("Error updating group worksheet");
+                console.log(json["message"]);
+            } else {
+                clearGWChanges();
+            }
+        },
+        error: function(json){
+            console.log("Error updating group worksheet");
+        }
+    });
+}
+
+function changeDateDueMain(){
+    var currentDateString = $("#summaryBoxShowDetailsTextMain").text();
+    var newDate = $("#dateDueMain").val();
+    $("#summaryBoxShowDetailsTextMain").text(currentDateString.slice(0,-10) + newDate);
+    changeGWValue();
+}
+
+function changeGWValue() {
+    sessionStorage.setItem("update_gw", "true");
+}
+
+function clearGWChanges() {
+    sessionStorage.setItem("update_gw", "false");
+}
+
+function sendSaveWorksheetsRequest(save_worksheets_array) {
+    if (checkLock("save_worksheets_request_lock")) return;
+    
+    var save_worksheets_send = getChangesToSend(save_worksheets_array, "save_worksheets_array");
+    if (save_worksheets_send.length === 0) return;  
+    var req_id = generateRequestLock("save_worksheets_request_lock", 10000);
+    var gwid = $("#gwid").val();
+    
+    var infoArray = {
+        gwid: gwid,
+        req_id: req_id,
+        type: "SAVEWORKSHEETS",
+        save_worksheets_array: save_worksheets_send,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/setWorksheetResult.php",
+        dataType: "json",
+        success: function(json){
+            saveWorksheetsSuccess(json);
+        },
+        error: function(json){
+            //TODO Should probably clear the sent request flag here
+            clearLock("save_worksheets_request_lock", req_id);
         }
     });
 }
 
 function sendSaveResultsRequest(save_changes_array) {
-    var save_changes_send = getChangesToSend(save_changes_array);
-    if (save_changes_send.length === 0) {
-        console.log("Nothing to save 2");
-        return;
-    }
-    console.log("Request changes");
+    if (checkLock("save_changes_request_lock")) return;
+    
+    var save_changes_send = getChangesToSend(save_changes_array, "save_changes_array");
+    if (save_changes_send.length === 0) return;  
+    var req_id = generateRequestLock("save_changes_request_lock", 10000);
     var gwid = $("#gwid").val();
+    
     var infoArray = {
         gwid: gwid,
+        req_id: req_id,
         type: "SAVERESULTS",
         save_changes_array: save_changes_send,
         userid: $('#userid').val(),
@@ -335,24 +477,81 @@ function sendSaveResultsRequest(save_changes_array) {
             saveResultsSuccess(json);
         },
         error: function(json){
-            //console.log("There was an error deleting the worksheet.");
-            console.log("error");
+            //TODO Should probably clear the sent request flag here
+            clearLock("save_changes_request_lock", req_id);
         }
     });
 }
 
-function getChangesToSend(save_changes_array) {
+function generateRequestLock(key, maxDuration) {
+    maxDuration = 10000 || maxDuration;
+    var time = new Date().getTime() + maxDuration;
+    var rand_num = Math.random() * 1000000000 | 0;
+    var req_id = time + ":" + rand_num;
+    sessionStorage.setItem(key, req_id);
+    return rand_num;
+}
+
+function checkLock(key) {
+    var lock = sessionStorage.getItem(key);
+    if (lock === null || lock === "") return false;
+    var info = lock.split(":");
+    var time = new Date().getTime();
+    if (parseInt(info[0]) < time) return false;
+    return true;
+}
+
+function clearLock(key, req_id) {
+    var lock = sessionStorage.getItem(key);
+    if (lock !== "") {
+        var info = lock.split(":");
+        if (info[1] && info[1] === req_id) {
+            sessionStorage.setItem(key, "");
+        }
+    }
+}
+
+function getChangesToSend(save_changes_array, key) {
     var save_changes_send = [];
     for (var i in save_changes_array) {
         var change = save_changes_array[i];
         if (!change["saved"]) {
             change["request_sent"] = true;
             save_changes_send.push(change);
-        }
-        
+        }   
     }
-    sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
+    sessionStorage.setItem(key, JSON.stringify(save_changes_array));
     return save_changes_send;
+}
+
+function saveWorksheetsSuccess(json) {
+    if(json["success"]) {
+        LockableStorage.lock("save_worksheetss_array", function () { 
+            var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
+            var returned_worksheets = json["worksheets"];
+            var req_id = json["req_id"];
+            for (var i in returned_worksheets) {
+                var worksheet = returned_worksheets[i];
+                var stu_id = worksheet["Student ID"];
+                for (var j in save_worksheets_array) {
+                    var saved_worksheet = save_worksheets_array[j];
+                    if (saved_worksheet["Student ID"] === stu_id && !saved_worksheet["saved"]) {
+                        if (worksheet["success"]) {
+                            save_worksheets_array[j]["saved"] = true;
+                            setStatusSaved(stu_id);
+                        } else {
+                            save_worksheets_array[j]["request_sent"] = false;
+                        }
+                        break;
+                    }
+                }
+            }
+            sessionStorage.setItem("save_worksheets_array",JSON.stringify(save_worksheets_array));
+            clearLock("save_worksheets_request_lock", req_id);
+        });
+    } else {
+        console.log("Something didn't go well");
+    }
 }
 
 function saveResultsSuccess(json) {
@@ -360,6 +559,7 @@ function saveResultsSuccess(json) {
         LockableStorage.lock("save_changes_array", function () { 
             var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
             var saved_changes = json["saved_changes"];
+            var req_id = json["req_id"];
             for (var i in saved_changes) {
                 var saved_change = saved_changes[i];
                 var id_string = saved_change["id_string"];
@@ -396,8 +596,8 @@ function saveResultsSuccess(json) {
                     addFailedClass(id_string);
                 }
             }
+            clearLock("save_changes_request_lock", req_id);
             sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
-            console.log("Changes saved");
         }); 
     } else {
         console.log("Something didn't go well");
@@ -432,6 +632,24 @@ function setAwatingSaveClass(id_string) {
     $("#" + id_string).addClass("awaiting_save");
 }
 
+function setAwatingSaveClassWorksheets(student) {
+    $("#comp" + student).addClass("awaiting_save");
+    $("#late" + student).addClass("awaiting_save");
+}
+
+function setStatusSaved(student) {
+    $("#comp" + student).removeClass("awaiting_save");
+    $("#late" + student).removeClass("awaiting_save");
+    $("#comp" + student).css({backgroundColor: '#c2f4a4'});
+    $("#late" + student).css({backgroundColor: '#c2f4a4'});
+    $("#note" + student).css({backgroundColor: '#c2f4a4'});
+    setTimeout(function(){
+      $("#comp" + student).animate({backgroundColor: 'transparent'}, 'slow');
+      $("#late" + student).animate({backgroundColor: 'transparent'}, 'slow');  
+      $("#note" + student).animate({backgroundColor: 'transparent'}, 'slow');  
+    }, 1000);
+}
+
 function removeAwatingSaveClass(id_string) {
     $("#" + id_string).removeClass("failed");
     $("#" + id_string).removeClass("awaiting_save");
@@ -448,11 +666,20 @@ function addFailedClass(id_string) {
 function updateCompletionStatus(student, row){
     var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
     var current_late = "NONE";
-    var completed_worksheet = {};
+    var gwid = $("#gwid").val();
+    var completed_worksheet = {
+        "Completion Status": "",
+        "Date Completed": "",
+        "Date Status": "",
+        "Group Worksheet ID": gwid,
+        "Notes": "",
+        "Student ID": student
+    };
     if (completed_worksheets[student]) {
         completed_worksheet = completed_worksheets[student];
         current_late = completed_worksheet["Date Status"];
     }
+    var old_state = $("#comp" + student).text();
     var state = checkAllCompleted(row);
     
     completed_worksheet["Completion Status"] = state;
@@ -462,6 +689,7 @@ function updateCompletionStatus(student, row){
         completed_worksheet["Date Status"] = current_late === "NONE" ? "": current_late;
     }
     completed_worksheets[student] = completed_worksheet;
+    if (old_state !== state) updateSaveWorksheetsArray(completed_worksheet, student);
     sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
     
     updateStatusRow(student);
@@ -742,7 +970,7 @@ function dateStatusChange(value, manual){
 }
 
 function setDateStatus(status){
-    if(status == ""){
+    if(status === "" || status === null){
         $("#popUpDateStatusSelect").val(0);
         showHideDate(0);
     } else if (status == 0) {
@@ -785,13 +1013,26 @@ function div_hide(save){
 
 function saveChanges(){
     var student = $("#popUpStudent").val();
+    var gwid = $("#gwid").val();
     // Save to completed worksheet array
     var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
-    var completed_worksheet = completed_worksheets[student] ? completed_worksheets[student] : {};
+    var completed_worksheet = {
+        "Completion Status": "",
+        "Date Completed": "",
+        "Date Status": "",
+        "Group Worksheet ID": gwid,
+        "Notes": "",
+        "Student ID": student
+    };
+    if (completed_worksheets[student]) {
+        completed_worksheet = completed_worksheets[student];
+    }
+    
     completed_worksheet["Completion Status"] = $("#popUpCompletionStatusSelect").val();
     completed_worksheet["Date Status"] = getDaysLateFromPopUp($("#popUpDateStatusSelect").val());
     completed_worksheet["Notes"] = $("#popUpNoteText").val();
     completed_worksheets[student] = completed_worksheet;
+    updateSaveWorksheetsArray(completed_worksheet, student);
     sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
     
     //Set comp status

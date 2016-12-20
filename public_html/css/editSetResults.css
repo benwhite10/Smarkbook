@@ -600,3 +600,7 @@ th.results_header {
     font-size: 1.1rem;
     font-weight: 300;
 }
+
+td.awaiting_save {
+    font-weight: bold;
+}
