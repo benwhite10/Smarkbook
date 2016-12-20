@@ -88,7 +88,7 @@ if(isset($_SESSION['message'])){
                     <thead>
                         <tr>
                             <th class="sortable name">Name</th>
-                            <th class="sortable date">Date Added</th> 
+                            <th class="tag_type" colspan="3">Type</th>
                         </tr>
                     </thead>
                     <tbody>

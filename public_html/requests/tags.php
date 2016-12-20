@@ -8,6 +8,7 @@ include_once $include_path . '/public_html/requests/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $tagId = filter_input(INPUT_POST,'tagid',FILTER_SANITIZE_NUMBER_INT);
+$typeId = filter_input(INPUT_POST,'type_id',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $tag1 = filter_input(INPUT_POST,'tag1',FILTER_SANITIZE_NUMBER_INT);
 $tag2 = filter_input(INPUT_POST,'tag2',FILTER_SANITIZE_NUMBER_INT);
@@ -29,6 +30,8 @@ switch ($requestType){
         mergeTags($tag1, $tag2);
     case "MODIFYTAG":
         modifyTag($tag1, $name);
+    case "UPDATETAG":
+        updateTag($tagId, $typeId);
     default:
         break;
 }
@@ -57,7 +60,9 @@ function requestTagInfo($tagid){
 }
 
 function getAllTags(){
-    $query = "SELECT * FROM TTAGS ORDER BY `Name`;";
+    $query = "SELECT T.`Tag ID`, T.`Name`, T.`Date Added`, T.`Type` TypeID, TT.`Name` Type FROM TTAGS T "
+            . "LEFT JOIN TTAGTYPES TT ON T.`Type` = TT.`ID` "
+            . "ORDER BY T.`Name`;";
     try{
         $result = db_select($query);
     } catch (Exception $ex) {
@@ -88,6 +93,20 @@ function modifyTag($tagid, $name) {
         succeedRequest("Tag succesfully updated", []);
     } catch (Exception $ex) {
         failRequest("There was a problem modifying the tag." . $ex->getMessage());
+    }
+}
+
+function updateTag($tagId, $typeId) {
+    $query = "UPDATE TTAGS SET `Type` = $typeId WHERE `Tag ID` = $tagId;";
+    try{
+        db_query_exception($query);
+        $tag_info = array(
+            "tag_id" => $tagId,
+            "type_id" => $typeId
+        );
+        succeedRequest("Tag succesfully updated", $tag_info);
+    } catch (Exception $ex) {
+        failRequest("There was a problem updating the tag." . $ex->getMessage());
     }
 }
 
