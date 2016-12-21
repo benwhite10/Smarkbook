@@ -94,7 +94,7 @@ h2 {
 
 .section_main {
     border: 1px solid black;
-    padding: 10px;
+    padding: 0;
 }
 
 .section_title {
@@ -137,6 +137,7 @@ h2 {
 #worksheet_details {
     border-top: none;
     display: none;
+    padding: 10px;
 }
 
 #worksheet_details_title {
@@ -145,26 +146,116 @@ h2 {
 }
 
 #worksheet_marks {
-    padding: 0;
     border: none;
 }
 
-#worksheet_tags {
-    height: 50px;
+#worksheet_tags, .worksheet_question_tags_entry {
+    min-height: 65px;
+    height: 100%;
 }
 
-#worksheet_questions {
-    padding: 0;
+.worksheet_question_tags_entry {
+    border: 1px solid black;
 }
 
 .worksheet_question_details {
     height: 30px;
+    margin-top: 10px;
 }
 
-.worksheet_question_tags_summary {
-    height: 50px;
+.wqd_marks_input, .wqd_marks_text, .wqd_question_input, .wqd_question_text {
+    height: 30px;
+    line-height: 30px;
+    display: inline-block;
+    float: left;
+    font-size: 1.1rem;
+    font-weight: normal;
+    cursor: default;
 }
 
-.worksheet_question_tags_entry {
-    height: 50px;
+.wqd_marks_input, .wqd_marks_text {
+    float: right;
+    padding-right: 10px;
+}
+
+.wqd_marks_input {
+    width: 35px;
+}
+
+.wqd_marks_input, .wqd_question_input {
+    outline: none;
+    cursor: text; 
+}
+
+.wqd_question_text, .wqd_question_input {
+    padding-left: 10px;
+}
+
+.tags_input {
+    height:calc(100% - 10px); 
+    width:calc(100% - 10px);
+    margin: 0;
+    padding: 0 5px;
+    outline: none;
+    line-height: 30px;
+    font-size: 0.8rem;    
+}
+
+.tag {
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+    font-size: 0.8rem;
+    padding-left: 10px;
+    margin-right: 5px;
+    cursor: pointer;
+    border-radius: 4px 10px 10px 4px;
+    vertical-align: middle;
+}
+
+.tag_text {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.tag_button {
+    display: inline-block;
+    float: left;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    margin: 0;
+    vertical-align: middle;
+    background-image: url("../images/cancel.png");
+    background-repeat: no-repeat;
+    background-size: 50px 25px;
+    background-position: -25px;
+}
+
+.tag_button:hover {
+    background-position: 0px;
+}
+
+.classification {
+    background: #1baff9;
+}
+
+.major {
+    background: #f95a1b;
+}
+
+.minor {
+    background: #f9d11b;
+}
+
+#worksheet_questions_title {
+    border-bottom: 1px solid black;
+}
+
+#worksheet_questions {
+    border: none;
 }
