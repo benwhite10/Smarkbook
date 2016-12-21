@@ -1,0 +1,170 @@
+/*Form objects*/
+
+input[type="text"], textarea, input[type="password"], input[type="submit"], select, input[type="url"], input[type="date"]{
+    display: inline-block;
+    font: normal 'Open Sans', sans-serif;
+    line-height: 20px;
+    height: 32px;
+    width: calc(100% - 182px);
+    background: #FFF;
+    margin: 0px auto 10px auto;
+    padding: 0 10px;
+    border: 1px solid;
+    -moz-border-radius: 2px; /* Firefox */
+    -webkit-border-radius: 2px; /* Safari, Chrome */
+    -khtml-border-radius: 2px; /* KHTML */
+    border-radius: 2px; /* CSS3 */ 
+    font-size: 0.9rem;
+    color: #323232;
+    outline: none;
+}
+  
+select{
+  width: calc(100% - 162px);
+}
+
+label {
+    display: inline-block;
+    width: 150px;
+    height:32px;
+    line-height: 32px;
+    padding-left: 10px;
+    font-size: 1.1rem;
+    vertical-align: middle;
+}
+
+input[type="submit"]{
+    display: block;
+    width: 200px;
+}
+
+fieldset { 
+    border:1px solid #323232;
+    margin: 10px auto;
+    padding-right: 10px; 
+}
+
+legend {
+  padding: 0.2em 0.5em;
+  border:1px solid #323232;
+  color:#323232;
+  font-size:100%;
+  text-align:left;
+}
+
+textarea {
+  height: 60px;
+  vertical-align: top;
+}
+
+table.worksheet_marks {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+tr.worksheet_marks, td.worksheet_marks {
+    height: 30px;
+    width: 50px;
+    text-align: center;
+    border: 1px solid black;
+    padding: 0px;
+}
+
+tr.worksheet_marks, tr.worksheet_marks:hover {
+    background: #EEE;
+}
+
+input[type="text"].marks_input {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    text-align: center;
+    border: none;
+    border-radius: 0;
+}
+
+h2 {
+    font-weight: normal;
+    font-size: 1.8rem;
+    padding-left: 10px;
+}
+
+.section_main {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.section_title {
+    margin-top: 20px;
+}
+
+.section_title_text, .section_title_button {
+    display: inline-block;
+    height: 100%;
+}
+
+.section_title_text {
+    width: calc(100% - 35px);
+    vertical-align: middle;
+}
+
+.section_title_button {
+    width: 25px;
+    height: 25px;
+    vertical-align: middle;
+    background-image: url("../images/plusminus.png");
+    background-repeat: no-repeat;
+    background-size: 100px 25px;
+    background-position: -75px;
+    cursor: pointer;
+}
+
+.section_title_button.minus {
+    background-position: -25px;
+}
+
+.section_title_button:hover {
+    background-position: -50px;
+}
+
+.section_title_button.minus:hover {
+    background-position: 0px;
+}
+
+#worksheet_details {
+    border-top: none;
+    display: none;
+}
+
+#worksheet_details_title {
+    border-bottom: 1px solid black;
+    margin-top: 0;
+}
+
+#worksheet_marks {
+    padding: 0;
+    border: none;
+}
+
+#worksheet_tags {
+    height: 50px;
+}
+
+#worksheet_questions {
+    padding: 0;
+}
+
+.worksheet_question_details {
+    height: 30px;
+}
+
+.worksheet_question_tags_summary {
+    height: 50px;
+}
+
+.worksheet_question_tags_entry {
+    height: 50px;
+}
