@@ -146,16 +146,22 @@ function getNotesForGWID($gwid){
 
 function getWorksheetInfo($wid) {
     $query1 = "SELECT * FROM TWORKSHEETVERSION WHERE `Version ID` = $wid;";
-    $query2 = "SELECT * FROM `TSTOREDQUESTIONS` WHERE `Version ID` = $wid ORDER BY `Question Order`";
+    $query2 = "SELECT * FROM `TSTOREDQUESTIONS` WHERE `Version ID` = $wid AND `Deleted` = 0 ORDER BY `Question Order`";
+    $query3 = "SELECT T.`Tag ID` ID, T.`Name` Name, TT.`ID` TypeID, TT.`Name` Type FROM TWORKSHEETTAGS WT "
+            . "JOIN TTAGS T ON WT.`Tag ID` = T.`Tag ID` "
+            . "JOIN TTAGTYPES TT ON T.`Type` = TT.`ID` "
+            . "WHERE `Worksheet ID` = $wid;";
     try {
         $worksheet_details = db_select_exception($query1);
         $worksheet_questions = db_select_exception($query2);
+        $worksheet_tags = db_select_exception($query3);
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
     $worksheet = array (
         "details" => $worksheet_details[0],
-        "questions" => getTagsForQuestions($worksheet_questions)
+        "questions" => getTagsForQuestions($worksheet_questions),
+        "tags" => $worksheet_tags
     );
     $response = array (
         "success" => TRUE,

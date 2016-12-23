@@ -152,6 +152,7 @@ h2 {
 #worksheet_tags, .worksheet_question_tags_entry {
     min-height: 65px;
     height: 100%;
+    border: none;
 }
 
 .worksheet_question_tags_entry {
@@ -192,6 +193,7 @@ h2 {
 }
 
 .tags_input {
+    min-height: 65px;
     height:calc(100% - 10px); 
     width:calc(100% - 10px);
     margin: 0;
@@ -199,6 +201,11 @@ h2 {
     outline: none;
     line-height: 30px;
     font-size: 0.8rem;    
+}
+
+.tags_input.suggested {
+    border-top: 1px dashed #888;
+    min-height: 35px;
 }
 
 .tag {
@@ -211,6 +218,50 @@ h2 {
     cursor: pointer;
     border-radius: 4px 10px 10px 4px;
     vertical-align: middle;
+}
+
+.tag:hover {
+    box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.5);;
+}
+
+.classification {
+    background: rgba(27, 175, 249, 1);
+}
+
+.major {
+    background: rgba(249, 90, 27, 1);
+}
+
+.minor {
+    background: rgba(249, 209, 27, 1);
+}
+
+.tag.suggested {
+    opacity: 0.5;
+}
+
+.tag.suggested:hover {
+    opacity: 0.75;
+}
+
+.tags_input_text_div {
+    width: 100%;
+    height: 35px;
+    line-height: 35px;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    border-top: 1px dashed #888;
+}
+
+input[type="text"].tags_input_text {
+    width: calc(100% - 10px);
+    height: 100%;
+    line-height: 35px;
+    background: transparent;
+    margin: 0;
+    padding: 0 5px;
+    border: none;
 }
 
 .tag_text {
@@ -238,18 +289,6 @@ h2 {
 
 .tag_button:hover {
     background-position: 0px;
-}
-
-.classification {
-    background: #1baff9;
-}
-
-.major {
-    background: #f95a1b;
-}
-
-.minor {
-    background: #f9d11b;
 }
 
 #worksheet_questions_title {

@@ -67,7 +67,7 @@ function getAllTags(){
         $result = db_select($query);
     } catch (Exception $ex) {
         $msg = "There was an error retrieving the tags.";
-        failRequest($msg);
+        failRequest($msg . ":" . $ex->getMessage());
     }
     succeedRequest(null, array("tagsInfo" => $result));
 }
