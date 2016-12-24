@@ -127,7 +127,7 @@ function parseTagsForDiv(div_id) {
     var html_input_string = "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
-        if (tag) html_input_string += getTagInputHTML(div_id + "_input",tag["Name"],getTypeFromId(tag["TypeID"])); 
+        if (tag) html_input_string += getTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
     }
     $("#" + div_id + "_input").html(html_input_string);
 }
@@ -161,6 +161,19 @@ function addTagIDForInput(div_id, tag_id) {
     $("#" + div_id + "_input_values").val(tags);
 }
 
+function removeTagIDFromInput(div_id, tag_id) {
+    var tags = $("#" + div_id + "_input_values").val();
+    var tags_array = tags.split(":");
+    var new_string = "";
+    for (var i in tags_array) {
+        var tag = tags_array[i];
+        if (parseInt(tag) !== parseInt(tag_id)) {
+            new_string += new_string.length === 0 ? tag : ":" + tag;
+        }
+    }
+    $("#" + div_id + "_input_values").val(new_string);
+}
+
 function setUpTagSelect(div_id) {
     var tags = JSON.parse(sessionStorage.getItem("tags_list"));
     var tags_string = "";
@@ -171,10 +184,10 @@ function setUpTagSelect(div_id) {
     $("#" + div_id + "_list").html(tags_string);
 }
 
-function getTagInputHTML(key, tag_name, tag_type, tag_id) {
+function getTagInputHTML(div_id, tag_name, tag_type, tag_id) {
     var str = "<div class='tag " + tag_type.toLowerCase() + "'>";
     str += "<div class='tag_text'>" + tag_name + "</div>";
-    str += "<div class='tag_button'></div></div>";
+    str += "<div class='tag_button' onclick='deleteTag(&quot;" + div_id + "&quot;," + tag_id + ")'></div></div>";
     return str;
 }
 
@@ -191,7 +204,14 @@ function clearTagFromList(list_id, tag_id) {
             return;
         }
     }
-};
+}
+
+function addTagToList(list_id, tag_id) {
+    var html = $("#" + list_id).html();
+    var tag = getTagForID(tag_id);
+    html += "<option data-value='" + tag["Tag ID"] + "'>" + tag["Name"] + "</option>";
+    $("#" + list_id).html(html);
+}
 
 function parseWorksheetTags(worksheet_tags) {
     $("#worksheet_tags").html(stringForBlankTagEntry("worksheet_tags"));
@@ -314,6 +334,13 @@ function changeTagInput(e) {
             console.log("Add tag: " + tag_name);
         }
     }
+}
+
+function deleteTag(div_id, tag_id) {
+    removeTagIDFromInput(div_id, tag_id);
+    $("#" + div_id + "_input_text").val("");
+    parseTagsForDiv(div_id);
+    addTagToList(div_id + "_list", tag_id);
 }
 
 function getTypeFromId(type_id) {
