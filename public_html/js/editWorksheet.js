@@ -261,7 +261,7 @@ function stringForQuestionDetails(div_id, question) {
     var html = "<div id='" + div_id + "_details' class='worksheet_question_details'>";
     html += "<div class='wqd_question_text'>Question</div>";
     html += "<div contenteditable='true' class='wqd_question_input'>" + label + "</div>";
-    html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Question ID"] + "' class='question_marks_input' onchange='updateMark(" + question["Question ID"] + ",0)' value=" + marks + " /></div>";
+    html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Question ID"] + "' class='question_marks_input' onblur='updateMark(" + question["Question ID"] + ",0)' value=" + marks + " /></div>";
     html += "<div class='wqd_marks_text'>Marks:</div></div>";
     return html;
 }
@@ -299,7 +299,7 @@ function parseWorksheetMarks(questions) {
         var marks = question["Marks"];
         totalMarks += parseInt(marks);
         ques_row += "<td class='worksheet_marks'><b>" + question["Number"] + "</b></td>";
-        marks_row += "<td class='worksheet_marks'><input type='text' id='ques_marks_summary_" + question["Question ID"] + "' class='marks_input' value='" + marks + "' onchange='updateMark(" + question["Question ID"] + ",1)' /></td>";
+        marks_row += "<td class='worksheet_marks'><input type='text' id='ques_marks_summary_" + question["Question ID"] + "' class='marks_input' value='" + marks + "' onblur='updateMark(" + question["Question ID"] + ",1)' /></td>";
     }
     ques_row += "<td class='worksheet_marks'><b>Total</b></td>";
     marks_row += "<td class='worksheet_marks' id='ques_marks_summary_total' ><b>" + totalMarks + "</b></td>";
@@ -360,14 +360,19 @@ function getTypeFromId(type_id) {
 }
 
 function updateMark(q_id, summary) {
-    if (summary === 0) {
-        var new_val = $("#ques_marks_" + q_id).val(); 
-        $("#ques_marks_summary_" + q_id).val(new_val); 
+    // TODO validate input!
+    var val_id = summary === 0 ? "#ques_marks_" + q_id : "#ques_marks_summary_" + q_id;
+    var update_id = summary === 0 ? "#ques_marks_summary_" + q_id : "#ques_marks_" + q_id;
+    var new_val = $(val_id).val();
+    if (validateMarks(new_val)){
+        $(update_id).val(parseInt(new_val));
+        $(val_id).val(parseInt(new_val));
+        updateTotalMarks();
     } else {
-        var new_val = $("#ques_marks_summary_" + q_id).val();
-        $("#ques_marks_" + q_id).val(new_val); 
+        $(val_id).val($(update_id).val());
+        $(val_id).focus();
+        alert("Please enter a valid mark.\n\nAll marks should be positive integer values.");
     }
-    updateTotalMarks();
 }
 
 function updateTotalMarks() {
@@ -378,4 +383,8 @@ function updateTotalMarks() {
         if (mark.value !== "") totalMarks += parseInt(mark.value);
     }
     $("#ques_marks_summary_total").html("<b>" + totalMarks + "</b>");
+}
+
+function validateMarks(mark) {
+    return !isNaN(mark) && mark !== "" && parseInt(mark) === parseFloat(mark) && parseInt(mark) > 0;
 }
