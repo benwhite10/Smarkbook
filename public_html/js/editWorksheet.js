@@ -261,7 +261,7 @@ function stringForQuestionDetails(div_id, question) {
     var html = "<div id='" + div_id + "_details' class='worksheet_question_details'>";
     html += "<div class='wqd_question_text'>Question</div>";
     html += "<div contenteditable='true' class='wqd_question_input'>" + label + "</div>";
-    html += "<div contenteditable='true' class='wqd_marks_input'>" + marks + "</div>";
+    html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Question ID"] + "' class='question_marks_input' onchange='updateMark(" + question["Question ID"] + ",0)' value=" + marks + " /></div>";
     html += "<div class='wqd_marks_text'>Marks:</div></div>";
     return html;
 }
@@ -299,10 +299,10 @@ function parseWorksheetMarks(questions) {
         var marks = question["Marks"];
         totalMarks += parseInt(marks);
         ques_row += "<td class='worksheet_marks'><b>" + question["Number"] + "</b></td>";
-        marks_row += "<td class='worksheet_marks'><input type='text' class='marks_input' value='" + marks + "' /></td>";
+        marks_row += "<td class='worksheet_marks'><input type='text' id='ques_marks_summary_" + question["Question ID"] + "' class='marks_input' value='" + marks + "' onchange='updateMark(" + question["Question ID"] + ",1)' /></td>";
     }
     ques_row += "<td class='worksheet_marks'><b>Total</b></td>";
-    marks_row += "<td class='worksheet_marks'><b>" + totalMarks + "</b></td>";
+    marks_row += "<td class='worksheet_marks' id='ques_marks_summary_total' ><b>" + totalMarks + "</b></td>";
     $("#worksheet_marks_ques").html(ques_row);
     $("#worksheet_marks_marks").html(marks_row);
 }
@@ -357,4 +357,25 @@ function getTypeFromId(type_id) {
         default:
             return "Minor";
     }
+}
+
+function updateMark(q_id, summary) {
+    if (summary === 0) {
+        var new_val = $("#ques_marks_" + q_id).val(); 
+        $("#ques_marks_summary_" + q_id).val(new_val); 
+    } else {
+        var new_val = $("#ques_marks_summary_" + q_id).val();
+        $("#ques_marks_" + q_id).val(new_val); 
+    }
+    updateTotalMarks();
+}
+
+function updateTotalMarks() {
+    var array = document.getElementsByClassName("marks_input");
+    var totalMarks = 0;
+    for (var i = 0; i < array.length; i++) {
+        var mark = array[i];
+        if (mark.value !== "") totalMarks += parseInt(mark.value);
+    }
+    $("#ques_marks_summary_total").html("<b>" + totalMarks + "</b>");
 }
