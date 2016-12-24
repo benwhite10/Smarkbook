@@ -121,27 +121,6 @@ function getWorksheetSuccess(json) {
     }
 }
 
-function setUpTagsInput(div_id, tags) {
-    // Set up pre set tags
-    var values_string = "";
-    var html_input_string = "";
-    for (var i in tags) {
-        var tag = tags[i];
-        html_input_string += getTagInputHTML(div_id + "_input",tag["Name"],getTypeFromId(tag["TypeID"]));
-        values_string += tag["ID"] + ":";
-    }
-    $("#" + div_id + "_input").html(html_input_string);
-    $("#" + div_id + "_input_values").val(values_string);
-    // Request suggested tags
-    
-    // Set up tags
-    setUpTagSelect(div_id);
-    for (var i in tags) {
-        var tag = tags[i];
-        clearTagFromList(div_id + "_list", tag["ID"]);
-    }
-}
-
 function parseTagsForDiv(div_id) {
     var tags = $("#" + div_id + "_input_values").val();
     var tags_array = tags.split(":");
@@ -158,6 +137,16 @@ function getTagForID(tag_id) {
     for (var i in tags) {
         var tag = tags[i];
         if (parseInt(tag["Tag ID"]) === parseInt(tag_id)) return tag;
+    }
+    return null;
+}
+
+function getIDForTag(tag_name) {
+    var tags = JSON.parse(sessionStorage.getItem("tags_list"));
+    for (var i in tags) {
+        var tag = tags[i];
+        var name = tag["Name"];
+        if (tag_name.toLowerCase() === name.toLowerCase()) return tag["Tag ID"];
     }
     return null;
 }
@@ -199,7 +188,6 @@ function clearTagFromList(list_id, tag_id) {
         var id = tag_data["value"];
         if (parseInt(id) === parseInt(tag_id)) {
             list.removeChild(tag_array[len]);
-            console.log(list_id + ": " + tag_id);
             return;
         }
     }
@@ -207,7 +195,16 @@ function clearTagFromList(list_id, tag_id) {
 
 function parseWorksheetTags(worksheet_tags) {
     $("#worksheet_tags").html(stringForBlankTagEntry("worksheet_tags"));
-    setUpTagsInput("worksheet_tags", worksheet_tags);
+    $("#worksheet_tags_input_text").keydown(function(event){
+        changeTagInput(event);
+    });
+    setUpTagSelect("worksheet_tags");
+    for (var j in worksheet_tags) {
+        var tag = worksheet_tags[j];
+        addTagIDForInput("worksheet_tags", tag["ID"]);
+        clearTagFromList("worksheet_tags_list", tag["ID"]);
+    }
+    parseTagsForDiv("worksheet_tags");
 }
 
 function parseQuestions(questions) {
@@ -225,6 +222,9 @@ function parseQuestions(questions) {
         var question = questions[i];
         var div_id = "question_" + question["Question ID"];
         var tags = question["Tags"];
+        $("#" + div_id + "_input_text").keydown(function(event){
+            changeTagInput(event);
+        });
         setUpTagSelect(div_id);
         for (var j in tags) {
             var tag = tags[j];
@@ -252,7 +252,7 @@ function stringForBlankTagEntry(div_id) {
     html += "<div id='" + div_id + "_input' class='tags_input'></div>";
     html += "<div id='" + div_id + "_input_suggested' class='tags_input suggested'></div>";
     html += "<div id='" + div_id + "_input_text_div' class='tags_input_text_div'>";
-    html += "<input id='" + div_id + "_input_text' class='tags_input_text' type='text' list='" + div_id + "_list' placeholder='Enter tags here' onchange='changeTagInput()'>";
+    html += "<input id='" + div_id + "_input_text' class='tags_input_text' type='text' list='" + div_id + "_list' placeholder='Enter tags here'>";
     html += "<datalist id='" + div_id + "_list'></datalist></div></div>";
     return html;
 }
@@ -299,8 +299,21 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-function changeTagInput() {
-    console.log("It changed");
+function changeTagInput(e) {
+    if(e && e.keyCode === 13) {
+        var input_id = e.currentTarget.id;
+        var div_id = input_id.substring(0, input_id.length - 11);
+        var tag_name = $("#" + div_id + "_input_text").val();
+        var tag_id = getIDForTag(tag_name);
+        if (tag_id) {
+            addTagIDForInput(div_id, tag_id);
+            $("#" + div_id + "_input_text").val("");
+            parseTagsForDiv(div_id);
+            clearTagFromList(div_id + "_list", tag_id);
+        } else { 
+            console.log("Add tag: " + tag_name);
+        }
+    }
 }
 
 function getTypeFromId(type_id) {
