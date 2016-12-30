@@ -6,6 +6,16 @@ $(document).ready(function(){
     $(window).resize(function(){
        
     });
+    
+    // Get the modal
+    var modal = document.getElementById('modal_add_new');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
 });
 
 function showHideDetails() {
@@ -143,22 +153,29 @@ function getTagForID(tag_id) {
 
 function getIDForTag(tag_name) {
     var tags = JSON.parse(sessionStorage.getItem("tags_list"));
+    var tag_name_comparison = escapeString(tag_name).toLowerCase().trim();
     for (var i in tags) {
         var tag = tags[i];
         var name = tag["Name"];
-        if (tag_name.toLowerCase() === name.toLowerCase()) return tag["Tag ID"];
+        if (tag_name_comparison === name.toLowerCase().trim()) return tag["Tag ID"];
     }
     return null;
 }
 
 function addTagIDForInput(div_id, tag_id) {
     var tags = $("#" + div_id + "_input_values").val();
-    if (tags.length === 0) {
-        tags += tag_id;
-    } else {
-        tags += ":" + tag_id;
+    if (!checkIfTagInTags(tag_id, tags)) {
+        tags += tags.length === 0 ? tag_id : ":" + tag_id;
     }
     $("#" + div_id + "_input_values").val(tags);
+}
+
+function checkIfTagInTags(tag_id, tags) {
+    var tags_array = tags.split(":");
+    for (var i in tags_array) {
+        if(parseInt(tags_array[i]) === parseInt(tag_id)) return true;
+    }
+    return false;
 }
 
 function removeTagIDFromInput(div_id, tag_id) {
@@ -261,6 +278,7 @@ function stringForQuestionDetails(div_id, question) {
     var html = "<div id='" + div_id + "_details' class='worksheet_question_details'>";
     html += "<div class='wqd_question_text'>Question</div>";
     html += "<div contenteditable='true' class='wqd_question_input'>" + label + "</div>";
+    html += "<div class='wqd_delete_button'></div>";
     html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Question ID"] + "' class='question_marks_input' onblur='updateMark(" + question["Question ID"] + ",0)' value=" + marks + " /></div>";
     html += "<div class='wqd_marks_text'>Marks:</div></div>";
     return html;
@@ -331,7 +349,7 @@ function changeTagInput(e) {
             parseTagsForDiv(div_id);
             clearTagFromList(div_id + "_list", tag_id);
         } else { 
-            console.log("Add tag: " + tag_name);
+            openModal(tag_name, div_id);
         }
     }
 }
@@ -360,7 +378,6 @@ function getTypeFromId(type_id) {
 }
 
 function updateMark(q_id, summary) {
-    // TODO validate input!
     var val_id = summary === 0 ? "#ques_marks_" + q_id : "#ques_marks_summary_" + q_id;
     var update_id = summary === 0 ? "#ques_marks_summary_" + q_id : "#ques_marks_" + q_id;
     var new_val = $(val_id).val();
@@ -387,4 +404,163 @@ function updateTotalMarks() {
 
 function validateMarks(mark) {
     return !isNaN(mark) && mark !== "" && parseInt(mark) === parseFloat(mark) && parseInt(mark) > 0;
+}
+
+function openModal(name, div_id) {
+    requestSimilarTags(name);
+    $("#add_new_tag_name").val(name);
+    $("#modal_add_new").css("display", "block");
+    $("#add_new_tag_type").val("minor");
+    $("#tag_type_value").val(3);
+    $("#add_new_tag_div_id").val(div_id);
+    $("#add_new_tag_input").html("");
+    $("#add_new_tag_input_values").val("");
+}
+
+function closeModal() {
+    $("#modal_add_new").css("display", "none");
+}
+
+function changeNewTagType(type) {
+    $("#add_new_tag_type").val(type);
+    setSelectedType(type);
+}
+
+function setSelectedType(type) {
+    $("#tag_type_classification").removeClass("selected");
+    $("#tag_type_major").removeClass("selected");
+    $("#tag_type_minor").removeClass("selected");
+    $("#tag_type_" + type).addClass("selected");
+    switch(type) {
+        case "minor":
+            $("#tag_type_value").val(3);
+            break;
+        case "major":
+            $("#tag_type_value").val(2);
+            break;
+        case "classification":
+            $("#tag_type_value").val(1);
+            break;
+    }
+}
+
+function requestSimilarTags(name) {
+    var infoArray = {
+        type: "SIMILARNEWTAGS",
+        name: name,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/tags.php",
+        dataType: "json",
+        success: function(json){
+            similarTagsRequestSuccess(json);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
+}
+
+function similarTagsRequestSuccess(json) {
+    if(json["success"]) {
+        var count = 10;
+        var tags = json["tags"];
+        for (var i = 0; i < count; i++) {
+            addTagIDForInput("add_new_tag", tags[i]["Tag ID"]);
+        }
+        parseSimilarTagsForDiv("add_new_tag");
+    } else {
+        console.log("There was an error getting the similar tags: " + json["message"]);
+    }
+}
+
+function parseSimilarTagsForDiv(div_id) {
+    var tags = $("#" + div_id + "_input_values").val();
+    var tags_array = tags.split(":");
+    var html_input_string = "";
+    for (var i in tags_array) {
+        var tag = getTagForID(tags_array[i]);
+        if (tag) html_input_string += getSimilarTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
+    }
+    $("#" + div_id + "_input").html(html_input_string);
+}
+
+function getSimilarTagInputHTML(div_id, tag_name, tag_type, tag_id) {
+    var str = "<div class='tag " + tag_type.toLowerCase() + "'>";
+    str += "<div class='tag_text' onclick='addSimilarTag(" + tag_id + ")'>" + tag_name + "</div>";
+    str += "<div class='tag_button' onclick='deleteTag(&quot;" + div_id + "&quot;," + tag_id + ")'></div></div>";
+    return str;
+}
+
+function addSimilarTag(tag_id) {
+    var root_id = $("#add_new_tag_div_id").val();
+    addTagIDForInput(root_id, tag_id);
+    $("#" + root_id + "_input_text").val("");
+    parseTagsForDiv(root_id);
+    clearTagFromList(root_id + "_list", tag_id);
+    closeModal();
+}
+
+function saveNewTag() {
+    var name = $("#add_new_tag_name").val();
+    var tag_type = $("#tag_type_value").val();
+    var div_id = $("#add_new_tag_div_id").val();
+    var infoArray = {
+        type: "ADDNEWTAG",
+        name: name,
+        type_id: tag_type,
+        div_id: div_id,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/tags.php",
+        dataType: "json",
+        success: function(json){
+            addNewTagRequestSuccess(json);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
+}
+
+function addNewTagRequestSuccess(json) {
+    if(json["success"]) {
+        var tag_list = JSON.parse(sessionStorage.getItem("tags_list"));
+        tag_list.push(json["tag"]);
+        sessionStorage.setItem("tags_list", JSON.stringify(tag_list));
+        var div_id = json["div_id"];
+        var tag_id = json["tag"]["Tag ID"];
+        addTagToAllLists(tag_id);
+        addTagIDForInput(div_id, tag_id);
+        $("#" + div_id + "_input_text").val("");
+        parseTagsForDiv(div_id);
+        clearTagFromList(div_id + "_list", tag_id);
+        closeModal();
+    } else {
+        console.log("Adding tag failed");
+    }
+}
+
+function addTagToAllLists(tag_id) {
+    var list_id = "worksheet_tags_list";
+    addTagToList(list_id, tag_id);
+    var elems = document.getElementsByClassName("worksheet_question_div");
+    for (var i = 0; i < elems.length; i++) {
+        var elem_id = elems[i].id;
+        addTagToList(elem_id + "_list", tag_id);
+    }
+}
+
+function escapeString(string) {
+    string = string.replace("'", "&#39;");
+    string = string.replace('"', "&#34;");
+    return string;
 }

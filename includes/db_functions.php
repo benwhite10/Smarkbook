@@ -102,3 +102,8 @@ function db_error(){
     $mysql = db_connect();
     return mysqli_error($mysql);
 }
+
+function db_escape_string($string) {
+    $mysql = db_connect();
+    return mysqli_real_escape_string($mysql, $string);
+}

@@ -102,5 +102,29 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             </div>
         </div>
     </div>
+    <div id="modal_add_new" class="modal_pop_up">
+        <div class="modal_content animate">
+            <span onclick="closeModal()" class="close" title="Close Modal">&times;</span>
+            <input type="hidden" id="add_new_tag_div_id">
+            <input type="hidden" id="add_new_tag_type">
+            <div class="container_title">Add New Tag</div>
+            <input type="text" placeholder="New Tag Name" id="add_new_tag_name" class="tags_input_text pop_up_input_text" >
+            <div class="add_new_tag_container">
+                <div class="add_new_tag_container_title"><i>Did you mean?</i></div>
+                <input type="hidden" id="add_new_tag_input_values" >
+                <div id="add_new_tag_input" class="tags_input add_new_tag_input"></div>
+            </div>
+            <div class="tag_types">
+                <input type="hidden" id="tag_type_value">
+                <div id="tag_type_classification" class="tag_type classification" onclick="changeNewTagType('classification')">Classification</div>
+                <div id="tag_type_major" class="tag_type major" onclick="changeNewTagType('major')">Major</div>
+                <div id="tag_type_minor" class="tag_type minor selected" onclick="changeNewTagType('minor')">Minor</div>
+            </div>
+            <div class="action_buttons">
+                <div class="save_button" onclick="saveNewTag()">Save</div>
+                <div class="cancel_button" onclick="closeModal()">Cancel</div>
+            </div>
+        </div>
+    </div>
 </body>
 
