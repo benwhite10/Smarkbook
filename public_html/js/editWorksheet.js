@@ -133,7 +133,8 @@ function getWorksheetSuccess(json) {
 
 function parseTagsForDiv(div_id) {
     var tags = $("#" + div_id + "_input_values").val();
-    var tags_array = tags.split(":");
+    var tags_string = getTagsString(tags);
+    var tags_array = tags_string.split(":");
     var html_input_string = "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
@@ -164,10 +165,36 @@ function getIDForTag(tag_name) {
 
 function addTagIDForInput(div_id, tag_id) {
     var tags = $("#" + div_id + "_input_values").val();
-    if (!checkIfTagInTags(tag_id, tags)) {
-        tags += tags.length === 0 ? tag_id : ":" + tag_id;
-    }
+    if (tags.length === 0) tags = "--";
+    tags = addTagString(tag_id, tags);
     $("#" + div_id + "_input_values").val(tags);
+}
+
+function addTagString(tag_id, tags) {
+    var tags_types = tags.split("-");
+    var tag = getTagForID(tag_id);
+    var classification_tags = tags_types[0];
+    var major_tags = tags_types[1];
+    var minor_tags = tags_types[2];
+    switch(parseInt(tag["TypeID"])) {
+        case 1:
+            if (!checkIfTagInTags(tag_id, classification_tags)) {
+                classification_tags += classification_tags.length === 0 ? tag_id : ":" + tag_id;
+            }
+            break;
+        case 2:
+            if (!checkIfTagInTags(tag_id, major_tags)) {
+                major_tags += major_tags.length === 0 ? tag_id : ":" + tag_id;
+            }
+            break;
+        case 3:
+        default:
+            if (!checkIfTagInTags(tag_id, minor_tags)) {
+                minor_tags += minor_tags.length === 0 ? tag_id : ":" + tag_id;
+            }
+            break;
+    }
+    return classification_tags + "-" + major_tags + "-" + minor_tags;
 }
 
 function checkIfTagInTags(tag_id, tags) {
@@ -180,7 +207,8 @@ function checkIfTagInTags(tag_id, tags) {
 
 function removeTagIDFromInput(div_id, tag_id) {
     var tags = $("#" + div_id + "_input_values").val();
-    var tags_array = tags.split(":");
+    var tags_string = getTagsString(tags);
+    var tags_array = tags_string.split(":");
     var new_string = "";
     for (var i in tags_array) {
         var tag = tags_array[i];
@@ -248,7 +276,7 @@ function parseQuestions(questions) {
     var questions_html = "";
     for (var i in questions) {
         var question = questions[i];
-        var div_id = "question_" + question["Question ID"];
+        var div_id = "question_" + question["Stored Question ID"];
         questions_html += "<div id='" + div_id + "' class='worksheet_question_div'>";
         questions_html += stringForQuestionDetails(div_id, question);
         questions_html += stringForBlankTagEntry(div_id);
@@ -257,7 +285,7 @@ function parseQuestions(questions) {
     $("#worksheet_questions").html(questions_html);
     for (var i in questions) {
         var question = questions[i];
-        var div_id = "question_" + question["Question ID"];
+        var div_id = "question_" + question["Stored Question ID"];
         var tags = question["Tags"];
         $("#" + div_id + "_input_text").keydown(function(event){
             changeTagInput(event);
@@ -267,6 +295,10 @@ function parseQuestions(questions) {
             var tag = tags[j];
             addTagIDForInput(div_id, tag["Tag ID"]);
             clearTagFromList(div_id + "_list", tag["Tag ID"]);
+            if (tag["Deleted"] !== "1") {
+                addTagIDForInput(div_id, tag["Tag ID"]);
+                clearTagFromList(div_id + "_list", tag["Tag ID"]);
+            }  
         }
         parseTagsForDiv(div_id);
     }
@@ -279,7 +311,7 @@ function stringForQuestionDetails(div_id, question) {
     html += "<div class='wqd_question_text'>Question</div>";
     html += "<div contenteditable='true' class='wqd_question_input'>" + label + "</div>";
     html += "<div class='wqd_delete_button'></div>";
-    html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Question ID"] + "' class='question_marks_input' onblur='updateMark(" + question["Question ID"] + ",0)' value=" + marks + " /></div>";
+    html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Stored Question ID"] + "' class='question_marks_input' onblur='updateMark(" + question["Stored Question ID"] + ",0)' value=" + marks + " /></div>";
     html += "<div class='wqd_marks_text'>Marks:</div></div>";
     return html;
 }
@@ -317,7 +349,7 @@ function parseWorksheetMarks(questions) {
         var marks = question["Marks"];
         totalMarks += parseInt(marks);
         ques_row += "<td class='worksheet_marks'><b>" + question["Number"] + "</b></td>";
-        marks_row += "<td class='worksheet_marks'><input type='text' id='ques_marks_summary_" + question["Question ID"] + "' class='marks_input' value='" + marks + "' onblur='updateMark(" + question["Question ID"] + ",1)' /></td>";
+        marks_row += "<td class='worksheet_marks'><input type='text' id='ques_marks_summary_" + question["Stored Question ID"] + "' class='marks_input' value='" + marks + "' onblur='updateMark(" + question["Stored Question ID"] + ",1)' /></td>";
     }
     ques_row += "<td class='worksheet_marks'><b>Total</b></td>";
     marks_row += "<td class='worksheet_marks' id='ques_marks_summary_total' ><b>" + totalMarks + "</b></td>";
@@ -345,6 +377,7 @@ function changeTagInput(e) {
         var tag_id = getIDForTag(tag_name);
         if (tag_id) {
             addTagIDForInput(div_id, tag_id);
+            saveQuestion(div_id);
             $("#" + div_id + "_input_text").val("");
             parseTagsForDiv(div_id);
             clearTagFromList(div_id + "_list", tag_id);
@@ -356,6 +389,7 @@ function changeTagInput(e) {
 
 function deleteTag(div_id, tag_id) {
     removeTagIDFromInput(div_id, tag_id);
+    saveQuestion(div_id);
     $("#" + div_id + "_input_text").val("");
     parseTagsForDiv(div_id);
     addTagToList(div_id + "_list", tag_id);
@@ -384,6 +418,7 @@ function updateMark(q_id, summary) {
     if (validateMarks(new_val)){
         $(update_id).val(parseInt(new_val));
         $(val_id).val(parseInt(new_val));
+        saveQuestion("question_" + q_id);
         updateTotalMarks();
     } else {
         $(val_id).val($(update_id).val());
@@ -499,6 +534,7 @@ function getSimilarTagInputHTML(div_id, tag_name, tag_type, tag_id) {
 function addSimilarTag(tag_id) {
     var root_id = $("#add_new_tag_div_id").val();
     addTagIDForInput(root_id, tag_id);
+    saveQuestion(root_id);
     $("#" + root_id + "_input_text").val("");
     parseTagsForDiv(root_id);
     clearTagFromList(root_id + "_list", tag_id);
@@ -540,6 +576,7 @@ function addNewTagRequestSuccess(json) {
         var tag_id = json["tag"]["Tag ID"];
         addTagToAllLists(tag_id);
         addTagIDForInput(div_id, tag_id);
+        saveQuestion(div_id);
         $("#" + div_id + "_input_text").val("");
         parseTagsForDiv(div_id);
         clearTagFromList(div_id + "_list", tag_id);
@@ -563,4 +600,85 @@ function escapeString(string) {
     string = string.replace("'", "&#39;");
     string = string.replace('"', "&#34;");
     return string;
+}
+
+function saveQuestion(div_id) {
+    if (div_id === "worksheet_tags") {
+        // Worksheet
+        var wid = sessionStorage.getItem("worksheet_id");
+        var tags = getTagsString($("#worksheet_tags_input_values").val());
+        var infoArray = {
+            type: "UPDATEWORKSHEETTAGS",
+            wid: wid,
+            tags: tags,
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/worksheet.php",
+            dataType: "json",
+            success: function(json){
+                saveWorksheetTagsSuccess(json);
+            },
+            error: function(response){
+                console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+            }
+        });
+    } else {
+        // Question
+        var sqid = div_id.substring(9);
+        var tags = getTagsString($("#" + div_id + "_input_values").val());
+        var mark = $("#ques_marks_" + sqid).val();
+        var infoArray = {
+            type: "UPDATEQUESTION",
+            sqid: sqid,
+            tags: tags,
+            mark: mark,
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/worksheet.php",
+            dataType: "json",
+            success: function(json){
+                saveQuestionSuccess(json);
+            },
+            error: function(response){
+                console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+            }
+        });
+    }
+}
+
+function saveQuestionSuccess(json) {
+    if (json["success"]) {
+        
+    } else {
+        console.log("Saving question failed: " + json["message"]);
+    }
+}
+
+function saveWorksheetTagsSuccess(json) {
+    if (json["success"]) {
+        
+    } else {
+        console.log("Saving question failed: " + json["message"]);
+    }
+}
+
+function getTagsString(tags) {
+    var types_array = tags.split("-");
+    var tags_string = "";
+    for (var i = 0; i < types_array.length; i++) {
+        var type_string = types_array[i];
+        tags_string += type_string.length === 0 ? "" : type_string + ":";
+    }
+    if (tags_string.substr(tags_string.length - 1) === ":") {
+        tags_string = tags_string.substring(0, tags_string.length - 1);
+    }
+    return tags_string;
 }

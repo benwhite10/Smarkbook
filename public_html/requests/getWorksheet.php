@@ -150,7 +150,8 @@ function getWorksheetInfo($wid) {
     $query3 = "SELECT T.`Tag ID` ID, T.`Name` Name, TT.`ID` TypeID, TT.`Name` Type FROM TWORKSHEETTAGS WT "
             . "JOIN TTAGS T ON WT.`Tag ID` = T.`Tag ID` "
             . "JOIN TTAGTYPES TT ON T.`Type` = TT.`ID` "
-            . "WHERE `Worksheet ID` = $wid;";
+            . "WHERE `Worksheet ID` = $wid "
+            . "ORDER BY T.`Type` DESC, T.`Name`;";
     try {
         $worksheet_details = db_select_exception($query1);
         $worksheet_questions = db_select_exception($query2);
@@ -178,7 +179,8 @@ function getTagsForQuestions($questions) {
             $query = "SELECT QT.`Link ID`, QT.`Tag ID`, QT.`Deleted`, T.`Name` TagName, T.`Type` TypeID, TT.`Name` TypeName FROM `TQUESTIONTAGS` QT 
                     JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID` 
                     JOIN TTAGTYPES TT ON T.`Type` = TT.`ID`
-                    WHERE `Stored Question ID` = $id";
+                    WHERE `Stored Question ID` = $id AND QT.`Deleted` = 0 
+                    ORDER BY T.`Type` DESC, T.`Name`;";
             $tags = db_select_exception($query);
             $questions[$i]["Tags"] = $tags;
         } catch (Exception $ex) {
