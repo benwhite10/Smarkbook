@@ -499,16 +499,20 @@ input[type="text"].pop_up_input_text {
 
 #save_worksheet_button, #save_worksheet_button:hover {
     color: #888;
+    background: #DDD;
 }
 
 #save_worksheet_button.saving, #save_worksheet_button.saving:hover {
     color: #666;
+    background: #DDD;
 }
 
 #save_worksheet_button.save {
     color: #323232;
+    background: #DDD;
 }
 
 #save_worksheet_button.save:hover {
     color: #66E11B;
+    background: #323232;
 }

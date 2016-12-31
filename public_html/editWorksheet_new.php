@@ -102,7 +102,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             </div>
             <div id="side_bar">
             <ul class="menu sidebar">
-                <li><div id="save_worksheet_button">Up To Date</div></li>
+                <li><div id="save_worksheet_button">Save</div></li>
+                <li><div id="add_question_button" onclick="addNewQuestion()">Add Question</div></li>
             </ul>
         </div>
         </div>

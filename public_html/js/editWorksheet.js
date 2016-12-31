@@ -617,19 +617,20 @@ function saveQuestion(div_id) {
 function setSaveButton(status) {
     $("#save_worksheet_button").removeClass("saving");
     $("#save_worksheet_button").removeClass("save");
+    var button = document.getElementById("save_worksheet_button");
     if (status === "Save") {
         $("#save_worksheet_button").html("Save");
-        $("#save_worksheet_button").click(saveWorksheet(null));
+        button.onclick = function() { saveWorksheet(null); };
         $("#save_worksheet_button").addClass("save");
         window.onbeforeunload = confirmLeave;
     } else if (status === "Saving") {
         $("#save_worksheet_button").html("Saving..."); 
         $("#save_worksheet_button").addClass("saving");
-        $("#save_worksheet_button").click("");
+        button.onclick = function() { };
         window.onbeforeunload = confirmLeave;
     } else {
-        $("#save_worksheet_button").html("Up To Date"); 
-        $("#save_worksheet_button").click("");
+        $("#save_worksheet_button").html("Save"); 
+        button.onclick = function() { };
         window.onbeforeunload = null;
     }
 }
