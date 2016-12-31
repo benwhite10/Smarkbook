@@ -20,6 +20,10 @@ $(document).ready(function(){
     };
 });
 
+function confirmLeave(){
+    return "You have unchanged saves, if you leave the page then your changes will be saved.";  
+}
+
 function showHideDetails() {
     if($("#worksheet_details").css("display") === "none"){
         $("#worksheet_details_button").addClass("minus");
@@ -617,13 +621,16 @@ function setSaveButton(status) {
         $("#save_worksheet_button").html("Save");
         $("#save_worksheet_button").click(saveWorksheet);
         $("#save_worksheet_button").addClass("save");
+        window.onbeforeunload = confirmLeave;
     } else if (status === "Saving") {
         $("#save_worksheet_button").html("Saving..."); 
         $("#save_worksheet_button").addClass("saving");
         $("#save_worksheet_button").click("");
+        window.onbeforeunload = confirmLeave;
     } else {
         $("#save_worksheet_button").html("Up To Date"); 
         $("#save_worksheet_button").click("");
+        window.onbeforeunload = null;
     }
 }
 
