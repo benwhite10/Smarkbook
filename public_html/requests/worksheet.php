@@ -49,6 +49,9 @@ function updateWorksheet($info_array, $req_id) {
             $author = $info["author"];
             $date = $info["date"];
             array_push($result_array, updateWorksheetDetails($wid, $name, $link, $date, $author));
+        } else if ($info["type"] === "delete_question"){
+            $sqid = $info["sqid"];
+            array_push($result_array, deleteQuestion($sqid));
         } else {
             $sqid = $info["sqid"];
             $tags = $info["tags"];
@@ -183,6 +186,23 @@ function updateWorksheetDetails($wid, $name, $link, $date, $author) {
         return array (
             "div_id" => "worksheet_details",
             "success" => FALSE,
+            "message" => $ex->getMessage());
+    }
+}
+
+function deleteQuestion($sqid) {
+    $query = "UPDATE `TSTOREDQUESTIONS` SET `Deleted` = 1 WHERE `Stored Question ID` = $sqid;";
+    try {
+        db_query_exception($query);
+        return array (
+            "div_id" => "delete_question",
+            "success" => TRUE,
+            "sqid" => $sqid);
+    } catch (Exception $ex) {
+        return array (
+            "div_id" => "delete_question",
+            "success" => FALSE,
+            "sqid" => $sqid,
             "message" => $ex->getMessage());
     }
 }

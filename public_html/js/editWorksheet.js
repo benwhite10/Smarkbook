@@ -316,7 +316,7 @@ function stringForQuestionDetails(div_id, question) {
     var html = "<div id='" + div_id + "_details' class='worksheet_question_details'>";
     html += "<div class='wqd_question_text'>Question</div>";
     html += "<div contenteditable='true' class='wqd_question_input'>" + label + "</div>";
-    html += "<div class='wqd_delete_button'></div>";
+    html += "<div class='wqd_delete_button' onclick='deleteQuestion(" + question["Stored Question ID"] + ")'></div>";
     html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Stored Question ID"] + "' class='question_marks_input' onblur='updateMark(" + question["Stored Question ID"] + ",0)' value=" + marks + " /></div>";
     html += "<div class='wqd_marks_text'>Marks:</div></div>";
     return html;
@@ -619,7 +619,7 @@ function setSaveButton(status) {
     $("#save_worksheet_button").removeClass("save");
     if (status === "Save") {
         $("#save_worksheet_button").html("Save");
-        $("#save_worksheet_button").click(saveWorksheet);
+        $("#save_worksheet_button").click(saveWorksheet(null));
         $("#save_worksheet_button").addClass("save");
         window.onbeforeunload = confirmLeave;
     } else if (status === "Saving") {
@@ -642,11 +642,22 @@ function addRequestToSave(div_id, save_requests) {
     return save_requests;
 }
 
-function saveWorksheet() {
-    if (checkLock("save_worksheet_request_lock")) return;
-    
+function saveWorksheet(delete_sqid) {
+    if (!checkLock("save_worksheet_request_lock")) {
+        saveWorksheetRequest(delete_sqid);
+    } else {
+        var save_interval = setInterval(function() {
+            if (!checkLock("save_worksheet_request_lock")) {
+                saveWorksheetRequest(delete_sqid);
+                clearInterval(save_interval);
+            }
+        }, 1000);
+    }   
+}
+
+function saveWorksheetRequest(delete_sqid) {
     var save_worksheet_array = JSON.parse(sessionStorage.getItem("save_requests"));
-    if (save_worksheet_array.length === 0) return; 
+    if (save_worksheet_array.length === 0 && delete_sqid === null) return; 
     
     sessionStorage.setItem("save_requests", "[]");
     setSaveButton("Saving");
@@ -691,6 +702,13 @@ function saveWorksheet() {
             array_to_send.push(array);
         }
     }
+    if (delete_sqid !== null) {
+        var array = {
+            type: "delete_question",
+            sqid: delete_sqid
+        };
+        array_to_send.push(array);
+    }
     var infoArray = {
         type: "UPDATEWORKSHEET",
         array: array_to_send,
@@ -718,9 +736,12 @@ function saveWorksheetSuccess(json) {
         clearLock("save_worksheet_request_lock", req_id);
         var response = json["result"]["results"];
         var save_requests = JSON.parse(sessionStorage.getItem("save_requests"));
+        var reload_page = false;
         for (var i = 0; i < response.length; i++) {
             if(!response[i]["success"]) {
                 save_requests = addRequestToSave(response[i]["div_id"], save_requests);
+            } else if (response[i]["div_id"] === "delete_question") {
+                reload_page = true;
             }
         }
         sessionStorage.setItem("save_requests", JSON.stringify(save_requests));
@@ -729,8 +750,15 @@ function saveWorksheetSuccess(json) {
         } else {
             setSaveButton("Save");
         }    
+        if (reload_page) location.reload();
     } else {
         console.log("Saving worksheet failed: " + json["message"]);
+    }
+}
+
+function deleteQuestion(sqid) {
+    if (confirm("Are you sure you want to delete this question? This process will also save any unsaved changes.")) {
+        saveWorksheet(sqid);
     }
 }
 
