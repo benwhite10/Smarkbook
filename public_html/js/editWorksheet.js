@@ -2,6 +2,7 @@ $(document).ready(function(){
     setWorksheetID();
     requestAllStaff();
     requestAllTags();
+    startSpinnerInDiv('spinner');
     
     sessionStorage.setItem("save_requests", "[]");
     
@@ -22,6 +23,35 @@ $(document).ready(function(){
 
 function confirmLeave(){
     return "You have unchanged saves, if you leave the page then your changes will be saved.";  
+}
+
+function startSpinnerInDiv(div){
+    stopSpinnerInDiv(div);
+    var opts = {
+      lines: 10             // The number of lines to draw
+    , length: 9             // The length of each line
+    , width: 4              // The line thickness
+    , radius: 10            // The radius of the inner circle
+    , scale: 1.0            // Scales overall size of the spinner
+    , corners: 1           // Roundness (0..1)
+    , color: '#000'         // #rgb or #rrggbb
+    , left: '0%'           // center horizontally
+    , position: 'relative'  // Element positioning
+    };
+    $("#" + div).show();
+    var spinner = new Spinner(opts).spin($("#" + div).get(0));
+    $($("#" + div).get(0)).data('spinner', spinner);
+    $("#main_content").hide();
+    $("#side_bar").hide();
+}
+
+function stopSpinnerInDiv(div){
+    if($('#' + div).data('spinner') !== undefined){
+        $('#' + div).data('spinner').stop();
+        $('#' + div).hide();
+    }
+    $("#main_content").show();
+    $("#side_bar").show();
 }
 
 function showHideDetails() {
@@ -132,6 +162,7 @@ function getWorksheetSuccess(json) {
         parseWorksheetMarks(questions);
         parseWorksheetTags(worksheet_tags);
         parseQuestions(questions);
+        stopSpinnerInDiv('spinner');
     } else {
         console.log("There was an error getting the worksheets: " + json["message"]);
     }

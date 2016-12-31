@@ -32,6 +32,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     <?php pageHeader("Edit Worksheet"); ?>
     <link rel="stylesheet" type="text/css" href="css/editworksheet_new.css" />
     <script src="js/editWorksheet.js"></script>
+    <script src="libraries/spin.js"></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -59,6 +60,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <ul class="menu navbar">
                 </ul>
             </div>
+            <div id="spinner" class="spinner"></div>
             <div id="main_content">
                 <div id="worksheet_details_title" class="section_title">
                     <div class="section_title_text">

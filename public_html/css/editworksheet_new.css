@@ -516,3 +516,8 @@ input[type="text"].pop_up_input_text {
     color: #66E11B;
     background: #323232;
 }
+
+.spinner {
+    height: 100px;
+    width: 100%;
+}
