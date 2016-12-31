@@ -70,15 +70,15 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </div>
                 <div id="worksheet_details" class="section_main">
                     <label>Name:
-                    </label><input type="text" id="worksheet_name" placeholder="Name" />
+                    </label><input type="text" id="worksheet_name" placeholder="Name" onchange="saveQuestion('worksheet_details')"/>
                     <label>File Link:
-                    </label><input type="text" id="worksheet_link" placeholder="File Link" />
+                    </label><input type="text" id="worksheet_link" placeholder="File Link" onchange="saveQuestion('worksheet_details')"/>
                     <label>Author:
-                    </label><select id="worksheet_author">
+                    </label><select id="worksheet_author" onchange="saveQuestion('worksheet_details')">
                         <option value="0">No Teachers</option>
                     </select>
                     <label>Date Added:    
-                    </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" /> 
+                    </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" onchange="saveQuestion('worksheet_details')"/> 
                 </div>
                 <div id="worksheet_marks_titles" class="section_title">
                     <h2>Marks</h2>

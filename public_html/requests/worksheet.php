@@ -42,6 +42,13 @@ function updateWorksheet($info_array, $req_id) {
             $wid = $info["wid"];
             $tags = $info["tags"];
             array_push($result_array, updateWorksheetTags($wid, $tags));
+        } else if ($info["type"] === "worksheet_details"){
+            $wid = $info["wid"];
+            $name = $info["name"];
+            $link = $info["link"];
+            $author = $info["author"];
+            $date = $info["date"];
+            array_push($result_array, updateWorksheetDetails($wid, $name, $link, $date, $author));
         } else {
             $sqid = $info["sqid"];
             $tags = $info["tags"];
@@ -62,7 +69,6 @@ function updateQuestion($sqid, $tags, $mark) {
     try {
         db_begin_transaction();
         $current_tags = db_select_exception($query);
-        // Remove any current tags not in the new tag list
         foreach ($current_tags as $current_tag) {
             $current_tag_id = $current_tag["Tag ID"];
             $contains = FALSE;
@@ -78,7 +84,6 @@ function updateQuestion($sqid, $tags, $mark) {
                 db_query_exception($remove_query);
             }
         }
-        // Add any new tags that don't currently exist
         foreach ($new_tags as $new_tag) {
             $contains = FALSE;
             foreach ($current_tags as $current_tag) {
@@ -97,16 +102,15 @@ function updateQuestion($sqid, $tags, $mark) {
         $marks_query = "UPDATE `TSTOREDQUESTIONS` SET `Marks`=$mark WHERE `Stored Question ID` = $sqid";
         db_query_exception($marks_query);
         db_commit_transaction();
-        //succeedRequest("Tags successfully added", null);
         return array (
             "div_id" => "question_" . $sqid,
             "success" => TRUE);
     } catch (Exception $ex) {
         db_rollback_transaction();
-        //failRequest("Update question failed with " . $ex->getMessage());
         return array (
             "div_id" => "question_" . $sqid,
-            "success" => FALSE);
+            "success" => FALSE,
+            "message" => $ex->getMessage());
     }
 }
 
@@ -151,16 +155,35 @@ function updateWorksheetTags($wid, $tags) {
         }
         // Update the marks
         db_commit_transaction();
-        //succeedRequest("Worksheet tags successfully added", null);
         return array (
             "div_id" => "worksheet_tags",
             "success" => TRUE);
     } catch (Exception $ex) {
         db_rollback_transaction();
-        //failRequest("Update worksheet tags failed with " . $ex->getMessage());
         return array (
             "div_id" => "worksheet_tags",
-            "success" => FALSE);
+            "success" => FALSE,
+            "message" => $ex->getMessage());
+    }
+}
+
+function updateWorksheetDetails($wid, $name, $link, $date, $author) {
+    $query = "UPDATE `TWORKSHEETVERSION` SET "
+            . "`WName`='$name', "
+            . "`Link`='$link', "
+            . "`Date Added`=STR_TO_DATE('$date','%d/%m/%Y'), "
+            . "`Author ID`=$author "
+            . "WHERE `Version ID` = $wid;";
+    try {
+        db_query_exception($query);
+        return array (
+            "div_id" => "worksheet_details",
+            "success" => TRUE);
+    } catch (Exception $ex) {
+        return array (
+            "div_id" => "worksheet_details",
+            "success" => FALSE,
+            "message" => $ex->getMessage());
     }
 }
 

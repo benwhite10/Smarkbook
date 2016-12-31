@@ -657,6 +657,20 @@ function saveWorksheet() {
                 tags: tags
             };
             array_to_send.push(array);
+        } else if (type === "worksheet_details"){
+            var name = $("#worksheet_name").val();
+            var link = $("#worksheet_link").val();
+            var date = $("#worksheet_date").val();
+            var author = $("#worksheet_author").val();
+            var array = {
+                type: type,
+                wid: wid,
+                name: name,
+                link: link,
+                date: date,
+                author: author
+            };
+            array_to_send.push(array);
         } else {
             var sqid = type.substring(9);
             var tags = getTagsString($("#" + type + "_input_values").val());
@@ -689,14 +703,6 @@ function saveWorksheet() {
             console.log("Request failed with status code: " + response.status + " - " + response.statusText);
         }
     });
-}
-
-function saveQuestionSuccess(json) {
-    if (json["success"]) {
-        
-    } else {
-        console.log("Saving question failed: " + json["message"]);
-    }
 }
 
 function saveWorksheetSuccess(json) {
