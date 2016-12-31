@@ -496,3 +496,19 @@ input[type="text"].pop_up_input_text {
 .cancel_button:hover {
     background: #FF8282;
 }
+
+#save_worksheet_button, #save_worksheet_button:hover {
+    color: #888;
+}
+
+#save_worksheet_button.saving, #save_worksheet_button.saving:hover {
+    color: #666;
+}
+
+#save_worksheet_button.save {
+    color: #323232;
+}
+
+#save_worksheet_button.save:hover {
+    color: #66E11B;
+}

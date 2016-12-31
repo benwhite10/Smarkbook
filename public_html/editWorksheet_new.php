@@ -100,6 +100,11 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </div>
                 <div id="worksheet_questions" class="section_main"></div>
             </div>
+            <div id="side_bar">
+            <ul class="menu sidebar">
+                <li><div id="save_worksheet_button">Up To Date</div></li>
+            </ul>
+        </div>
         </div>
     </div>
     <div id="modal_add_new" class="modal_pop_up">

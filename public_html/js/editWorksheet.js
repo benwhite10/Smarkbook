@@ -3,6 +3,8 @@ $(document).ready(function(){
     requestAllStaff();
     requestAllTags();
     
+    sessionStorage.setItem("save_requests", "[]");
+    
     $(window).resize(function(){
        
     });
@@ -603,55 +605,90 @@ function escapeString(string) {
 }
 
 function saveQuestion(div_id) {
-    if (div_id === "worksheet_tags") {
-        // Worksheet
-        var wid = sessionStorage.getItem("worksheet_id");
-        var tags = getTagsString($("#worksheet_tags_input_values").val());
-        var infoArray = {
-            type: "UPDATEWORKSHEETTAGS",
-            wid: wid,
-            tags: tags,
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
-        };
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "/requests/worksheet.php",
-            dataType: "json",
-            success: function(json){
-                saveWorksheetTagsSuccess(json);
-            },
-            error: function(response){
-                console.log("Request failed with status code: " + response.status + " - " + response.statusText);
-            }
-        });
+    var save_requests = JSON.parse(sessionStorage.getItem("save_requests"));
+    sessionStorage.setItem("save_requests", JSON.stringify(addRequestToSave(div_id, save_requests)));
+    setSaveButton("Save");
+}
+
+function setSaveButton(status) {
+    $("#save_worksheet_button").removeClass("saving");
+    $("#save_worksheet_button").removeClass("save");
+    if (status === "Save") {
+        $("#save_worksheet_button").html("Save");
+        $("#save_worksheet_button").click(saveWorksheet);
+        $("#save_worksheet_button").addClass("save");
+    } else if (status === "Saving") {
+        $("#save_worksheet_button").html("Saving..."); 
+        $("#save_worksheet_button").addClass("saving");
+        $("#save_worksheet_button").click("");
     } else {
-        // Question
-        var sqid = div_id.substring(9);
-        var tags = getTagsString($("#" + div_id + "_input_values").val());
-        var mark = $("#ques_marks_" + sqid).val();
-        var infoArray = {
-            type: "UPDATEQUESTION",
-            sqid: sqid,
-            tags: tags,
-            mark: mark,
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
-        };
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "/requests/worksheet.php",
-            dataType: "json",
-            success: function(json){
-                saveQuestionSuccess(json);
-            },
-            error: function(response){
-                console.log("Request failed with status code: " + response.status + " - " + response.statusText);
-            }
-        });
+        $("#save_worksheet_button").html("Up To Date"); 
+        $("#save_worksheet_button").click("");
     }
+}
+
+function addRequestToSave(div_id, save_requests) {
+    for (var i = 0; i < save_requests.length; i++) {
+        if (save_requests[i] === div_id) return save_requests;
+    }
+    save_requests.push(div_id);
+    return save_requests;
+}
+
+function saveWorksheet() {
+    if (checkLock("save_worksheet_request_lock")) return;
+    
+    var save_worksheet_array = JSON.parse(sessionStorage.getItem("save_requests"));
+    if (save_worksheet_array.length === 0) return; 
+    
+    sessionStorage.setItem("save_requests", "[]");
+    setSaveButton("Saving");
+    
+    var wid = sessionStorage.getItem("worksheet_id");
+    var req_id = generateRequestLock("save_worksheet_request_lock");
+    var array_to_send = [];
+    for (var i = 0; i < save_worksheet_array.length; i++) {
+        var type = save_worksheet_array[i];
+        if (type === "worksheet_tags") {
+            var tags = getTagsString($("#worksheet_tags_input_values").val()); 
+            var array = {
+                type: type,
+                wid: wid,
+                tags: tags
+            };
+            array_to_send.push(array);
+        } else {
+            var sqid = type.substring(9);
+            var tags = getTagsString($("#" + type + "_input_values").val());
+            var mark = $("#ques_marks_" + sqid).val();
+            var array = {
+                type: type,
+                sqid: sqid,
+                tags: tags,
+                mark: mark
+            };
+            array_to_send.push(array);
+        }
+    }
+    var infoArray = {
+        type: "UPDATEWORKSHEET",
+        array: array_to_send,
+        req_id: req_id,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/worksheet.php",
+        dataType: "json",
+        success: function(json){
+            saveWorksheetSuccess(json);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
 }
 
 function saveQuestionSuccess(json) {
@@ -662,11 +699,25 @@ function saveQuestionSuccess(json) {
     }
 }
 
-function saveWorksheetTagsSuccess(json) {
+function saveWorksheetSuccess(json) {
     if (json["success"]) {
-        
+        var req_id = json["result"]["req_id"];
+        clearLock("save_worksheet_request_lock", req_id);
+        var response = json["result"]["results"];
+        var save_requests = JSON.parse(sessionStorage.getItem("save_requests"));
+        for (var i = 0; i < response.length; i++) {
+            if(!response[i]["success"]) {
+                save_requests = addRequestToSave(response[i]["div_id"], save_requests);
+            }
+        }
+        sessionStorage.setItem("save_requests", JSON.stringify(save_requests));
+        if(save_requests.length === 0) {
+            setSaveButton();
+        } else {
+            setSaveButton("Save");
+        }    
     } else {
-        console.log("Saving question failed: " + json["message"]);
+        console.log("Saving worksheet failed: " + json["message"]);
     }
 }
 
@@ -681,4 +732,32 @@ function getTagsString(tags) {
         tags_string = tags_string.substring(0, tags_string.length - 1);
     }
     return tags_string;
+}
+
+function generateRequestLock(key, maxDuration) {
+    maxDuration = 10000 || maxDuration;
+    var time = new Date().getTime() + maxDuration;
+    var rand_num = Math.random() * 1000000000 | 0;
+    var req_id = time + ":" + rand_num;
+    sessionStorage.setItem(key, req_id);
+    return rand_num;
+}
+
+function checkLock(key) {
+    var lock = sessionStorage.getItem(key);
+    if (lock === null || lock === "") return false;
+    var info = lock.split(":");
+    var time = new Date().getTime();
+    if (parseInt(info[0]) < time) return false;
+    return true;
+}
+
+function clearLock(key, req_id) {
+    var lock = sessionStorage.getItem(key);
+    if (lock !== "") {
+        var info = lock.split(":");
+        if (info[1] && info[1] === req_id) {
+            sessionStorage.setItem(key, "");
+        }
+    }
 }

@@ -9,6 +9,8 @@ include_once $include_path . '/public_html/requests/core.php';
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $user_val = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$info_array = $_POST["array"];
+$req_id = filter_input(INPUT_POST,'req_id',FILTER_SANITIZE_NUMBER_INT);
 $sqid = filter_input(INPUT_POST,'sqid',FILTER_SANITIZE_NUMBER_INT);
 $wid = filter_input(INPUT_POST,'wid',FILTER_SANITIZE_NUMBER_INT);
 $tags = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
@@ -26,8 +28,32 @@ switch ($request_type){
     case "UPDATEWORKSHEETTAGS":
         updateWorksheetTags($wid, $tags);
         break;
+    case "UPDATEWORKSHEET":
+        updateWorksheet($info_array, $req_id);
+        break;
     default:
         break;
+}
+
+function updateWorksheet($info_array, $req_id) {
+    $result_array = [];
+    foreach ($info_array as $info) {
+        if ($info["type"] === "worksheet_tags"){
+            $wid = $info["wid"];
+            $tags = $info["tags"];
+            array_push($result_array, updateWorksheetTags($wid, $tags));
+        } else {
+            $sqid = $info["sqid"];
+            $tags = $info["tags"];
+            $mark = $info["mark"];
+            array_push($result_array, updateQuestion($sqid, $tags, $mark));
+        }
+    }
+    $response_array = array(
+        "req_id" => $req_id,
+        "results" => $result_array
+    );
+    succeedRequest("Worksheet updated", $response_array);
 }
 
 function updateQuestion($sqid, $tags, $mark) {
@@ -71,10 +97,16 @@ function updateQuestion($sqid, $tags, $mark) {
         $marks_query = "UPDATE `TSTOREDQUESTIONS` SET `Marks`=$mark WHERE `Stored Question ID` = $sqid";
         db_query_exception($marks_query);
         db_commit_transaction();
-        succeedRequest("Tags successfully added", null);
+        //succeedRequest("Tags successfully added", null);
+        return array (
+            "div_id" => "question_" . $sqid,
+            "success" => TRUE);
     } catch (Exception $ex) {
         db_rollback_transaction();
-        failRequest("Update question failed with " . $ex->getMessage());
+        //failRequest("Update question failed with " . $ex->getMessage());
+        return array (
+            "div_id" => "question_" . $sqid,
+            "success" => FALSE);
     }
 }
 
@@ -119,10 +151,16 @@ function updateWorksheetTags($wid, $tags) {
         }
         // Update the marks
         db_commit_transaction();
-        succeedRequest("Worksheet tags successfully added", null);
+        //succeedRequest("Worksheet tags successfully added", null);
+        return array (
+            "div_id" => "worksheet_tags",
+            "success" => TRUE);
     } catch (Exception $ex) {
         db_rollback_transaction();
-        failRequest("Update worksheet tags failed with " . $ex->getMessage());
+        //failRequest("Update worksheet tags failed with " . $ex->getMessage());
+        return array (
+            "div_id" => "worksheet_tags",
+            "success" => FALSE);
     }
 }
 
