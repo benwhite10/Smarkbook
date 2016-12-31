@@ -704,10 +704,17 @@ function saveWorksheetRequest(delete_sqid) {
         }
     }
     if (delete_sqid !== null) {
-        var array = {
-            type: "delete_question",
-            sqid: delete_sqid
-        };
+        if (delete_sqid === "add") {
+            var array = {
+                type: "add_question",
+                wid: wid
+            };
+        } else {
+            var array = {
+                type: "delete_question",
+                sqid: delete_sqid
+            };
+        }
         array_to_send.push(array);
     }
     var infoArray = {
@@ -741,7 +748,7 @@ function saveWorksheetSuccess(json) {
         for (var i = 0; i < response.length; i++) {
             if(!response[i]["success"]) {
                 save_requests = addRequestToSave(response[i]["div_id"], save_requests);
-            } else if (response[i]["div_id"] === "delete_question") {
+            } else if (response[i]["div_id"] === "delete_question" || response[i]["div_id"] === "add_question") {
                 reload_page = true;
             }
         }
@@ -760,6 +767,12 @@ function saveWorksheetSuccess(json) {
 function deleteQuestion(sqid) {
     if (confirm("Are you sure you want to delete this question? This process will also save any unsaved changes.")) {
         saveWorksheet(sqid);
+    }
+}
+
+function addNewQuestion() {
+    if (confirm("Adding a new question will also save any unsaved changes. Are you sure you wish to continue?")) {
+        saveWorksheet("add");
     }
 }
 

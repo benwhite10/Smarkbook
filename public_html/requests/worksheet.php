@@ -11,10 +11,6 @@ $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $user_val = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 $info_array = $_POST["array"];
 $req_id = filter_input(INPUT_POST,'req_id',FILTER_SANITIZE_NUMBER_INT);
-$sqid = filter_input(INPUT_POST,'sqid',FILTER_SANITIZE_NUMBER_INT);
-$wid = filter_input(INPUT_POST,'wid',FILTER_SANITIZE_NUMBER_INT);
-$tags = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
-$mark = filter_input(INPUT_POST,'mark',FILTER_SANITIZE_NUMBER_INT);
 
 $role = validateRequest($user_id, $user_val);
 if(!$role){
@@ -22,14 +18,11 @@ if(!$role){
 }
 
 switch ($request_type){
-    case "UPDATEQUESTION":
-        updateQuestion($sqid, $tags, $mark);
-        break;
-    case "UPDATEWORKSHEETTAGS":
-        updateWorksheetTags($wid, $tags);
-        break;
     case "UPDATEWORKSHEET":
         updateWorksheet($info_array, $req_id);
+        break;
+    case "NEWWORKSHEET":
+        newWorksheet($info_array);
         break;
     default:
         break;
@@ -52,6 +45,9 @@ function updateWorksheet($info_array, $req_id) {
         } else if ($info["type"] === "delete_question"){
             $sqid = $info["sqid"];
             array_push($result_array, deleteQuestion($sqid));
+        } else if ($info["type"] === "add_question"){
+            $wid = $info["wid"];
+            array_push($result_array, addQuestion($wid));
         } else {
             $sqid = $info["sqid"];
             $tags = $info["tags"];
@@ -68,7 +64,7 @@ function updateWorksheet($info_array, $req_id) {
 
 function updateQuestion($sqid, $tags, $mark) {
     $query = "SELECT * FROM `TQUESTIONTAGS` WHERE `Stored Question ID` = $sqid AND `Deleted` = 0;";
-    $new_tags = split(":", $tags);
+    $new_tags = strlen($tags) > 0 ? split(":", $tags) : [];
     try {
         db_begin_transaction();
         $current_tags = db_select_exception($query);
@@ -196,15 +192,69 @@ function deleteQuestion($sqid) {
         db_query_exception($query);
         return array (
             "div_id" => "delete_question",
-            "success" => TRUE,
-            "sqid" => $sqid);
+            "success" => TRUE);
     } catch (Exception $ex) {
         return array (
             "div_id" => "delete_question",
             "success" => FALSE,
-            "sqid" => $sqid,
             "message" => $ex->getMessage());
     }
+}
+
+function newWorksheet($details) {
+    $name = $details["name"];
+    $link = $details["link"];
+    $author = checkValidId($details["author"]);
+    $date = $details["date"];
+    $questions_count = $details["questions"];
+    
+    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`,`Date Added`,`Deleted`) "
+            . "VALUES ('$name', '', '$link', $author, STR_TO_DATE('$date','%d/%m/%Y'),0);";
+    try {
+        db_begin_transaction();
+        $result = db_insert_query_exception($query);
+        $vid = checkValidId($result[1]);
+        if ($vid == 0) {
+            db_rollback_transaction();
+            failRequest("Adding new worksheet failed: " . $ex->getMessage());
+        }
+        for ($i = 0; $i < $questions_count; $i++) {
+            $num = $i + 1;
+            $question_query = "INSERT INTO TSTOREDQUESTIONS (`Version ID`, `Number`, `Marks`, `Question Order`) VALUES ($vid, $num, 1, $num);";
+            db_insert_query_exception($question_query);
+        }
+        db_commit_transaction();
+        succeedRequest("New worksheet added.", $vid);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("Adding new worksheet failed: " . $ex->getMessage());
+    }
+}
+
+function addQuestion($vid) {
+    $query = "SELECT MAX(`Question Order`) Max FROM `TSTOREDQUESTIONS` WHERE `Version ID` = $vid";
+    try {
+        $result = db_select_exception($query);
+        $max = count($result) > 0 ? $result[0]["Max"] : 0;
+        $num = $max + 1;
+        $question_query = "INSERT INTO TSTOREDQUESTIONS (`Version ID`, `Number`, `Marks`, `Question Order`) VALUES ($vid, $num, 1, $num);";
+        db_insert_query_exception($question_query);
+        return array (
+            "div_id" => "add_question",
+            "success" => TRUE);
+    } catch (Exception $ex) {
+        return array (
+            "div_id" => "add_question",
+            "success" => FALSE,
+            "message" => $ex->getMessage());
+    }
+}
+
+function checkValidId($id) {
+    if (is_null($id)) return 0;
+    if (!is_numeric($id)) return 0;
+    if ($id <= 0) return 0;
+    return $id;
 }
 
 function succeedRequest($message, $result){
