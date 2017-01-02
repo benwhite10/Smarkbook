@@ -15,11 +15,119 @@ $(document).ready(function(){
 
     // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
+        toggleMenuOff();
         if (event.target === modal) {
             closeModal();
         }
     };
+    
+    document.addEventListener("contextmenu", function(e) {
+        var id = clickInsideElement(e, "tag");
+        if (id) {
+            e.preventDefault();
+            toggleMenuOn();
+            positionMenu(e);
+            context_tag_id = id;
+        } else {
+            toggleMenuOff();
+        }
+    });
 });
+
+var context_tag_id = "";
+
+function clickInsideElement(e, className) {
+  var el = e.srcElement || e.target;
+
+  if (el.classList.contains(className)) {
+    return el.id;
+  } else {
+    while (el = el.parentNode) {
+      if (el.classList && el.classList.contains(className) ) {
+        return el.id;
+      }
+    }
+  }
+  return false;
+}
+
+function addAllQuestions() {
+    var info = context_tag_id.split("-");
+    var tag_id = info[0];
+    addTagIDForInput("worksheet_tags", tag_id);
+    clearTagFromList("worksheet_tags_list", tag_id);
+    parseTagsForDiv("worksheet_tags");
+    saveQuestion("worksheet_tags");
+    var questions_string = sessionStorage.getItem("questions_array");
+    var questions = questions_string === "" ? [] : JSON.parse(questions_string);
+    for (var i in questions) {
+        var question = questions[i];
+        var div_id = "question_" + question["Stored Question ID"];
+        addTagIDForInput(div_id, tag_id);
+        clearTagFromList(div_id + "_list", tag_id); 
+        parseTagsForDiv(div_id);
+        saveQuestion(div_id);
+    }  
+}
+
+function removeAllQuestions() {
+    var info = context_tag_id.split("-");
+    var tag_id = info[0];
+    
+    removeTagIDFromInput("worksheet_tags", tag_id);
+    addTagToList("worksheet_tags_list", tag_id);
+    parseTagsForDiv("worksheet_tags");
+    saveQuestion("worksheet_tags");
+    var questions_string = sessionStorage.getItem("questions_array");
+    var questions = questions_string === "" ? [] : JSON.parse(questions_string);
+    for (var i in questions) {
+        var question = questions[i];
+        var div_id = "question_" + question["Stored Question ID"];
+        removeTagIDFromInput(div_id, tag_id);
+        addTagToList(div_id + "_list", tag_id); 
+        parseTagsForDiv(div_id);
+        saveQuestion(div_id);
+    }  
+}
+
+function toggleMenuOn() {
+    $("#context-menu").addClass("context-menu--active");
+}
+
+function toggleMenuOff() {
+    $("#context-menu").removeClass("context-menu--active");
+}
+
+function getPosition(e) {
+  var posx = 0;
+  var posy = 0;
+
+  if (!e) var e = window.event;
+
+  if (e.pageX || e.pageY) {
+    posx = e.pageX;
+    posy = e.pageY;
+  } else if (e.clientX || e.clientY) {
+    posx = e.clientX + document.body.scrollLeft + 
+                       document.documentElement.scrollLeft;
+    posy = e.clientY + document.body.scrollTop + 
+                       document.documentElement.scrollTop;
+  }
+
+  return {
+    x: posx,
+    y: posy
+  }
+}
+
+function positionMenu(e) {
+  var menuPosition = getPosition(e);
+  var menuPositionX = menuPosition.x + "px";
+  var menuPositionY = menuPosition.y + "px";
+
+  $("#context-menu").css("left", menuPositionX);
+  $("#context-menu").css("top", menuPositionY);
+}
 
 function confirmLeave(){
     return "You have unchanged saves, if you leave the page then your changes will be saved.";  
@@ -158,6 +266,7 @@ function getWorksheetSuccess(json) {
         var details = worksheet["details"];
         var questions = worksheet["questions"];
         var worksheet_tags = worksheet["tags"];
+        sessionStorage.setItem("questions_array", JSON.stringify(questions));
         parseWorksheetDetails(details);
         parseWorksheetMarks(questions);
         parseWorksheetTags(worksheet_tags);
@@ -267,7 +376,7 @@ function setUpTagSelect(div_id) {
 }
 
 function getTagInputHTML(div_id, tag_name, tag_type, tag_id) {
-    var str = "<div class='tag " + tag_type.toLowerCase() + "'>";
+    var str = "<div id='" + tag_id + "-" + div_id + "' class='tag " + tag_type.toLowerCase() + "'>";
     str += "<div class='tag_text'>" + tag_name + "</div>";
     str += "<div class='tag_button' onclick='deleteTag(&quot;" + div_id + "&quot;," + tag_id + ")'></div></div>";
     return str;
@@ -330,8 +439,6 @@ function parseQuestions(questions) {
         setUpTagSelect(div_id);
         for (var j in tags) {
             var tag = tags[j];
-            addTagIDForInput(div_id, tag["Tag ID"]);
-            clearTagFromList(div_id + "_list", tag["Tag ID"]);
             if (tag["Deleted"] !== "1") {
                 addTagIDForInput(div_id, tag["Tag ID"]);
                 clearTagFromList(div_id + "_list", tag["Tag ID"]);

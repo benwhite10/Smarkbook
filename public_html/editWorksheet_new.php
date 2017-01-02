@@ -134,5 +134,11 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             </div>
         </div>
     </div>
+    <nav id="context-menu" class="context-menu">
+        <ul class="context-menu_items">
+            <li class="context-menu_item" onclick="addAllQuestions()">Add Tag To All Questions</li>
+            <li class="context-menu_item" onclick="removeAllQuestions()">Remove Tag From All Questions</li>
+        </ul>
+    </nav>
 </body>
 
