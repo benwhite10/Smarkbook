@@ -52,7 +52,8 @@ function updateWorksheet($info_array, $req_id) {
             $sqid = $info["sqid"];
             $tags = $info["tags"];
             $mark = $info["mark"];
-            array_push($result_array, updateQuestion($sqid, $tags, $mark));
+            $label = $info["label"];
+            array_push($result_array, updateQuestion($sqid, $tags, $mark, $label));
         }
     }
     $response_array = array(
@@ -62,7 +63,7 @@ function updateWorksheet($info_array, $req_id) {
     succeedRequest("Worksheet updated", $response_array);
 }
 
-function updateQuestion($sqid, $tags, $mark) {
+function updateQuestion($sqid, $tags, $mark, $label) {
     $query = "SELECT * FROM `TQUESTIONTAGS` WHERE `Stored Question ID` = $sqid AND `Deleted` = 0;";
     $new_tags = strlen($tags) > 0 ? split(":", $tags) : [];
     try {
@@ -97,8 +98,8 @@ function updateQuestion($sqid, $tags, $mark) {
                 db_insert_query_exception($insert_query);
             }
         }
-        // Update the marks
-        $marks_query = "UPDATE `TSTOREDQUESTIONS` SET `Marks`=$mark WHERE `Stored Question ID` = $sqid";
+        // Update the marks and label
+        $marks_query = "UPDATE `TSTOREDQUESTIONS` SET `Marks`=$mark, `Number`='$label' WHERE `Stored Question ID` = $sqid";
         db_query_exception($marks_query);
         db_commit_transaction();
         return array (

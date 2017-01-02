@@ -453,7 +453,7 @@ function stringForQuestionDetails(div_id, question) {
     var marks = question["Marks"] ? question["Marks"] : "-";
     var html = "<div id='" + div_id + "_details' class='worksheet_question_details'>";
     html += "<div class='wqd_question_text'>Question</div>";
-    html += "<div contenteditable='true' class='wqd_question_input'>" + label + "</div>";
+    html += "<div class='wqd_question_input'><input type='text' id='ques_label_" + question["Stored Question ID"] + "' class='question_label_input' onblur='updateLabel(" + question["Stored Question ID"] + ",0)' value=" + label + " /></div>";
     html += "<div class='wqd_delete_button' onclick='deleteQuestion(" + question["Stored Question ID"] + ")'></div>";
     html += "<div class='wqd_marks_input'><input type='text' id='ques_marks_" + question["Stored Question ID"] + "' class='question_marks_input' onblur='updateMark(" + question["Stored Question ID"] + ",0)' value=" + marks + " /></div>";
     html += "<div class='wqd_marks_text'>Marks:</div></div>";
@@ -492,7 +492,7 @@ function parseWorksheetMarks(questions) {
         var question = questions[i];
         var marks = question["Marks"];
         totalMarks += parseInt(marks);
-        ques_row += "<td class='worksheet_marks'><b>" + question["Number"] + "</b></td>";
+        ques_row += "<td class='worksheet_marks' id='summary_label_" + question["Stored Question ID"] + "' ><b>" + question["Number"] + "</b></td>";
         marks_row += "<td class='worksheet_marks'><input type='text' id='ques_marks_summary_" + question["Stored Question ID"] + "' class='marks_input' value='" + marks + "' onblur='updateMark(" + question["Stored Question ID"] + ",1)' /></td>";
     }
     ques_row += "<td class='worksheet_marks'><b>Total</b></td>";
@@ -569,6 +569,11 @@ function updateMark(q_id, summary) {
         $(val_id).focus();
         alert("Please enter a valid mark.\n\nAll marks should be positive integer values.");
     }
+}
+
+function updateLabel(q_id, summary) {
+    $("#summary_label_" + q_id).html("<b>" + $("#ques_label_" + q_id).val() + "</b>");
+    saveQuestion("question_" + q_id);
 }
 
 function updateTotalMarks() {
@@ -832,11 +837,13 @@ function saveWorksheetRequest(delete_sqid) {
             var sqid = type.substring(9);
             var tags = getTagsString($("#" + type + "_input_values").val());
             var mark = $("#ques_marks_" + sqid).val();
+            var label = $("#ques_label_" + sqid).val();
             var array = {
                 type: type,
                 sqid: sqid,
                 tags: tags,
-                mark: mark
+                mark: mark,
+                label: label
             };
             array_to_send.push(array);
         }

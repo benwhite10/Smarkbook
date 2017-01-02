@@ -174,7 +174,7 @@ h2 {
     cursor: pointer;
 }
 
-input[type="text"].question_marks_input {
+input[type="text"].question_marks_input, input[type="text"].question_label_input {
     padding: 0;
     margin: 0;
     width: 100%;
@@ -188,6 +188,11 @@ input[type="text"].question_marks_input {
     font-weight: normal;
     cursor: pointer;
     vertical-align: top;
+}
+
+input[type="text"].question_label_input {
+    width: 40px;
+    text-align: left;
 }
 
 .wqd_marks_input, .wqd_marks_text, .wqd_delete_button {
