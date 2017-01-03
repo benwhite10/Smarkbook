@@ -304,8 +304,7 @@ function parseTagsForDiv(div_id) {
 
 function parseSuggestedTagsForDiv(div_id) {
     var tags = $("#" + div_id + "_suggested_values").val();
-    var tags_string = getTagsString(tags);
-    var tags_array = tags_string.split(":");
+    var tags_array = tags.split(":");
     var html_input_string = "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
@@ -353,8 +352,7 @@ function addTagIDForInput(div_id, tag_id) {
 
 function addSuggestedTagIDForInput(div_id, tag_id) {
     var tags = $("#" + div_id + "_suggested_values").val();
-    if (tags.length === 0) tags = "--";
-    tags = addTagString(tag_id, tags);
+    tags += tag_id + ":";
     $("#" + div_id + "_suggested_values").val(tags);
 }
 
@@ -397,20 +395,18 @@ function removeTagIDFromInput(div_id, tag_id) {
     var tags = $("#" + div_id + "_input_values").val();
     var tags_string = getTagsString(tags);
     var tags_array = tags_string.split(":");
-    var new_string = "";
+    $("#" + div_id + "_input_values").val("");
     for (var i in tags_array) {
         var tag = tags_array[i];
         if (parseInt(tag) !== parseInt(tag_id)) {
-            new_string += new_string.length === 0 ? tag : ":" + tag;
+            addTagIDForInput(div_id, tag);
         }
     }
-    $("#" + div_id + "_input_values").val(new_string);
 }
 
 function removeSuggestedTagIDFromInput(div_id, tag_id) {
     var tags = $("#" + div_id + "_suggested_values").val();
-    var tags_string = getTagsString(tags);
-    var tags_array = tags_string.split(":");
+    var tags_array = tags.split(":");
     var new_string = "";
     for (var i in tags_array) {
         var tag = tags_array[i];
@@ -720,6 +716,7 @@ function requestSuggestedTags(div_id) {
 function suggestedTagsSuccess(json) {
     if (json["success"]) {
         var suggested_tags = json["result"]["top_values"];
+        console.log(suggested_tags);
         var div_id = json["result"]["div_id"];
         $("#" + div_id + "_suggested_values").val("");
         for (var i in suggested_tags) {

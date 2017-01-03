@@ -275,7 +275,7 @@ function getSuggestedTags($tags, $div_id) {
             $tags_result = db_select_exception($tag_query);
             foreach($tags_result as $tag) {
                 if (!tagIsInArray($tag, $tags_array)) {
-                    $suggested_tags = addTagToSuggestedTagArray($tag, $suggested_tags);
+                    $suggested_tags = addTagToSuggestedTagArray($tag, $suggested_tags, $count);
                 }  
             }
         } catch (Exception $ex) {
@@ -294,20 +294,23 @@ function tagIsInArray($tag, $tags_array) {
     }
     return FALSE;
 }
-function addTagToSuggestedTagArray($tag, $suggested_tags) {
+function addTagToSuggestedTagArray($tag, $suggested_tags, $count) {
     $tag_id = $tag["Tag ID"];
-    $tag_count = $tag["Count"];
-    foreach($suggested_tags as $i => $suggested_tag) {
-        if ($tag_id == $suggested_tag["ID"]) {
-            $suggested_tags[$i]["Count"] = $suggested_tags[$i]["Count"] + $tag_count;
-            return $suggested_tags;
+    $tag_perc = $tag["Count"] / $count;
+    if ($tag_perc >= 0.5) {
+        foreach($suggested_tags as $i => $suggested_tag) {
+            if ($tag_id == $suggested_tag["ID"]) {
+                return $suggested_tags;
+            }
         }
+        $new_value = array(
+            "ID" => $tag_id,
+            "Perc" => $tag_perc
+        );
+        array_push($suggested_tags, $new_value);
     }
-    $new_value = array(
-        "ID" => $tag_id,
-        "Count" => $tag_count
-    );
-    array_push($suggested_tags, $new_value);
+    
+    
     return $suggested_tags;
 }
 
