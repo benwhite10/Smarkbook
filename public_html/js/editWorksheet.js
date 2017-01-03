@@ -22,7 +22,7 @@ $(document).ready(function(){
     };
     
     document.addEventListener("contextmenu", function(e) {
-        var id = clickInsideElement(e, "tag");
+        var id = clickInsideElement(e, "tag", "suggested");
         if (id) {
             e.preventDefault();
             toggleMenuOn();
@@ -36,15 +36,15 @@ $(document).ready(function(){
 
 var context_tag_id = "";
 
-function clickInsideElement(e, className) {
+function clickInsideElement(e, className, notClassName) {
   var el = e.srcElement || e.target;
 
   if (el.classList.contains(className)) {
-    return el.id;
+    return el.classList.contains(notClassName) ? false : el.id;
   } else {
     while (el = el.parentNode) {
       if (el.classList && el.classList.contains(className) ) {
-        return el.id;
+        return el.classList.contains(notClassName) ? false : el.id;
       }
     }
   }
@@ -58,6 +58,7 @@ function addAllQuestions() {
     clearTagFromList("worksheet_tags_list", tag_id);
     parseTagsForDiv("worksheet_tags");
     saveQuestion("worksheet_tags");
+    requestSuggestedTags("worksheet_tags");
     var questions_string = sessionStorage.getItem("questions_array");
     var questions = questions_string === "" ? [] : JSON.parse(questions_string);
     for (var i in questions) {
@@ -66,6 +67,7 @@ function addAllQuestions() {
         addTagIDForInput(div_id, tag_id);
         clearTagFromList(div_id + "_list", tag_id); 
         parseTagsForDiv(div_id);
+        requestSuggestedTags(div_id);
         saveQuestion(div_id);
     }  
 }
@@ -78,6 +80,7 @@ function removeAllQuestions() {
     addTagToList("worksheet_tags_list", tag_id);
     parseTagsForDiv("worksheet_tags");
     saveQuestion("worksheet_tags");
+    requestSuggestedTags("worksheet_tags");
     var questions_string = sessionStorage.getItem("questions_array");
     var questions = questions_string === "" ? [] : JSON.parse(questions_string);
     for (var i in questions) {
@@ -86,6 +89,7 @@ function removeAllQuestions() {
         removeTagIDFromInput(div_id, tag_id);
         addTagToList(div_id + "_list", tag_id); 
         parseTagsForDiv(div_id);
+        requestSuggestedTags(div_id);
         saveQuestion(div_id);
     }  
 }
@@ -271,9 +275,18 @@ function getWorksheetSuccess(json) {
         parseWorksheetMarks(questions);
         parseWorksheetTags(worksheet_tags);
         parseQuestions(questions);
+        requestAllSuggestedTags(questions);
         stopSpinnerInDiv('spinner');
     } else {
         console.log("There was an error getting the worksheets: " + json["message"]);
+    }
+}
+
+function requestAllSuggestedTags(questions) {
+    requestSuggestedTags("worksheet_tags");
+    for (var i in questions) {
+        var question = questions[i];
+        requestSuggestedTags("question_" + question["Stored Question ID"]);
     }
 }
 
@@ -287,6 +300,28 @@ function parseTagsForDiv(div_id) {
         if (tag) html_input_string += getTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
     }
     $("#" + div_id + "_input").html(html_input_string);
+}
+
+function parseSuggestedTagsForDiv(div_id) {
+    var tags = $("#" + div_id + "_suggested_values").val();
+    var tags_string = getTagsString(tags);
+    var tags_array = tags_string.split(":");
+    var html_input_string = "";
+    for (var i in tags_array) {
+        var tag = getTagForID(tags_array[i]);
+        if (tag) html_input_string += getSuggestedTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
+    }
+    $("#" + div_id + "_input_suggested").html(html_input_string);
+}
+
+function addSuggestedTag(div_id, tag_id) {
+    addTagIDForInput(div_id, tag_id);
+    clearTagFromList(div_id + "_list", tag_id); 
+    parseTagsForDiv(div_id);
+    removeSuggestedTagIDFromInput(div_id, tag_id);
+    parseSuggestedTagsForDiv(div_id);
+    requestSuggestedTags(div_id);
+    saveQuestion(div_id);
 }
 
 function getTagForID(tag_id) {
@@ -314,6 +349,13 @@ function addTagIDForInput(div_id, tag_id) {
     if (tags.length === 0) tags = "--";
     tags = addTagString(tag_id, tags);
     $("#" + div_id + "_input_values").val(tags);
+}
+
+function addSuggestedTagIDForInput(div_id, tag_id) {
+    var tags = $("#" + div_id + "_suggested_values").val();
+    if (tags.length === 0) tags = "--";
+    tags = addTagString(tag_id, tags);
+    $("#" + div_id + "_suggested_values").val(tags);
 }
 
 function addTagString(tag_id, tags) {
@@ -365,6 +407,20 @@ function removeTagIDFromInput(div_id, tag_id) {
     $("#" + div_id + "_input_values").val(new_string);
 }
 
+function removeSuggestedTagIDFromInput(div_id, tag_id) {
+    var tags = $("#" + div_id + "_suggested_values").val();
+    var tags_string = getTagsString(tags);
+    var tags_array = tags_string.split(":");
+    var new_string = "";
+    for (var i in tags_array) {
+        var tag = tags_array[i];
+        if (parseInt(tag) !== parseInt(tag_id)) {
+            new_string += new_string.length === 0 ? tag : ":" + tag;
+        }
+    }
+    $("#" + div_id + "_suggested_values").val(new_string);
+}
+
 function setUpTagSelect(div_id) {
     var tags = JSON.parse(sessionStorage.getItem("tags_list"));
     var tags_string = "";
@@ -379,6 +435,13 @@ function getTagInputHTML(div_id, tag_name, tag_type, tag_id) {
     var str = "<div id='" + tag_id + "-" + div_id + "' class='tag " + tag_type.toLowerCase() + "'>";
     str += "<div class='tag_text'>" + tag_name + "</div>";
     str += "<div class='tag_button' onclick='deleteTag(&quot;" + div_id + "&quot;," + tag_id + ")'></div></div>";
+    return str;
+}
+
+function getSuggestedTagInputHTML(div_id, tag_name, tag_type, tag_id) {
+    var str = "<div id='" + tag_id + "-" + div_id + "' class='tag suggested " + tag_type.toLowerCase() + "' onclick='addSuggestedTag(&quot;" + div_id + "&quot;, " + tag_id + ")'>";
+    str += "<div class='tag_text'>" + tag_name + "</div>";
+    str += "<div class='tag_button' ></div></div>";
     return str;
 }
 
@@ -463,6 +526,7 @@ function stringForQuestionDetails(div_id, question) {
 function stringForBlankTagEntry(div_id) {
     var html = "<div id='" + div_id + "_tags_entry' class='worksheet_question_tags_entry'>";
     html += "<input type='hidden' id='" + div_id + "_input_values' />";
+    html += "<input type='hidden' id='" + div_id + "_suggested_values' />";
     html += "<div id='" + div_id + "_input' class='tags_input'></div>";
     html += "<div id='" + div_id + "_input_suggested' class='tags_input suggested'></div>";
     html += "<div id='" + div_id + "_input_text_div' class='tags_input_text_div'>";
@@ -525,6 +589,7 @@ function changeTagInput(e) {
             $("#" + div_id + "_input_text").val("");
             parseTagsForDiv(div_id);
             clearTagFromList(div_id + "_list", tag_id);
+            requestSuggestedTags(div_id);
         } else { 
             openModal(tag_name, div_id);
         }
@@ -537,6 +602,7 @@ function deleteTag(div_id, tag_id) {
     $("#" + div_id + "_input_text").val("");
     parseTagsForDiv(div_id);
     addTagToList(div_id + "_list", tag_id);
+    requestSuggestedTags(div_id);
 }
 
 function getTypeFromId(type_id) {
@@ -625,6 +691,42 @@ function setSelectedType(type) {
         case "classification":
             $("#tag_type_value").val(1);
             break;
+    }
+}
+
+function requestSuggestedTags(div_id) {
+    var tags = getTagsString($("#" + div_id + "_input_values").val());
+    var infoArray = {
+        type: "SUGGESTEDTAGS",
+        tags: tags,
+        div_id: div_id,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/worksheet.php",
+        dataType: "json",
+        success: function(json){
+            suggestedTagsSuccess(json);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
+}
+
+function suggestedTagsSuccess(json) {
+    if (json["success"]) {
+        var suggested_tags = json["result"]["top_values"];
+        var div_id = json["result"]["div_id"];
+        $("#" + div_id + "_suggested_values").val("");
+        for (var i in suggested_tags) {
+            var tag = suggested_tags[i];
+            addSuggestedTagIDForInput(div_id, tag["ID"]);
+        }
+        parseSuggestedTagsForDiv(div_id);
     }
 }
 

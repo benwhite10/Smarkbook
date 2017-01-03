@@ -10,6 +10,8 @@ $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $user_val = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 $info_array = $_POST["array"];
+$tags = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
+$div_id = filter_input(INPUT_POST,'div_id',FILTER_SANITIZE_STRING);
 $req_id = filter_input(INPUT_POST,'req_id',FILTER_SANITIZE_NUMBER_INT);
 
 $role = validateRequest($user_id, $user_val);
@@ -23,6 +25,9 @@ switch ($request_type){
         break;
     case "NEWWORKSHEET":
         newWorksheet($info_array);
+        break;
+    case "SUGGESTEDTAGS":
+        getSuggestedTags($tags, $div_id);
         break;
     default:
         break;
@@ -249,6 +254,96 @@ function addQuestion($vid) {
             "success" => FALSE,
             "message" => $ex->getMessage());
     }
+}
+
+function getSuggestedTags($tags, $div_id) {
+    $tags_array = split(":", $tags);
+    $suggested_tags = [];
+    foreach($tags_array as $tag) {
+        // Get questions with tag
+        $query = "SELECT `Stored Question ID` SQID FROM TQUESTIONTAGS WHERE `Tag ID` = $tag";
+        try {
+            $questions = db_select_exception($query);
+            $count = count($questions);
+            if ($count === 0) break;
+            $tag_query = "SELECT `Tag ID`, COUNT(`Tag ID`) Count FROM TQUESTIONTAGS WHERE `Stored Question ID` IN (";
+            foreach ($questions as $i => $question) {
+                $sqid = $question["SQID"];
+                $tag_query .= $i + 1 == $count ? $sqid : $sqid . ", ";
+            }
+            $tag_query .= ") GROUP BY `Tag ID` ORDER BY `Tag ID`";
+            $tags_result = db_select_exception($tag_query);
+            foreach($tags_result as $tag) {
+                if (!tagIsInArray($tag, $tags_array)) {
+                    $suggested_tags = addTagToSuggestedTagArray($tag, $suggested_tags);
+                }  
+            }
+        } catch (Exception $ex) {
+            errorLog($ex->getMessage());
+        }
+    }
+    $response = array(
+        "top_values" => getTopValues($suggested_tags, 10),
+        "div_id" => $div_id);
+    succeedRequest("Suggested tags", $response);
+}
+
+function tagIsInArray($tag, $tags_array) {
+    foreach($tags_array as $value) {
+        if($value == $tag["Tag ID"]) return TRUE;
+    }
+    return FALSE;
+}
+function addTagToSuggestedTagArray($tag, $suggested_tags) {
+    $tag_id = $tag["Tag ID"];
+    $tag_count = $tag["Count"];
+    foreach($suggested_tags as $i => $suggested_tag) {
+        if ($tag_id == $suggested_tag["ID"]) {
+            $suggested_tags[$i]["Count"] = $suggested_tags[$i]["Count"] + $tag_count;
+            return $suggested_tags;
+        }
+    }
+    $new_value = array(
+        "ID" => $tag_id,
+        "Count" => $tag_count
+    );
+    array_push($suggested_tags, $new_value);
+    return $suggested_tags;
+}
+
+function getTopValues($suggested_tags, $num) {
+    $top_tags = [];
+    foreach($suggested_tags as $tag) {
+        if (count($top_tags) < $num) {
+            array_push($top_tags, $tag);
+        } else {
+            foreach($top_tags as $top_tag) {
+                if ($top_tag["Count"] < $tag["Count"]) {
+                    $top_tags = removeLeastValue($top_tags);
+                    array_push($top_tags, $tag);
+                    break;
+                }
+            }
+        }
+    }
+    usort($top_tags, function($item1,$item2){
+        if ($item1["Count"] == $item2["Count"]) return 0;
+        return $item1["Count"] > $item2["Count"] ? -1 : 1;
+    });
+    return $top_tags;
+}
+
+function removeLeastValue($top_tags) {
+    $min = 999999;
+    $id = 0;
+    foreach($top_tags as $i => $tag) {
+        if ($tag["Count"] < $min) {
+            $id = $i;
+            $min = $tag["Count"];
+        }
+    }
+    unset($top_tags[$id]);
+    return $top_tags;
 }
 
 function checkValidId($id) {
