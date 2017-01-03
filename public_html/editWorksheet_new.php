@@ -106,6 +106,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             <ul class="menu sidebar">
                 <li><div id="save_worksheet_button">Save</div></li>
                 <li><div id="add_question_button" onclick="addNewQuestion()">Add Question</div></li>
+                <li><div id="delete_question_button" onclick="deleteWorksheet()">Delete Worksheet</div></li>
             </ul>
         </div>
         </div>

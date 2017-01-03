@@ -275,10 +275,20 @@ function getWorksheetSuccess(json) {
         parseWorksheetMarks(questions);
         parseWorksheetTags(worksheet_tags);
         parseQuestions(questions);
+        setUpDeleteRestoreButton(worksheet);
         requestAllSuggestedTags(questions);
         stopSpinnerInDiv('spinner');
     } else {
         console.log("There was an error getting the worksheets: " + json["message"]);
+    }
+}
+
+function setUpDeleteRestoreButton(worksheet) {
+    var deleted = worksheet["details"]["Deleted"];
+    var name = worksheet["details"]["WName"];
+    if (deleted === "1") {
+        $("#delete_question_button").html("Restore Worksheet");
+        $("#title2").html("<h1>" + name + " - DELETED</h1>");
     }
 }
 
@@ -305,7 +315,7 @@ function parseTagsForDiv(div_id) {
 function parseSuggestedTagsForDiv(div_id) {
     var tags = $("#" + div_id + "_suggested_values").val();
     var tags_array = tags.split(":");
-    var html_input_string = "";
+    var html_input_string = tags === "" ? "No Suggestions" : "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
         if (tag) html_input_string += getSuggestedTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
@@ -524,7 +534,10 @@ function stringForBlankTagEntry(div_id) {
     html += "<input type='hidden' id='" + div_id + "_input_values' />";
     html += "<input type='hidden' id='" + div_id + "_suggested_values' />";
     html += "<div id='" + div_id + "_input' class='tags_input'></div>";
-    html += "<div id='" + div_id + "_input_suggested' class='tags_input suggested'></div>";
+    html += "<div class='suggested_tags_input_div'>";
+    html += "<div class='suggested_tags_title'>Did you mean?</div>";
+    html += "<div class='suggested_tags_container'>";
+    html += "<div id='" + div_id + "_input_suggested' class='tags_input suggested'></div></div></div>";
     html += "<div id='" + div_id + "_input_text_div' class='tags_input_text_div'>";
     html += "<input id='" + div_id + "_input_text' class='tags_input_text' type='text' list='" + div_id + "_list' placeholder='Enter tags here'>";
     html += "<datalist id='" + div_id + "_list'></datalist></div></div>";
@@ -1058,5 +1071,37 @@ function clearLock(key, req_id) {
         if (info[1] && info[1] === req_id) {
             sessionStorage.setItem(key, "");
         }
+    }
+}
+
+function deleteWorksheet(){
+    var message = "Are you sure you want to delete this worksheet? This will also remove any results associated with this worksheet.";
+    if(confirm(message)){
+        var wid = sessionStorage.getItem("worksheet_id");
+        var type = $("#delete_question_button").html() === "Delete Worksheet" ? "DELETE" : "RESTORE";
+        var infoArray = {
+            type: type,
+            vid: wid,
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/worksheetFunctions.php",
+            dataType: "json",
+            success: function(json){
+                deleteWorksheetSuccess(json);
+            }
+        });
+    }
+}
+
+function deleteWorksheetSuccess(json) {
+    if(json["success"]){
+        window.location.href = "/viewAllWorksheets.php";
+    } else {
+        alert("There was an problem deleting the worksheet, it has not been deleted.");
+        console.log(json["message"]);        
     }
 }
