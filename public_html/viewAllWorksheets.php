@@ -98,7 +98,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             </div><div id="side_bar" class="menu_bar">
                 <ul class="menu sidebar">
                     <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                    <li><a href="/addNewWorksheet.php">Add a New Worksheet</a></li> 
+                    <li><a href="/addNewWorksheet.php">Add a New Worksheet</a></li>
+                    <li id="restore_link"><a href="/viewAllWorksheets.php?rst=1">Restore Worksheets</a></li> 
                     <?php } ?>
                 </ul>
             </div>

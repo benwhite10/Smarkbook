@@ -1105,3 +1105,7 @@ function deleteWorksheetSuccess(json) {
         console.log(json["message"]);        
     }
 }
+
+function backToWorksheets() {
+    window.location.href = "/viewAllWorksheets.php";
+}
