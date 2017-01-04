@@ -115,6 +115,7 @@ function addNewWorksheet($worksheet) {
             $update = TRUE;
         }
     } catch (Exception $ex) {
+        errorLog("There was an error getting the old completed worksheet id: " . $ex->getMessage());
     }
     
     if ($update) {

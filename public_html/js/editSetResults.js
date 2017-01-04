@@ -21,6 +21,10 @@ $(document).ready(function(){
     $("#summaryBoxShowHide").click(function(){
         showHideDetails();
     });
+    
+    window.onbeforeunload = function() {
+        return checkIfUnsavedChanges() ? "You have unsaved changes, if you leave now they will not be saved." : null;
+    };
 });
 
 /* Get worksheets */
@@ -350,6 +354,7 @@ function updateCompletedWorksheet(save_worksheets_array, worksheet, stu_id) {
     save_worksheets_array.push(worksheet);
     return save_worksheets_array;
 }
+
 function clickSave(){
     saveResults();
     saveWorksheets();
@@ -376,6 +381,24 @@ function saveWorksheets() {
             sendSaveWorksheetsRequest(save_worksheets_array);
         }
     });
+}
+
+function checkIfUnsavedChanges() {
+    var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+    var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
+    var changed = sessionStorage.getItem("update_gw");
+    if (changed === "true") return true;
+    if (checkForUnsavedChanges(save_changes_array)) return true;
+    if (checkForUnsavedChanges(save_worksheets_array)) return true;
+    return false;
+}
+
+function checkForUnsavedChanges(array) {
+    for (var i in array) {
+        var change = array[i];
+        if (!change["saved"]) return true; 
+    }
+    return false;
 }
 
 function saveGroupWorksheet() {
@@ -464,7 +487,6 @@ function sendSaveWorksheetsRequest(save_worksheets_array) {
             saveWorksheetsSuccess(json);
         },
         error: function(json){
-            //TODO Should probably clear the sent request flag here
             clearLock("save_worksheets_request_lock", req_id);
         }
     });
@@ -495,7 +517,6 @@ function sendSaveResultsRequest(save_changes_array) {
             saveResultsSuccess(json);
         },
         error: function(json){
-            //TODO Should probably clear the sent request flag here
             clearLock("save_changes_request_lock", req_id);
         }
     });
@@ -519,11 +540,11 @@ function checkLock(key) {
     return true;
 }
 
-function clearLock(key, req_id) {
+function clearLock(key, req_id, force) {
     var lock = sessionStorage.getItem(key);
     if (lock !== "") {
         var info = lock.split(":");
-        if (info[1] && info[1] === req_id) {
+        if (info[1] && info[1] === req_id || force) {
             sessionStorage.setItem(key, "");
         }
     }
@@ -569,6 +590,7 @@ function saveWorksheetsSuccess(json) {
         });
     } else {
         console.log("Something didn't go well");
+        clearLock("save_worksheets_request_lock", null, true);
     }
 }
 
@@ -618,6 +640,7 @@ function saveResultsSuccess(json) {
             sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
         }); 
     } else {
+        clearLock("save_changes_request_lock", null, true);
         console.log("Something didn't go well");
     }
 }

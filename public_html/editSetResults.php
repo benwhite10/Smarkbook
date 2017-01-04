@@ -203,13 +203,6 @@ if(isset($_SESSION['message'])){
             
             <form id="editForm" class="editResults" action="" method="POST">
                 <input type='hidden' id ='gwid' name='gwid' />
-                <?php
-                    $dateString = date('d/m/Y', strtotime($details["DateDue"]));
-                    $staffNotes = isset($details["StaffNotes"]) ? $details["StaffNotes"] : "";
-                    $studentNotes = isset($details["StudentNotes"]) ? $details["StudentNotes"] : "";
-                    $hidden = isset($details["Hidden"]) ? $details["Hidden"] : "0"; 
-                ?>
-      
                 <div id="summaryBox">
                     <div id="summaryBoxDetails">
                         <div id="summaryBoxShowDetailsText">
@@ -266,7 +259,6 @@ if(isset($_SESSION['message'])){
                 </div>
             
                 <div id="main_content" style="overflow: scroll;">
-                    <input type="hidden" name="questioncount" id="questioncount" value="<?php echo count($worksheet) ?>" />
                     <table class="results" border="1">
                         <thead class="results">
                             <tr class="results" id="row_head_1"></tr>
