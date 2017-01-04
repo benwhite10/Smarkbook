@@ -107,6 +107,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <li><div id="save_worksheet_button">Save</div></li>
                 <li><div id="add_question_button" onclick="addNewQuestion()">Add Question</div></li>
                 <li><div id="delete_question_button" onclick="deleteWorksheet()">Delete Worksheet</div></li>
+                <li><div id="add_results_button" onclick="addResults()">Add Results</div></li>
                 <li><div id="back_button" onclick="backToWorksheets()">Back To All Worksheets</div></li>
             </ul>
         </div>
