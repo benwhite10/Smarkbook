@@ -25,44 +25,6 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-$gwid = filter_input(INPUT_GET, 'gwid', FILTER_SANITIZE_NUMBER_INT);
-
-$query1 = "SELECT S.`User ID`, S.`Initials` FROM TSTAFF S 
-            JOIN TUSERS U ON S.`User ID` = U.`User ID`
-            ORDER BY U.`Surname`;";
-try{
-    $staff = db_select_exception($query1);
-} catch (Exception $ex) {
-    $staff = array();
-}
-
-$postData = array(
-    "gwid" => $gwid,
-    "type" => "WORKSHEETFORGWID",
-    "userid" => $userid,
-    "userval" => $userval
-);
-        
-$resp = sendCURLRequest("/requests/getWorksheet.php", $postData);
-$respArray = json_decode($resp[1], TRUE);
-
-$success = $respArray["success"];
-if($success){
-    $details = $respArray["details"];
-    $worksheet = $respArray["worksheet"];
-    $results = $respArray["results"];
-    $completedWorksheets = $respArray["completedWorksheets"];
-    $notes = $respArray["notes"];
-    $students = $respArray["students"];
-} else {
-    $message = new Message("ERROR", "Something went wrong loading the results, please try again");
-}
-
-function getArrayValueForKey($array, $key)
-{
-    return array_key_exists($key, $array) ? $array[$key] : null;
-}
-
 if(isset($_SESSION['message'])){
     $message = $_SESSION['message'];
     unset($_SESSION['message']);
