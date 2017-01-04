@@ -141,7 +141,7 @@ function clearSearch() {
 }
 
 function goToWorksheet(vid) {
-    window.location.href = "editWorksheet_new.php?id=" + vid;
+    window.location.href = "editWorksheet.php?id=" + vid;
 }
 
 function goToOriginalWorksheet() {

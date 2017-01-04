@@ -81,7 +81,7 @@ function createWorksheetRequest() {
 
 function createWorksheetSuccess(json) {
     if (json["success"]) {
-        window.location.href = "/editWorksheet_new.php?id=" + json["result"];
+        window.location.href = "/editWorksheet.php?id=" + json["result"];
     } else {
         console.log("There was an error creating the worksheet: " + json["message"]);
     }
