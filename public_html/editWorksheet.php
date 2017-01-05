@@ -30,7 +30,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <html>
 <head lang="en">
     <?php pageHeader("Edit Worksheet"); ?>
-    <link rel="stylesheet" type="text/css" href="css/editworksheet_new.css" />
+    <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
     <script src="js/editWorksheet.js"></script>
     <script src="libraries/spin.js"></script>
 </head>
