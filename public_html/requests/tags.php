@@ -47,14 +47,14 @@ function requestTagInfo($tagid){
         $result = db_select($query);
     } catch (Exception $ex) {
         $msg = "There was an error retrieving the tag.";
-        failRequest($msg);
+        failRequest($msg . ": " . $ex->getMessage());
     }
     
     if(count($result) > 0){
         $tagInfo = $result[0];
     } else {
         $msg = "There were no tags returned for that id.";
-        failRequest($msg);
+        failRequest($msg . ": " . $ex->getMessage());
     }
     
     $response = array(
@@ -162,7 +162,7 @@ function addNewTag($name, $typeId, $div_id) {
     $query = "INSERT INTO `TTAGS`(`Name`, `Date Added`, `Type`) VALUES ('$name_escape',NOW(),$typeId)";
     try {
         $response = db_insert_query_exception($query);
-        $tag_id = $response[1];
+        $tag_id = count($response) > 0 ? $response[1] : 0;
         $query2 = "SELECT T.`Tag ID`, T.`Name`, T.`Date Added`, T.`Type` TypeID, TT.`Name` Type FROM TTAGS T "
             . "LEFT JOIN TTAGTYPES TT ON T.`Type` = TT.`ID` "
             . "WHERE T.`Tag ID` = $tag_id;";

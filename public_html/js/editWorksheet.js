@@ -6,10 +6,6 @@ $(document).ready(function(){
     
     sessionStorage.setItem("save_requests", "[]");
     
-    $(window).resize(function(){
-       
-    });
-    
     // Get the modal
     var modal = document.getElementById('modal_add_new');
 
@@ -188,6 +184,9 @@ function requestAllStaff() {
         dataType: "json",
         success: function(json){
             requestStaffSuccess(json);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
         }
     });
 }
@@ -843,7 +842,7 @@ function addNewTagRequestSuccess(json) {
         clearTagFromList(div_id + "_list", tag_id);
         closeModal();
     } else {
-        console.log("Adding tag failed");
+        console.log("Adding tag failed: " + json["message"]);
     }
 }
 
@@ -1092,6 +1091,9 @@ function deleteWorksheet(){
             dataType: "json",
             success: function(json){
                 deleteWorksheetSuccess(json);
+            },
+            error: function(response){
+                console.log("Request failed with status code: " + response.status + " - " + response.statusText);
             }
         });
     }

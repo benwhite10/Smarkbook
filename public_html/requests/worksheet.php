@@ -84,7 +84,8 @@ function updateQuestion($sqid, $tags, $mark, $label) {
                 }
             }
             if (!$contains) {
-                $link_id = $current_tag["Link ID"];
+                $link_id = checkValidId($current_tag["Link ID"]);
+                if ($link_id == 0) throw new Exception('Error getting link id');
                 $remove_query = "UPDATE `TQUESTIONTAGS` SET `Deleted` = 1 WHERE `Link ID` = $link_id;";
                 db_query_exception($remove_query);
             }
@@ -104,6 +105,7 @@ function updateQuestion($sqid, $tags, $mark, $label) {
             }
         }
         // Update the marks and label
+        if (checkValidId($sqid) == 0) throw new Exception('Error getting sqid');
         $marks_query = "UPDATE `TSTOREDQUESTIONS` SET `Marks`=$mark, `Number`='$label' WHERE `Stored Question ID` = $sqid";
         db_query_exception($marks_query);
         db_commit_transaction();
@@ -137,10 +139,9 @@ function updateWorksheetTags($wid, $tags) {
             }
             if (!$contains) {
                 $link_id = $current_tag["ID"];
-                if ($link_id && is_numeric($link_id) && $link_id > 0) {
-                    $remove_query = "DELETE FROM `TWORKSHEETTAGS` WHERE `ID` = $link_id";
-                    db_query_exception($remove_query);
-                }      
+                if ($link_id == 0) throw new Exception('Error getting link id');
+                $remove_query = "DELETE FROM `TWORKSHEETTAGS` WHERE `ID` = $link_id";
+                db_query_exception($remove_query);    
             }
         }
         // Add any new tags that don't currently exist
@@ -180,6 +181,7 @@ function updateWorksheetDetails($wid, $name, $link, $date, $author) {
             . "`Author ID`=$author "
             . "WHERE `Version ID` = $wid;";
     try {
+        if ($wid == 0) throw new Exception('Error getting worksheet id');
         db_query_exception($query);
         return array (
             "div_id" => "worksheet_details",
@@ -195,6 +197,7 @@ function updateWorksheetDetails($wid, $name, $link, $date, $author) {
 function deleteQuestion($sqid) {
     $query = "UPDATE `TSTOREDQUESTIONS` SET `Deleted` = 1 WHERE `Stored Question ID` = $sqid;";
     try {
+        if ($sqid == 0) throw new Exception('Error getting sqid');
         db_query_exception($query);
         return array (
             "div_id" => "delete_question",
