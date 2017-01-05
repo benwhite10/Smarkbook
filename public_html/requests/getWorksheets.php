@@ -31,6 +31,11 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         getAllWorksheets($orderby, $desc);
+    case "DELETEDWORKSHEETS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getAllDeletedWorksheets($orderby, $desc);
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
@@ -70,6 +75,33 @@ function getAllWorksheets($orderby, $desc){
             . "FROM TWORKSHEETVERSION WV "
             . "JOIN TSTAFF S ON S.`User ID` = WV.`Author ID` "
             . "WHERE WV.`Deleted` = 0";
+    if(isset($orderby)){
+        $query .= " ORDER BY $orderby";
+        if(isset($desc) && $desc == "TRUE"){
+            $query .= " DESC";
+        }
+    }
+
+    try{
+        $worksheets = db_select_exception($query);
+    } catch (Exception $ex) {
+        $message = "There was an error retrieving the worksheets.";
+        returnToPageError($ex, $message);
+    }
+    
+    $response = array(
+        "success" => TRUE,
+        "worksheets" => $worksheets);
+    
+    echo json_encode($response);
+    exit();
+}
+
+function getAllDeletedWorksheets($orderby, $desc){        
+    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, S.`Initials` Author "
+            . "FROM TWORKSHEETVERSION WV "
+            . "JOIN TSTAFF S ON S.`User ID` = WV.`Author ID` "
+            . "WHERE WV.`Deleted` = 1";
     if(isset($orderby)){
         $query .= " ORDER BY $orderby";
         if(isset($desc) && $desc == "TRUE"){

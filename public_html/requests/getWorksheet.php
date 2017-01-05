@@ -8,6 +8,7 @@ include_once $include_path . '/public_html/requests/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
+$wid = filter_input(INPUT_POST,'wid',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
@@ -28,6 +29,12 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         getNotesForGWID($gwid);
+        break;
+    case "WORKSHEETINFO":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getWorksheetInfo($wid);
         break;
     default:
         break;
@@ -135,6 +142,52 @@ function getNotesForGWID($gwid){
         "notes" => $notes);
     
     echo json_encode($test);
+}
+
+function getWorksheetInfo($wid) {
+    $query1 = "SELECT * FROM TWORKSHEETVERSION WHERE `Version ID` = $wid;";
+    $query2 = "SELECT * FROM `TSTOREDQUESTIONS` WHERE `Version ID` = $wid AND `Deleted` = 0 ORDER BY `Question Order`";
+    $query3 = "SELECT T.`Tag ID` ID, T.`Name` Name, TT.`ID` TypeID, TT.`Name` Type FROM TWORKSHEETTAGS WT "
+            . "JOIN TTAGS T ON WT.`Tag ID` = T.`Tag ID` "
+            . "JOIN TTAGTYPES TT ON T.`Type` = TT.`ID` "
+            . "WHERE `Worksheet ID` = $wid "
+            . "ORDER BY T.`Type` DESC, T.`Name`;";
+    try {
+        $worksheet_details = db_select_exception($query1);
+        $worksheet_questions = db_select_exception($query2);
+        $worksheet_tags = db_select_exception($query3);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    $worksheet = array (
+        "details" => $worksheet_details[0],
+        "questions" => getTagsForQuestions($worksheet_questions),
+        "tags" => $worksheet_tags
+    );
+    $response = array (
+        "success" => TRUE,
+        "worksheet" => $worksheet
+    );
+    echo json_encode($response);
+    exit();
+}
+
+function getTagsForQuestions($questions) {
+    foreach ($questions as $i => $question) {
+        $id = $question["Stored Question ID"];
+        try {
+            $query = "SELECT QT.`Link ID`, QT.`Tag ID`, QT.`Deleted`, T.`Name` TagName, T.`Type` TypeID, TT.`Name` TypeName FROM `TQUESTIONTAGS` QT 
+                    JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID` 
+                    JOIN TTAGTYPES TT ON T.`Type` = TT.`ID`
+                    WHERE `Stored Question ID` = $id AND QT.`Deleted` = 0 
+                    ORDER BY T.`Type` DESC, T.`Name`;";
+            $tags = db_select_exception($query);
+            $questions[$i]["Tags"] = $tags;
+        } catch (Exception $ex) {
+            failRequest($ex->getMessage());
+        }
+    }
+    return $questions;
 }
 
 function failRequest($message){

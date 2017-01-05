@@ -13,6 +13,7 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
 }else{
     header($resultArray[1]);
     exit();
@@ -23,79 +24,6 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     exit();
 }
 
-$vid = filter_input(INPUT_GET,'id',FILTER_SANITIZE_NUMBER_INT);
-
-if(!isset($vid)){
-    failWithMessage("Something went wrong loading the details, please try again.");
-}
-
-$stopFlag = FALSE;
-
-$query1 = "SELECT V.`Worksheet ID` WID, V.`WName` WName, V.`VName` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, V.`Link` Link "
-        . "FROM TWORKSHEETVERSION V "
-        . "JOIN TSTAFF S ON V.`Author ID` = S.`User ID` "
-        . "WHERE V.`Version ID` = $vid;";
-try{
-    $worksheet = db_select_exception($query1);
-} catch (Exception $ex) {
-    $msg = $ex->getMessage();
-    failWithMessage("Something went wrong selecting the worksheet with Version ID ($vid) - $msg");
-}
-
-$queries = array(
-    "SELECT V.`Worksheet ID` WID, V.`WName` WName, V.`VName` VName, V.`Author ID` AuthorID, S.`Initials` Author, V.`Date Added` Date, V.`Link` Link FROM TWORKSHEETVERSION V JOIN TSTAFF S ON V.`Author ID` = S.`Staff ID` WHERE V.`Version ID` = $vid;",
-    "SELECT S.`Stored Question ID` ID, S.`Number` Number, S.`Marks` Marks FROM TSTOREDQUESTIONS S WHERE S.`Version ID` = $vid ORDER BY S.`Question Order`;",
-    "SELECT S.`Stored Question ID` ID, T.`Name` Name FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` WHERE S.`Version ID` = $vid ORDER BY T.`Name`;",
-    "SELECT T.`Name` Name, T.`Tag ID` ID FROM TSTOREDQUESTIONS S JOIN TQUESTIONTAGS Q ON S.`Stored Question ID` = Q.`Stored Question ID` JOIN TTAGS T ON Q.`Tag ID` = T.`Tag ID` GROUP BY T.`Name` ORDER BY COUNT(T.`Name`) DESC, T.`Name`; ",
-    "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S ORDER BY S.`Initials`;"
-);
-
-$errors = array(
-    "Something went wrong retrieving the worksheet with Version ID ($vid)",
-    "Something went wrong retrieving questions for the worksheet with Version ID ($vid)",
-    "Something went wrong retrieving tags for the worksheet with Version ID ($vid)",
-    "Something went wrong loading all of the tags, please try again.",
-    "Something went wrong loading all of the staff, please try again"
-);
-
-$variables = array(
-    "worksheet",
-    "questions",
-    "tags",
-    "alltags",
-    "staff"
-);
-
-for($i = 0; $i < count($queries); $i++) {
-    if(!$stopFlag){
-        $query = $queries[$i];
-        $error = $errors[$i];
-        $variable = $variables[$i];
-        if(isset($query, $variable, $error)){
-            try{
-                $$variable = db_select_exception($query);
-            } catch (Exception $ex) {
-                $stopFlag = true;
-                failWithMessage($error, $ex);
-            }
-        }else{
-            $stopFlag = true;
-        }
-    }
-}
-
-if(isset($_SESSION['message'])){
-    $Message = $_SESSION['message'];
-    $message = $Message->getMessage();
-    $type = $Message->getType();
-    unset($_SESSION['message']);
-}
-
-function failWithMessage($msg, $ex){
-    $_SESSION['message'] = new Message("ERROR", $msg);
-    errorLog($msg . ' - ' . $ex->getMessage());
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -103,16 +31,11 @@ function failWithMessage($msg, $ex){
 <head lang="en">
     <?php pageHeader("Edit Worksheet"); ?>
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css"/>
-    <script src="js/jquery-ui.js"></script>
-    <script src="js/tagsList.js"></script>
-    <script>
-        $(function() {
-          $( "#datepicker" ).datepicker({ dateFormat: 'dd/mm/yy' });
-        });
-    </script>
+    <script src="js/editWorksheet.js"></script>
+    <script src="libraries/spin.js"></script>
 </head>
 <body>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -132,187 +55,93 @@ function failWithMessage($msg, $ex){
     	<div id="body">
             <div id="top_bar">
                 <div id="title2">
-                    <h1>Edit Worksheet</h1>
+                    <h1></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>
             </div>
-            
-            <?php
-                if(isset($message)){
-                    if($type == "ERROR"){
-                        $div = 'class="error"';
-                    }else if($type == "SUCCESS"){
-                        $div = 'class="success"';
-                    }
-                }else{
-                    $div = 'style="display:none;"';
-                }
-            ?>
-            
-            <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
-                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>  
-            
-            <?php if(!$stopFlag){ ?>
-            <form id="editForm" class="editWorksheet" action="includes/updateWorksheet.php" method="POST">
-                <div id="main_content">
-                    <input type="hidden" name = "version" value="<?php echo $vid ?>" />
-                    <label for="worksheetname">Worksheet:
-                    </label><input type="text" name="worksheetname" id="worksheetname" placeholder="Name" value="<?php echo $worksheet[0]['WName'] ?>" />
-                    <!--
-                    <label for="versionname">Version:
-                    </label><input type="text" name="versionname" id="versionname" placeholder="Version" value="<?php //echo $worksheet[0]['VName'] ?>" />
-                    -->
-                    <label for="link">File Link:
-                    </label><input type="url" name="link" placeholder="File Link" id="test123" value="<?php echo $worksheet[0]['Link'] ?>" />
-                    <label for="author">Author:
-                    </label><select name="author" id="author">
-                        <option value=0>Author:</option>
-                        <?php
-                            $author = $worksheet[0]['AuthorID'];
-                            foreach($staff as $teacher){
-                                $id = $teacher['ID'];
-                                $initials = $teacher['Initials'];
-                                if($id == $author){
-                                    echo "<option value='$id' selected>$initials</option>";
-                                }else{
-                                    echo "<option value='$id'>$initials</option>";
-                                }
-                            }
-                        ?>
+            <div id="spinner" class="spinner"></div>
+            <div id="main_content">
+                <div id="worksheet_details_title" class="section_title">
+                    <div class="section_title_text">
+                        <h2>Details</h2>
+                    </div>
+                    <div id="worksheet_details_button" class="section_title_button" onclick="showHideDetails()">
+                    </div>
+                    
+                </div>
+                <div id="worksheet_details" class="section_main">
+                    <label>Name:
+                    </label><input type="text" id="worksheet_name" placeholder="Name" onchange="saveQuestion('worksheet_details')"/>
+                    <label>File Link:
+                    </label><input type="text" id="worksheet_link" placeholder="File Link" onchange="saveQuestion('worksheet_details')"/>
+                    <label>Author:
+                    </label><select id="worksheet_author" onchange="saveQuestion('worksheet_details')">
+                        <option value="0">No Teachers</option>
                     </select>
-                    <?php
-                        $date = $worksheet[0]['Date'];
-                        $newdate = date('d/m/Y',strtotime($date));
-                    ?>
-                    <label for="date">Date Added:
-                    </label><input type="text" name="date" id="datepicker" placeholder="DD/MM/YYYY" value="<?php echo $newdate ?>"></input>
-                    <?php 
-                        $count = 1;
-                        foreach ($questions as $question){
-                            $number = $question['Number'];
-                            $marks = $question['Marks'];
-                            $qid = $question['ID'];
-
-                            $ques = 'question' . $number;
-                            echo "<fieldset id='$ques'>";
-                            echo "<legend>Question " . $number . "</legend>";
-                            
-                            $name = $count . 'a';
-                            echo "<input type='hidden' name='$name' value='$qid' >";
-                            
-                            $name1 = $count .'num';
-                            echo "<label for='$name1'>Number:";
-                            echo "</label><input type='text' name='$name1' value='$number'></input>";
-                            
-                            $name2 = $count . 'mark';
-                            echo "<label for='$name2'>Marks:";
-                            echo "</label><input type='text' name='$name2' value='$marks'></input>";
-
-                            $tagstring = "";
-                            
-                            foreach($tags as $tag){
-                                if($tag['ID'] == $qid){
-                                    $name = $tag['Name'];
-                                    $tagstring = $tagstring . $name . ", ";
-                                }
-                            }
-
-                            $substr = substr($tagstring, 0, -2);
-
-                            $name3 = $count . 'tags';
-                            echo "<label for='$name3'>Tags: ";
-                            echo "</label><textarea name='$name3' class='autocomplete' >$tagstring</textarea>";
-                            
-                            //Leave like this so that ' can be included in the tag name
-                            $varname = $count . 'currTags';
-                            print '<input type="hidden" name="' . $varname . '" value="' . $tagstring . '" />';
-
-                            echo "</fieldset>";
-                            $count = $count + 1;
-                        }
-                    ?> 
-                    <!--<input type="submit" value="Save"/>-->
+                    <label>Date Added:    
+                    </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" onchange="saveQuestion('worksheet_details')"/> 
                 </div>
-            <?php } ?>
-                <div id="side_bar">
-                    <ul class="menu sidebar">
-                        <!--<li><a href="www.bbc.co.uk">Add Question</a></li>-->
-                        <?php if(!$stopFlag){ ?>
-                        <li><input type="submit" value="Save"/></li>
-                        <?php } ?>
-                        <li><a <?php 
-                                    if(isset($vid)){
-                                        echo "href='/viewWorksheet.php?id=$vid'";
-                                    }else{
-                                        echo "href='/viewAllWorksheets.php'";
-                                    }
-                                ?>
-                                >Back To Overview</a></li>
-                    </ul>
+                <div id="worksheet_marks_titles" class="section_title">
+                    <h2>Marks</h2>
                 </div>
-            </form> 
-    	</div>
+                <div id="worksheet_marks" class="section_main">
+                    <table class="worksheet_marks">
+                        <tbody class="worksheet_marks">
+                            <tr class="worksheet_marks" id="worksheet_marks_ques"></tr>
+                            <tr class="worksheet_marks" id="worksheet_marks_marks"></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="worksheet_tags_title" class="section_title">
+                    <h2>Worksheet Tags</h2>
+                </div>
+                <div id="worksheet_tags" class="section_main"></div>
+                <div id="worksheet_questions_title" class="section_title">
+                    <h2>Questions</h2>
+                </div>
+                <div id="worksheet_questions" class="section_main"></div>
+            </div>
+            <div id="side_bar">
+            <ul class="menu sidebar">
+                <li><div id="save_worksheet_button">Save</div></li>
+                <li><div id="add_question_button" onclick="addNewQuestion()">Add Question</div></li>
+                <li><div id="delete_question_button" onclick="deleteWorksheet()">Delete Worksheet</div></li>
+                <li><div id="add_results_button" onclick="addResults()">Add Results</div></li>
+                <li><div id="back_button" onclick="backToWorksheets()">Back To All Worksheets</div></li>
+            </ul>
+        </div>
+        </div>
     </div>
-    <script>
-    var availableTags = [];
-    <?php
-        foreach ($alltags as $tag){
-            print 'availableTags.push("' . $tag['Name'] . '");';
-        }
-    ?>
-        
-    var allTagNames = [];
-    var allTagIds = [];
-    <?php
-        foreach ($alltags as $tag){
-            print 'allTagNames.push("' . $tag['Name'] . '");';
-            print 'allTagIds.push("' . $tag['ID'] . '");';
-        }
-    ?>
-        
-    function split( val ) {
-      return val.split( /,\s*/ );
-    }
-    function extractLast( term ) {
-      return split( term ).pop();
-    }
-
-    $( ".autocomplete" )
-    // don't navigate away from the field on tab when selecting an item
-    .bind( "keydown", function( event ) {
-        if ( event.keyCode === $.ui.keyCode.TAB && $( this ).autocomplete( "instance" ).menu.active ) {
-            event.preventDefault();
-        }
-    })
-
-    .autocomplete({
-        minLength: 0,
-        source: function( request, response ) {
-            // delegate back to autocomplete, but extract the last term
-            response( $.ui.autocomplete.filter(availableTags, extractLast( request.term ) ) );
-        },
-        focus: function() {
-            // prevent value inserted on focus
-            return false;
-        },
-        select: function( event, ui ) {
-            var terms = split( this.value );
-            // remove the current input
-            terms.pop();
-            // add the selected item
-            terms.push( ui.item.value );
-            // add placeholder to get the comma-and-space at the end
-            terms.push( "" );
-            this.value = terms.join( ", " );
-            return false;
-        }
-    });
-
-    </script>
-    <script src="js/tagsList.js"></script>
+    <div id="modal_add_new" class="modal_pop_up">
+        <div class="modal_content animate">
+            <span onclick="closeModal()" class="close" title="Close Modal">&times;</span>
+            <input type="hidden" id="add_new_tag_div_id">
+            <input type="hidden" id="add_new_tag_type">
+            <div class="container_title">Add New Tag</div>
+            <input type="text" placeholder="New Tag Name" id="add_new_tag_name" class="tags_input_text pop_up_input_text" >
+            <div class="add_new_tag_container">
+                <div class="add_new_tag_container_title"><i>Did you mean?</i></div>
+                <input type="hidden" id="add_new_tag_input_values" >
+                <div id="add_new_tag_input" class="tags_input add_new_tag_input"></div>
+            </div>
+            <div class="tag_types">
+                <input type="hidden" id="tag_type_value">
+                <div id="tag_type_classification" class="tag_type classification" onclick="changeNewTagType('classification')">Classification</div>
+                <div id="tag_type_major" class="tag_type major" onclick="changeNewTagType('major')">Major</div>
+                <div id="tag_type_minor" class="tag_type minor selected" onclick="changeNewTagType('minor')">Minor</div>
+            </div>
+            <div class="action_buttons">
+                <div class="save_button" onclick="saveNewTag()">Save</div>
+                <div class="cancel_button" onclick="closeModal()">Cancel</div>
+            </div>
+        </div>
+    </div>
+    <nav id="context-menu" class="context-menu">
+        <ul class="context-menu_items">
+            <li class="context-menu_item" onclick="addAllQuestions()">Add Tag To All Questions</li>
+            <li class="context-menu_item" onclick="removeAllQuestions()">Remove Tag From All Questions</li>
+        </ul>
+    </nav>
 </body>
 
-	

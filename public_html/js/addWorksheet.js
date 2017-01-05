@@ -1,48 +1,98 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 $(document).ready(function(){
-    $('#editForm').submit(function(){
-        
-        var validationMessage = validate();
-        if(validationMessage !== true){
-            setUpErrorMessage(validationMessage);
-            console.log(validationMessage);
-            return false;
-        }
-        convertAllToLowerCase();
-
-        if(document.getElementById("tags")){
-            var tagsString = document.getElementById("tags").value;
-            var tagsArray = convertToArray(tagsString);
-            var json = JSON.stringify(tagsArray);
-        }
-        
-        // Create a new element input, this will be our update string. 
-        var p = document.createElement("input");
-
-        // Add the new element to our form. 
-        this.appendChild(p);
-        p.name = "updateTags";
-        p.type = "hidden";
-        p.value = json;
-
-        return true;
+    requestAllStaff();
+    
+    $(function() {
+        $( "#datepicker" ).datepicker({ dateFormat: 'dd/mm/yy' });
     });
 });
+
+function requestAllStaff() {
+    var infoArray = {
+        orderby: "Initials",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStaff.php",
+        dataType: "json",
+        success: function(json){
+            requestStaffSuccess(json);
+        }
+    });
+}
+
+function requestStaffSuccess(json) {
+    if(json["success"]) {
+        var staff = json["staff"];
+        $("#worksheet_author").html("");
+        var options = "<option value='0' selected>Author</option>";
+        for (var key in staff) {
+            var teacher = staff[key];
+            var userid = teacher["User ID"];
+            options += "<option value='" + userid + "'>" + teacher["Initials"] + "</option>";
+        }
+        $("#worksheet_author").html(options);
+        $("#worksheet_author").val($('#userid').val());
+    } else {
+        console.log("There was an error getting the staff: " + json["message"]);
+    }
+}
+
+function createWorksheet() {
+    var validation = validate();
+    if (validation === true) {
+        // Create worksheet
+        createWorksheetRequest();
+    } else {
+        alert (validation);
+    }
+}
+
+function createWorksheetRequest() {
+    var array_to_send = {
+        name: $("#worksheetname").val(),
+        link: $("#link").val(),
+        author: $("#worksheet_author").val(),
+        date: $("#datepicker").val(),
+        questions: $("#questions").val()
+    };
+    var infoArray = {
+        type: "NEWWORKSHEET",
+        array: array_to_send,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/worksheet.php",
+        dataType: "json",
+        success: function(json){
+            createWorksheetSuccess(json);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
+}
+
+function createWorksheetSuccess(json) {
+    if (json["success"]) {
+        window.location.href = "/editWorksheet.php?id=" + json["result"];
+    } else {
+        console.log("There was an error creating the worksheet: " + json["message"]);
+    }
+}
 
 function validate(){
     // Worksheet
     if(document.getElementById("worksheetname") && document.getElementById("worksheetname").value.length === 0){
         return "Please enter a name for your worksheet.";
     }
-    // Version
-    if(document.getElementById("versionname") && document.getElementById("versionname").value.length === 0){
-        return "Please enter a version name for your worksheet.";
-    }
+
     //Date
     var datepicker = document.getElementById("datepicker");
     if(datepicker){
@@ -99,19 +149,4 @@ function convertToArray(string){
         }
     }
     return array;
-}
-
-function getIdFromTag(string){
-    var pos = allTagNamesLowerCase.indexOf(string.toLowerCase());
-    if (pos === -1){
-        return ["NEW", string];
-    }else{
-        return ["CURRENT", allTagIds[pos]];
-    }
-}
-
-function convertAllToLowerCase(){
-    allTagNamesLowerCase = allTagNames.map(function(value) {
-      return value.toLowerCase();
-    });
 }

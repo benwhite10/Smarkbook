@@ -2,14 +2,51 @@ table {
     border: 1px solid #323232;
 }
 
-th.date, td.date {
-    width: 120px;
-}
-
-.tag_row {
+tr.tag_row {
     cursor: pointer;
+    height: 35px
 }
 
-th.date, th.name, td.date, td.name {
-    height: 40px;
+th.date, th.name, td.date, td.name, td.tag {
+    height: 35px;
 }
+
+#main_content {
+    width: 100%;
+}
+
+.tag_classification, .tag_major, .tag_minor {
+    width: 120px;
+    text-align: center;
+    padding: 0px;
+}
+
+.tag_type {
+    text-align: center;
+}
+
+.tag_classification:hover {
+    background: #1c94c4;
+}
+
+.tag_major:hover {
+    background: #FF8282;
+}
+
+.tag_minor:hover {
+    background: #e68a00;
+}
+
+.tag_classification.selected {
+    background: #1c94c4;
+}
+
+.tag_major.selected {
+    background: #FF8282;
+}
+
+.tag_minor.selected {
+    background: #e68a00;
+}
+
+

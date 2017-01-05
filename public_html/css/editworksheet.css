@@ -56,3 +56,534 @@ textarea {
   height: 60px;
   vertical-align: top;
 }
+
+table.worksheet_marks {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+tr.worksheet_marks, td.worksheet_marks {
+    height: 30px;
+    width: 50px;
+    text-align: center;
+    border: 1px solid black;
+    padding: 0px;
+}
+
+tr.worksheet_marks, tr.worksheet_marks:hover {
+    background: #EEE;
+}
+
+input[type="text"].marks_input {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    text-align: center;
+    border: none;
+    border-radius: 0;
+}
+
+h2 {
+    font-weight: normal;
+    font-size: 1.8rem;
+    padding-left: 10px;
+}
+
+.section_main {
+    border: 1px solid black;
+    padding: 0;
+}
+
+.section_title {
+    margin-top: 20px;
+}
+
+.section_title_text, .section_title_button {
+    display: inline-block;
+    height: 100%;
+}
+
+.section_title_text {
+    width: calc(100% - 35px);
+    vertical-align: middle;
+}
+
+.section_title_button {
+    width: 25px;
+    height: 25px;
+    vertical-align: middle;
+    background-image: url("../images/plusminus.png");
+    background-repeat: no-repeat;
+    background-size: 100px 25px;
+    background-position: -75px;
+    cursor: pointer;
+}
+
+.section_title_button.minus {
+    background-position: -25px;
+}
+
+.section_title_button:hover {
+    background-position: -50px;
+}
+
+.section_title_button.minus:hover {
+    background-position: 0px;
+}
+
+#worksheet_details {
+    border-top: none;
+    display: none;
+    padding: 10px;
+}
+
+#worksheet_details_title {
+    border-bottom: 1px solid black;
+    margin-top: 0;
+}
+
+#worksheet_marks {
+    border: none;
+}
+
+#worksheet_tags, .worksheet_question_tags_entry {
+    min-height: 65px;
+    height: 100%;
+    border: none;
+}
+
+.worksheet_question_tags_entry {
+    border: 1px solid black;
+}
+
+.worksheet_question_details {
+    height: 30px;
+    margin-top: 10px;
+}
+
+.wqd_marks_input, .wqd_marks_text, .wqd_question_input, .wqd_question_text {
+    height: 30px;
+    line-height: 30px;
+    display: inline-block;
+    float: left;
+    font-size: 1.1rem;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+input[type="text"].question_marks_input, input[type="text"].question_label_input {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    text-align: center;
+    border: none;
+    border-radius: 0;
+    line-height: 30px;
+    font-size: 1.1rem;
+    font-weight: normal;
+    cursor: pointer;
+    vertical-align: top;
+}
+
+input[type="text"].question_label_input {
+    width: 40px;
+    text-align: left;
+}
+
+.wqd_marks_input, .wqd_marks_text, .wqd_delete_button {
+    float: right;
+}
+
+.wqd_marks_input {
+    padding-right: 10px;
+}
+
+.wqd_delete_button {
+    height: 30px;
+    width: 30px;
+    padding: 0;
+    margin: 0;
+    background-image: url("../images/delete-button.png");
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    background-position: 0;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.wqd_delete_button:hover {
+    opacity: 1.0;
+}
+
+.wqd_marks_input {
+    width: 35px;
+}
+
+.wqd_marks_input, .wqd_question_input {
+    outline: none;
+    cursor: text; 
+}
+
+.wqd_question_text, .wqd_question_input {
+    padding-left: 10px;
+}
+
+.tags_input {
+    min-height: 65px;
+    height:calc(100% - 10px); 
+    width:calc(100% - 10px);
+    margin: 0;
+    padding: 0 5px;
+    outline: none;
+    line-height: 30px;
+    font-size: 0.8rem;    
+}
+
+.tags_input.suggested {
+    width:calc(100% - 10px);
+    height:calc(100% - 10px);
+    min-height: 35px;
+    max-height: 70px;
+    width: 100%;
+    font-size: 0.9rem;
+    font-weight: lighter;
+    color: #999;
+}
+
+.suggested_tags_input_div {
+    border-top: 1px dashed #888;
+    width: 100%;
+}
+
+.suggested_tags_title {
+    padding-left: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.tag {
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+    font-size: 0.8rem;
+    padding-left: 10px;
+    margin-right: 5px;
+    cursor: pointer;
+    border-radius: 4px 10px 10px 4px;
+    vertical-align: middle;
+    color: #000;
+}
+
+.tag:hover {
+    box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.5);;
+}
+
+.classification {
+    background: rgba(27, 175, 249, 1);
+}
+
+.major {
+    background: rgba(249, 90, 27, 1);
+}
+
+.minor {
+    background: rgba(249, 209, 27, 1);
+}
+
+.tag.suggested {
+    opacity: 0.5;
+}
+
+.tag.suggested:hover {
+    opacity: 0.75;
+}
+
+.tags_input_text_div {
+    width: 100%;
+    height: 35px;
+    line-height: 35px;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    border-top: 1px dashed #888;
+}
+
+input[type="text"].tags_input_text {
+    width: calc(100% - 10px);
+    height: 100%;
+    line-height: 35px;
+    background: transparent;
+    margin: 0;
+    padding: 0 5px;
+    border: none;
+}
+
+.tag_text {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0;
+    margin-right: 5px;
+    vertical-align: middle;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.tag_button {
+    display: inline-block;
+    float: left;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    margin: 0;
+    vertical-align: middle;
+    background-image: url("../images/cancel.png");
+    background-repeat: no-repeat;
+    background-size: 50px 25px;
+    background-position: -25px;
+}
+
+.tag_button:hover {
+    background-position: 0px;
+}
+
+#worksheet_questions_title {
+    border-bottom: 1px solid black;
+}
+
+#worksheet_questions {
+    border: none;
+}
+
+/* The Modal (background) */
+.modal_pop_up {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    padding-top: 60px;
+}
+
+/* Modal Content/Box */
+.modal_content {
+    background-color: #fefefe;
+    margin: 5px auto; 
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+}
+
+/* The Close Button */
+.close {
+    /* Position it in the top right corner inside of the modal */
+    display: inline-block;
+    float: right;
+    margin-right: 10px;
+    color: #000;
+    font-size: 35px;
+    font-weight: bold;
+}
+
+/* Close button on hover */
+.close:hover,
+.close:focus {
+    color: red;
+    cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+    -webkit-animation: animatezoom 0.6s;
+    animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+    from {-webkit-transform: scale(0)} 
+    to {-webkit-transform: scale(1)}
+}
+
+@keyframes animatezoom {
+    from {transform: scale(0)} 
+    to {transform: scale(1)}
+}
+
+.container_title {
+    text-align: center;
+    margin: 14px 0 12px 0;
+    font-size: 2.0rem;
+    font-weight: normal;
+}
+
+input[type="text"].pop_up_input_text {
+    height: 40px;
+    margin: 10px;
+    width: calc(100% - 32px);
+    border: 1px solid black;
+}
+
+.add_new_tag_container {
+    min-height: 60px;
+    width: calc(100% - 20px);
+    padding: 0 10px;
+}
+
+.add_new_tag_container_title {
+    width: 100%;
+    height: 25px;
+    line-height: 25px;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.add_new_tag_input {
+    border: 1px solid;
+    margin-bottom: 10px;
+    min-height: 60px;
+    max-height: 60px;
+    overflow: scroll;
+}
+
+.tag_types {
+    min-height: 40px;
+    width: 100%;
+}
+
+.tag_type {
+    height: 39px;
+    width: 33.333%;
+    display: inline-block;
+    float: left;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 40px;
+    text-align: center;
+    border-top: 1px solid black;
+}
+
+.tag_type.classification:hover {
+    background: rgba(27, 175, 249, 0.5);
+}
+
+.tag_type.major:hover {
+    background: rgba(249, 90, 27, 0.5);
+}
+
+.tag_type.minor:hover {
+    background: rgba(249, 209, 27, 0.5);
+}
+
+.tag_type.classification.selected {
+    background: rgba(27, 175, 249, 1);
+}
+
+.tag_type.major.selected  {
+    background: rgba(249, 90, 27, 1);
+}
+
+.tag_type.minor.selected  {
+    background: rgba(249, 209, 27, 1);
+}
+
+.action_buttons {
+    min-height: 40px;
+    width: 100%;
+    font-size: 1.2rem;
+    line-height: 40px;
+    text-align: center;
+    border-top: 1px solid black;
+}
+
+.save_button, .cancel_button {
+    height: 40px;
+    width: 50%;
+    display: inline-block;
+    float: left;
+    background: transparent;
+    cursor: pointer;
+}
+
+.save_button:hover {
+    background: #c2f4a4;
+}
+
+.cancel_button:hover {
+    background: #FF8282;
+}
+
+#save_worksheet_button, #save_worksheet_button:hover {
+    color: #888;
+    background: #DDD;
+}
+
+#save_worksheet_button.saving, #save_worksheet_button.saving:hover {
+    color: #666;
+    background: #DDD;
+}
+
+#save_worksheet_button.save {
+    color: #323232;
+    background: #DDD;
+}
+
+#save_worksheet_button.save:hover {
+    color: #66E11B;
+    background: #323232;
+}
+
+.spinner {
+    height: 100px;
+    width: 100%;
+}
+
+.context-menu {
+    display: none;
+    position: absolute;
+    z-index: 10;
+    padding: 0;
+    width: 240px;
+    background-color: #fff;
+    border: none;
+    box-shadow: 1px 1px 2px #cfcfcf;
+}
+
+.context-menu--active {
+    display: block;
+}
+
+.context-menu_items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.context-menu_item {
+    display: block;
+    margin: 0;
+    padding: 3px 0 3px 10px;
+    color: #323232;
+    font-size: 0.8rem;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.context-menu_item:hover {
+    color: #66E11B;
+    background: #323232;
+}

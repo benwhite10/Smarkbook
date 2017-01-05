@@ -1,16 +1,21 @@
 $(document).ready(function(){
     sessionStorage.setItem("first_time", "TRUE");
     
-    getWorksheets();
+    getWorksheets(getParameterByName("rst"));
     
     $("#search_bar_text_input").keyup(function(event){
         searchWorksheets();
     });
 });
 
-function getWorksheets() {
+function getWorksheets(restore) {
+    var type = "ALLWORKSHEETS";
+    if (restore === "1") {
+        type = "DELETEDWORKSHEETS";
+        $("#restore_link").html("<a href='/viewAllWorksheets.php'>View Worksheets</a>");
+    }
     var infoArray = {
-        type: "ALLWORKSHEETS",
+        type: type,
         orderby: "WName",
         desc: "FALSE",
         userid: $('#userid').val(),
@@ -136,7 +141,7 @@ function clearSearch() {
 }
 
 function goToWorksheet(vid) {
-    window.location.href = "viewWorksheet.php?id=" + vid;
+    window.location.href = "editWorksheet.php?id=" + vid;
 }
 
 function goToOriginalWorksheet() {
