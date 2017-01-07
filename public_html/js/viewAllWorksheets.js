@@ -82,9 +82,26 @@ function highlightSearchTerms(string, searchTerm) {
     var terms = searchTerm ? searchTerm.split(" ") : null;
     for (var key in terms) {
         var term = terms[key];
-        string = string.replace(term,"<span class='highlight'>" + term + "</span>")
+        var capitalised_terms = getCapitalForTerm(term);
+        for (var i in capitalised_terms) {
+            var new_term = capitalised_terms[i];
+            string = string.replace(new_term,"<span class='highlight'>" + new_term + "</span>");
+        }
     }
     return string;
+}
+
+function getCapitalForTerm(term) {
+    var return_array = [];
+    return_array.push(term);
+    if (return_array.indexOf(term.toLowerCase()) === -1) return_array.push(term.toLowerCase());
+    if (return_array.indexOf(term.toUpperCase()) === -1) return_array.push(term.toUpperCase());
+    if (return_array.indexOf(capitaliseFirstLetter(term)) === -1) return_array.push(capitaliseFirstLetter(term));
+    return return_array;
+}
+
+function capitaliseFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
 function searchWorksheets() {
