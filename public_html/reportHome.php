@@ -210,6 +210,59 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div>
                 </div>
                 
+                <div id="new_tags_report" class="fullSection">
+                    <div id="new_tags_report_spinner" class="spinnerBox">
+                    </div>
+                    <div id="new_tags_report_main">
+                        <div class="new_tags_report_titles">
+                            <div class="new_tags_report_title">
+                                <div class="new_tags_report_title_top">
+                                    <h1>Classification Tags</h1>
+                                </div>
+                                <div class="new_tags_report_title_bottom">
+                                    <input type="hidden" id="classification_criteria">
+                                    <input type="hidden" id="classification_order">
+                                    <div id="tags_report_criteria_classification" class="new_tags_report_title_bottom_criteria" onclick="changeCriteia(1)">
+                                    </div>
+                                    <div id="tags_report_order_classification" class="new_tags_report_title_bottom_order" onclick="changeOrder(1)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="new_tags_report_title">
+                                <div class="new_tags_report_title_top">
+                                    <h1>Major Tags</h1>
+                                </div>
+                                <div class="new_tags_report_title_bottom">
+                                    <input type="hidden" id="major_criteria">
+                                    <input type="hidden" id="major_order">
+                                    <div id="tags_report_criteria_major" class="new_tags_report_title_bottom_criteria" onclick="changeCriteia('2')">
+                                    </div>
+                                    <div id="tags_report_order_major" class="new_tags_report_title_bottom_order" onclick="changeOrder('2')">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="new_tags_report_title">
+                                <div class="new_tags_report_title_top">
+                                    <h1>Minor Tags</h1>
+                                </div>
+                                <div class="new_tags_report_title_bottom">
+                                    <input type="hidden" id="minor_criteria">
+                                    <input type="hidden" id="minor_order">
+                                    <div id="tags_report_criteria_minor" class="new_tags_report_title_bottom_criteria" onclick="changeCriteia('3')">
+                                    </div>
+                                    <div id="tags_report_order_minor" class="new_tags_report_title_bottom_order" onclick="changeOrder('3')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="new_tags_report_sections">
+                            <div id="new_tags_report_classification" class="tags_report_section"></div>
+                            <div id="new_tags_report_major" class="tags_report_section"></div>
+                            <div id="new_tags_report_minor" class="tags_report_section"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="tagsReport" class="fullSection">
                     <div id="tagsReportSpinner" class="spinnerBox">
                     </div>
