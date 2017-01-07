@@ -672,6 +672,7 @@ tr.tableHead:nth-child(odd){
     display: inline-block;
     float: left;
     padding-left: 10px;
+    overflow: hidden;
 }
 
 .tag_content_main_display {

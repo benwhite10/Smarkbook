@@ -103,7 +103,7 @@ function getStaff(){
 }
 
 function updateSets(){
-    disableGenerateReportButton()
+    disableGenerateReportButton();
     var infoArray = {
         orderby: "Name",
         desc: "FALSE",
@@ -461,15 +461,22 @@ function setOrderTextAndDirection(type_name, order, desc) {
 function parseNewTagResult(result, order_key) {
     var tag_id = result["TagID"];
     var name = result["name"];
+    var name_style = "";
+    if (name.length > 45) {
+        name_style = "line-height: 12.5px; font-size:0.8rem";
+    } else if (name.length > 35) {
+        name_style = "font-size:0.8rem";
+    }
     var marks = result["marks"];
     var type = getTypeFromId(result["type"]).toLowerCase();
     var count = result["count"];
     var totalScore = result["perc"] !== "-" ? parseInt(result["perc"]): 0;
+    var width = totalScore === 0 ? 0.1 : totalScore;
     var recentScore = parseInt(result["recent_perc"]);
     var string = "<div id='tag_" + tag_id + "' class='" + type + " new_tag'>";
-    string += "<div id='background_tag_" + tag_id + "' class='background_block " + type + "' style='width:" + totalScore + "%'></div>";
+    string += "<div id='background_tag_" + tag_id + "' class='background_block " + type + "' style='width:" + width + "%'></div>";
     string += "<div class='tag_content'>";
-    string += "<div class='tag_content_name'><p>" + name + "</p></div>";
+    string += "<div class='tag_content_name'><p style='" + name_style + "'>" + name + "</p></div>";
     string += "<div class='tag_content_main_display'><p>" + getMainDisplayCriteria(result, order_key) + "</p></div>";
     string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + totalScore + "%</p></div>";
     string += "<div class='tag_content_main_extra_writing'><p>ALL</p></div></div>";
@@ -685,7 +692,7 @@ function setNewHalfWidthTagResults(tag, position){
     var recentMarks = recentMark + "/" + recentMarks;
     var questionsAnswered = tag["count"];
     var string = "<tr class='results'>";
-    string += "<td class='results' style='text-align:left; padding-left: 10px;'>" + name + "-" + type + "</td>";
+    string += "<td class='results' style='text-align:left; padding-left: 10px;'>" + name + "</td>";
     string += "<td class='results' title='" + totalMarks + "'>" + totalScore + "% </td>";
     string += "<td class='results' title='" + recentMarks + "'>" + recentScore + "% </td>";
     string += "<td class='results'>" + questionsAnswered + "</td>";
