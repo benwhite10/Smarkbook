@@ -41,6 +41,12 @@ switch ($requestType){
         }
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
+    case "NEWSTUDENTREPORT":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+        break;
     case "STUDENTSUMMARY":
         getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
@@ -58,6 +64,23 @@ function getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId,
     groupResultsByTag();
     
     reorderTagsAndSucceedRequest();
+}
+
+function getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){
+    global $questionTags, $tags;
+    
+    validateAndReturnInputs($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+    unset($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+    
+    getAnsweredQuestionsAndTags();
+    groupNewResultsByTag();
+    
+    $result = array(
+        "tags" => $tags,
+        "questions" => $questionTags
+    );
+    
+    succeedRequest($result);
 }
 
 function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString){    
@@ -229,7 +252,7 @@ function getAnsweredQuestions(){
 function getAnsweredQuestionsAndTags(){
     global $returns, $questionTags;
     
-    $query = "SELECT CQ.`Stored Question ID` SQID, CQ.`Completed Question ID` CQID, QT.`Tag ID` TagID, T.`Name` Name, CQ.`Mark` Mark, SQ.`Marks` Marks, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Added`), 0) Days, 1 Difficulty
+    $query = "SELECT CQ.`Stored Question ID` SQID, CQ.`Completed Question ID` CQID, QT.`Tag ID` TagID, T.`Name` Name, T.`Type` Type, CQ.`Mark` Mark, SQ.`Marks` Marks, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Added`), 0) Days, 1 Difficulty
                 FROM TCOMPLETEDQUESTIONS CQ
                 JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
                 JOIN TQUESTIONTAGS QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
@@ -307,6 +330,46 @@ function getAnsweredQuestionsAndTags(){
     }
 }
 
+function groupNewResultsByTag(){
+    global $questionTags, $tags, $recentQuestions, $returns;
+    
+    $currentTagId = "";
+    foreach ($questionTags as $result){
+        $mark = $result["Mark"];
+        $marks = $result["Marks"];
+        $tagId = $result["TagID"];
+        $name = $result["Name"];
+        $type = $result["Type"];
+        if($currentTagId == $tagId){
+            // Looping through a tag and building the array
+            $resultArray["mark"] += $mark;
+            $resultArray["marks"] += $marks;
+            if($resultArray["count"] < $recentQuestions){
+                $resultArray["recentmark"] += $mark;
+                $resultArray["recentmarks"] += $marks; 
+            }
+            $resultArray["count"]++;
+        } else {
+            if($currentTagId != ""){
+                $resultArray["perc"] = $resultArray["marks"] != 0 ? 100 * $resultArray["mark"] / $resultArray["marks"] : "-";
+                $resultArray["recent_perc"] = $resultArray["recentmarks"] != 0 ? 100 * $resultArray["recentmark"] / $resultArray["recentmarks"] : "-";
+                array_push($tags, $resultArray);
+            }
+            $resultArray = array(
+                "mark" => floatval($mark),
+                "marks" => floatval($marks),
+                "recentmark" => floatval($mark),
+                "recentmarks" => floatval($marks),
+                "TagID" => $tagId,
+                "name" => $name,
+                "type" => $type,
+                "count" => 1
+            );
+            $currentTagId = $tagId;
+        }
+    }
+}
+
 function groupResultsByTag(){
     global $questionTags, $tags, $recentQuestions, $returns;
     
@@ -319,6 +382,7 @@ function groupResultsByTag(){
         $marks = $result["Marks"];
         $tagId = $result["TagID"];
         $name = $result["Name"];
+        $type = $result["Type"];
         $score = $mark * $result["TimeWeight"];
         $weight = $marks * $result["TimeWeight"];
         if($currentTagId == $tagId){
@@ -349,6 +413,7 @@ function groupResultsByTag(){
                 "weightedScore" => floatval($score/$weight),
                 "TagID" => $tagId,
                 "name" => $name,
+                "type" => $type,
                 "count" => 1
             );
             $currentTagId = $tagId;

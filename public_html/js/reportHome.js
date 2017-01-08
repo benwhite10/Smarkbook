@@ -103,7 +103,7 @@ function getStaff(){
 }
 
 function updateSets(){
-    disableGenerateReportButton()
+    disableGenerateReportButton();
     var infoArray = {
         orderby: "Name",
         desc: "FALSE",
@@ -197,6 +197,16 @@ function sendReportRequest(){
         dataType: "json",
         success: function(json){
             reportRequestSuccess(json);
+        }
+    });
+    infoArray["type"] = "NEWSTUDENTREPORT";
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            newReportRequestSuccess(json);
         }
     });
     sendSummaryRequest(infoArray);
@@ -300,6 +310,22 @@ function reportRequestSuccess(json){
     }
 }
 
+function newReportRequestSuccess(json) {
+    if(validateResponse(json)){
+        var results = json["result"];
+        if(results !== null){
+            localStorage.setItem("new_tag_results", JSON.stringify(results["tags"]));
+            localStorage.setItem("new_tag_questions", JSON.stringify(results["questions"]));
+        } else {
+            localStorage.setItem("new_tag_results", "");
+            localStorage.setItem("new_tag_questions", "");
+        }
+        refreshNewTagResults();
+    } else {
+        console.log("Something went wrong generating the reports.");
+    }
+}
+
 function summaryRequestSuccess(json){
     if(validateResponse(json)){
         var results = json["result"];
@@ -363,6 +389,127 @@ function enableGenerateReportButton(){
 }
 
 /* Refresh Displays */
+
+function refreshNewTagResults(){
+    parseNewTagResults("1", 1, true);
+    parseNewTagResults("2", 1, true);
+    parseNewTagResults("3", 1, true);
+    stopSpinnerInDiv('new_tags_report_spinner');
+    $("#new_tags_report_main").show();
+}
+
+function parseNewTagResults(type, order, desc) {
+    var results = JSON.parse(localStorage.getItem("new_tag_results"));
+    var order_info = getOrderInformation(order);
+    results = orderArrayBy(results, order_info["array_key"], desc);
+    var type_name = getTypeFromId(type).toLowerCase();
+    setOrderTextAndDirection(type_name, order, desc);
+    $("#new_tags_report_" + type_name).html("");
+    for(var i = 0; i < results.length; i++){
+        var result = results[i];
+        if (parseInt(type) === parseInt(result["type"])) {
+            var tag_string = parseNewTagResult(result, order_info["array_key"]);
+            $("#new_tags_report_" + type_name).append(tag_string);
+        }        
+    }
+}
+
+function getOrderInformation(value) {
+    switch (value) {
+        case 1:
+            return {
+                array_key: "count",
+                display_text: "No. Of Questions"
+            };
+            break;
+        case 2:
+            return {
+                array_key: "perc",
+                display_text: "Percentage"
+            };
+            break;
+        case 3:
+            return {
+                array_key: "marks",
+                display_text: "Marks"
+            };
+            break;
+        case 4:
+            return {
+                array_key: "recent_perc",
+                display_text: "Last 5"
+            };
+            break;
+        default:
+            return {
+                array_key: "count",
+                display_text: "No. Of Questions"
+            };
+            break;
+    }
+}
+
+function setOrderTextAndDirection(type_name, order, desc) {
+    var order_info = getOrderInformation(order);
+    var desc_text = desc ? "\u2193" : "\u2191";
+    $("#tags_report_order_" + type_name).html("<h2>" + desc_text + "</h2>");
+    $("#tags_report_criteria_" + type_name).html("<h2>" + order_info["display_text"] + "</h2>");
+    $("#" + type_name + "_criteria").val(order);
+    $("#" + type_name + "_order").val(desc);
+}
+
+function parseNewTagResult(result, order_key) {
+    var tag_id = result["TagID"];
+    var name = result["name"];
+    var name_style = "";
+    if (name.length > 45) {
+        name_style = "line-height: 12.5px; font-size:0.8rem";
+    } else if (name.length > 35) {
+        name_style = "font-size:0.8rem";
+    }
+    var marks = result["marks"];
+    var type = getTypeFromId(result["type"]).toLowerCase();
+    var count = result["count"];
+    var totalScore = result["perc"] !== "-" ? parseInt(result["perc"]): 0;
+    var width = totalScore === 0 ? 0.1 : totalScore;
+    var recentScore = parseInt(result["recent_perc"]);
+    var string = "<div id='tag_" + tag_id + "' class='" + type + " new_tag'>";
+    string += "<div id='background_tag_" + tag_id + "' class='background_block " + type + "' style='width:" + width + "%'></div>";
+    string += "<div class='tag_content'>";
+    string += "<div class='tag_content_name'><p style='" + name_style + "'>" + name + "</p></div>";
+    string += "<div class='tag_content_main_display'><p>" + getMainDisplayCriteria(result, order_key) + "</p></div>";
+    string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + totalScore + "%</p></div>";
+    string += "<div class='tag_content_main_extra_writing'><p>ALL</p></div></div>";
+    string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + recentScore + "%</p></div>";
+    string += "<div class='tag_content_main_extra_writing'><p>LAST 5</p></div></div>";
+    string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + count + "</p></div>";
+    string += "<div class='tag_content_main_extra_writing'><p>QUESTIONS</p></div></div>";
+    string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + marks + "</p></div>";
+    string += "<div class='tag_content_main_extra_writing'><p>MARKS</p></div></div>";
+    string += "</div></div>";
+    return string;
+}
+
+function getMainDisplayCriteria(result, order_key) {
+    return (order_key === "count" || order_key === "marks") ? parseInt(result[order_key]) : parseInt(result[order_key]) + "%";
+}
+
+function changeCriteia(type) {
+    var type_name = getTypeFromId(type).toLowerCase();
+    var order = parseInt($("#" + type_name + "_criteria").val());
+    var desc = $("#" + type_name + "_order").val();
+    desc = desc === "true" ?true : false;
+    order = order < 4 ? order + 1 : 1;
+    parseNewTagResults(type, order, desc);
+}
+
+function changeOrder(type) {
+    var type_name = getTypeFromId(type).toLowerCase();
+    var order = parseInt($("#" + type_name + "_criteria").val());
+    var desc = $("#" + type_name + "_order").val();
+    desc = desc === "true" ? false : true;
+    parseNewTagResults(type, order, desc);
+}
 
 function refreshTagResults(){
     $('#top5tags tbody').html('');
@@ -538,6 +685,7 @@ function setNewHalfWidthTagResults(tag, position){
     var mark = tag["mark"];
     var recentMarks = tag["recentmarks"];
     var recentMark = tag["recentmark"];
+    var type = tag["type"];
     var totalScore = parseInt(mark / marks * 100);;
     var recentScore = parseInt(recentMark / recentMarks * 100);
     var totalMarks = mark + "/" + marks;
@@ -619,6 +767,7 @@ function hideAllSections(){
     $("#tagsReport").hide();
     $("#summaryReport").hide();
     $("#questionsReport").hide();
+    $("#new_tags_report").hide();
     $("#noResults").show();
 }
 
@@ -626,6 +775,7 @@ function showAllSections(){
     $("#tagsReport").show();
     $("#summaryReport").show();
     $("#questionsReport").show();
+    $("#new_tags_report").show();
     $("#noResults").hide();
     $("#showHideWorksheetText").text("Show Worksheets \u2193");
 }
@@ -635,6 +785,7 @@ function hideAllContent(){
     $("#tagsReportShort").hide();
     $("#tagsReportFull").hide();
     $("#summaryReportMain").hide();
+    $("#new_tags_report_main").hide();
     $("#summaryReportDetails").hide();
     $("#questionsReportMain").hide();
 }
@@ -644,6 +795,7 @@ function showAllSpinners(){
     startSpinnerInDiv('tagsReportSpinner');
     startSpinnerInDiv('summaryReportSpinner');
     startSpinnerInDiv('questionsReportSpinner');
+    startSpinnerInDiv('new_tags_report_spinner');
 }
 
 function startSpinnerInDiv(div){
@@ -669,4 +821,27 @@ function stopSpinnerInDiv(div){
         $('#' + div).data('spinner').stop();
         $('#' + div).hide();
     }
+}
+
+function getTypeFromId(type_id) {
+    switch(type_id) {
+        case "1":
+        case 1:
+            return "Classification";
+        case "2":
+        case 2:
+            return "Major";
+        case "3":
+        case 3:
+            return "Minor";
+        default:
+            return "Minor";
+    }
+}
+
+function orderArrayBy(array, key, desc) {
+    array.sort(function(a, b) {
+        return desc ? parseFloat(b[key]) - parseFloat(a[key]) :parseFloat(a[key]) - parseFloat(b[key]);
+    });
+    return array;
 }

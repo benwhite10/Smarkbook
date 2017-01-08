@@ -585,3 +585,225 @@ tr.tableHead:nth-child(odd){
 #showHideWorksheetText:hover {
     color: #323232;
 }
+
+#new_tags_report {
+    border-bottom: thin solid #323232;
+}
+
+#new_tags_report_spinner {
+    display: none;
+}
+
+#new_tags_report_main {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.tags_report_section {
+    width: calc(33.3333% - 0.6666px);
+    height: 100%;
+    display: inline-block;
+    float: left;
+    overflow: scroll;
+}
+
+#new_tags_report_classification {
+    border-right: 1px solid #323232;
+}
+
+#new_tags_report_major {
+    border-right: 1px solid #323232;
+}
+
+#new_tags_report_minor {
+}
+
+.new_tag {
+    width: 100%;
+    height: 30px;
+    cursor: pointer;
+    border-bottom: thin solid rgba(0,0,0,0.5);
+}
+
+.classification {
+    background: rgba(27, 175, 249, 0.5);
+}
+
+.major {
+    background: rgba(249, 90, 27, 0.5);
+}
+
+.minor {
+    background: rgba(249, 209, 27, 0.5);
+}
+
+.background_block {
+    height: 100%;
+    display: inline-block;
+    float: left;
+    background: rgba(27, 175, 249, 1); 
+}
+
+.background_block.classification {
+    background: rgba(27, 175, 249, 1);
+}
+
+.background_block.major {
+    background: rgba(249, 90, 27, 1);
+}
+
+.background_block.minor {
+    background: rgba(249, 209, 27, 1);
+}
+
+.tag_content {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    float: left;
+    margin-top: -30px;
+}
+
+.tag_content_name {
+    width: calc(100% - 80px);
+    height: 100%;
+    display: inline-block;
+    float: left;
+    padding-left: 10px;
+    overflow: hidden;
+}
+
+.tag_content_main_display {
+    width: 60px;
+    height: 100%;
+    display: inline-block;
+    float: left;
+}
+
+.tag_content_main_display > p {
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 25px;
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+    text-align: center;
+}
+
+.tag_content_name > p {
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 25px;
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+}
+
+.tag_content_main_extra {
+    width: 25%;
+    height: 100%;
+    display: none;
+    float: left;
+}
+
+.tag_content_main_extra_value, .tag_content_main_extra_writing {
+    width: 100%;
+    height: 20px;
+    display: inline-block;
+    float: left;
+}
+
+.tag_content_main_extra_value > p, .tag_content_main_extra_writing > p {
+    padding: 0;
+    font-size: 1.0rem;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: center;
+}
+
+.tag_content_main_extra_writing {
+    height: 10px;
+}
+
+.tag_content_main_extra_writing > p {
+    font-size: 0.5rem;
+    font-weight: bold;
+    line-height: 10px;
+}
+
+.tag_content:hover .tag_content_name, 
+.tag_content:hover .tag_content_main_display  {
+    display: none;
+}
+
+.tag_content:hover .tag_content_main_extra {
+    display: inline-block;
+}
+
+.new_tags_report_titles {
+    width: 100%;
+    height: 50px;
+    background: #323232;
+}
+
+.new_tags_report_title {
+    width: 33.3333%;
+    height: 100%;
+    display: inline-block;
+    float: left;
+}
+
+.new_tags_report_sections {
+    width: 100%;
+    height: 300px;
+}
+
+.new_tags_report_title_top, .new_tags_report_title_bottom {
+    width: 100%;
+    height: 50%;
+}
+
+.new_tags_report_title_bottom {
+    cursor: pointer;
+    -webkit-user-select: none;       
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.new_tags_report_title_top > h1 {
+    font-size: 1.2rem;
+    color: #66E11B;
+    text-align: center;
+    padding: 0;
+    line-height: 25px;
+    font-weight: 300;
+}
+
+.new_tags_report_title_bottom_criteria > h2, .new_tags_report_title_bottom_order > h2 {
+    font-size: 1.0rem;
+    color: #66E11B;
+    text-align: center;
+    padding: 0;
+    line-height: 25px;
+    font-weight: 300;
+}
+
+.new_tags_report_title_bottom_criteria > h2 {
+    text-align: right;
+}
+
+.new_tags_report_title_bottom_criteria {
+    display: inline-block;
+    float: left;
+    width: calc(100% - 20px);
+}
+
+.new_tags_report_title_bottom_order {
+    display: inline-block;
+    float: left;
+    width: 20px;
+}
