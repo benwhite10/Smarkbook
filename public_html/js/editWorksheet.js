@@ -775,7 +775,8 @@ function similarTagsRequestSuccess(json) {
 
 function parseSimilarTagsForDiv(div_id) {
     var tags = $("#" + div_id + "_input_values").val();
-    var tags_array = tags.split(":");
+    var tags_string = getTagsString(tags);
+    var tags_array = tags_string.split(":");
     var html_input_string = "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
