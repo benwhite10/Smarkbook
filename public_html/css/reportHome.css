@@ -441,6 +441,7 @@ table.fullResults{
 .worksheetSummaryTable{
     width: 100%;
     border-collapse: collapse;
+    cursor: pointer;
 }
 
 thead.worksheetSummaryTable{
@@ -455,14 +456,20 @@ tbody.worksheetSummaryTable{
 
 tr.worksheetSummaryTable{
     line-height: 25px;
+    cursor: pointer;
 }
 
 tr.worksheetSummaryTable:nth-child(odd){
     background-color: #DDD;
 }
 
+tr.worksheetSummaryTable:hover {
+    background-color: #c2f4a4;
+}
+
 .worksheetSummaryTable td, .worksheetSummaryTable th{
     text-align: center;
+    cursor: pointer;
 }
 
 th {
