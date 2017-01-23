@@ -7,6 +7,7 @@ $(document).ready(function(){
     $(window).resize(function(){
         setUpGrid();
     });
+    setTimeout(function() { setUpGrid(); }, 1000);
 });
 
 function setUpGrid(){
