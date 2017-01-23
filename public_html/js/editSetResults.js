@@ -727,9 +727,9 @@ function updateCompletionStatus(student, row){
     
     completed_worksheet["Completion Status"] = state;
     if (state === "Completed" || state === "Partially Completed") {
-        completed_worksheet["Date Status"] = current_late === "NONE" ? "0": current_late;
+        completed_worksheet["Date Status"] = (!current_late || current_late === "NONE") ? "0": current_late;
     } else {
-        completed_worksheet["Date Status"] = current_late === "NONE" ? "": current_late;
+        completed_worksheet["Date Status"] = "";
     }
     completed_worksheets[student] = completed_worksheet;
     if (old_state !== state) updateSaveWorksheetsArray(completed_worksheet, student);
