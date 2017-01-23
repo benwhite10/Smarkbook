@@ -61,7 +61,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </ul>
             </div>
             <div id="spinner" class="spinner"></div>
-            <div id="main_content">
+            <div id="main_content" style="margin-bottom:300px">
                 <div id="worksheet_details_title" class="section_title">
                     <div class="section_title_text">
                         <h2>Details</h2>
