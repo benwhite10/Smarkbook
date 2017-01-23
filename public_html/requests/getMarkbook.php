@@ -39,7 +39,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                
                 WHERE GW.`Primary Staff ID` = $staffid AND GW.`Group ID` = $setid AND WV.`Deleted` = 0  
-                AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1) AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1)
+                AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1) AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1) AND SQ.`Deleted` = 0 
                 GROUP BY GW.`Group Worksheet ID`                
                 ORDER BY GW.`Date Due`, WV.`WName`;";
 
