@@ -347,7 +347,7 @@ function getIDForTag(tag_name) {
     for (var i in tags) {
         var tag = tags[i];
         var name = tag["Name"];
-        if (tag_name_comparison === name.toLowerCase().trim()) return tag["Tag ID"];
+        if (tag_name_comparison === escapeString(name.toLowerCase().trim())) return tag["Tag ID"];
     }
     return null;
 }
@@ -728,7 +728,6 @@ function requestSuggestedTags(div_id) {
 function suggestedTagsSuccess(json) {
     if (json["success"]) {
         var suggested_tags = json["result"]["top_values"];
-        console.log(suggested_tags);
         var div_id = json["result"]["div_id"];
         $("#" + div_id + "_suggested_values").val("");
         for (var i in suggested_tags) {
