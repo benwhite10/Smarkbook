@@ -197,8 +197,8 @@ function parseMainTable() {
         student_rows += "<tr class='results'><td class='results student_name' id='stu" + stuid + "'>" + student["Name"] + "</td>";
         var totalMark = 0;
         var totalMarks = 0;
-        for (var key in worksheet) {
-            var question = worksheet[key];
+        for (var key2 in worksheet) {
+            var question = worksheet[key2];
             var sqid = question["SQID"];
             var mark = "";
             var cqid = 0;
@@ -230,7 +230,9 @@ function parseMainTable() {
     $("#table_body").html(student_rows + average_row_1 + average_row_2 + average_row_3);
     
     for (var key in students) {
-        updateStatusRow(key);
+        var student = students[key];
+        var stuid = student["ID"];
+        updateStatusRow(stuid);
     }
 }
 
