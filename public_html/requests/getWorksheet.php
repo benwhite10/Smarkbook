@@ -80,7 +80,7 @@ function getWorksheetForGWID($gwid){
         $details = db_select_exception($query3);
         $completedWorksheets = optimiseArray(db_select_exception($query4), "Student ID");
         $notes = optimiseArray(db_select_exception($query5), "Student ID");
-        $students = optimiseArray(db_select_exception($query6), "ID");
+        $students = db_select_exception($query6);
         $finalResults = groupResultsByStudent($results, $students);
     } catch (Exception $ex) {
         errorLog("Something went wrong loading the data for the worksheet: " . $ex->getMessage());
