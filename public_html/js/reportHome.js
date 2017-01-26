@@ -584,7 +584,7 @@ function refreshSummaryResults(){
     $('#summaryReportUserAvgValue').css('color', getColour(userAvg, 60, 40, [220, 0, 0], [240, 160, 0], [0, 240, 0]));
     
     setWorksheetsSummary();
-    setWorksheetsTable2();
+    setWorksheetsTable();
     showSummaryResults();
 }
 
@@ -663,63 +663,6 @@ function setWorksheetsSummary(){
 }
 
 function setWorksheetsTable(){
-    var summary = JSON.parse(localStorage.getItem("summary"));
-    if(summary !== null){
-        var list = summary["worksheetList"];
-        for(var key in list){
-            var sheet = list[key];
-            var name = sheet["WName"];
-            var date = sheet["DateDue"];
-            var gwid = sheet["GWID"];
-            var lateString = "-";
-            var comp = "-";
-            var student = "-";
-            var set = "-";
-            var classString = "worksheetSummaryTable noResults";
-            var colour = "";
-            if(sheet["Results"]){
-                var stuScore = sheet["StuAVG"] ? Math.round(100 * sheet["StuAVG"]) : 0;
-                var stuMark = sheet["StuMark"] ? sheet["StuMark"] : 0;
-                var stuMarks = sheet["StuMarks"] ? sheet["StuMarks"] : 0;
-                student = stuMark + "/" + stuMarks + " (" + stuScore + "%)";
-                var setScore = sheet["AVG"] ? Math.round(100 * sheet["AVG"]) : 0;
-                var diff = stuScore - setScore;
-                if (diff === 0) {
-                    set = "-";
-                } else if (diff < 0) {
-                    set = "\u2193" + Math.abs(diff) + "%";
-                } else {
-                    set = "\u2191" + Math.abs(diff) + "%";
-                }
-                var setMarks = sheet["Marks"];
-                var setMark = Math.round(setMarks * sheet["AVG"]);
-                var setOutput = setMark + "/" + setMarks + " (" + setScore + "%)";
-                var colour = getColour(diff, 0, 20, [255, 0, 0], [80, 80, 80], [0, 210, 0]);
-                var late = sheet["StuDays"];
-                if(late === "" || late === null){
-                    lateString = "-";
-                } else if(late === 0 || late === "0") {
-                    lateString = "On Time";
-                } else {
-                    lateString = late + " Days Late";
-                }
-                comp = sheet["StuComp"];
-                classString = "worksheetSummaryTable";
-            }
-            var string = "<tr class='" + classString + "' onclick='clickWorksheet(" + gwid + ")'>";
-            string += "<td class='worksheetName'>" + name + "</td>";
-            string += "<td>" + date + "</td>";
-            string += "<td>" + student + "</td>";
-            string += "<td style='color: " + colour + "' title='" + setOutput + "'>" + set + "</td>";
-            string += "<td>" + comp + "</td>";
-            string += "<td>" + lateString + "</td>";
-            string += "</tr>";
-            $('#worksheetSummaryTable tbody').append(string);
-        }
-    }
-}
-
-function setWorksheetsTable2(){
     var summary = JSON.parse(localStorage.getItem("summary"));
     $('#new_worksheets_report_main').html("");
     if(summary !== null){
