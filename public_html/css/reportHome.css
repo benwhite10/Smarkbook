@@ -419,7 +419,6 @@ table.fullResults{
 
 #summaryReportDetails{
     display: none;
-    overflow: scroll;
 }
 
 #worksheetSummaryReport{
@@ -657,7 +656,7 @@ tr.tableHead:nth-child(odd){
     background: rgba(249, 209, 27, 0.5);
 }
 
-.background_block {
+.background_block, .background_block_worksheet {
     height: 100%;
     display: inline-block;
     float: left;
@@ -835,14 +834,46 @@ td.ind_worksheet {
 }
 
 .half_column_report {
-    width: calc(50% - 0.5px);
-    height: 400px;
+    width: 50%;
+    height: 100%;
+    max-height: 400px;
     display:inline-block;
     float: left;
+    overflow-y: scroll;
 }
 
-#new_worksheets_report {
+#new_worksheets_report_main {
     border-right: #323232 1px solid;
+}
+
+.title_sections {
+    width: calc(25% - 0.75px);
+    height: 100%;
+    float: left;
+    text-align: center;
+    background: #EEE;
+    color: #323232;
+    cursor: pointer;
+    border-right: 1px solid #323232;
+}
+
+.title_sections.selected, .title_sections.selected:hover {
+    background: #323232;
+    color: #66E11B;
+}
+
+.title_sections:hover {
+    background: #888;
+}
+
+.title_sections.nosection:hover {
+    background: #EEE;
+}
+
+.title_sections > h1 {
+    font-size: 1.0rem;
+    line-height: 25px;
+    margin: 0;
 }
 
 .report_column_title {
@@ -900,6 +931,10 @@ td.ind_worksheet {
     background: #eee;
 }
 
-.background_block.worksheet {
-    background: rgba(0, 0, 0, 0.3);
+.background_block_worksheet {
+    background: #a4ef76;
+}
+
+.background_block_worksheet.selected {
+    background: #66E11B;
 }

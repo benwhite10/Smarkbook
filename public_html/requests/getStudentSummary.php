@@ -12,7 +12,6 @@ $endDate = filter_input(INPUT_POST,'endDate',FILTER_SANITIZE_STRING);
 $studentId = filter_input(INPUT_POST,'student',FILTER_SANITIZE_NUMBER_INT);
 $staffId = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
-$stu_id = filter_input(INPUT_POST,'stu_id',FILTER_SANITIZE_NUMBER_INT);
 $setId = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $tagsArrayString = "";
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
@@ -53,7 +52,7 @@ switch ($requestType){
         getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "WORKSHEETREPORT":
-        getWorksheetSummary($gwid, $stu_id);
+        getWorksheetSummary($gwid, $studentId);
         break;
     default:
         failRequest("Invalid request type.");
@@ -118,7 +117,7 @@ function getWorksheetSummary($gwid, $stu_id) {
             JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0";
     
-    $query_2 = "SELECT T.`Tag ID` TID, T.`Name` Name, SUM(CQ.`Mark`) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.`Mark`)/SUM(SQ.`Marks`) Perc FROM `TCOMPLETEDQUESTIONS` CQ
+    $query_2 = "SELECT T.`Tag ID` TID, T.`Name` Name, SUM(CQ.`Mark`) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.`Mark`)/SUM(SQ.`Marks`) Perc, COUNT(1) Count FROM `TCOMPLETEDQUESTIONS` CQ
             JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             JOIN `TQUESTIONTAGS` QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
             JOIN `TTAGS` T ON QT.`Tag ID` = T.`Tag ID`
@@ -128,6 +127,8 @@ function getWorksheetSummary($gwid, $stu_id) {
         $questions = db_select_exception($query_1);
         $tags = db_select_exception($query_2);
         succeedRequest(array(
+            "student" => $stu_id,
+            "gwid" => $gwid,
             "questions" => $questions,
             "tags" => $tags));
     } catch (Exception $ex) {
@@ -856,8 +857,9 @@ function succeedSummaryRequest($list, $userAvg, $setAvg){
 /* Exit page */
 
 function failRequestWithException($message, $ex){
-    errorLog("There was an error requesting the report: " . $ex->getMessage());
-    failRequest($message);
+    $ex_message = $ex->getMessage();
+    errorLog("There was an error requesting the report: " . $ex_message);
+    failRequest("$message: $ex_message");
 }
 
 function failRequest($message){

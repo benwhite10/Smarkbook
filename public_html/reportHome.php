@@ -207,20 +207,15 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                     <div id="new_worksheets_report_order_title" class="new_worksheets_report_order"></div>
                                 </div>
                             </div>
-                            <div id="new_worksheets_report_main" class="report_column_main">
-                                <div id="worksheet_1" class="new_tag worksheet_summary">
-                                    <div id="background_worksheet_1" class="background_block worksheet" style="width:83%"></div>
-                                    <div class="tag_content">
-                                        <div class="tag_content_name"><p style="">3rd Form Michaelmas Revision Prep 1 (Hard)</p></div>
-                                        <div class="tag_content_main_display"><p>69</p></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div id="new_worksheets_report_main" class="report_column_main"></div>
                         </div>
                         <div id="new_worksheet_report" class="half_column_report">
                             <div id="new_worksheet_report_title" class="report_column_title">
                                 <div id="new_worksheet_report_title_top" class="report_column_title_top">
-                                    <h1>Worksheets</h1>
+                                    <div id="section_questions" class="title_sections selected" onclick="changeSection('section_questions')"><h1>Questions</h1></div>
+                                    <div id="section_tags" class="title_sections" onclick="changeSection('section_tags')"><h1>Tags</h1></div>
+                                    <div id="section_blank_1" class="title_sections nosection"></div>
+                                    <div id="section_blank_2" class="title_sections nosection" style="border-right: none"></div>
                                 </div>
                                 <div id="new_worksheet_report_title_bottom" class="report_column_title_bottom">
                                     <input type="hidden" id="new_worksheet_report_criteria">
@@ -229,29 +224,8 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                     <div id="new_worksheet_report_order_title" class="new_worksheets_report_order"></div>
                                 </div>
                             </div>
+                            <div id="new_worksheet_report_main" class="report_column_main"></div>
                         </div>
-                    </div>
-                    <div id="worksheetSummaryReport" class="innerSectionWrapper">
-                        <table class="ind_worksheet">
-                            <tbody class="ind_worksheet">
-                                <tr class="ind_worksheet">
-                                    <td>1 (/10)</td>
-                                    <td>2 (/10)</td>
-                                    <td>3 (/10)</td>
-                                    <td>4 (/10)</td>
-                                    <td>5 (/10)</td>
-                                    <td>Total</td>
-                                </tr>
-                                <tr class="ind_worksheet">
-                                    <td>8</td>
-                                    <td>4</td>
-                                    <td>2</td>
-                                    <td>3</td>
-                                    <td>4</td>
-                                    <td>25</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
                 

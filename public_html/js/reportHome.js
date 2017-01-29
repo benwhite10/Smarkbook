@@ -215,6 +215,25 @@ function sendSummaryRequest(infoArray){
     });
 }
 
+function sendWorksheetSummaryRequest(gwid){
+    var infoArray = {
+        type: "WORKSHEETREPORT",
+        student: $('#student').val(),
+        gwid: gwid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            worksheetSummaryRequestSuccess(json);
+        }
+    });
+}
+
 function sendReportRequest(){
     var reqid = generateNewReqId();
     var infoArray = {
@@ -662,6 +681,27 @@ function setWorksheetsSummary(){
     }  
 }
 
+function changeSection(id) {
+    switch(id) {
+        case "section_questions":
+        default:
+            setWorksheetSummary(0);
+            break;
+        case "section_tags":
+            setWorksheetSummary(1);
+            break;
+    }
+}
+
+function changeSectionTab(id) {
+    var tabs = document.getElementsByClassName("title_sections");
+    for (var i = 0; i < tabs.length; i++) {
+        var tab = tabs[i];
+        $("#" + tab.id).removeClass("selected");
+    }
+    $("#" + id).addClass('selected');
+}
+
 function setWorksheetsTable(){
     var summary = JSON.parse(localStorage.getItem("summary"));
     $('#new_worksheets_report_main').html("");
@@ -708,8 +748,8 @@ function setWorksheetsTable(){
                     status_colour = "rgb(255,0,0)";
                 }
             }
-            var string = "<div id='worksheet_" + gwid + "' class='new_tag worksheet_summary'>";
-            string += "<div id='background_worksheet_" + gwid + "' class='background_block worksheet' style='width:" + stu_score + "%'></div>";
+            var string = "<div id='worksheet_" + gwid + "' class='new_tag worksheet_summary' onclick='clickWorksheet(" + gwid + ")'>";
+            string += "<div id='background_worksheet_" + gwid + "' class='background_block_worksheet' style='width:" + stu_score + "%'></div>";
             string += "<div class='tag_content'>";
             string += "<div class='tag_content_name'><p>" + name + "</p></div>";
             string += "<div class='tag_content_main_display'><p>" + short_date_string + " </p></div>";
@@ -724,6 +764,91 @@ function setWorksheetsTable(){
             string += "</div></div>";
             $('#new_worksheets_report_main').append(string);
         }
+    }
+}
+
+function clickWorksheet(gwid) {
+    sendWorksheetSummaryRequest(gwid);
+    setWorksheetSelected(gwid);
+}
+
+function setWorksheetSelected(gwid) {
+    var divs = document.getElementsByClassName("background_block_worksheet");
+    for (var i = 0; i < divs.length; i++) {
+        var id = divs[i].id;
+        $("#" + id).removeClass("selected");
+    }
+    $("#background_worksheet_" + gwid).addClass("selected");
+}
+
+function worksheetSummaryRequestSuccess(json) {
+    sessionStorage.setItem("worksheet_summary", JSON.stringify(json["result"]));
+    setWorksheetSummary(0);
+}
+
+function setWorksheetSummary(type) {
+    var summary = JSON.parse(sessionStorage.getItem("worksheet_summary"));
+    var summary_info = [];
+    var parse_array = [];
+    var id = "";
+    switch(type) {
+        case 0:
+        default:
+            summary_info = summary["questions"];
+            orderArrayBy(summary_info, "QOrder", false);
+            for (var i = 0; i < summary_info.length; i++) {
+                var row = summary_info[i];
+                parse_array.push({
+                    main: "Question " + row["Number"],
+                    main_display: row["Mark"] + "/" + row["Marks"],
+                    width: parseFloat(row["Mark"])/parseFloat(row["Marks"])
+                });
+            }
+            id = "section_questions";
+            break;
+        case 1:
+            summary_info = summary["tags"];
+            orderArrayBy(summary_info, "Perc", true);
+            for (var i = 0; i < summary_info.length; i++) {
+                var row = summary_info[i];
+                parse_array.push({
+                    main: row["Name"],
+                    main_display: row["Mark"] + "/" + row["Marks"],
+                    width: parseFloat(row["Perc"]),
+                    option_1: ["QUESTIONS", row["Count"]],
+                    option_2: ["MARKS", row["Mark"] + "/" + row["Marks"]],
+                    option_3: ["PERC", parseInt(100*parseFloat(row["Perc"]))]
+                });
+            }
+            id = "section_tags";
+            break;
+    }
+    changeSectionTab(id);
+    parseWorksheetSummary(parse_array);
+}
+
+function parseWorksheetSummary(info) {
+    $('#new_worksheet_report_main').html("");
+    for (var i = 0; i < info.length; i++) {
+        var row = info[i];
+        var width = parseFloat(row["width"]) > 0 ? 100 * parseFloat(row["width"]) : 0.1;
+        var main = row["main"];
+        var string = "<div class='new_tag worksheet_summary'>";
+        string += "<div class='background_block_worksheet' style='width:" + width + "%'></div>";
+        string += "<div class='tag_content'>";
+        string += "<div class='tag_content_name'><p>" + row["main"] + "</p></div>";
+        string += "<div class='tag_content_main_display'><p>" + row["main_display"] + " </p></div>";
+        for (var j = 1; j < 5; j++) {
+            if(row["option_" + j]) {
+                var title = row["option_" + j][0];
+                var value = row["option_" + j][1];
+                string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + value + "</p></div>";
+                string += "<div class='tag_content_main_extra_writing'><p>" + title + "</p></div></div>";
+            }
+
+        }
+        string += "</div></div>";
+        $('#new_worksheet_report_main').append(string);
     }
 }
 
