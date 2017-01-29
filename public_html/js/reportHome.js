@@ -833,6 +833,7 @@ function parseWorksheetSummary(info) {
         var row = info[i];
         var width = parseFloat(row["width"]) > 0 ? 100 * parseFloat(row["width"]) : 0.1;
         var main = row["main"];
+        var extra_width = getExtraContentWidth(row);
         var string = "<div class='new_tag worksheet_summary'>";
         string += "<div class='background_block_worksheet' style='width:" + width + "%'></div>";
         string += "<div class='tag_content'>";
@@ -842,14 +843,21 @@ function parseWorksheetSummary(info) {
             if(row["option_" + j]) {
                 var title = row["option_" + j][0];
                 var value = row["option_" + j][1];
-                string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + value + "</p></div>";
+                string += "<div class='tag_content_main_extra' style='width:" + extra_width + "%'><div class='tag_content_main_extra_value'><p>" + value + "</p></div>";
                 string += "<div class='tag_content_main_extra_writing'><p>" + title + "</p></div></div>";
             }
-
         }
         string += "</div></div>";
         $('#new_worksheet_report_main').append(string);
     }
+}
+
+function getExtraContentWidth(row) {
+    var count = 0;
+    for (var j = 1; j < 5; j++) {
+        if(row["option_" + j]) count++;
+    }
+    return count > 0 ? 100/count : 100;
 }
 
 function setNewHalfWidthTagResults(tag, position){

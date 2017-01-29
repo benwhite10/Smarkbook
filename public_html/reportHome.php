@@ -220,7 +220,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                 <div id="new_worksheet_report_title_bottom" class="report_column_title_bottom">
                                     <input type="hidden" id="new_worksheet_report_criteria">
                                     <input type="hidden" id="new_worksheet_report_order">
-                                    <div id="new_worksheet_report_criteria_title" class="new_worksheets_report_criteria"><h2>Date</h2></div>
+                                    <div id="new_worksheet_report_criteria_title" class="new_worksheets_report_criteria"><h2>No.</h2></div>
                                     <div id="new_worksheet_report_order_title" class="new_worksheets_report_order"></div>
                                 </div>
                             </div>
