@@ -799,9 +799,10 @@ function setWorksheetSummary(type) {
             for (var i = 0; i < summary_info.length; i++) {
                 var row = summary_info[i];
                 parse_array.push({
-                    main: "Question " + row["Number"],
+                    main: "Q. " + row["Number"],
                     main_display: row["Mark"] + "/" + row["Marks"],
-                    width: parseFloat(row["Mark"])/parseFloat(row["Marks"])
+                    width: parseFloat(row["Mark"])/parseFloat(row["Marks"]),
+                    option_tags: row["tag_string"]
                 });
             }
             id = "section_questions";
@@ -817,18 +818,18 @@ function setWorksheetSummary(type) {
                     width: parseFloat(row["Perc"]),
                     option_1: ["QUESTIONS", row["Count"]],
                     option_2: ["MARKS", row["Mark"] + "/" + row["Marks"]],
-                    option_3: ["PERC", parseInt(100*parseFloat(row["Perc"]))]
+                    option_3: ["PERC", parseInt(100*parseFloat(row["Perc"])) + "%"]
                 });
             }
             id = "section_tags";
             break;
     }
     changeSectionTab(id);
-    parseWorksheetSummary(parse_array);
+    parseWorksheetSummary(parse_array, "#new_worksheet_report_main");
 }
 
-function parseWorksheetSummary(info) {
-    $('#new_worksheet_report_main').html("");
+function parseWorksheetSummary(info, id) {
+    $(id).html("");
     for (var i = 0; i < info.length; i++) {
         var row = info[i];
         var width = parseFloat(row["width"]) > 0 ? 100 * parseFloat(row["width"]) : 0.1;
@@ -838,17 +839,28 @@ function parseWorksheetSummary(info) {
         string += "<div class='background_block_worksheet' style='width:" + width + "%'></div>";
         string += "<div class='tag_content'>";
         string += "<div class='tag_content_name'><p>" + row["main"] + "</p></div>";
-        string += "<div class='tag_content_main_display'><p>" + row["main_display"] + " </p></div>";
-        for (var j = 1; j < 5; j++) {
-            if(row["option_" + j]) {
-                var title = row["option_" + j][0];
-                var value = row["option_" + j][1];
-                string += "<div class='tag_content_main_extra' style='width:" + extra_width + "%'><div class='tag_content_main_extra_value'><p>" + value + "</p></div>";
-                string += "<div class='tag_content_main_extra_writing'><p>" + title + "</p></div></div>";
+        string += "<div class='tag_content_main_display'><p>" + row["main_display"] + "</p></div>";
+        if(row["option_tags"]) {
+            var tags_string = row["option_tags"];
+            if(tags_string.length < 70) {
+                string += "<div class='tag_content_tags_string'><p>" + row["option_tags"] + "</p></div>";
+            } else if (tags_string.length < 110) {
+                string += "<div class='tag_content_tags_string'><p class='smaller'>" + row["option_tags"] + "</p></div>";
+            } else {
+                string += "<div class='tag_content_tags_string'><p class='two_lines'>" + row["option_tags"] + "</p></div>";
+            } 
+        } else {
+            for (var j = 1; j < 5; j++) {
+                if(row["option_" + j]) {
+                    var title = row["option_" + j][0];
+                    var value = row["option_" + j][1];
+                    string += "<div class='tag_content_main_extra' style='width:" + extra_width + "%'><div class='tag_content_main_extra_value'><p>" + value + "</p></div>";
+                    string += "<div class='tag_content_main_extra_writing'><p>" + title + "</p></div></div>";
+                }
             }
         }
         string += "</div></div>";
-        $('#new_worksheet_report_main').append(string);
+        $(id).append(string);
     }
 }
 
