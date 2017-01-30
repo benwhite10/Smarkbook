@@ -396,6 +396,7 @@ function summaryRequestSuccess(json){
             localStorage.setItem("userAverage", null);
             localStorage.setItem("setAverage", null);
         }
+        setUpWorksheetList();
         refreshSummaryResults();
     } else {
         console.log("Something went wrong generating the report summary.");
@@ -516,6 +517,15 @@ function setOrderTextAndDirection(type_name, order, desc) {
     $("#" + type_name + "_order").val(desc);
 }
 
+function setWorksheetsOrderTextAndDirection(order, desc) {
+    var order_info = getWorksheetsOrderInformation(order);
+    var desc_text = desc ? "\u2193" : "\u2191";
+    $("#new_worksheets_report_order_title").html("<h2>" + desc_text + "</h2>");
+    $("#new_worksheets_report_criteria_title").html("<h2>" + order_info["display_text"] + "</h2>");
+    $("#new_worksheets_report_criteria").val(order);
+    $("#new_worksheets_report_order").val(desc);
+}
+
 function parseNewTagResult(result, order_key) {
     var tag_id = result["TagID"];
     var name = result["name"];
@@ -552,11 +562,11 @@ function getMainDisplayCriteria(result, order_key) {
     return (order_key === "count" || order_key === "marks") ? parseInt(result[order_key]) : parseInt(result[order_key]) + "%";
 }
 
-function changeCriteia(type) {
+function changeCriteria(type) {
     var type_name = getTypeFromId(type).toLowerCase();
     var order = parseInt($("#" + type_name + "_criteria").val());
     var desc = $("#" + type_name + "_order").val();
-    desc = desc === "true" ?true : false;
+    desc = desc === "true" ? true : false;
     order = order < 4 ? order + 1 : 1;
     parseNewTagResults(type, order, desc);
 }
@@ -567,6 +577,21 @@ function changeOrder(type) {
     var desc = $("#" + type_name + "_order").val();
     desc = desc === "true" ? false : true;
     parseNewTagResults(type, order, desc);
+}
+
+function changeWorksheetsCriteria() {
+    var order = parseInt($("#new_worksheets_report_criteria").val());
+    var desc = $("#new_worksheets_report_order").val();
+    desc = desc === "true" ? true : false;
+    order = order < 2 ? order + 1 : 1;
+    setWorksheetsTable(order, desc);
+}
+
+function changeWorksheetsOrder() {
+    var order = parseInt($("#new_worksheets_report_criteria").val());
+    var desc = $("#new_worksheets_report_order").val();
+    desc = desc === "true" ? false : true;
+    setWorksheetsTable(order, desc);
 }
 
 function refreshTagResults(){
@@ -603,7 +628,7 @@ function refreshSummaryResults(){
     $('#summaryReportUserAvgValue').css('color', getColour(userAvg, 60, 40, [220, 0, 0], [240, 160, 0], [0, 240, 0]));
     
     setWorksheetsSummary();
-    setWorksheetsTable();
+    setWorksheetsTable(0, false);
     showSummaryResults();
 }
 
@@ -702,68 +727,114 @@ function changeSectionTab(id) {
     $("#" + id).addClass('selected');
 }
 
-function setWorksheetsTable(){
+function setUpWorksheetList() {
     var summary = JSON.parse(localStorage.getItem("summary"));
-    $('#new_worksheets_report_main').html("");
+    var worksheet_list = [];
     if(summary !== null){
         var list = summary["worksheetList"];
         for(var key in list){
             var sheet = list[key];
+            var worksheet = {};
             if (!sheet["Results"]) continue;
-            var name = sheet["WName"];
+            worksheet["name"] = sheet["WName"];
             var date_due = moment(sheet["DateDue"], "DD/MM/YYYY");
             var date_string = date_due.format("DD/MM/YY");
             var short_date_string = date_due.format("DD/MM");
-            var gwid = sheet["GWID"];
+            worksheet["date_order"] = date_due.unix();
+            worksheet["date_string"] = date_string;
+            worksheet["short_date_string"] = short_date_string;
+            worksheet["gwid"] = sheet["GWID"];
             var stu_score = 0.1;
             var display_status = "-";
-            var display_marks = "-";
             var display_relative = "-";
             var relative_colour = "rgb(0,0,0)";
             var status_colour = "rgb(0,0,0)";
-            if(sheet["Results"]){
-                stu_score = sheet["StuAVG"] ? Math.round(100 * sheet["StuAVG"]) : 0;
-                stu_score = parseInt(stu_score) === 0 ? 0.1 : parseInt(stu_score);
-                var stuMark = sheet["StuMark"] ? sheet["StuMark"] : 0;
-                var stuMarks = sheet["StuMarks"] ? sheet["StuMarks"] : 0;
-                display_marks = stuMark + "/" + stuMarks;
-                var set_score = sheet["AVG"] ? Math.round(100 * sheet["AVG"]) : 0;
-                var relative_score = stu_score - set_score; 
-                if (stu_score !== 0.1) {
-                    if (relative_score < 0) {
-                        display_relative = "\u2193" + Math.abs(relative_score) + "%";
-                    } else if (stu_score - set_score > 0) {
-                        display_relative = "\u2191" + Math.abs(relative_score) + "%";
-                    }
-                    relative_colour = getColour(relative_score, 0, 20, [255, 0, 0], [80, 80, 80], [0, 210, 0]);
+            var stu_perc = sheet["StuAVG"] ? Math.round(100 * sheet["StuAVG"]) : 0;
+            stu_score = parseInt(stu_perc) === 0 ? 0.1 : parseInt(stu_perc);
+            var stuMark = sheet["StuMark"] ? sheet["StuMark"] : 0;
+            var stuMarks = sheet["StuMarks"] ? sheet["StuMarks"] : 0;
+            var display_marks = stuMark + "/" + stuMarks;
+            var set_score = sheet["AVG"] ? Math.round(100 * sheet["AVG"]) : 0;
+            var relative_score = stu_score - set_score; 
+            if (stu_score !== 0.1) {
+                if (relative_score < 0) {
+                    display_relative = "\u2193" + Math.abs(relative_score) + "%";
+                } else if (stu_score - set_score > 0) {
+                    display_relative = "\u2191" + Math.abs(relative_score) + "%";
                 }
-                var late = sheet["StuDays"];
-                if(late === "" || late === null){
-                    display_status = "-";
-                } else if(late === 0 || late === "0") {
-                    display_status = "On Time";
-                    status_colour = "rgb(50,130,50)";
-                } else {
-                    display_status = late + " Days Late";
-                    status_colour = "rgb(255,0,0)";
-                }
+                relative_colour = getColour(relative_score, 0, 20, [255, 0, 0], [80, 80, 80], [0, 210, 0]);
             }
-            var string = "<div id='worksheet_" + gwid + "' class='new_tag worksheet_summary' onclick='clickWorksheet(" + gwid + ")'>";
-            string += "<div id='background_worksheet_" + gwid + "' class='background_block_worksheet' style='width:" + stu_score + "%'></div>";
-            string += "<div class='tag_content'>";
-            string += "<div class='tag_content_name'><p>" + name + "</p></div>";
-            string += "<div class='tag_content_main_display'><p>" + short_date_string + " </p></div>";
-            string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + date_string + "</p></div>";
-            string += "<div class='tag_content_main_extra_writing'><p>DATE</p></div></div>";
-            string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + display_marks + "</p></div>";
-            string += "<div class='tag_content_main_extra_writing'><p>MARK</p></div></div>";
-            string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p style='color:" + relative_colour + "'>" + display_relative + "</p></div>";
-            string += "<div class='tag_content_main_extra_writing'><p style='color:" + relative_colour + "'>REL</p></div></div>";
-            string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p style='color:" + status_colour + "'>" + display_status + "</p></div>";
-            string += "<div class='tag_content_main_extra_writing'><p style='color:" + status_colour + "'>STATUS</p></div></div>";
-            string += "</div></div>";
-            $('#new_worksheets_report_main').append(string);
-        }
+            var late = sheet["StuDays"];
+            if(late === "" || late === null){
+                display_status = "-";
+            } else if(late === 0 || late === "0") {
+                display_status = "On Time";
+                status_colour = "rgb(50,130,50)";
+            } else {
+                display_status = late + " Days Late";
+                status_colour = "rgb(255,0,0)";
+            }
+            worksheet["stu_score"] = stu_score;
+            worksheet["percentage"] = stu_perc;
+            worksheet["display_status"] = display_status;
+            worksheet["display_status_colour"] = status_colour;
+            worksheet["relative_score"] = relative_score;
+            worksheet["display_relative_score"] = display_relative;
+            worksheet["relative_colour"] = relative_colour;
+            worksheet["display_marks"] = display_marks;
+            worksheet_list.push(worksheet);
+        }  
+    }
+    sessionStorage.setItem("worksheet_list", JSON.stringify(worksheet_list));
+}
+
+function setWorksheetsTable(order, desc){
+    var worksheet_list = JSON.parse(sessionStorage.getItem("worksheet_list"));
+    setWorksheetsOrderTextAndDirection(order, desc);
+    var order_info = getWorksheetsOrderInformation(order);
+    worksheet_list = orderArrayBy(worksheet_list, order_info["array_key"], desc);
+    $('#new_worksheets_report_main').html("");
+    for(var key in worksheet_list){
+        var sheet = worksheet_list[key];
+        var string = "<div id='worksheet_" + sheet["gwid"] + "' class='new_tag worksheet_summary' onclick='clickWorksheet(" + sheet["gwid"] + ")'>";
+        string += "<div id='background_worksheet_" + sheet["gwid"] + "' class='background_block_worksheet' style='width:" + sheet["stu_score"] + "%'></div>";
+        string += "<div class='tag_content'>";
+        string += "<div class='tag_content_name'><p>" + sheet["name"] + "</p></div>";
+        string += "<div class='tag_content_main_display'><p>" + getMainWorksheetsDisplayCriteria(order_info["display_key"], sheet) + " </p></div>";
+        string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + sheet["date_string"] + "</p></div>";
+        string += "<div class='tag_content_main_extra_writing'><p>DATE</p></div></div>";
+        string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + sheet["display_marks"] + "</p></div>";
+        string += "<div class='tag_content_main_extra_writing'><p>MARK</p></div></div>";
+        string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p style='color:" + sheet["relative_colour"] + "'>" + sheet["display_relative_score"] + "</p></div>";
+        string += "<div class='tag_content_main_extra_writing'><p style='color:" + sheet["relative_colour"] + "'>REL</p></div></div>";
+        string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p style='color:" + sheet["display_status_colour"] + "'>" + sheet["display_status"] + "</p></div>";
+        string += "<div class='tag_content_main_extra_writing'><p style='color:" + sheet["display_status_colour"] + "'>STATUS</p></div></div>";
+        string += "</div></div>";
+        $('#new_worksheets_report_main').append(string);
+    }
+}
+
+function getMainWorksheetsDisplayCriteria(display_key, sheet) {
+    return (display_key === "percentage") ? sheet[display_key] + "%" : sheet[display_key];
+}
+
+function getWorksheetsOrderInformation(order) {
+    switch(order) {
+        case 0:
+        default:
+            return {
+                array_key: "date_order",
+                display_text: "Date",
+                display_key: "short_date_string"
+            };
+            break;
+        case 1:
+            return {
+                array_key: "percentage",
+                display_text: "Percentage",
+                display_key: "percentage"
+            };
+            break;
     }
 }
 
@@ -817,7 +888,7 @@ function setWorksheetSummary(type) {
                     main_display: row["Mark"] + "/" + row["Marks"],
                     width: parseFloat(row["Perc"]),
                     option_1: ["QUESTIONS", row["Count"]],
-                    option_2: ["MARKS", row["Mark"] + "/" + row["Marks"]],
+                    option_2: ["MARK", row["Mark"] + "/" + row["Marks"]],
                     option_3: ["PERC", parseInt(100*parseFloat(row["Perc"])) + "%"]
                 });
             }

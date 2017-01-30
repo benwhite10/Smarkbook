@@ -962,3 +962,7 @@ td.ind_worksheet {
 .background_block_worksheet.selected {
     background: #66E11B;
 }
+
+#new_worksheets_report_title_bottom {
+    cursor: pointer;
+}
