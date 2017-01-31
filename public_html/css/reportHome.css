@@ -966,3 +966,23 @@ td.ind_worksheet {
 #new_worksheets_report_title_bottom {
     cursor: pointer;
 }
+
+p.medium_worksheet_name {
+    font-size: 0.9rem;
+}
+
+p.long_worksheet_name {
+    font-size: 0.75rem;
+}
+
+#new_worksheet_placeholder {
+    margin: 50px auto 0px auto;
+    width: 60%;
+    height: 100px;
+    text-align: center;
+}
+
+#new_worksheet_placeholder > p {
+    font-size: 1.0rem;
+    font-weight: bold;
+}

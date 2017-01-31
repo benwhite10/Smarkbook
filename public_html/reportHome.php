@@ -203,7 +203,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                 <div id="new_worksheets_report_title_bottom" class="report_column_title_bottom">
                                     <input type="hidden" id="new_worksheets_report_criteria">
                                     <input type="hidden" id="new_worksheets_report_order">
-                                    <div id="new_worksheets_report_criteria_title" class="new_worksheets_report_criteria" onclick="changeWorksheetsCriteria()"><h2>Date</h2></div>
+                                    <div id="new_worksheets_report_criteria_title" class="new_worksheets_report_criteria" onclick="changeWorksheetsCriteria()"></div>
                                     <div id="new_worksheets_report_order_title" class="new_worksheets_report_order" onclick="changeWorksheetsOrder()"></div>
                                 </div>
                             </div>
@@ -220,11 +220,15 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                 <div id="new_worksheet_report_title_bottom" class="report_column_title_bottom">
                                     <input type="hidden" id="new_worksheet_report_criteria">
                                     <input type="hidden" id="new_worksheet_report_order">
-                                    <div id="new_worksheet_report_criteria_title" class="new_worksheets_report_criteria"><h2>No.</h2></div>
+                                    <div id="new_worksheet_report_criteria_title" class="new_worksheets_report_criteria"><h2></h2></div>
                                     <div id="new_worksheet_report_order_title" class="new_worksheets_report_order"></div>
                                 </div>
                             </div>
-                            <div id="new_worksheet_report_main" class="report_column_main"></div>
+                            <div id="new_worksheet_report_main" class="report_column_main">
+                                <div id="new_worksheet_placeholder">
+                                    <p>Click on a worksheet to view the details for that worksheet.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -68,15 +68,6 @@ function showHideWorksheetDetails(){
 function clickWorksheet(gwid) {
     getWorksheetSummary(gwid);
     $("#worksheetSummaryReport").slideDown();
-//    if (worksheet["Summary"]) {
-//        $("#worksheetSummaryReport").slideDown();
-//    } else {
-//        $("#worksheetSummaryReport").slideUp();
-//    }
-}
-
-function parseWorksheetSummary(summary) {
-    
 }
 
 function getWorksheetSummary(gwid) {
@@ -799,7 +790,12 @@ function setWorksheetsTable(order, desc){
         var string = "<div id='worksheet_" + sheet["gwid"] + "' class='new_tag worksheet_summary' onclick='clickWorksheet(" + sheet["gwid"] + ")'>";
         string += "<div id='background_worksheet_" + sheet["gwid"] + "' class='background_block_worksheet' style='width:" + sheet["stu_score"] + "%'></div>";
         string += "<div class='tag_content'>";
-        string += "<div class='tag_content_name'><p>" + sheet["name"] + "</p></div>";
+        var sheet_name = sheet["name"];
+        var class_name = "";
+        if (sheet_name.length > 50) {
+            class_name = (sheet_name.length < 70) ? "medium_worksheet_name" : "long_worksheet_name";
+        }
+        string += "<div class='tag_content_name'><p class='" + class_name + "'>" + sheet_name + "</p></div>";      
         string += "<div class='tag_content_main_display'><p>" + getMainWorksheetsDisplayCriteria(order_info["display_key"], sheet) + " </p></div>";
         string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + sheet["date_string"] + "</p></div>";
         string += "<div class='tag_content_main_extra_writing'><p>DATE</p></div></div>";
@@ -862,11 +858,13 @@ function setWorksheetSummary(type) {
     var summary_info = [];
     var parse_array = [];
     var id = "";
+    var order_display = "";
     switch(type) {
         case 0:
         default:
             summary_info = summary["questions"];
             orderArrayBy(summary_info, "QOrder", false);
+            order_display = "Marks";
             for (var i = 0; i < summary_info.length; i++) {
                 var row = summary_info[i];
                 parse_array.push({
@@ -880,12 +878,13 @@ function setWorksheetSummary(type) {
             break;
         case 1:
             summary_info = summary["tags"];
-            orderArrayBy(summary_info, "Perc", true);
+            orderArrayBy(summary_info, "Count", true);
+            order_display = "Questions";
             for (var i = 0; i < summary_info.length; i++) {
                 var row = summary_info[i];
                 parse_array.push({
                     main: row["Name"],
-                    main_display: row["Mark"] + "/" + row["Marks"],
+                    main_display: row["Count"],
                     width: parseFloat(row["Perc"]),
                     option_1: ["QUESTIONS", row["Count"]],
                     option_2: ["MARK", row["Mark"] + "/" + row["Marks"]],
@@ -896,15 +895,15 @@ function setWorksheetSummary(type) {
             break;
     }
     changeSectionTab(id);
-    parseWorksheetSummary(parse_array, "#new_worksheet_report_main");
+    parseWorksheetSummary(parse_array, "#new_worksheet_report", order_display);
 }
 
-function parseWorksheetSummary(info, id) {
-    $(id).html("");
+function parseWorksheetSummary(info, id, order_display) {
+    $(id + "_main").html("");
+    $(id + "_criteria_title").html("<h2>" + order_display + "</h2>");
     for (var i = 0; i < info.length; i++) {
         var row = info[i];
         var width = parseFloat(row["width"]) > 0 ? 100 * parseFloat(row["width"]) : 0.1;
-        var main = row["main"];
         var extra_width = getExtraContentWidth(row);
         var string = "<div class='new_tag worksheet_summary'>";
         string += "<div class='background_block_worksheet' style='width:" + width + "%'></div>";
@@ -931,7 +930,7 @@ function parseWorksheetSummary(info, id) {
             }
         }
         string += "</div></div>";
-        $(id).append(string);
+        $(id + "_main").append(string);
     }
 }
 
