@@ -605,6 +605,7 @@ tr.tableHead:nth-child(odd){
 
 #new_tags_report {
     border-bottom: thin solid #323232;
+    margin-bottom: 100px;
 }
 
 #new_tags_report_spinner {

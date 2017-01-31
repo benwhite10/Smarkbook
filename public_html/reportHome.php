@@ -75,7 +75,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </li>
                 </ul>
             </div>
-            <div id="body" style="margin-bottom: 100px">
+            <div id="body">
                 <?php
                 if (isset($message)) {
                     $type = $message->getType();
