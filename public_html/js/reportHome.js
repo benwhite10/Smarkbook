@@ -211,16 +211,16 @@ function sendReportRequest(){
         userval: $('#userval').val()
     };
     localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
-    infoArray["type"] = "STUDENTREPORT";
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getStudentSummary.php",
-        dataType: "json",
-        success: function(json){
-            reportRequestSuccess(json);
-        }
-    });
+//    infoArray["type"] = "STUDENTREPORT";
+//    $.ajax({
+//        type: "POST",
+//        data: infoArray,
+//        url: "/requests/getStudentSummary.php",
+//        dataType: "json",
+//        success: function(json){
+//            reportRequestSuccess(json);
+//        }
+//    });
     infoArray["type"] = "NEWSTUDENTREPORT";
     $.ajax({
         type: "POST",
@@ -1026,12 +1026,12 @@ function hideAllSections(){
 }
 
 function showAllSections(){
-    $("#tagsReport").show();
+    //$("#tagsReport").show();
     $("#summaryReport").show();
-    $("#questionsReport").show();
+    //$("#questionsReport").show();
     $("#new_tags_report").show();
     $("#noResults").hide();
-    $("#showHideWorksheetText").text("Show Worksheets \u2193");
+    $("#showHideWorksheetText").text("Hide Worksheets \u2191");
 }
 
 function hideAllContent(){
@@ -1046,9 +1046,9 @@ function hideAllContent(){
 
 function showAllSpinners(){
     hideAllContent();
-    startSpinnerInDiv('tagsReportSpinner');
+    //startSpinnerInDiv('tagsReportSpinner');
     startSpinnerInDiv('summaryReportSpinner');
-    startSpinnerInDiv('questionsReportSpinner');
+    //startSpinnerInDiv('questionsReportSpinner');
     startSpinnerInDiv('new_tags_report_spinner');
 }
 

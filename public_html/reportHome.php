@@ -75,7 +75,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </li>
                 </ul>
             </div>
-            <div id="body">
+            <div id="body" style="margin-bottom: 100px">
                 <?php
                 if (isset($message)) {
                     $type = $message->getType();
@@ -286,7 +286,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div>
                 </div>
                 
-                <div id="tagsReport" class="fullSection">
+                <div id="tagsReport" class="fullSection" style="display:none">
                     <div id="tagsReportSpinner" class="spinnerBox">
                     </div>
                     <div id="tagsReportSummary" class="sectionMain" style="display: none;">
@@ -340,7 +340,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div>
                 </div>
                 
-                <div id="questionsReport" class="sectionWrapper">
+                <div id="questionsReport" class="sectionWrapper" style="display:none">
                     <div id="questionsReportSpinner" class="spinnerBox" style="display:none;">
                     </div>
                     <div id="questionsReportMain" class="innerSectionWrapper top">
