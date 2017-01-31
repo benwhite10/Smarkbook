@@ -421,6 +421,11 @@ table.fullResults{
     display: none;
 }
 
+#worksheetSummaryReport{
+    display: none;
+    height: 150px;
+}
+
 #summaryReportSetAvg, #summaryReportUserAvg{
     width: 25%;
 }
@@ -441,6 +446,12 @@ table.fullResults{
 .worksheetSummaryTable{
     width: 100%;
     border-collapse: collapse;
+    cursor: pointer;
+    -webkit-user-select: none;       
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 thead.worksheetSummaryTable{
@@ -455,14 +466,20 @@ tbody.worksheetSummaryTable{
 
 tr.worksheetSummaryTable{
     line-height: 25px;
+    cursor: pointer;
 }
 
 tr.worksheetSummaryTable:nth-child(odd){
     background-color: #DDD;
 }
 
+tr.worksheetSummaryTable:hover {
+    background-color: #c2f4a4;
+}
+
 .worksheetSummaryTable td, .worksheetSummaryTable th{
     text-align: center;
+    cursor: pointer;
 }
 
 th {
@@ -588,6 +605,7 @@ tr.tableHead:nth-child(odd){
 
 #new_tags_report {
     border-bottom: thin solid #323232;
+    margin-bottom: 100px;
 }
 
 #new_tags_report_spinner {
@@ -639,7 +657,7 @@ tr.tableHead:nth-child(odd){
     background: rgba(249, 209, 27, 0.5);
 }
 
-.background_block {
+.background_block, .background_block_worksheet {
     height: 100%;
     display: inline-block;
     float: left;
@@ -708,6 +726,29 @@ tr.tableHead:nth-child(odd){
     float: left;
 }
 
+.tag_content_tags_string {
+    display: none;
+    float: left;
+    height: 100%;
+    width: calc(100% - 10px);
+    padding-left: 10px;
+    text-align: left;
+}
+
+.tag_content_tags_string > p {
+    line-height: 30px;
+    font-size: 0.9rem;
+}
+
+p.smaller {
+    font-size: 0.7rem;
+}
+
+p.two_lines {
+    line-height: 15px;
+    font-size: 0.7rem;
+}
+
 .tag_content_main_extra_value, .tag_content_main_extra_writing {
     width: 100%;
     height: 20px;
@@ -738,7 +779,8 @@ tr.tableHead:nth-child(odd){
     display: none;
 }
 
-.tag_content:hover .tag_content_main_extra {
+.tag_content:hover .tag_content_main_extra,
+.tag_content:hover .tag_content_tags_string {
     display: inline-block;
 }
 
@@ -806,4 +848,142 @@ tr.tableHead:nth-child(odd){
     display: inline-block;
     float: left;
     width: 20px;
+}
+
+table.ind_worksheet {
+    border-bottom: 1px solid #323232;
+}
+
+td.ind_worksheet {
+    border-right: 1px solid #323232;
+}
+
+.half_column_report {
+    width: calc(50% - 0.5px);
+    height: 100%;
+    max-height: 400px;
+    display:inline-block;
+    float: left;
+    overflow-y: scroll;
+}
+
+#new_worksheets_report {
+    border-right: #323232 1px solid;
+}
+
+.title_sections {
+    width: calc(25% - 0.75px);
+    height: 100%;
+    float: left;
+    text-align: center;
+    background: #EEE;
+    color: #323232;
+    cursor: pointer;
+    border-right: 1px solid #323232;
+}
+
+.title_sections.selected, .title_sections.selected:hover {
+    background: #323232;
+    color: #66E11B;
+}
+
+.title_sections:hover {
+    background: #888;
+}
+
+.title_sections.nosection:hover {
+    background: #EEE;
+}
+
+.title_sections > h1 {
+    font-size: 1.0rem;
+    line-height: 25px;
+    margin: 0;
+}
+
+.report_column_title {
+    width: 100%;
+    height: 50px;
+    background: #323232;
+    color: #66E11B;
+}
+
+.report_column_title_top, .report_column_title_bottom {
+    width: 100%;
+    height: 50%;
+}
+
+.report_column_title_top > h1 {
+    font-size: 1.2rem;
+    color: #66E11B;
+    text-align: center;
+    padding: 0;
+    line-height: 25px;
+    font-weight: 300;
+}
+
+.new_worksheets_report_criteria {
+    display: inline-block;
+    float: left;
+    width: calc(100% - 20px);
+}
+
+.new_worksheets_report_order {
+    display: inline-block;
+    float: left;
+    width: 20px;
+}
+
+.new_worksheets_report_criteria > h2, .new_worksheets_report_order > h2 {
+    font-size: 1.0rem;
+    color: #66E11B;
+    text-align: center;
+    padding: 0;
+    line-height: 25px;
+    font-weight: 300;
+}
+
+.new_worksheets_report_criteria > h2 {
+    text-align: right;
+}
+
+.report_column_main {
+    width: 100%;
+    height: calc(100% - 50px);
+}
+
+.worksheet_summary {
+    background: #eee;
+}
+
+.background_block_worksheet {
+    background: #a4ef76;
+}
+
+.background_block_worksheet.selected {
+    background: #66E11B;
+}
+
+#new_worksheets_report_title_bottom {
+    cursor: pointer;
+}
+
+p.medium_worksheet_name {
+    font-size: 0.9rem;
+}
+
+p.long_worksheet_name {
+    font-size: 0.75rem;
+}
+
+#new_worksheet_placeholder {
+    margin: 50px auto 0px auto;
+    width: 60%;
+    height: 100px;
+    text-align: center;
+}
+
+#new_worksheet_placeholder > p {
+    font-size: 1.0rem;
+    font-weight: bold;
 }

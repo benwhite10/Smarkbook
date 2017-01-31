@@ -195,18 +195,41 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                         </div>
                     </div>
                     <div id="summaryReportDetails" class="innerSectionWrapper">
-                        <table id="worksheetSummaryTable" class="worksheetSummaryTable">
-                            <thead class="worksheetSummaryTable">
-                                <tr class="worksheetSummaryTable tableHead">
-                                    <th class="worksheetName">Worksheet</th>
-                                    <th>Date</th>
-                                    <th colspan="2">Mark</th>
-                                    <th colspan="2">Status</th> 
-                                </tr>
-                            </thead>
-                            <tbody class="worksheetSummaryTable">
-                            </tbody>
-                        </table>
+                        <div id="new_worksheets_report" class="half_column_report">
+                            <div id="new_worksheets_report_title" class="report_column_title">
+                                <div id="new_worksheets_report_title_top" class="report_column_title_top">
+                                    <h1>Worksheets</h1>
+                                </div>
+                                <div id="new_worksheets_report_title_bottom" class="report_column_title_bottom">
+                                    <input type="hidden" id="new_worksheets_report_criteria">
+                                    <input type="hidden" id="new_worksheets_report_order">
+                                    <div id="new_worksheets_report_criteria_title" class="new_worksheets_report_criteria" onclick="changeWorksheetsCriteria()"></div>
+                                    <div id="new_worksheets_report_order_title" class="new_worksheets_report_order" onclick="changeWorksheetsOrder()"></div>
+                                </div>
+                            </div>
+                            <div id="new_worksheets_report_main" class="report_column_main"></div>
+                        </div>
+                        <div id="new_worksheet_report" class="half_column_report">
+                            <div id="new_worksheet_report_title" class="report_column_title">
+                                <div id="new_worksheet_report_title_top" class="report_column_title_top">
+                                    <div id="section_questions" class="title_sections selected" onclick="changeSection('section_questions')"><h1>Questions</h1></div>
+                                    <div id="section_tags" class="title_sections" onclick="changeSection('section_tags')"><h1>Tags</h1></div>
+                                    <div id="section_blank_1" class="title_sections nosection"></div>
+                                    <div id="section_blank_2" class="title_sections nosection" style="border-right: none"></div>
+                                </div>
+                                <div id="new_worksheet_report_title_bottom" class="report_column_title_bottom">
+                                    <input type="hidden" id="new_worksheet_report_criteria">
+                                    <input type="hidden" id="new_worksheet_report_order">
+                                    <div id="new_worksheet_report_criteria_title" class="new_worksheets_report_criteria"><h2></h2></div>
+                                    <div id="new_worksheet_report_order_title" class="new_worksheets_report_order"></div>
+                                </div>
+                            </div>
+                            <div id="new_worksheet_report_main" class="report_column_main">
+                                <div id="new_worksheet_placeholder">
+                                    <p>Click on a worksheet to view the details for that worksheet.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -222,7 +245,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                 <div class="new_tags_report_title_bottom">
                                     <input type="hidden" id="classification_criteria">
                                     <input type="hidden" id="classification_order">
-                                    <div id="tags_report_criteria_classification" class="new_tags_report_title_bottom_criteria" onclick="changeCriteia(1)">
+                                    <div id="tags_report_criteria_classification" class="new_tags_report_title_bottom_criteria" onclick="changeCriteria(1)">
                                     </div>
                                     <div id="tags_report_order_classification" class="new_tags_report_title_bottom_order" onclick="changeOrder(1)">
                                     </div>
@@ -235,7 +258,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                 <div class="new_tags_report_title_bottom">
                                     <input type="hidden" id="major_criteria">
                                     <input type="hidden" id="major_order">
-                                    <div id="tags_report_criteria_major" class="new_tags_report_title_bottom_criteria" onclick="changeCriteia('2')">
+                                    <div id="tags_report_criteria_major" class="new_tags_report_title_bottom_criteria" onclick="changeCriteria('2')">
                                     </div>
                                     <div id="tags_report_order_major" class="new_tags_report_title_bottom_order" onclick="changeOrder('2')">
                                     </div>
@@ -248,7 +271,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                                 <div class="new_tags_report_title_bottom">
                                     <input type="hidden" id="minor_criteria">
                                     <input type="hidden" id="minor_order">
-                                    <div id="tags_report_criteria_minor" class="new_tags_report_title_bottom_criteria" onclick="changeCriteia('3')">
+                                    <div id="tags_report_criteria_minor" class="new_tags_report_title_bottom_criteria" onclick="changeCriteria('3')">
                                     </div>
                                     <div id="tags_report_order_minor" class="new_tags_report_title_bottom_order" onclick="changeOrder('3')">
                                     </div>
@@ -263,7 +286,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div>
                 </div>
                 
-                <div id="tagsReport" class="fullSection">
+                <div id="tagsReport" class="fullSection" style="display:none">
                     <div id="tagsReportSpinner" class="spinnerBox">
                     </div>
                     <div id="tagsReportSummary" class="sectionMain" style="display: none;">
@@ -317,7 +340,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div>
                 </div>
                 
-                <div id="questionsReport" class="sectionWrapper">
+                <div id="questionsReport" class="sectionWrapper" style="display:none">
                     <div id="questionsReportSpinner" class="spinnerBox" style="display:none;">
                     </div>
                     <div id="questionsReportMain" class="innerSectionWrapper top">

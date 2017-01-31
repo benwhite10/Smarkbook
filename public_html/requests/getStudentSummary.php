@@ -11,6 +11,7 @@ $startDate = filter_input(INPUT_POST,'startDate',FILTER_SANITIZE_STRING);
 $endDate = filter_input(INPUT_POST,'endDate',FILTER_SANITIZE_STRING);
 $studentId = filter_input(INPUT_POST,'student',FILTER_SANITIZE_NUMBER_INT);
 $staffId = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
+$gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
 $setId = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $tagsArrayString = "";
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
@@ -49,6 +50,9 @@ switch ($requestType){
         break;
     case "STUDENTSUMMARY":
         getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+        break;
+    case "WORKSHEETREPORT":
+        getWorksheetSummary($gwid, $studentId);
         break;
     default:
         failRequest("Invalid request type.");
@@ -106,6 +110,52 @@ function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId
 
     // Set average score (probably not here though)
     succeedSummaryRequest($list, $userAvgArray["AVG"], $setAvgArray["AVG"]);
+}
+
+function getWorksheetSummary($gwid, $stu_id) {
+    $query_1 = "SELECT CQ.`Stored Question ID` SQID, CQ.`Mark` Mark, SQ.`Marks` Marks, SQ.`Number` Number, SQ.`Question Order` QOrder FROM `TCOMPLETEDQUESTIONS` CQ
+            JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0";
+    
+    $query_1_1 = "SELECT CQ.`Stored Question ID` SQID, TT.`Name` Name FROM `TCOMPLETEDQUESTIONS` CQ
+            JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID` 
+            JOIN `TQUESTIONTAGS` QT ON SQ.`Stored Question ID`  = QT.`Stored Question ID` 
+            JOIN `TTAGS` TT ON QT.`Tag ID` = TT.`Tag ID` 
+            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0 ORDER BY TT.`Name`";
+    
+    $query_2 = "SELECT T.`Tag ID` TID, T.`Name` Name, SUM(CQ.`Mark`) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.`Mark`)/SUM(SQ.`Marks`) Perc, COUNT(1) Count FROM `TCOMPLETEDQUESTIONS` CQ
+            JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+            JOIN `TQUESTIONTAGS` QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
+            JOIN `TTAGS` T ON QT.`Tag ID` = T.`Tag ID`
+            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0
+            GROUP BY T.`Tag ID`";
+    try {
+        $questions = db_select_exception($query_1);
+        $tag_names = db_select_exception($query_1_1);
+        $questions = addTagStringToQuestion($questions, $tag_names);
+        $tags = db_select_exception($query_2);
+        succeedRequest(array(
+            "student" => $stu_id,
+            "gwid" => $gwid,
+            "questions" => $questions,
+            "tags" => $tags));
+    } catch (Exception $ex) {
+        $message = "There was an error getting the worksheet summary.";
+        failRequestWithException($message, $ex);
+    }   
+}
+
+function addTagStringToQuestion($questions, $tag_names) {
+    foreach($questions as $key => $question){
+        $tag_string = "";
+        foreach($tag_names as $tag_name) {
+            if ($tag_name["SQID"] === $question["SQID"]) $tag_string .= $tag_name["Name"] .", ";
+        }
+        if (strlen($tag_string) > 2) $tag_string = substr($tag_string, 0, -2);
+        $question["tag_string"] = $tag_string;
+        $questions[$key] = $question;
+    }
+    return $questions;
 }
 
 function getUserAverage($dates){
@@ -827,8 +877,9 @@ function succeedSummaryRequest($list, $userAvg, $setAvg){
 /* Exit page */
 
 function failRequestWithException($message, $ex){
-    errorLog("There was an error requesting the report: " . $ex->getMessage());
-    failRequest($message);
+    $ex_message = $ex->getMessage();
+    errorLog("There was an error requesting the report: " . $ex_message);
+    failRequest("$message: $ex_message");
 }
 
 function failRequest($message){
