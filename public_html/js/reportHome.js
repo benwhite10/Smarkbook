@@ -762,8 +762,9 @@ function setWorksheetsTable(order, desc){
     $('#new_worksheets_report_main').html("");
     for(var key in worksheet_list){
         var sheet = worksheet_list[key];
+        var class_string = parseInt(sheet["gwid"]) === parseInt(displayed_gwid) ? "selected" : "";
         var string = "<div id='worksheet_" + sheet["gwid"] + "' class='new_tag worksheet_summary' onclick='clickWorksheet(" + sheet["gwid"] + ")'>";
-        string += "<div id='background_worksheet_" + sheet["gwid"] + "' class='background_block_worksheet' style='width:" + sheet["stu_score"] + "%'></div>";
+        string += "<div id='background_worksheet_" + sheet["gwid"] + "' class='background_block_worksheet " + class_string + "' style='width:" + sheet["stu_score"] + "%'></div>";
         string += "<div class='tag_content'>";
         var sheet_name = sheet["name"];
         var class_name = "";
