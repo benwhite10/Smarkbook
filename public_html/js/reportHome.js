@@ -1,3 +1,5 @@
+var displayed_gwid = "";
+
 $(document).ready(function(){  
     $("#variablesInputBoxShowHideButton").click(function(){
         showHideButton("variablesInputMain", "variablesInputBoxShowHideButton");
@@ -63,35 +65,6 @@ function showHideWorksheetDetails(){
     }
     $("#worksheetSummaryReport").hide();
     $("#summaryReportDetails").slideToggle();
-}
-
-function clickWorksheet(gwid) {
-    getWorksheetSummary(gwid);
-    $("#worksheetSummaryReport").slideDown();
-}
-
-function getWorksheetSummary(gwid) {
-    var stu_id = $("#student").val();
-    var infoArray = {
-        gwid: gwid,
-        stu_id: stu_id,
-        type: "WORKSHEETREPORT",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getStudentSummary.php",
-        dataType: "json",
-        success: function(json){
-            getWorksheetSummarySuccess(json);
-        }
-    });
-}
-
-function getWorksheetSummarySuccess(json) {
-    console.log(json);
 }
 
 function showHideButton(mainId, buttonId){
@@ -698,15 +671,17 @@ function setWorksheetsSummary(){
 }
 
 function changeSection(id) {
-    switch(id) {
-        case "section_questions":
-        default:
-            setWorksheetSummary(0);
-            break;
-        case "section_tags":
-            setWorksheetSummary(1);
-            break;
-    }
+    if (displayed_gwid !== "") {
+        switch(id) {
+            case "section_questions":
+            default:
+                setWorksheetSummary(0);
+                break;
+            case "section_tags":
+                setWorksheetSummary(1);
+                break;
+        }
+    } 
 }
 
 function changeSectionTab(id) {
@@ -835,17 +810,32 @@ function getWorksheetsOrderInformation(order) {
 }
 
 function clickWorksheet(gwid) {
-    sendWorksheetSummaryRequest(gwid);
-    setWorksheetSelected(gwid);
+    if (gwid === displayed_gwid) {
+        displayed_gwid = "";
+        clearWorksheetSelected();
+        clearWorksheetSummary();
+    } else {
+        displayed_gwid = gwid;
+        sendWorksheetSummaryRequest(gwid);
+        setWorksheetSelected(gwid);
+    } 
 }
 
 function setWorksheetSelected(gwid) {
+    clearWorksheetSelected();
+    $("#background_worksheet_" + gwid).addClass("selected");
+}
+
+function clearWorksheetSelected() {
     var divs = document.getElementsByClassName("background_block_worksheet");
     for (var i = 0; i < divs.length; i++) {
         var id = divs[i].id;
         $("#" + id).removeClass("selected");
     }
-    $("#background_worksheet_" + gwid).addClass("selected");
+}
+
+function clearWorksheetSummary() {
+    $("#new_worksheet_report_main").html("<div id='new_worksheet_placeholder'><p>Click on a worksheet to view the details for that worksheet.</p></div>");
 }
 
 function worksheetSummaryRequestSuccess(json) {
