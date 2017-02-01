@@ -462,9 +462,15 @@ function studentChange(){
 function generateReport(){
     showAllSections();
     showAllSpinners();
+    clearWorksheetsSummary();
     sendReportRequest();
     setInputsTitle();
     return false;
+}
+
+function clearWorksheetsSummary() {
+    displayed_gwid = "";
+    clearWorksheetSummary();
 }
 
 /* Request Validation */
@@ -920,6 +926,7 @@ function clearWorksheetSelected() {
 
 function clearWorksheetSummary() {
     $("#new_worksheet_report_main").html("<div id='new_worksheet_placeholder'><p>Click on a worksheet to view the details for that worksheet.</p></div>");
+    changeSectionTab("section_questions");
 }
 
 function worksheetSummaryRequestSuccess(json) {
