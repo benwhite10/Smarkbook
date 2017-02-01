@@ -869,6 +869,11 @@ td.ind_worksheet {
 
 #new_worksheet_report {
     border-left: #323232 1px solid;
+    margin-left: -1px;
+}
+
+#new_worksheets_report {
+    border-right: #323232 1px solid;
 }
 
 .title_sections {
