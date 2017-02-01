@@ -915,10 +915,16 @@ function clickWorksheet(gwid) {
 function setWorksheetSelected(gwid) {
     clearWorksheetSelected();
     $("#background_worksheet_" + gwid).addClass("selected");
+    $("#worksheet_" + gwid).addClass("selected");
 }
 
 function clearWorksheetSelected() {
     var divs = document.getElementsByClassName("background_block_worksheet");
+    for (var i = 0; i < divs.length; i++) {
+        var id = divs[i].id;
+        $("#" + id).removeClass("selected");
+    }
+    divs = document.getElementsByClassName("worksheet_summary");
     for (var i = 0; i < divs.length; i++) {
         var id = divs[i].id;
         $("#" + id).removeClass("selected");
@@ -988,7 +994,7 @@ function parseWorksheetSummary(info, id, order_display) {
         var width = parseFloat(row["width"]) > 0 ? 100 * parseFloat(row["width"]) : 0.1;
         var extra_width = getExtraContentWidth(row);
         var string = "<div class='new_tag worksheet_summary'>";
-        string += "<div class='background_block_worksheet' style='width:" + width + "%'></div>";
+        string += "<div class='background_block_summary' style='width:" + width + "%'></div>";
         string += "<div class='tag_content'>";
         string += "<div class='tag_content_name'><p>" + row["main"] + "</p></div>";
         string += "<div class='tag_content_main_display'><p>" + row["main_display"] + "</p></div>";

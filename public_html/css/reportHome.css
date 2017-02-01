@@ -657,7 +657,7 @@ tr.tableHead:nth-child(odd){
     background: rgba(249, 209, 27, 0.5);
 }
 
-.background_block, .background_block_worksheet {
+.background_block, .background_block_worksheet, .background_block_summary {
     height: 100%;
     display: inline-block;
     float: left;
@@ -960,7 +960,15 @@ td.ind_worksheet {
     background: #a4ef76;
 }
 
+.background_block_summary{
+    background: #66E11B;
+}
+
 .background_block_worksheet.selected {
+    background: rgba(0,0,0,0.2);
+}
+
+.worksheet_summary.selected {
     background: #66E11B;
 }
 
