@@ -43,7 +43,7 @@ switch ($requestType){
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "NEWSTUDENTREPORT":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
         }
         getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
@@ -53,6 +53,9 @@ switch ($requestType){
         break;
     case "WORKSHEETREPORT":
         getWorksheetSummary($gwid, $studentId);
+        break;
+    case "STUDENTSETS":
+        getStudentSets($studentId);
         break;
     default:
         failRequest("Invalid request type.");
@@ -771,6 +774,40 @@ function createCombinedList(){
         "compStatus" => $compStatus,
         "dateStatus" => $dateStatus
     );
+}
+
+function getStudentSets($studentId) {
+    $set_query = "SELECT * FROM `TUSERGROUPS` UG
+            JOIN TGROUPS G ON UG.`Group ID` = G.`Group ID`
+            WHERE `User ID` = $studentId AND `Type ID` = 3 AND `Archived` = 0 
+            ORDER BY G.`Name` ";
+    $student_query = "SELECT U.`First Name` FName, U.`Surname` Surname, S.`Preferred Name` PName, U.`User ID` UserID FROM TUSERS U "
+            . "JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` "
+            . "WHERE U.`User ID` = $studentId";
+    try {
+        $sets = db_select_exception($set_query);
+        $student_details = db_select_exception($student_query);
+        $staff_details = [];
+        foreach($sets as $set) {
+            $group_id = $set["Group ID"];
+            $staff_query = "SELECT U.`User ID` UserID, UG.`Group ID` GroupID, S.`Title` Title, U.`Surname` Surname FROM TUSERGROUPS UG
+                            JOIN TUSERS U ON UG.`User ID` = U.`User ID`
+                            JOIN TSTAFF S ON S.`User ID` = U.`User ID`
+                            WHERE UG.`Group ID` = $group_id AND UG.`Archived` = 0 AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER') 
+                            ORDER BY U.`Surname`;";
+            $staff = db_select_exception($staff_query);
+            foreach ($staff as $staff_member) {
+                array_push($staff_details, $staff_member);
+            }
+        }
+        succeedRequest(array(
+            "sets" => $sets,
+            "student" => $student_details[0],
+            "staff" => $staff_details));
+    } catch (Exception $ex) {
+        $message = "There was an error getting the sets for the students.";
+        failRequestWithException($message, $ex);
+    }
 }
 
 /*Input Validation*/
