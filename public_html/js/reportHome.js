@@ -438,13 +438,14 @@ function summaryRequestSuccess(json){
             localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
             localStorage.setItem("userAverage", Math.round(parseFloat(json["result"]["stuAvg"]) * 100));
             localStorage.setItem("setAverage", Math.round(parseFloat(json["result"]["setAvg"]) * 100));
+            setUpWorksheetList();
+            refreshSummaryResults();
         } else {
             localStorage.setItem("summary", null);
             localStorage.setItem("userAverage", null);
             localStorage.setItem("setAverage", null);
+            setNoResults();
         }
-        setUpWorksheetList();
-        refreshSummaryResults();
     } else {
         console.log("Something went wrong generating the report summary.");
     }
