@@ -119,7 +119,7 @@ if($resultArray[0]){
                 }
                 if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     $count++;
-                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<div class='menuobject' id='menuobject$count' >";
                     echo "<a href='reportNotes.php?t=$userid' class='title'>Report Notes</a>";
                     echo "<input type='hidden' id='menuObjectLink$count' value='reportNotes.php?t=$userid'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
