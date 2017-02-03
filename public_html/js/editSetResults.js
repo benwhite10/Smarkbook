@@ -6,6 +6,7 @@ $(document).ready(function(){
     clearGWChanges();
     requestWorksheet(gwid);
     requestAllStaff();
+    log_event("EDIT_SET_RESULTS", $('#userid').val(), gwid);
     
     setAutoSave(5000);
     
