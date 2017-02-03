@@ -6,6 +6,7 @@ nbproject/private/private.xml
 includes/config.ini
 includes/spanishConfig.ini
 logs/error_log
+logs/*
 public_html/test.php
 public_html/request_tests/
 public_html/spanish.php
