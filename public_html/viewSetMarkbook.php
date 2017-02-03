@@ -6,6 +6,7 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
+include_once $include_path . '/public_html/includes/logEvents.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -74,6 +75,8 @@ if($respArray["success"]){
     $message = "There was an error loading the markbook.";
     $type = "ERROR";       
 }
+
+logEvent($userid, "VIEW_MARKBOOK", $setId);
 
 ?>
 
