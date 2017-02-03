@@ -1,4 +1,5 @@
 var displayed_gwid = "";
+var student_report_view = false;
 
 $(document).ready(function(){  
     $("#variablesInputBoxShowHideButton").click(function(){
@@ -28,8 +29,86 @@ $(function() {
 function setUpVariableInputs(){
     localStorage.setItem("initialRun", true);
     disableGenerateReportButton();
-    getStaff();
+    var set_student = $("#set_student").val();
+    if (set_student) {
+        student_report_view = true;
+        setStudent(set_student);
+    } else {
+        getStaff();
+    }
     setDates();
+}
+
+function setStudent(stuid){
+    var infoArray = {
+        type: "STUDENTSETS",
+        student: stuid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            setVariableInputs(json);
+        }
+    });
+}
+
+function setVariableInputs(json) {
+    if(json["success"]){
+        var results = json["result"];
+        var student_details = results["student"];
+        var set_details = results["sets"];
+        var staff_details = results["staff"];
+        
+        var first_name = student_details["PName"] ? student_details["PName"] : student_details["FName"];
+        var surname = student_details["Surname"];
+        $('#student').html("");
+        $('#student').append($('<option/>', {
+            value: student_details["UserID"],
+            text: first_name + " " + surname
+        }));
+        
+        //Set up staff
+        var htmlValue = staff_details.length === 0 ? "<option value='0'>No Teachers</option>" : "";
+        $('#staff').html(htmlValue);
+        for (var key in staff_details) {
+            $('#staff').append($('<option/>', { 
+                value: staff_details[key]["UserID"],
+                text : staff_details[key]["Title"] + " " + staff_details[key]["Surname"] 
+            }));
+        }
+        //Set up sets
+        htmlValue = set_details.length === 0 ? "<option value='0'>No Sets</option>" : "";
+        $('#set').html(htmlValue);
+        for (var key in set_details) {
+            $('#set').append($('<option/>', { 
+                value: set_details[key]["Group ID"],
+                text : set_details[key]["Name"] 
+            }));
+        }
+        
+        var initial_set_val = $('#setid').val();
+        if($("#set option[value='" + initial_set_val + "']").length !== 0){
+            $('#set').val(initial_set_val);
+        }
+        var initial_staff_val = $('#staffid').val();
+        if($("#staff option[value='" + initial_staff_val + "']").length !== 0){
+            $('#staff').val(initial_staff_val);
+        }
+        
+        enableGenerateReportButton();
+        if(localStorage.getItem("initialRun") === "true"){
+            generateReport();
+            localStorage.setItem("initialRun", false);
+        }
+    } else {
+        console.log("Something went wrong getting the details for the students.");
+        console.log(json["message"]);
+    }
 }
 
 function setDates(){
@@ -106,45 +185,49 @@ function getStaff(){
 }
 
 function updateSets(){
-    disableGenerateReportButton();
-    var infoArray = {
-        orderby: "Name",
-        desc: "FALSE",
-        type: "SETSBYSTAFF",
-        staff: $('#staff').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getGroup.php",
-        dataType: "json",
-        success: function(json){
-            updateSetsSuccess(json);
-        }
-    });
+    if (!student_report_view) {
+        disableGenerateReportButton();
+        var infoArray = {
+            orderby: "Name",
+            desc: "FALSE",
+            type: "SETSBYSTAFF",
+            staff: $('#staff').val(),
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/getGroup.php",
+            dataType: "json",
+            success: function(json){
+                updateSetsSuccess(json);
+            }
+        });
+    }
 }
 
 function updateStudents(){
-    disableGenerateReportButton();
-    var infoArray = {
-        orderby: "SName",
-        desc: "FALSE",
-        type: "STUDENTSBYSET",
-        set: $('#set').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getStudents.php",
-        dataType: "json",
-        success: function(json){
-            updateStudentsSuccess(json);
-        }
-    });
+    if (!student_report_view) {
+        disableGenerateReportButton();
+        var infoArray = {
+            orderby: "SName",
+            desc: "FALSE",
+            type: "STUDENTSBYSET",
+            set: $('#set').val(),
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/getStudents.php",
+            dataType: "json",
+            success: function(json){
+                updateStudentsSuccess(json);
+            }
+        });
+    }
 }
 
 function generateQuestionsRequest(reqid, tagsArray){
@@ -355,13 +438,14 @@ function summaryRequestSuccess(json){
             localStorage.setItem("summary", JSON.stringify(json["result"]["summary"]));
             localStorage.setItem("userAverage", Math.round(parseFloat(json["result"]["stuAvg"]) * 100));
             localStorage.setItem("setAverage", Math.round(parseFloat(json["result"]["setAvg"]) * 100));
+            setUpWorksheetList();
+            refreshSummaryResults();
         } else {
             localStorage.setItem("summary", null);
             localStorage.setItem("userAverage", null);
             localStorage.setItem("setAverage", null);
+            setNoResults();
         }
-        setUpWorksheetList();
-        refreshSummaryResults();
     } else {
         console.log("Something went wrong generating the report summary.");
     }
@@ -379,9 +463,15 @@ function studentChange(){
 function generateReport(){
     showAllSections();
     showAllSpinners();
+    clearWorksheetsSummary();
     sendReportRequest();
     setInputsTitle();
     return false;
+}
+
+function clearWorksheetsSummary() {
+    displayed_gwid = "";
+    clearWorksheetSummary();
 }
 
 /* Request Validation */
@@ -763,7 +853,7 @@ function setWorksheetsTable(order, desc){
     for(var key in worksheet_list){
         var sheet = worksheet_list[key];
         var class_string = parseInt(sheet["gwid"]) === parseInt(displayed_gwid) ? "selected" : "";
-        var string = "<div id='worksheet_" + sheet["gwid"] + "' class='new_tag worksheet_summary' onclick='clickWorksheet(" + sheet["gwid"] + ")'>";
+        var string = "<div id='worksheet_" + sheet["gwid"] + "' class='new_tag worksheet_summary " + class_string + "' onclick='clickWorksheet(" + sheet["gwid"] + ")'>";
         string += "<div id='background_worksheet_" + sheet["gwid"] + "' class='background_block_worksheet " + class_string + "' style='width:" + sheet["stu_score"] + "%'></div>";
         string += "<div class='tag_content'>";
         var sheet_name = sheet["name"];
@@ -825,6 +915,7 @@ function clickWorksheet(gwid) {
 function setWorksheetSelected(gwid) {
     clearWorksheetSelected();
     $("#background_worksheet_" + gwid).addClass("selected");
+    $("#worksheet_" + gwid).addClass("selected");
 }
 
 function clearWorksheetSelected() {
@@ -833,10 +924,16 @@ function clearWorksheetSelected() {
         var id = divs[i].id;
         $("#" + id).removeClass("selected");
     }
+    divs = document.getElementsByClassName("worksheet_summary");
+    for (var i = 0; i < divs.length; i++) {
+        var id = divs[i].id;
+        $("#" + id).removeClass("selected");
+    }
 }
 
 function clearWorksheetSummary() {
     $("#new_worksheet_report_main").html("<div id='new_worksheet_placeholder'><p>Click on a worksheet to view the details for that worksheet.</p></div>");
+    changeSectionTab("section_questions");
 }
 
 function worksheetSummaryRequestSuccess(json) {
@@ -897,7 +994,7 @@ function parseWorksheetSummary(info, id, order_display) {
         var width = parseFloat(row["width"]) > 0 ? 100 * parseFloat(row["width"]) : 0.1;
         var extra_width = getExtraContentWidth(row);
         var string = "<div class='new_tag worksheet_summary'>";
-        string += "<div class='background_block_worksheet' style='width:" + width + "%'></div>";
+        string += "<div class='background_block_summary' style='width:" + width + "%'></div>";
         string += "<div class='tag_content'>";
         string += "<div class='tag_content_name'><p>" + row["main"] + "</p></div>";
         string += "<div class='tag_content_main_display'><p>" + row["main_display"] + "</p></div>";

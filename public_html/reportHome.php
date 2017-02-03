@@ -20,7 +20,7 @@ if ($resultArray[0]) {
     exit();
 }
 
-if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
+if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])) {
     header("Location: unauthorisedAccess.php");
     exit();
 }
@@ -34,6 +34,7 @@ $studentid = filter_input(INPUT_GET, 'stu', FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
 $startdate = filter_input(INPUT_GET, 'start', FILTER_SANITIZE_STRING);
 $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
+$set_student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_NUMBER_INT);
 ?>
 
 <!DOCTYPE html>
@@ -54,6 +55,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
         <?php
         echo "<input type='hidden' id='staffid' value='$staffid' />";
         echo "<input type='hidden' id='studentid' value='$studentid' />";
+        echo "<input type='hidden' id='set_student' value='$set_student' />";
         echo "<input type='hidden' id='setid' value='$setid' />";
         echo "<input type='hidden' id='start' value='$startdate' />";
         echo "<input type='hidden' id='end' value='$enddate' />";
