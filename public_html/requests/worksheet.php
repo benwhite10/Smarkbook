@@ -5,6 +5,7 @@ include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/public_html/includes/logEvents.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
@@ -65,6 +66,7 @@ function updateWorksheet($info_array, $req_id) {
         "req_id" => $req_id,
         "results" => $result_array
     );
+    logEvent($author, "EDIT_WORKSHEET", "ID: " . $wid . ", Title: " . $name);
     succeedRequest("Worksheet updated", $response_array);
 }
 
@@ -233,6 +235,7 @@ function newWorksheet($details) {
             db_insert_query_exception($question_query);
         }
         db_commit_transaction();
+        logEvent($author, "ADD_WORKSHEET", "ID: " . $vid . ", Title: " . $name);
         succeedRequest("New worksheet added.", $vid);
     } catch (Exception $ex) {
         db_rollback_transaction();
