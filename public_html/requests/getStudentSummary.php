@@ -777,10 +777,13 @@ function createCombinedList(){
 }
 
 function getStudentSets($studentId) {
-    $set_query = "SELECT * FROM `TUSERGROUPS` UG
-            JOIN TGROUPS G ON UG.`Group ID` = G.`Group ID`
-            WHERE `User ID` = $studentId AND `Type ID` = 3 AND `Archived` = 0 
-            ORDER BY G.`Name` ";
+    $set_query = "SELECT G.`Group ID`, G.`Name` FROM `TCOMPLETEDQUESTIONS` CQ
+            JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
+            JOIN TGROUPS G ON GW.`Group ID` = G.`Group ID`
+            JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`
+            WHERE `Student ID` = $studentId AND G.`Type ID` = 3 AND GW.`Deleted` = 0 AND UG.`Archived` = 0
+            GROUP BY GW.`Group ID`
+            ORDER BY G.`Name`;";
     $student_query = "SELECT U.`First Name` FName, U.`Surname` Surname, S.`Preferred Name` PName, U.`User ID` UserID FROM TUSERS U "
             . "JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` "
             . "WHERE U.`User ID` = $studentId";
@@ -790,10 +793,11 @@ function getStudentSets($studentId) {
         $staff_details = [];
         foreach($sets as $set) {
             $group_id = $set["Group ID"];
-            $staff_query = "SELECT U.`User ID` UserID, UG.`Group ID` GroupID, S.`Title` Title, U.`Surname` Surname FROM TUSERGROUPS UG
-                            JOIN TUSERS U ON UG.`User ID` = U.`User ID`
+            $staff_query = "SELECT U.`User ID` UserID, GW.`Group ID` GroupID, S.`Title` Title, U.`Surname` Surname FROM `TGROUPWORKSHEETS` GW 
+                            JOIN TUSERS U ON GW.`Primary Staff ID` = U.`User ID`
                             JOIN TSTAFF S ON S.`User ID` = U.`User ID`
-                            WHERE UG.`Group ID` = $group_id AND UG.`Archived` = 0 AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER') 
+                            WHERE GW.`Group ID` = $group_id AND GW.`Deleted` = 0
+                            GROUP BY U.`User ID`
                             ORDER BY U.`Surname`;";
             $staff = db_select_exception($staff_query);
             foreach ($staff as $staff_member) {
