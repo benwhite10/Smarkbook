@@ -4,6 +4,7 @@ include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/includes/class.phpmailer.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
+include_once $include_path . '/public_html/includes/logEvents.php';
 include_once 'errorReporting.php';
 
 sec_session_start();
@@ -50,6 +51,7 @@ if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
         }else{
             $url = '../portalhome.php';
         }
+        logEvent($userid, "USER_LOGIN", "");
         returnToPageSuccess($message, $url);
     }else{
         //Check when the last failed login was
