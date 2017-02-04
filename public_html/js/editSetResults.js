@@ -6,6 +6,7 @@ $(document).ready(function(){
     clearGWChanges();
     requestWorksheet(gwid);
     requestAllStaff();
+    log_event("EDIT_SET_RESULTS", $('#userid').val(), gwid);
     
     setAutoSave(5000);
     
@@ -286,11 +287,14 @@ function hideButton() {
     var val = sessionStorage.getItem("hidden_selected") === "true" ? false : true;
     document.getElementById("hide_checkbox").checked = val;
     sessionStorage.setItem("hidden_selected", val);
+    var type = val ? "SHOW_SET_RESULTS" : "HIDE_SET_RESULTS";
+    log_event(type, $('#userid').val(), getParameterByName("gwid"));
     changeGWValue();
 }
 
 function deleteButton() {
     if(confirm("Are you sure you want to delete this group worksheet? This process is irreversible and you will lose any data entered.")){
+        log_event("DELETE_GROUP_WORKSHEET", $('#userid').val(), getParameterByName("gwid"));
         deleteRequest();
     }  
 }

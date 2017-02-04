@@ -5,6 +5,7 @@ include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/public_html/includes/logEvents.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
@@ -76,6 +77,7 @@ function createNewGroupWorksheet($staff, $setid, $versionid, $datedue){
         echo json_encode($resultArray);
     }
     
+    logEvent($staff[0], "ADD_SET_RESULTS", $gwid);
     $resultArray = array(
         "result" => TRUE,
         "gwid" => $gwid

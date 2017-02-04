@@ -6,6 +6,7 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
+include_once $include_path . '/public_html/includes/logEvents.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
@@ -41,6 +42,7 @@ if(isset($_SESSION['message'])){
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css"/>
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css"/>
     <script src='js/jquery-ui.js'></script>
+    <script src="js/log_events.js"></script>
     <script src="js/editSetResults.js"></script>
     <script src="libraries/lockablestorage.js"></script>
     <script src="pickadate/picker.js"></script>

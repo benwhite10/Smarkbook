@@ -5,6 +5,7 @@ include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/public_html/includes/logEvents.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $startDate = filter_input(INPUT_POST,'startDate',FILTER_SANITIZE_STRING);
@@ -46,6 +47,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
         }
+        logReport($userid, $studentId, $staffId, $setId, "");
         getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "STUDENTSUMMARY":
