@@ -466,6 +466,7 @@ function generateReport(){
     clearWorksheetsSummary();
     sendReportRequest();
     setInputsTitle();
+    getNotesRequest();
     return false;
 }
 
@@ -1120,6 +1121,7 @@ function hideAllSections(){
     $("#summaryReport").hide();
     $("#questionsReport").hide();
     $("#new_tags_report").hide();
+    $("#report_notes").hide();
     $("#noResults").show();
 }
 
@@ -1128,6 +1130,7 @@ function showAllSections(){
     $("#summaryReport").show();
     //$("#questionsReport").show();
     $("#new_tags_report").show();
+    $("#report_notes").show();
     $("#noResults").hide();
     $("#showHideWorksheetText").text("Hide Worksheets \u2191");
 }
@@ -1140,14 +1143,14 @@ function hideAllContent(){
     $("#new_tags_report_main").hide();
     $("#summaryReportDetails").hide();
     $("#questionsReportMain").hide();
+    $("#report_notes_main").hide();
 }
 
 function showAllSpinners(){
     hideAllContent();
-    //startSpinnerInDiv('tagsReportSpinner');
     startSpinnerInDiv('summaryReportSpinner');
-    //startSpinnerInDiv('questionsReportSpinner');
     startSpinnerInDiv('new_tags_report_spinner');
+    startSpinnerInDiv('report_notes_spinner');
 }
 
 function startSpinnerInDiv(div){
@@ -1196,4 +1199,67 @@ function orderArrayBy(array, key, desc) {
         return desc ? parseFloat(b[key]) - parseFloat(a[key]) :parseFloat(a[key]) - parseFloat(b[key]);
     });
     return array;
+}
+
+function getNotesRequest() {
+    var infoArray = {
+        staffid: $('#staff').val(),
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        stuid: $('#student').val(),
+        type: "GET_ALL_NOTE_TYPES",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/reportNotes.php",
+        dataType: "json",
+        success: function(json){
+            getNotesSuccess(json);
+        }
+    });
+}
+
+function getNotesSuccess(json) {
+    if (json["success"]) {
+        var reports_array = json["result"];
+        // Update dates
+        for (var i = 0; i < reports_array.length; i++) {
+            var date = moment(reports_array[i]["Date"], "YYYY/MM/DD HH:II:SS");
+            reports_array[i]["date_display"] = date.format("DD/MM/YY");
+            reports_array[i]["date_int"] = date.unix();
+        }
+        reports_array = orderArrayBy(reports_array, "date_int", true);
+        stopSpinnerInDiv('report_notes_spinner');
+        if (reports_array.length === 0) {
+            $("#report_notes").hide();
+        } else {
+            $("#report_notes_main").show();
+            parseReportNotes(reports_array);
+        }
+    } else {
+        stopSpinnerInDiv('report_notes_spinner');
+        console.log("Error requesting notes");
+        console.log(json["message"]);
+    }
+}
+
+function parseReportNotes(reports_array) {
+    $("#report_notes_notes").html("");
+    for (var i = 0; i < reports_array.length; i++) {
+        var date_display = reports_array[i]["date_display"];
+        var name = reports_array[i]["WName"] ? reports_array[i]["WName"] : "-";
+        var note = reports_array[i]["Note"];
+        var style = i === (reports_array.length - 1) ? "border-bottom: none;" : "";
+        var string = "<div class='report_note' style='" + style + "'><div class='note_details'><div class='note_details_date'>";
+        string += "<p>" + date_display + "</p>";
+        string += "</div><div class='note_details_name'>";
+        string += "<p>" + name + "</p>";
+        string += "</div></div><div class='note_text'>";
+        string += "<p>" + note + "</p>";
+        string += "</div></div>";
+        $("#report_notes_notes").append(string);
+    }
 }

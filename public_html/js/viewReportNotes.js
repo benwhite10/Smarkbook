@@ -126,7 +126,9 @@ function updateStudentsSuccess(json){
 function getNotes(){
     var infoArray = {
         type: "GET_NOTES_STAFF",
-        staffid: $('#userid').val()
+        staffid: $('#userid').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val() 
     };
     $.ajax({
         type: "POST",
