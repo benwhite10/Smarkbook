@@ -605,27 +605,25 @@ tr.tableHead:nth-child(odd){
 
 #new_tags_report {
     border-bottom: thin solid #323232;
-    //margin-bottom: 100px;
 }
 
-#report_notes {
-    border-bottom: thin solid #323232;
+#body {
     margin-bottom: 100px;
 }
 
 .report_notes_title {
     width: 100%;
-    height: 40px;
+    height: 32px;
     margin: 0;
     background: #323232;
 }
 
 .report_notes_title > h1 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     color: #66E11B;
     text-align: center;
     padding: 0;
-    line-height: 40px;
+    line-height: 32px;
     font-weight: 300;
 }
 
@@ -672,7 +670,7 @@ tr.tableHead:nth-child(odd){
 }
 
 .note_text {
-    padding: 10px;
+    padding: 5px 10px;
 }
 
 .note_text > p {
@@ -1057,4 +1055,9 @@ p.long_worksheet_name {
 #new_worksheet_placeholder > p {
     font-size: 1.0rem;
     font-weight: bold;
+}
+
+#report_notes_notes {
+    max-height: 250px;
+    overflow-y: scroll;
 }

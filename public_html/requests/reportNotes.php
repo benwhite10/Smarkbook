@@ -53,9 +53,9 @@ function getNotesForStaff($staffId) {
 
 function getAllNoteTypes($staffId, $studentId) {
     try {
-        $query = "SELECT R.`ID` RID, R.`Note`, R.`Date` FROM `TREPORTNOTES` R
+        $query = "SELECT R.`ID` RID, R.`Note` Note, R.`Date` FROM `TREPORTNOTES` R
                 WHERE R.`StaffID` = $staffId AND R.`StudentID` = $studentId";
-        $query2 = "SELECT G.`Date Last Modified` Date, C.`Completed Worksheet ID` CWID, C.`Notes`, WV.`WName` FROM TCOMPLETEDWORKSHEETS C
+        $query2 = "SELECT G.`Date Last Modified` Date, C.`Completed Worksheet ID` CWID, C.`Notes` Note, WV.`WName` FROM TCOMPLETEDWORKSHEETS C
                 JOIN TGROUPWORKSHEETS G ON C.`Group Worksheet ID` = G.`Group Worksheet ID`
                 JOIN TWORKSHEETVERSION WV ON G.`Version ID` = WV.`Version ID`
                 WHERE (G.`Primary Staff ID` = $staffId OR G.`Additional Staff ID` = $staffId OR G.`Additional Staff ID 2` = $staffId) AND C.`Student ID` = $studentId AND C.`Notes` <> ''";
