@@ -15,15 +15,21 @@ $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
 $role = validateRequest($userid, $userval);
-//if(!$role){
-//    failRequest("There was a problem validating your request");
-//}
+if(!$role){
+    failRequest("There was a problem validating your request");
+}
 
 switch ($requestType){
     case "ADD_NOTE":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         addNote($studentId, $staffId, $setId, $note);
         break;
     case "GET_NOTES_STAFF":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
         getNotesForStaff($staffId);
         break;
     case "GET_ALL_NOTE_TYPES":

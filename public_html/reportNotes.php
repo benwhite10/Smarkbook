@@ -9,6 +9,25 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 $staffid = filter_input(INPUT_GET, 't', FILTER_SANITIZE_NUMBER_INT);
 $studentid = filter_input(INPUT_GET, 'st', FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
+
+sec_session_start();
+$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_STRING));
+if ($resultArray[0]) {
+    $user = $_SESSION['user'];
+    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
+    $userid = $user->getUserId();
+    $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
+} else {
+    header($resultArray[1]);
+    exit();
+}
+
+if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
+    header("Location: unauthorisedAccess.php");
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -23,6 +42,7 @@ $setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
             echo "<input type='hidden' id='staffid' value='$staffid' />";
             echo "<input type='hidden' id='studentid' value='$studentid' />";
             echo "<input type='hidden' id='setid' value='$setid' />";
+            setUpRequestAuthorisation($userid, $userval);
         ?>
         <div id="main">
             <div id="header">

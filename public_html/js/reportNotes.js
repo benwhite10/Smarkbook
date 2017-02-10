@@ -129,7 +129,9 @@ function saveNote(){
         stuid: $('#studentInput').val(),
         staffid: $('#staffInput').val(),
         setid: $('#setsInput').val(),
-        note: $('#note').val()
+        note: $('#note').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
     };
     $.ajax({
         type: "POST",
