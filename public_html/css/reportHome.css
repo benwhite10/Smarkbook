@@ -607,6 +607,10 @@ tr.tableHead:nth-child(odd){
     border-bottom: thin solid #323232;
 }
 
+#report_notes {
+    border-bottom: thin solid #323232; 
+}
+
 #body {
     margin-bottom: 100px;
 }

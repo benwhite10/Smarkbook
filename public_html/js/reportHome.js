@@ -1155,7 +1155,8 @@ function parseReportNotes(reports_array) {
         var date_display = reports_array[i]["date_display"];
         var name = reports_array[i]["WName"] ? reports_array[i]["WName"] : "-";
         var note = reports_array[i]["Note"];
-        var string = "<div class='report_note'><div class='note_details'><div class='note_details_date'>";
+        var style = i === (reports_array.length - 1) ? "border-bottom: none;" : "";
+        var string = "<div class='report_note' style='" + style + "'><div class='note_details'><div class='note_details_date'>";
         string += "<p>" + date_display + "</p>";
         string += "</div><div class='note_details_name'>";
         string += "<p>" + name + "</p>";
