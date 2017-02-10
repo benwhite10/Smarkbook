@@ -1143,6 +1143,7 @@ function getNotesSuccess(json) {
             parseReportNotes(reports_array);
         }
     } else {
+        stopSpinnerInDiv('report_notes_spinner');
         console.log("Error requesting notes");
         console.log(json["message"]);
     }
