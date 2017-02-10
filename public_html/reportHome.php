@@ -286,6 +286,30 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div>
                 </div>
                 
+                <div id="report_notes" class="fullSection">
+                    <div id="report_notes_spinner" class="spinnerBox">
+                    </div>
+                    <div id="report_notes_main">
+                        <div class="report_notes_title">
+                            <h1>Report Notes</h1>
+                        </div>
+                        <div id="report_notes_notes">
+                            <div class="report_note">
+                                <div class="note_details">
+                                    <div class="note_details_date">
+                                        <p></p>
+                                    </div><div class="note_details_name">
+                                        <p></p>
+                                    </div>
+                                </div>
+                                <div class="note_text">
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="tagsReport" class="fullSection" style="display:none">
                     <div id="tagsReportSpinner" class="spinnerBox">
                     </div>

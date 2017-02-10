@@ -19,6 +19,9 @@ switch ($requestType){
     case "GET_NOTES_STAFF":
         getNotesForStaff($staffId);
         break;
+    case "GET_ALL_NOTE_TYPES":
+        getAllNoteTypes($staffId, $studentId);
+        break;
     default:
         break;
 }
@@ -43,6 +46,25 @@ function getNotesForStaff($staffId) {
             WHERE StaffID = $staffId ";      
         $query .= "ORDER BY G.Name, U.Surname, R.Date DESC;";
         succeedRequest(db_select_exception($query));
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+}
+
+function getAllNoteTypes($staffId, $studentId) {
+    try {
+        $query = "SELECT R.`ID` RID, R.`Note`, R.`Date` FROM `TREPORTNOTES` R
+                WHERE R.`StaffID` = $staffId AND R.`StudentID` = $studentId";
+        $query2 = "SELECT G.`Date Last Modified` Date, C.`Completed Worksheet ID` CWID, C.`Notes`, WV.`WName` FROM TCOMPLETEDWORKSHEETS C
+                JOIN TGROUPWORKSHEETS G ON C.`Group Worksheet ID` = G.`Group Worksheet ID`
+                JOIN TWORKSHEETVERSION WV ON G.`Version ID` = WV.`Version ID`
+                WHERE (G.`Primary Staff ID` = $staffId OR G.`Additional Staff ID` = $staffId OR G.`Additional Staff ID 2` = $staffId) AND C.`Student ID` = $studentId AND C.`Notes` <> ''";
+        $report_notes = db_select_exception($query);
+        $worksheet_notes = db_select_exception($query2);
+        foreach ($worksheet_notes as $note) {
+            array_push($report_notes, $note);
+        }
+        succeedRequest($report_notes);
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }

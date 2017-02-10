@@ -381,6 +381,7 @@ function generateReport(){
     showAllSpinners();
     sendReportRequest();
     setInputsTitle();
+    getNotesRequest();
     return false;
 }
 
@@ -1051,6 +1052,7 @@ function showAllSpinners(){
     startSpinnerInDiv('summaryReportSpinner');
     //startSpinnerInDiv('questionsReportSpinner');
     startSpinnerInDiv('new_tags_report_spinner');
+    startSpinnerInDiv('report_notes_spinner');
 }
 
 function startSpinnerInDiv(div){
@@ -1099,4 +1101,26 @@ function orderArrayBy(array, key, desc) {
         return desc ? parseFloat(b[key]) - parseFloat(a[key]) :parseFloat(a[key]) - parseFloat(b[key]);
     });
     return array;
+}
+
+function getNotesRequest() {
+    var infoArray = {
+        staffid: $('#staff').val(),
+        startDate: $('#startDate').val(),
+        endDate: $('#endDate').val(),
+        stuid: $('#student').val(),
+        type: "GET_ALL_NOTE_TYPES",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/reportNotes.php",
+        dataType: "json",
+        success: function(json){
+            console.log(json);
+            stopSpinnerInDiv('report_notes_spinner');
+        }
+    });
 }
