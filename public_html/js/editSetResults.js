@@ -375,7 +375,7 @@ function downloadCSV() {
 function sendDownloadRequest() {
     document.removeEventListener('results_saved', sendDownloadRequest);
     var infoArray = {
-        type: "WORKSHEETFORGWID",
+        type: "DOWNLOADGWID",
         gwid: $("#gwid").val(),
         userid: $('#userid').val(),
         userval: $('#userval').val()
@@ -392,46 +392,14 @@ function sendDownloadRequest() {
 }
 
 function downloadResultSuccess(json) {
-    var worksheets = json["worksheet"];
-    var results = json["results"];
-    var students = json["students"];
-    var details = json["details"];
-    
-    var file_name = details["WName"] + " - " + details["SetName"] + ".csv";
-    var data = [];
-    var first_row = ["", "Question"];
-    var second_row = ["", "Marks"];
-    for (var key in worksheets) {
-        first_row.push(worksheets[key]["Number"]);
-        second_row.push(worksheets[key]["Marks"]);
+    if (json["success"]) {
+        var url = json["url"];
+        var link = document.createElement("a");
+        link.setAttribute("href", json["url"]);
+        link.setAttribute("download", json["title"]);
+        document.body.appendChild(link);
+        link.click();
     }
-    data.push(first_row);
-    data.push(second_row);
-    
-    for (var i = 0; i < students.length; i++) {
-        var student_id = students[i]["ID"];
-        var student_name = students[i]["Name"];
-        var row_array = [student_id, student_name];
-        for (var key in worksheets) {
-            var result = results[student_id][key] ? results[student_id][key]["Mark"] : "";
-            row_array.push(result);
-        }
-        data.push(row_array);
-    }
-    
-    var csvContent = "data:text/csv;charset=utf-8,";
-    data.forEach(function(infoArray, index){
-       dataString = infoArray.join(",");
-       csvContent += index < data.length ? dataString+ "\n" : dataString;
-    }); 
-    
-    var encodedUri = encodeURI(csvContent);
-    var link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", file_name);
-    document.body.appendChild(link);
-
-    link.click();
 }
 
 function clickBack() {

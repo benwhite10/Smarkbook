@@ -5,6 +5,7 @@ include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
@@ -35,6 +36,12 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         getWorksheetInfo($wid);
+        break;
+    case "DOWNLOADGWID":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        downloadGWID($gwid);
         break;
     default:
         break;
@@ -101,6 +108,94 @@ function getWorksheetForGWID($gwid){
         "students" => $students);
     
     echo json_encode($test);
+}
+
+function downloadGWID($gwid) {
+    // List of questions and their marks
+    $query1 = "SELECT SQ.`Stored Question ID` SQID, SQ.`Number` Number, SQ.`Marks` Marks FROM TSTOREDQUESTIONS SQ
+                JOIN TGROUPWORKSHEETS GW ON SQ.`Version ID` = GW.`Version ID`
+                WHERE GW.`Group Worksheet ID` = $gwid AND SQ.`Deleted` = 0
+                ORDER BY SQ.`Question Order`;";
+
+    // Results for every student in the group
+    $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark, C.`Deleted` Deleted
+                FROM TCOMPLETEDQUESTIONS C
+                WHERE `Group Worksheet ID` = $gwid  AND C.`Deleted` = 0;";
+    
+    //Details for the worksheet, date due, notes etc
+    $query3 = "SELECT WV.`WName` WName, G.`Name` SetName FROM TGROUPWORKSHEETS GW
+                JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
+                JOIN TGROUPS G ON G.`Group ID` = GW.`Group ID`
+                WHERE `Group Worksheet ID` = $gwid;";
+    
+    // Students
+    $query4 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name
+                FROM TUSERS U JOIN TSTUDENTS S ON U.`User ID` = S.`User ID`
+                JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
+                JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
+                WHERE GW.`Group Worksheet ID` = $gwid
+                AND UG.`Archived` <> 1
+                ORDER BY U.`Surname`;";
+    
+    try{
+        $worksheet_questions = db_select_exception($query1);
+        $results = db_select_exception($query2);
+        $details = db_select_exception($query3);
+        $students = db_select_exception($query4);
+        $finalResults = groupResultsByStudent($results, $students);
+    } catch (Exception $ex) {
+        errorLog("Something went wrong downloading the data for the worksheet: " . $ex->getMessage());
+        $test = array(
+            "success" => FALSE,
+            "message" => $ex->getMessage());
+        echo json_encode($test);
+        exit();
+    }
+    
+    $title = $details[0]["WName"] . " - " . $details[0]["SetName"];
+    $file_name = $gwid . time();
+    $objPHPExcel = new PHPExcel();
+    $objPHPExcel->getProperties()->setCreator("Smarkbook")
+                                ->setLastModifiedBy("Ben White")
+                                ->setTitle($title);
+   
+    //Set first 2 rows
+    $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A1', '')
+            ->setCellValue('B1', 'Question')
+            ->setCellValue('A2', '')
+            ->setCellValue('B2', 'Marks');
+    $col = "C";
+    foreach ($worksheet_questions as $worksheet) {
+        $objPHPExcel ->getActiveSheet()
+            ->setCellValue($col . "1", $worksheet["Number"])
+            ->setCellValue($col . "2", $worksheet["Marks"]);
+        $col++;
+    }
+    $row = 3;
+    foreach($students as $student) {
+        $col = "A";
+        $objPHPExcel ->getActiveSheet()->setCellValue($col . $row, $student["ID"]);
+        $col++;
+        $objPHPExcel ->getActiveSheet()->setCellValue($col . $row, $student["Name"]);
+        foreach($worksheet_questions as $worksheet) {
+            $col++;
+            $result = $finalResults[$student["ID"]][$worksheet["SQID"]] ? $finalResults[$student["ID"]][$worksheet["SQID"]]["Mark"] : "";
+            $objPHPExcel ->getActiveSheet()->setCellValue($col . $row, $result);
+        }
+        $row++;
+    }
+    
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+    $objWriter->save("../downloads/$file_name.xlsx");
+    
+    $response = array (
+        "success" => TRUE,
+        "url" => "/downloads/$file_name.xlsx",
+        "title" => $title
+    );
+    echo json_encode($response);
+    exit();
 }
 
 function optimiseArray($array, $key){
