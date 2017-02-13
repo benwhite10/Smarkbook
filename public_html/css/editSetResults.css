@@ -185,7 +185,7 @@ td.date_completion {
 
 #saveButton
 {
-    width: 50%;
+    width: calc(60% - 30px);
     display: inline-block;
     margin: 0px;
     padding: 0px;
@@ -197,6 +197,7 @@ td.date_completion {
     border-left: thin solid #323232;
     border-radius: 0px;
     line-height: 60px;
+    vertical-align: top;
 }
 
 #saveButton:hover
@@ -207,7 +208,7 @@ td.date_completion {
 
 #cancelButton
 {
-    width: calc(50% - 1px);
+    width: calc(40% - 31px);
     display: inline-block;
     margin: 0px;
     padding: 0px;
@@ -218,12 +219,36 @@ td.date_completion {
     border: none;
     border-radius: 0px;
     line-height: 60px;
+    vertical-align: top;
 }
 
 #cancelButton:hover
 {
     background: #ff9999;
     color: #323232;
+}
+
+#downloadButton
+{
+    width: 60px;
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+    background: transparent;
+    height: 60px;
+    border: none;
+    border-radius: 0px;
+    vertical-align: top;
+    background-image: url("../images/download.png");
+    background-repeat: no-repeat;
+    background-size: 60px;
+}
+
+#downloadButton:hover {
+    background: #A3E0FF;
+    background-image: url("../images/download.png");
+    background-repeat: no-repeat;
+    background-size: 60px;
 }
 
 #popUpBackground

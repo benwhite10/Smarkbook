@@ -174,8 +174,9 @@ if(isset($_SESSION['message'])){
                         </div><div id="summaryBoxShowHide">
                         </div>
                     </div><div id="summaryBoxButtons">
-                        <div id="saveButton" onclick="clickSave()">Force Save</div><!--
-                        --><div id="cancelButton" onclick="clickBack()">Back</div>
+                        <div id="saveButton" onclick="clickSave()">Force Save
+                        </div><div id="cancelButton" onclick="clickBack()">Back
+                        </div><div id="downloadButton" onclick="downloadCSV()"></div>
                     </div>
                 </div>
                 
