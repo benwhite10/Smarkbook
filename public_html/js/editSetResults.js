@@ -368,6 +368,12 @@ function clickSave(){
 }
 
 function downloadCSV() {
+    document.addEventListener('results_saved', sendDownloadRequest);
+    saveResults();
+}
+
+function sendDownloadRequest() {
+    document.removeEventListener('results_saved', sendDownloadRequest);
     var infoArray = {
         type: "WORKSHEETFORGWID",
         gwid: $("#gwid").val(),
@@ -393,8 +399,8 @@ function downloadResultSuccess(json) {
     
     var file_name = details["WName"] + " - " + details["SetName"] + ".csv";
     var data = [];
-    var first_row = ["Question"];
-    var second_row = ["Marks"];
+    var first_row = ["", "Question"];
+    var second_row = ["", "Marks"];
     for (var key in worksheets) {
         first_row.push(worksheets[key]["Number"]);
         second_row.push(worksheets[key]["Marks"]);
@@ -405,7 +411,7 @@ function downloadResultSuccess(json) {
     for (var i = 0; i < students.length; i++) {
         var student_id = students[i]["ID"];
         var student_name = students[i]["Name"];
-        var row_array = [student_name];
+        var row_array = [student_id, student_name];
         for (var key in worksheets) {
             var result = results[student_id][key] ? results[student_id][key]["Mark"] : "";
             row_array.push(result);
@@ -438,6 +444,7 @@ function saveResults() {
         if (save_changes_array.length > 0) {
             sendSaveResultsRequest(save_changes_array);
         }
+        fireResultsSavedEvent();
     });
 }
 
@@ -560,10 +567,16 @@ function sendSaveWorksheetsRequest(save_worksheets_array) {
 }
 
 function sendSaveResultsRequest(save_changes_array) {
-    if (checkLock("save_changes_request_lock")) return;
+    if (checkLock("save_changes_request_lock")){
+        fireResultsSavedEvent();
+        return;
+    }
     
     var save_changes_send = getChangesToSend(save_changes_array, "save_changes_array");
-    if (save_changes_send.length === 0) return;  
+    if (save_changes_send.length === 0){
+        fireResultsSavedEvent();
+        return;
+    }  
     var req_id = generateRequestLock("save_changes_request_lock", 10000);
     var gwid = $("#gwid").val();
     
@@ -582,11 +595,17 @@ function sendSaveResultsRequest(save_changes_array) {
         dataType: "json",
         success: function(json){
             saveResultsSuccess(json);
+            fireResultsSavedEvent();
         },
-        error: function(json){
+        error: function(){
             clearLock("save_changes_request_lock", req_id);
+            fireResultsSavedEvent();
         }
     });
+}
+
+function fireResultsSavedEvent() {
+    document.dispatchEvent(new Event('results_saved'));
 }
 
 function generateRequestLock(key, maxDuration) {
