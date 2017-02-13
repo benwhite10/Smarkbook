@@ -185,6 +185,26 @@ function downloadGWID($gwid) {
         }
         $row++;
     }
+    $row--;
+    
+    //Styling
+    $objPHPExcel->getActiveSheet()->getColumnDimension("A")->setVisible(false);
+    $objPHPExcel->getActiveSheet()->getColumnDimension("B")->setAutoSize(true);
+    for ($i = "C"; $i < $col; $i++) {
+        $objPHPExcel->getActiveSheet()->getColumnDimension($i)->setWidth(3.00);
+    }
+    $objPHPExcel->getActiveSheet()->getColumnDimension($col)->setWidth(3.00);
+    
+    $objPHPExcel->getActiveSheet()->getStyle("A1:$col" . "2")->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle("A1:B$row")->getFont()->setBold(true);
+    $styleArray = array(
+        'borders' => array(
+            'allborders' => array(
+                'style' => PHPExcel_Style_Border::BORDER_THIN
+            )
+        )
+    );
+    $objPHPExcel->getActiveSheet()->getStyle("A1:$col$row")->applyFromArray($styleArray);
     
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
     $objWriter->save("../downloads/$file_name.xlsx");
