@@ -88,6 +88,7 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
     <link href="css/autocomplete.css" rel="stylesheet" />
     <script src="js/jquery-ui.js"></script>
     <script src="js/tagsList.js"></script>
+    <script src="js/viewMarkbook.js"></script>
     <script>
         function viewWorksheet(gwid) {
             window.location.href = "editSetResults.php?gwid=" + gwid;
@@ -99,6 +100,7 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
     </script>
 </head>
 <body>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -139,6 +141,13 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
                     <h1><?php echo $fullName; ?></h1>
                 </div>
                 <ul class="menu navbar">
+                    <li>
+                        <a>Download &#x25BE</a>
+                        <ul class="dropdown navdrop">
+                            <li><a onclick="downloadExcel(<?php echo $setId; ?>)"><?php if(isset($set)){ echo $set; }?></a></li>
+                            <li><a onclick="downloadExcel()">All Sets</a></li>
+                        </ul>
+                    </li>
                     <li>
                         <a><?php if(isset($set)){ echo $set; }?> &#x25BE</a>
                         <ul class="dropdown navdrop">
