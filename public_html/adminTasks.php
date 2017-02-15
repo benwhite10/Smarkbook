@@ -68,22 +68,7 @@ if(isset($_SESSION['message'])){
                 </ul>
             </div>
             
-            <?php
-                if(isset($message)){
-                    if($type == "ERROR"){
-                        $div = 'class="error"';
-                    }else if($type == "SUCCESS"){
-                        $div = 'class="success"';
-                    }
-                }else{
-                    $div = 'style="display:none;"';
-                }
-            ?>
-            
-            <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
-                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>  
+            <div id="temp_message"></div> 
             
             <div id="main_content">
                 <div id="task_downloads" class="task" style="border-bottom: none">

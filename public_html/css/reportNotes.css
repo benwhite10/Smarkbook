@@ -85,19 +85,3 @@ input[type="text"], select{
 #cancel:hover {
     background: #df7979;
 }
-#temp_message{
-    width: 90%;
-    max-width: 700px;
-    margin: 10px auto;
-    background: #c2f4a4;
-    height: 50px;
-    display: none;
-}
-
-#temp_message p {
-    font-family: 'Open Sans', sans-serif;
-    font-size: 25px;
-    text-align: center;
-    line-height: 50px;
-    color: #00CC00;
-}

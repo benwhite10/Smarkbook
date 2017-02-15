@@ -54,3 +54,12 @@
     font-size: 0.9rem;
     font-weight: bold;
 }
+
+#temp_message{
+    width: 100%;
+    max-width: 100%;
+}
+
+#temp_message p {
+    font-size: 20px;
+}
