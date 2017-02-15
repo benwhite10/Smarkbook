@@ -1,0 +1,56 @@
+#main_content {
+    width: 100%;
+    border: 1px solid #323232;
+}
+
+.task {
+    width: 100%;
+    min-height: 50px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border-bottom: 1px solid #323232;
+}
+
+.task:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.task_description {
+    width: calc(100% - 180px);
+    height: 40px;
+    line-height: 40px;
+    padding: 5px 10px;
+    margin: 0;
+    text-align: left;
+    display: inline-block;
+    float: left;
+}
+
+.task_description > p {
+    line-height: 40px;
+    font-size: 0.9rem;
+}
+
+.task_button {
+    width: 159px;
+    height: 50px;
+    line-height: 50px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    display: inline-block;
+    float: left;
+    border-left: 1px solid #323232;
+    cursor: pointer;
+}
+
+.task_button:hover {
+    background: #c2f4a4;
+}
+
+.task_button > p {
+    line-height: 50px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
