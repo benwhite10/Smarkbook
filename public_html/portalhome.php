@@ -42,6 +42,10 @@ if($resultArray[0]){
                             <li><a href="portalhome.php">Home</a></li>
                             <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
                             <li><a href="includes/process_logout.php">Log Out</a></li>
+                            <?php if(authoriseUserRoles($userRole, ["SUPER_USER"])){?>
+                                <li><a href="switchUser.php">Switch User</a></li>
+                                <li><a href="adminTasks.php">Tasks</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                 </ul>
@@ -51,11 +55,7 @@ if($resultArray[0]){
                 <div id="title2">
                     <h1>Portal Home</h1>
                 </div>
-                <ul class="menu navbar">
-                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER"])){?>
-                        <li><a href="switchUser.php">Switch User</a></li>
-                    <?php } ?>
-                </ul>
+                <ul class="menu navbar"></ul>
             </div>  
             <div id="menuContainer">
                 <?php   
