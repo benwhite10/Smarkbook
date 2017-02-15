@@ -3,6 +3,7 @@
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/public_html/includes/mail_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/libraries/PHPExcel.php';
@@ -27,7 +28,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER"])){
             failRequest("You are not authorised to complete that request");
         }
-        backUpDB();
+        backUpDB($userid);
         break;
     default:
         break;
@@ -48,9 +49,33 @@ function deleteDownloads() {
     succeedRequest(null, "$count temporary files deleted");
 }
 
-function backUpDB() {
-    db_back_up();
+function backUpDB($userid) {
+    try {
+        $return = db_back_up();
+        $local = $return[0];
+        $backup_name = $return[1];
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    emailFile($local, $backup_name, "../../db_backups/$backup_name", $userid);
     succeedRequest(null, "Database successfully backed up");
+}
+
+function emailFile($local, $title, $file_path, $userid) {
+    $subject = "$local" . "DBBackup - $title";
+    $date = date("d/m/Y H:i:s");
+    $body = "<html>
+                <body>
+                <p>Backup: $title</p>
+                <p>Date: $date</p>
+                <p>User ID: $userid</p>
+                </body>
+            </html>";
+    try {
+        sendMailFromContact("contact.smarkbook@gmail.com", "Smarkbook", $body, $subject, $file_path);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
 }
 
 function succeedRequest($result, $message) {

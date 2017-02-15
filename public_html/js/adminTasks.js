@@ -22,7 +22,7 @@ function runBackUp() {
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
-
+    
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -33,7 +33,7 @@ function runBackUp() {
         }
     });
 }
-
+    
 function deleteDownloadSuccess(json){
     if(json["success"]){
         showSavedMessage(json["message"]);
