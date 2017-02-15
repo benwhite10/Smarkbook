@@ -1,4 +1,5 @@
 function runDeleteDownloads() {
+    $("#task_downloads_button").html("<p>Running..</p>");
     var infoArray = {
         type: "DELETEDOWNLOADS",
         userid: $('#userid').val(),
@@ -17,6 +18,7 @@ function runDeleteDownloads() {
 }
 
 function runBackUp() {
+    $("#task_backup_button").html("<p>Running..</p>");
     var infoArray = {
         type: "BACKUPDB",
         userid: $('#userid').val(),
@@ -35,6 +37,7 @@ function runBackUp() {
 }
     
 function deleteDownloadSuccess(json){
+    $("#task_downloads_button").html("<p>Run</p>");
     if(json["success"]){
         showSavedMessage(json["message"]);
         setTimeout(function(){ 
@@ -47,6 +50,7 @@ function deleteDownloadSuccess(json){
 }
 
 function backUpSuccess(json) {
+    $("#task_backup_button").html("<p>Run</p>");
     if(json["success"]){
         showSavedMessage(json["message"]);
         setTimeout(function(){ 

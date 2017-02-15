@@ -75,7 +75,7 @@ if(isset($_SESSION['message'])){
                     <div class="task_description">
                         <p>Delete all of the temporary download files.</p>
                     </div>
-                    <div class="task_button" onclick="runDeleteDownloads()">
+                    <div id="task_downloads_button" class="task_button" onclick="runDeleteDownloads()">
                         <p>Run</p>
                     </div>
                 </div>
@@ -83,7 +83,7 @@ if(isset($_SESSION['message'])){
                     <div class="task_description">
                         <p>Back up the database.</p>
                     </div>
-                    <div class="task_button" onclick="runBackUp(false)">
+                    <div id="task_backup_button" class="task_button" onclick="runBackUp(false)">
                         <p>Run</p>
                     </div>
                 </div>
