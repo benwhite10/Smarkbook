@@ -31,6 +31,12 @@ switch ($requestType){
         }
         downloadMarkbookForSetAndTeacher($setid, $staffid);
         break;
+    case "DOWNLOADMARKBOOKFORTEACHER":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        downloadAllSets($staffid);
+        break;
     default:
         break;
 }
@@ -90,6 +96,39 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
 }
 
 function downloadMarkbookForSetAndTeacher($setid, $staffid){
+    $query1 = "SELECT Initials FROM TSTAFF WHERE `User ID` = $staffid";
+    $query2 = "SELECT Name FROM TGROUPS WHERE `Group ID` = $setid;";
+
+    try{
+        $staff_initials = db_select_single_exception($query1, "Initials");
+        $set_name = db_select_single_exception($query2, "Name");
+    } catch (Exception $ex) {
+        $message = "There was an error retrieving the markbook";
+        returnToPageError($ex, $message);
+    }
+    
+    $title = $staff_initials . " - " . $set_name;
+    $file_name = $setid . $staffid . time();
+    $objPHPExcel = new PHPExcel();
+    $objPHPExcel->getProperties()->setCreator("Smarkbook")
+                                ->setLastModifiedBy("Ben White")
+                                ->setTitle($title);
+    
+    $objPHPExcel = getDownloadableMarkbookForSetAndTeacher($setid, $staffid, 0, $title, $objPHPExcel);
+    
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+    $objWriter->save("../downloads/$file_name.xlsx");
+    
+    $response = array (
+        "success" => TRUE,
+        "url" => "/downloads/$file_name.xlsx",
+        "title" => $title
+    );
+    
+    echo json_encode($response);
+}
+
+function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index, $sheet_name, $objPHPExcel){
     $query1 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name FROM TUSERGROUPS G 
                 JOIN TUSERS U ON G.`User ID` = U.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` 
                 WHERE G.`Group ID` = $setid
@@ -103,28 +142,19 @@ function downloadMarkbookForSetAndTeacher($setid, $staffid){
                 AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1) AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1) AND SQ.`Deleted` = 0 
                 GROUP BY GW.`Group Worksheet ID`                
                 ORDER BY GW.`Date Due`, WV.`WName`;";
-    $query3 = "SELECT Initials FROM TSTAFF WHERE `User ID` = $staffid";
-    $query4 = "SELECT Name FROM TGROUPS WHERE `Group ID` = $setid;";
 
     try{
         $students = db_select_exception($query1);
         $worksheets = db_select_exception($query2);
-        $staff_initials = db_select_single_exception($query3, "Initials");
-        $set_name = db_select_single_exception($query4, "Name");
     } catch (Exception $ex) {
         $message = "There was an error retrieving the markbook";
         returnToPageError($ex, $message);
     }
     
-    $title = $staff_initials . " - " . $set_name;
-    $file_name = $setid . $staffid . time();
-    $objPHPExcel = new PHPExcel();
-    $objPHPExcel->getProperties()->setCreator("Smarkbook")
-                                ->setLastModifiedBy("Ben White")
-                                ->setTitle($title);
+    if ($sheet_index !== 0 ) { $objPHPExcel->createSheet($sheet_index); }
     
     //Set first 2 rows
-    $objPHPExcel->setActiveSheetIndex(0)
+    $objPHPExcel->setActiveSheetIndex($sheet_index)
             ->setCellValue('A1', '')
             ->setCellValue('B1', '')
             ->setCellValue('A2', '')
@@ -195,7 +225,37 @@ function downloadMarkbookForSetAndTeacher($setid, $staffid){
         )
     );
     $objPHPExcel->getActiveSheet()->getStyle("A1:$col$row")->applyFromArray($styleArray);
-    $objPHPExcel->getActiveSheet()->setTitle($set_name);
+    $objPHPExcel->getActiveSheet()->setTitle($sheet_name);
+    
+    return $objPHPExcel;
+}
+
+function downloadAllSets($staffid) {
+    $query1 = "SELECT Initials FROM TSTAFF WHERE `User ID` = $staffid";
+    $query2 = "SELECT G.`Group ID` ID, G.Name Name "
+        . "FROM TUSERGROUPS U JOIN TGROUPS G ON U.`Group ID` = G.`Group ID` "
+        . "WHERE `User ID` = $staffid AND G.`Type ID` = 3 AND U.`Archived` <> 1 ORDER BY G.Name;";
+
+    try{
+        $staff_initials = db_select_single_exception($query1, "Initials");
+        $sets = db_select_exception($query2);
+    } catch (Exception $ex) {
+        $message = "There was an error retrieving the markbook";
+        returnToPageError($ex, $message);
+    }
+    
+    $title = $staff_initials;
+    $file_name = $staffid . time();
+    $objPHPExcel = new PHPExcel();
+    $objPHPExcel->getProperties()->setCreator("Smarkbook")
+                                ->setLastModifiedBy("Ben White")
+                                ->setTitle($title);
+    $i = 0;
+    foreach ($sets as $set) {
+        $objPHPExcel = getDownloadableMarkbookForSetAndTeacher($set["ID"], $staffid, $i, $set["Name"], $objPHPExcel);
+        $i++;
+    }
+    
     
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
     $objWriter->save("../downloads/$file_name.xlsx");

@@ -17,13 +17,26 @@ function downloadExcel(set_id){
             }
         });
     } else {
-        console.log("Download All");
+        var infoArray = {
+            type: "DOWNLOADMARKBOOKFORTEACHER",
+            staff: $('#userid').val(),
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/getMarkbook.php",
+            dataType: "json",
+            success: function(json){
+                downloadSuccess(json);
+            }
+        });
     }
 }
 
 function downloadSuccess(json) {
     if (json["success"]) {
-        var url = json["url"];
         var link = document.createElement("a");
         link.setAttribute("href", json["url"]);
         link.setAttribute("download", json["title"]);
