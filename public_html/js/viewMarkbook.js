@@ -1,38 +1,23 @@
 function downloadExcel(set_id){
+    var infoArray = {
+        type: "DOWNLOADMARKBOOKFORTEACHER",
+        staff: $('#userid').val(),
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
     if(set_id) {
-        var infoArray = {
-            type: "DOWNLOADMARKBOOKFORSETANDTEACHER",
-            set: set_id,
-            staff: $('#userid').val(),
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
-        };
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "/requests/getMarkbook.php",
-            dataType: "json",
-            success: function(json){
-                downloadSuccess(json);
-            }
-        });
-    } else {
-        var infoArray = {
-            type: "DOWNLOADMARKBOOKFORTEACHER",
-            staff: $('#userid').val(),
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
-        };
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "/requests/getMarkbook.php",
-            dataType: "json",
-            success: function(json){
-                downloadSuccess(json);
-            }
-        });
+        infoArray["set"] = set_id;
+        infoArray["type"] = "DOWNLOADMARKBOOKFORSETANDTEACHER";
     }
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getMarkbook.php",
+        dataType: "json",
+        success: function(json){
+            downloadSuccess(json);
+        }
+    });
 }
 
 function downloadSuccess(json) {

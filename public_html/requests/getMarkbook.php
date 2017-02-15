@@ -256,6 +256,7 @@ function downloadAllSets($staffid) {
         $i++;
     }
     
+    $objPHPExcel->setActiveSheetIndex(0);
     
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
     $objWriter->save("../downloads/$file_name.xlsx");
