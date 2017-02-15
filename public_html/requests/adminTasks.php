@@ -11,7 +11,7 @@ $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
-$role = validateRequest($userid, $userval);
+$role = validateRequest($userid, $userval, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }
@@ -22,6 +22,12 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         deleteDownloads();
+        break;
+    case "BACKUPDB":
+        if(!authoriseUserRoles($role, ["SUPER_USER"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        backUpDB();
         break;
     default:
         break;
@@ -40,6 +46,11 @@ function deleteDownloads() {
         failRequest($ex->getMessage());
     }
     succeedRequest(null, "$count temporary files deleted");
+}
+
+function backUpDB() {
+    db_back_up();
+    succeedRequest(null, "Database successfully backed up");
 }
 
 function succeedRequest($result, $message) {

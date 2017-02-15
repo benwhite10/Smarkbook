@@ -13,4 +13,5 @@ public_html/spanish.php
 php.ini
 public_html/phpinfo.php
 public_html/downloads/*
+/db_backups/*
 .htaccess

@@ -16,7 +16,37 @@ function runDeleteDownloads() {
     });
 }
 
+function runBackUp() {
+    var infoArray = {
+        type: "BACKUPDB",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/adminTasks.php",
+        dataType: "json",
+        success: function(json){
+            backUpSuccess(json);
+        }
+    });
+}
+
 function deleteDownloadSuccess(json){
+    if(json["success"]){
+        showSavedMessage(json["message"]);
+        setTimeout(function(){ 
+            closeMessage(); 
+        }, 3000);
+    } else {
+        showErrorMessage('There was an error deleting the temporary downloads');
+        console.log(json["message"]);
+    }
+}
+
+function backUpSuccess(json) {
     if(json["success"]){
         showSavedMessage(json["message"]);
         setTimeout(function(){ 

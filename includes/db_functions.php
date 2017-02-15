@@ -107,3 +107,16 @@ function db_escape_string($string) {
     $mysql = db_connect();
     return mysqli_real_escape_string($mysql, $string);
 }
+
+function db_back_up() {      
+   $config = parse_ini_file('config.ini');
+   $dbhost = $config['host'];
+   $dbuser = $config['username'];
+   $dbpass = $config['password'];
+   $dbname = $config['dbname'];
+   $mysqldump = $config['mysqldump'];
+
+   $backup_file = "../../db_backups/$dbname-" . date("Y-m-d-H-i-s") . ".sql";
+   $command = "$mysqldump --host=$dbhost --user=$dbuser --password=$dbpass $dbname > $backup_file 2>&1";
+   exec($command);
+}
