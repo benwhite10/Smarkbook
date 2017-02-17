@@ -14,6 +14,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -29,10 +31,10 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Worksheets"); ?>
-    <script src="js/sorttable.js"></script>
-    <script src="js/viewAllWorksheets.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/viewAllWorksheets.css" />
+    <?php pageHeader("Worksheets", $info_version); ?>
+    <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
+    <script src="js/viewAllWorksheets.js?<?php echo $info_version; ?>"></script>
+    <link rel="stylesheet" type="text/css" href="css/viewAllWorksheets.css?<?php echo $info_version; ?>" />
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -104,6 +106,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </ul>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

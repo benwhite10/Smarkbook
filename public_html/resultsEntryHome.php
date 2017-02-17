@@ -15,6 +15,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -73,10 +75,10 @@ function getInput($method, $name, $type){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Results") ?>
-    <link rel="stylesheet" type="text/css" href="css/resultsEntryHome.css" />
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css"/>
-    <script src="js/resultsEntryHome.js"></script>
+    <?php pageHeader("Results", $info_version) ?>
+    <link rel="stylesheet" type="text/css" href="css/resultsEntryHome.css?<?php echo $info_version; ?>" />
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css?<?php echo $info_version; ?>"/>
+    <script src="js/resultsEntryHome.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -175,6 +177,7 @@ function getInput($method, $name, $type){
                 </div>
             </form>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

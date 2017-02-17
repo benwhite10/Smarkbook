@@ -1,4 +1,7 @@
 /*Form objects*/
+body {
+    height: auto;
+}
 
 input[type="text"], textarea, input[type="password"], input[type="submit"], select, input[type="url"], input[type="date"]{
     display: inline-block;

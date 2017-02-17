@@ -13,6 +13,8 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -33,12 +35,12 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("New User"); ?>
-    <link href="css/autocomplete.css" rel="stylesheet" />
-    <script src="js/jquery-ui.js"></script>
-    <script src="js/allTagsList.js"></script>
-    <script src="js/sha512.js"></script>
-    <script src="js/createUser.js"></script>
+    <?php pageHeader("New User", $info_version); ?>
+    <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />
+    <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
+    <script src="js/allTagsList.js?<?php echo $info_version; ?>"></script>
+    <script src="js/sha512.js?<?php echo $info_version; ?>"></script>
+    <script src="js/createUser.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <div id="main">
@@ -140,6 +142,7 @@ if(isset($_SESSION['message'])){
                 </div>
             </form> 
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

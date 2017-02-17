@@ -1,12 +1,13 @@
 <?php
 $include_path = get_include_path();
 require $include_path . '/includes/class.phpmailer.php';
+include_once $include_path . '/public_html/includes/errorReporting.php';
 
 if(isset($_POST['email'], $_POST['name'])){
     send_mail(CONTACT, $_POST['email'], $_POST['name'], $_POST['body']);
 }
 
-function sendMailFromContact($to, $name, $body, $subject){
+function sendMailFromContact($to, $name, $body, $subject, $attachment){
 
     $mail = new PHPMailer();
 
@@ -22,8 +23,11 @@ function sendMailFromContact($to, $name, $body, $subject){
     $mail->AddReplyTo("contact.smarkbook@gmail.com", 'Smarkbook'); // Reply TO
 
     $mail->AddAddress($to, $name); // recipient email
-    //$mail->AddCC('ben.white10@outlook.com', 'Ben White'); //CC email
-
+    
+    if ($attachment !== null) {
+        $mail->AddAttachment($attachment);
+    }
+    
     $mail->Subject    = $subject; // email subject
     $mail->Body       = $body;
     $mail->IsHTML(true);
@@ -35,3 +39,5 @@ function sendMailFromContact($to, $name, $body, $subject){
         infoLog("Email sent to $name about $subject");
     }
 }
+
+

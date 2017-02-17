@@ -16,6 +16,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -36,18 +38,18 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>    
-    <link rel="stylesheet" type="text/css" href="css/editSetResults.css" />
-    <link href="css/autocomplete.css" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css"/>
-    <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css"/>
-    <script src='js/jquery-ui.js'></script>
-    <script src="js/log_events.js"></script>
-    <script src="js/editSetResults.js"></script>
-    <script src="libraries/lockablestorage.js"></script>
-    <script src="pickadate/picker.js"></script>
-    <script src="pickadate/picker.date.js"></script>
-    <script src="pickadate/legacy.js"></script>
+    <?php pageHeader("Smarkbook", $info_version); ?>    
+    <link rel="stylesheet" type="text/css" href="css/editSetResults.css?<?php echo $info_version; ?>" />
+    <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css?<?php echo $info_version; ?>"/>
+    <link rel="stylesheet" type="text/css" href="pickadate/themes/default.date.css?<?php echo $info_version; ?>"/>
+    <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
+    <script src="js/log_events.js?<?php echo $info_version; ?>"></script>
+    <script src="js/editSetResults.js?<?php echo $info_version; ?>"></script>
+    <script src="libraries/lockablestorage.js?<?php echo $info_version; ?>"></script>
+    <script src="pickadate/picker.js?<?php echo $info_version; ?>"></script>
+    <script src="pickadate/picker.date.js?<?php echo $info_version; ?>"></script>
+    <script src="pickadate/legacy.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -235,6 +237,7 @@ if(isset($_SESSION['message'])){
                 </div>
             </form> 
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

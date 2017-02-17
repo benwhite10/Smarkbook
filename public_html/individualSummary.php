@@ -14,6 +14,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $author = $userid;
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -58,10 +60,10 @@ $name = $student[0]['Preferred Name'] . ' ' . $student[0]['Surname'];
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <script src="js/sorttable.js"></script>
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
 </head>
-<body>
+<body style="height: auto;">
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -128,6 +130,7 @@ $name = $student[0]['Preferred Name'] . ' ' . $student[0]['Surname'];
             </ul>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

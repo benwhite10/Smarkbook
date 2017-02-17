@@ -56,7 +56,7 @@ if(isset($type, $email)){
                 </html>
                 ";
         try {
-            sendMailFromContact($email, $name, $body, $subject);
+            sendMailFromContact($email, $name, $body, $subject, null);
             $message = "An email has been sent to $email containing a link to reset your password.";
             returnToPageSuccess($message);
         } catch (Exception $ex) {

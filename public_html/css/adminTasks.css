@@ -1,0 +1,104 @@
+#main_content {
+    width: 100%;
+    border: 1px solid #323232;
+}
+
+.task {
+    width: 100%;
+    min-height: 50px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border-bottom: 1px solid #323232;
+}
+
+.task:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.task_description {
+    width: calc(100% - 180px);
+    height: 40px;
+    line-height: 40px;
+    padding: 5px 10px;
+    margin: 0;
+    text-align: left;
+    display: inline-block;
+    float: left;
+}
+
+.task_description > p {
+    line-height: 40px;
+    font-size: 0.9rem;
+}
+
+.task_button {
+    width: 159px;
+    height: 50px;
+    line-height: 50px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    display: inline-block;
+    float: left;
+    border-left: 1px solid #323232;
+    cursor: pointer;
+}
+
+.task_button:hover {
+    background: #c2f4a4;
+}
+
+.task_button > p {
+    line-height: 50px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+#temp_message{
+    width: 100%;
+    max-width: 100%;
+}
+
+#temp_message.success {
+    background: #c2f4a4;
+}
+
+#temp_message.error {
+    background: #FF8282;
+}
+
+#temp_message.success p {
+    font-size: 20px;
+    color: #006600;
+}
+
+#temp_message.error p {
+    font-size: 20px;
+    color: #F00;
+}
+
+.task_description.input {
+    width: calc(100% - 330px);
+}
+
+.task_text_input {
+    width: 149px;
+    height: 50px;
+    margin: 0;
+    text-align: left;
+    display: inline-block;
+    float: left;
+    border-left: 1px solid #323232;
+}
+
+input[type="text"].task_text_input {
+    width: calc(100% - 20px);
+    height: calc(100% - 10px);
+    background: transparent;
+    margin: 0;
+    padding: 5px 10px;
+    border: none;
+    line-height: 40px;
+    text-align: center;
+}

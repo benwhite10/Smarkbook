@@ -15,6 +15,8 @@ if ($resultArray[0]) {
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 } else {
     header($resultArray[1]);
     exit();
@@ -30,11 +32,11 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
 <!DOCTYPE html>
 <html>
     <head lang="en">
-        <?php pageHeader("Report Notes") ?>
+        <?php pageHeader("Report Notes", $info_version) ?>
         <!--<link rel="stylesheet" type="text/css" href="css/viewReportNotes.css" />-->
-        <script src="js/viewReportNotes.js"></script>
+        <script src="js/viewReportNotes.js?<?php echo $info_version; ?>"></script>
     </head>
-    <body>
+    <body style="height: auto;">
         <?php setUpRequestAuthorisation($userid, $userval); ?>
         <div id="main">
             <div id="header">
@@ -71,7 +73,8 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
                         </tr>
                     </table>
                 </div>
-            </div>   
+            </div>
+            <?php pageFooter($info_version) ?>
         </div>
     </body>
 </html>

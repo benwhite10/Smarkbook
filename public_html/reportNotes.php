@@ -18,6 +18,8 @@ if ($resultArray[0]) {
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 } else {
     header($resultArray[1]);
     exit();
@@ -33,9 +35,9 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
 <!DOCTYPE html>
 <html>
     <head lang="en">
-        <?php pageHeader("Notes") ?>
-        <link rel="stylesheet" type="text/css" href="css/reportNotes.css" />
-        <script src="js/reportNotes.js"></script>
+        <?php pageHeader("Notes", $info_version) ?>
+        <link rel="stylesheet" type="text/css" href="css/reportNotes.css?<?php echo $info_version; ?>" />
+        <script src="js/reportNotes.js?<?php echo $info_version; ?>"></script>
     </head>
     <body>
         <?php
@@ -83,7 +85,7 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
                     </div>
                 </div>
             </div>
+            <?php pageFooter($info_version) ?>
         </div>
     </body>
-
-
+</html>

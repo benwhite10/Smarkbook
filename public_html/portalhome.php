@@ -15,6 +15,8 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -25,9 +27,9 @@ if($resultArray[0]){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <script src='js/portalhome.js'></script>
-    <link rel='stylesheet' type='text/css' href='css/portalhome.css' />
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <script src='js/portalhome.js?<?php echo $info_version; ?>'></script>
+    <link rel='stylesheet' type='text/css' href='css/portalhome.css?<?php echo $info_version; ?>' />
 </head>
 <body>
     <div id="main">
@@ -42,6 +44,10 @@ if($resultArray[0]){
                             <li><a href="portalhome.php">Home</a></li>
                             <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
                             <li><a href="includes/process_logout.php">Log Out</a></li>
+                            <?php if(authoriseUserRoles($userRole, ["SUPER_USER"])){?>
+                                <li><a href="switchUser.php">Switch User</a></li>
+                                <li><a href="adminTasks.php">Tasks</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                 </ul>
@@ -51,11 +57,7 @@ if($resultArray[0]){
                 <div id="title2">
                     <h1>Portal Home</h1>
                 </div>
-                <ul class="menu navbar">
-                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER"])){?>
-                        <li><a href="switchUser.php">Switch User</a></li>
-                    <?php } ?>
-                </ul>
+                <ul class="menu navbar"></ul>
             </div>  
             <div id="menuContainer">
                 <?php   
@@ -98,7 +100,7 @@ if($resultArray[0]){
                 }
                 if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF", "STUDENT"])){
                     $count++;
-                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<div class='menuobject' id='menuobject$count' >";
                     if ($userRole === "STUDENT") {
                         echo "<a href='reportHome.php?student=$userid' class='title'>Reports</a>";
                         echo "<input type='hidden' id='menuObjectLink$count' value='reportHome.php?student=$userid'>";
@@ -129,7 +131,6 @@ if($resultArray[0]){
                 ?>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
-</body>
-
-	
+</body>	

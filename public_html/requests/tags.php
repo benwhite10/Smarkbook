@@ -16,7 +16,7 @@ $div_id = filter_input(INPUT_POST,'div_id',FILTER_SANITIZE_STRING);
 $name = filter_input(INPUT_POST,'name',FILTER_SANITIZE_STRING);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
-$role = validateRequest($userid, $userval);
+$role = validateRequest($userid, $userval, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }

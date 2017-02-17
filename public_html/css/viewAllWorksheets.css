@@ -1,3 +1,7 @@
+body {
+    height: auto;
+}
+
 td, th {
     height: 40px;
 }

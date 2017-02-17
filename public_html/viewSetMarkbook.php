@@ -16,6 +16,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -83,11 +85,12 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css" />
-    <link href="css/autocomplete.css" rel="stylesheet" />
-    <script src="js/jquery-ui.js"></script>
-    <script src="js/tagsList.js"></script>
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css?<?php echo $info_version; ?>" />
+    <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />
+    <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
+    <script src="js/tagsList.js?<?php echo $info_version; ?>"></script>
+    <script src="js/viewMarkbook.js?<?php echo $info_version; ?>"></script>
     <script>
         function viewWorksheet(gwid) {
             window.location.href = "editSetResults.php?gwid=" + gwid;
@@ -99,6 +102,7 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
     </script>
 </head>
 <body>
+    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -139,6 +143,13 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
                     <h1><?php echo $fullName; ?></h1>
                 </div>
                 <ul class="menu navbar">
+                    <li>
+                        <a>Download &#x25BE</a>
+                        <ul class="dropdown navdrop">
+                            <li><a onclick="downloadExcel(<?php echo $setId; ?>)"><?php if(isset($set)){ echo $set; }?></a></li>
+                            <li><a onclick="downloadExcel()">All Sets</a></li>
+                        </ul>
+                    </li>
                     <li>
                         <a><?php if(isset($set)){ echo $set; }?> &#x25BE</a>
                         <ul class="dropdown navdrop">
@@ -233,6 +244,7 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
             </div>-->
             <?php } ?>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

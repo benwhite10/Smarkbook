@@ -15,7 +15,7 @@ $tags = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
 $div_id = filter_input(INPUT_POST,'div_id',FILTER_SANITIZE_STRING);
 $req_id = filter_input(INPUT_POST,'req_id',FILTER_SANITIZE_NUMBER_INT);
 
-$role = validateRequest($user_id, $user_val);
+$role = validateRequest($user_id, $user_val, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }
