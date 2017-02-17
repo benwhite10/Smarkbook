@@ -68,10 +68,12 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
     
     foreach ($worksheets as $worksheet){
         $GWID = $worksheet["GWID"];
-        $query = "select SQ.`Version ID` VID, `Group Worksheet ID` GWID, CQ.`Student ID` StuID, SUM(Mark) Mark, SUM(Marks) Marks from TCOMPLETEDQUESTIONS CQ
-                    join TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-                    WHERE `Group Worksheet ID` = $GWID
-                    group by CQ.`Student ID`;";
+        $query = "SELECT StuID, SUM(Mark) Mark, SUM(Marks) Marks FROM (
+                    SELECT CQ.`Student ID` StuID, Mark, Marks FROM TCOMPLETEDQUESTIONS CQ
+                    JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+                    WHERE `Group Worksheet ID` = $GWID AND CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 
+                    GROUP BY CQ.`Student ID`, CQ.`Stored Question ID`) AS A 
+                    GROUP BY StuID;";
         try{
             $results = db_select_exception($query);
         } catch (Exception $ex) {
@@ -179,10 +181,12 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
                 ->setCellValue($col . "2", $worksheet["ShortDate"])
                 ->setCellValue($col . "3", $worksheet["Marks"]);
         
-        $query = "SELECT CQ.`Student ID` StuID, SUM(Mark) Mark, SUM(Marks) Marks FROM TCOMPLETEDQUESTIONS CQ
+        $query = "SELECT StuID, SUM(Mark) Mark, SUM(Marks) Marks FROM (
+                    SELECT CQ.`Student ID` StuID, Mark, Marks FROM TCOMPLETEDQUESTIONS CQ
                     JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
                     WHERE `Group Worksheet ID` = $GWID AND CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 
-                    GROUP BY CQ.`Student ID`;";
+                    GROUP BY CQ.`Student ID`, CQ.`Stored Question ID`) AS A 
+                    GROUP BY StuID;";
         try{
             $results = db_select_exception($query);
         } catch (Exception $ex) {
