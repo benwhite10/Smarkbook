@@ -1,3 +1,7 @@
+body {
+    height: auto;
+}
+
 textarea.autocomplete {
     width: calc(100% - 20px);
     background: transparent;

@@ -102,7 +102,6 @@ if(isset($_SESSION['message'])){
                 </div>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>  
-</body>
-
-	
+</body>	

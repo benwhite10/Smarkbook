@@ -63,7 +63,7 @@ $name = $student[0]['Preferred Name'] . ' ' . $student[0]['Surname'];
     <?php pageHeader("Smarkbook", $info_version); ?>
     <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
 </head>
-<body>
+<body style="height: auto;">
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -130,6 +130,7 @@ $name = $student[0]['Preferred Name'] . ' ' . $student[0]['Surname'];
             </ul>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

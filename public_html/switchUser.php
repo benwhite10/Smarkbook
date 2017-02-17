@@ -56,7 +56,7 @@ function failWithMessage($msg, $error){
     <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
     <script src="js/tagsList.js?<?php echo $info_version; ?>"></script>
 </head>
-<body>
+<body style="height: 100%;">
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -121,6 +121,7 @@ function failWithMessage($msg, $error){
                 </div>
             </form> 
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>  
     <script src="js/tagsList.js"></script>
 </body>

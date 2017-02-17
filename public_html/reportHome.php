@@ -378,6 +378,7 @@ $set_student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_NUMBER_INT);
                     </div>
                 </div>
             </div>
+            <?php pageFooter($info_version) ?>
         </div>
     </body>
 

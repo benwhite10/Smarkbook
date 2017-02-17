@@ -3,6 +3,10 @@
     Author     : benwhite
 */
 
+body {
+    height: auto;
+}
+
 #add_student {
     width: calc(100% - 2px);
     height: 100px;

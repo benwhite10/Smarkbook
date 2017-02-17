@@ -106,6 +106,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </ul>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

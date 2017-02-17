@@ -36,7 +36,7 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
         <!--<link rel="stylesheet" type="text/css" href="css/viewReportNotes.css" />-->
         <script src="js/viewReportNotes.js?<?php echo $info_version; ?>"></script>
     </head>
-    <body>
+    <body style="height: auto;">
         <?php setUpRequestAuthorisation($userid, $userval); ?>
         <div id="main">
             <div id="header">
@@ -73,7 +73,8 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
                         </tr>
                     </table>
                 </div>
-            </div>   
+            </div>
+            <?php pageFooter($info_version) ?>
         </div>
     </body>
 </html>

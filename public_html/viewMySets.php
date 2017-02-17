@@ -86,6 +86,7 @@ $sets = db_select($query);
             </ul>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

@@ -1,4 +1,7 @@
 /*Markbook*/
+body {
+    height: auto;
+}
 
 table
 { border-color: #323232; }

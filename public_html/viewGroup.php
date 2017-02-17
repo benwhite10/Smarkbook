@@ -122,6 +122,7 @@ $groupName = $groupNameResult[0]['Name'];
             </ul>
             </div>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

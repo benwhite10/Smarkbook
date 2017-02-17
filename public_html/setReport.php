@@ -145,6 +145,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                 <div id="main_tables">
                 </div>
             </div>
+            <?php pageFooter($info_version) ?>
         </div>
         <script>
         var availableTags = [];

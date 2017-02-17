@@ -114,6 +114,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             </ul>
         </div>
         </div>
+        <?php pageFooter($info_version) ?>
     </div>
     <div id="modal_add_new" class="modal_pop_up">
         <div class="modal_content animate">

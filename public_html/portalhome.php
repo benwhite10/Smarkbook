@@ -100,7 +100,7 @@ if($resultArray[0]){
                 }
                 if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF", "STUDENT"])){
                     $count++;
-                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<div class='menuobject' id='menuobject$count' >";
                     if ($userRole === "STUDENT") {
                         echo "<a href='reportHome.php?student=$userid' class='title'>Reports</a>";
                         echo "<input type='hidden' id='menuObjectLink$count' value='reportHome.php?student=$userid'>";
@@ -130,7 +130,7 @@ if($resultArray[0]){
                 echo "<input type='hidden' id='menuCount' value=$count />";
                 ?>
             </div>
-            <?php pageFooter($info_version) ?>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>	

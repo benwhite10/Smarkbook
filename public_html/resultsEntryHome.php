@@ -177,6 +177,7 @@ function getInput($method, $name, $type){
                 </div>
             </form>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

@@ -1,3 +1,7 @@
+body {
+    height: auto;
+}
+
 table {
     border: 1px solid #323232;
 }

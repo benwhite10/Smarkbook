@@ -244,6 +244,7 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
             </div>-->
             <?php } ?>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>
 </body>
 

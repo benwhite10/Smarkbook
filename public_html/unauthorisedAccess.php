@@ -46,6 +46,7 @@ if($resultArray[0]){
             <p style="text-align: center"><br>You do not have permission to access this page. <br>
                 Please go back to the <a href="index.php">home</a> page and try again. </p>
     	</div>
+        <?php pageFooter($info_version) ?>
     </div>  
 </body>
 
