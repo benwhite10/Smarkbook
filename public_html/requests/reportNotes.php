@@ -14,7 +14,7 @@ $note = filter_input(INPUT_POST,'note',FILTER_SANITIZE_STRING);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
-$role = validateRequest($userid, $userval);
+$role = validateRequest($userid, $userval, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }
