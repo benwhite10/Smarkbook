@@ -9,6 +9,7 @@ include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$version_number = filter_input(INPUT_POST,'version_number',FILTER_SANITIZE_STRING);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
@@ -29,6 +30,12 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         backUpDB($userid);
+        break;
+    case "UPDATEVERSION":
+        if(!authoriseUserRoles($role, ["SUPER_USER"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        updateVersion($version_number);
         break;
     default:
         break;
@@ -82,6 +89,16 @@ function emailFile($local, $title, $file_path, $userid) {
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
+}
+
+function updateVersion($version) {
+    $query = "UPDATE TINFO SET `Detail` = '$version' WHERE `Type` = 'VERSION'";
+    try {
+        db_insert_query_exception($query);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    succeedRequest(null, "Version updated to '$version'");
 }
 
 function succeedRequest($result, $message) {
