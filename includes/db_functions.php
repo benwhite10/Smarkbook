@@ -117,13 +117,14 @@ function db_back_up() {
    $mysqldump = $config['mysqldump'];
    
    $backup_name = "$dbname-" . date("Y-m-d-H-i-s") . ".sql.gz";
-   $backup_file = "../../db_backups/$backup_name";
+   $include_path = get_include_path();
+   $backup_file = "$include_path/db_backups/$backup_name";
    $command = "$mysqldump --host=$dbhost --user=$dbuser --password=$dbpass $dbname | gzip > $backup_file";
    exec($command);
    
    if($dbhost === "localhost") {
-       return ["LOCAL:", $backup_name];
+       return ["LOCAL:", $backup_name, $backup_file];
    } else {
-       return ["", $backup_name];
+       return ["", $backup_name, $backup_file];
    }
 }

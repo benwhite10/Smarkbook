@@ -1,6 +1,7 @@
 <?php
 $include_path = get_include_path();
 require $include_path . '/includes/class.phpmailer.php';
+include_once $include_path . '/public_html/includes/errorReporting.php';
 
 if(isset($_POST['email'], $_POST['name'])){
     send_mail(CONTACT, $_POST['email'], $_POST['name'], $_POST['body']);

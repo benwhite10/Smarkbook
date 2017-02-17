@@ -54,23 +54,28 @@ function backUpDB($userid) {
         $return = db_back_up();
         $local = $return[0];
         $backup_name = $return[1];
+        $backup_file = $return[2];
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-    emailFile($local, $backup_name, "../../db_backups/$backup_name", $userid);
+    emailFile($local, $backup_name, $backup_file, $userid);
     succeedRequest(null, "Database successfully backed up");
 }
 
 function emailFile($local, $title, $file_path, $userid) {
     $subject = "$local" . "DBBackup - $title";
     $date = date("d/m/Y H:i:s");
+    $staff = Teacher::createTeacherFromId($userid);
+    $name = $staff->firstName . " " . $staff->surname;
     $body = "<html>
                 <body>
                 <p>Backup: $title</p>
                 <p>Date: $date</p>
-                <p>User ID: $userid</p>
+                <p>User: $name</p>
                 </body>
             </html>";
+    
+    
     try {
         sendMailFromContact("contact.smarkbook@gmail.com", "Smarkbook", $body, $subject, $file_path);
     } catch (Exception $ex) {
