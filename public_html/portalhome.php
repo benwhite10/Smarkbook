@@ -130,7 +130,7 @@ if($resultArray[0]){
                 echo "<input type='hidden' id='menuCount' value=$count />";
                 ?>
             </div>
-            <div id="footer"><p><?php echo "Copyright &copy " . date("Y") . " Ben White - v" . $info_version; ?></p></div>
+            <?php pageFooter($info_version) ?>
     	</div>
     </div>
 </body>	

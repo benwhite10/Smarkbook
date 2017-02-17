@@ -25,4 +25,6 @@ function setUpRequestAuthorisation($userid, $userval) {
     echo "<input type='hidden' id='userval' value='$userval' />";
 }
 
-
+function pageFooter($info_version) {
+    echo "<div id='footer'><p>Copyright &copy " . date("Y") . " Ben White - v$info_version</p></div>";
+}
