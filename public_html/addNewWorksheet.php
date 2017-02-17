@@ -39,7 +39,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css?<?php echo $info_version; ?>"/>
     <script src="js/addWorksheet.js?<?php echo $info_version; ?>"></script>
 </head>
-<body>
+<body style="height: 100%;">
     <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
