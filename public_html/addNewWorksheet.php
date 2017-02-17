@@ -15,6 +15,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -30,12 +32,12 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("New Worksheet"); ?>
-    <script src="js/jquery-ui.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
-    <link rel="stylesheet" type="text/css" href="css/autocomplete.css"  />
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css"/>
-    <script src="js/addWorksheet.js"></script>
+    <?php pageHeader("New Worksheet", $info_version); ?>
+    <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
+    <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
+    <link rel="stylesheet" type="text/css" href="css/autocomplete.css?<?php echo $info_version; ?>"  />
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-date.css?<?php echo $info_version; ?>"/>
+    <script src="js/addWorksheet.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>

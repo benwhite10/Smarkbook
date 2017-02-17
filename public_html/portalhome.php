@@ -15,6 +15,8 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -25,9 +27,9 @@ if($resultArray[0]){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <script src='js/portalhome.js'></script>
-    <link rel='stylesheet' type='text/css' href='css/portalhome.css' />
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <script src='js/portalhome.js?<?php echo $info_version; ?>'></script>
+    <link rel='stylesheet' type='text/css' href='css/portalhome.css?<?php echo $info_version; ?>' />
 </head>
 <body>
     <div id="main">

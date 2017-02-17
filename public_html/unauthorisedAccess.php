@@ -12,6 +12,8 @@ if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }
 
 ?>
@@ -19,7 +21,7 @@ if($resultArray[0]){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
+    <?php pageHeader("Smarkbook", $info_version); ?>
 </head>
 <body>
     <div id="main">

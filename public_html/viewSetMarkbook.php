@@ -16,6 +16,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -83,12 +85,12 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css" />
-    <link href="css/autocomplete.css" rel="stylesheet" />
-    <script src="js/jquery-ui.js"></script>
-    <script src="js/tagsList.js"></script>
-    <script src="js/viewMarkbook.js"></script>
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css?<?php echo $info_version; ?>" />
+    <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />
+    <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
+    <script src="js/tagsList.js?<?php echo $info_version; ?>"></script>
+    <script src="js/viewMarkbook.js?<?php echo $info_version; ?>"></script>
     <script>
         function viewWorksheet(gwid) {
             window.location.href = "editSetResults.php?gwid=" + gwid;

@@ -14,6 +14,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -44,10 +46,10 @@ $groupName = $groupNameResult[0]['Name'];
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <script src="js/sorttable.js"></script>
-    <script src="js/manageGroups.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/viewGroup.css" />
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
+    <script src="js/manageGroups.js?<?php echo $info_version; ?>"></script>
+    <link rel="stylesheet" type="text/css" href="css/viewGroup.css?<?php echo $info_version; ?>" />
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>

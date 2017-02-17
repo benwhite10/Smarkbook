@@ -13,14 +13,16 @@ if($resultArray[0]){
     $loggedin = true; 
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
-	// Redirect to portalhome
-	header("Location: ../portalhome.php");
-	exit();
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
+    // Redirect to portalhome
+    header("Location: ../portalhome.php");
+    exit();
 }else{
     $loggedin = false;
-	// Redirect to login
-	header("Location: ../login.php");
-	exit();
+    // Redirect to login
+    header("Location: ../login.php");
+    exit();
 }
 if(isset($_SESSION['url'])){
     unset($_SESSION['url']);
@@ -31,11 +33,11 @@ if(isset($_SESSION['url'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <link rel="stylesheet" type="text/css" href="css/home.css" />
-    <script type="text/javascript" src="js/menu.js"></script>
-    <script src="js/sha512.js"></script>
-    <script type="text/javascript" src="js/userFunctions.js"></script>
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <link rel="stylesheet" type="text/css" href="css/home.css?<?php echo $info_version; ?>" />
+    <script type="text/javascript" src="js/menu.js?<?php echo $info_version; ?>"></script>
+    <script src="js/sha512.js?<?php echo $info_version; ?>"></script>
+    <script type="text/javascript" src="js/userFunctions.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <div id="main">

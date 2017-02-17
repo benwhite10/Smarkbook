@@ -13,6 +13,8 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -31,8 +33,8 @@ $sets = db_select($query);
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Sets"); ?>
-    <script src="js/sorttable.js"></script>
+    <?php pageHeader("Sets", $info_version); ?>
+    <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <div id="main">

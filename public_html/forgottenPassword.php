@@ -17,6 +17,8 @@ if(isset($code)){
     $visible = true;
     $type = "RESET";
 }
+$info = Info::getInfo();
+$info_version = $info->getVersion();
 
 if(isset($_SESSION['message'])){
     $Message = $_SESSION['message'];
@@ -30,12 +32,12 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Login"); ?>
-    <link rel="stylesheet" type="text/css" href="css/login.css" />
-    <script src="js/jquery-ui.js"></script>
-    <script src="js/sha512.js"></script>
-    <script src="js/resetPassword.js"></script>
-    <script type="text/javascript" src="js/userFunctions.js"></script>
+    <?php pageHeader("Login", $info_version); ?>
+    <link rel="stylesheet" type="text/css" href="css/login.css?<?php echo $info_version; ?>" />
+    <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
+    <script src="js/sha512.js?<?php echo $info_version; ?>"></script>
+    <script src="js/resetPassword.js?<?php echo $info_version; ?>"></script>
+    <script type="text/javascript" src="js/userFunctions.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <div id="main">

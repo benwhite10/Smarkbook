@@ -13,6 +13,8 @@ if($resultArray[0]){
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -49,10 +51,10 @@ function failWithMessage($msg, $error){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook"); ?>
-    <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
-    <script src="js/jquery-ui.js"></script>
-    <script src="js/tagsList.js"></script>
+    <?php pageHeader("Smarkbook", $info_version); ?>
+    <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
+    <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
+    <script src="js/tagsList.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <div id="main">

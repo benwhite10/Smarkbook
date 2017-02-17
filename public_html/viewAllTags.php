@@ -14,6 +14,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -36,10 +38,10 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Tags"); ?>
-    <script src="js/sorttable.js"></script>
-    <script src="js/viewAllTags.js"></script>
-    <link rel='stylesheet' type='text/css' href='css/viewAllTags.css' />
+    <?php pageHeader("Tags", $info_version); ?>
+    <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
+    <script src="js/viewAllTags.js?<?php echo $info_version; ?>"></script>
+    <link rel='stylesheet' type='text/css' href='css/viewAllTags.css?<?php echo $info_version; ?>' />
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>

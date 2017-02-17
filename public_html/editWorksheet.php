@@ -14,6 +14,8 @@ if($resultArray[0]){
     $userid = $user->getUserId();
     $userRole = $user->getRole();
     $userval = base64_encode($user->getValidation());
+    $info = Info::getInfo();
+    $info_version = $info->getVersion();
 }else{
     header($resultArray[1]);
     exit();
@@ -29,10 +31,10 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Edit Worksheet"); ?>
-    <link rel="stylesheet" type="text/css" href="css/editworksheet.css" />
-    <script src="js/editWorksheet.js"></script>
-    <script src="libraries/spin.js"></script>
+    <?php pageHeader("Edit Worksheet", $info_version); ?>
+    <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
+    <script src="js/editWorksheet.js?<?php echo $info_version; ?>"></script>
+    <script src="libraries/spin.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
