@@ -36,8 +36,9 @@ switch ($requestType){
 
 function deleteDownloads() {
     $count = 0;
+    $include_path = get_include_path();
     try {
-        foreach (glob("../downloads/*") as $filename) {
+        foreach (glob("$include_path/public_html/downloads/*") as $filename) {
             if (is_file($filename)) {
                 unlink($filename);
                 $count++;
