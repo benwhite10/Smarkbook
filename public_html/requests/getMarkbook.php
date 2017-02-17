@@ -13,7 +13,7 @@ $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
-$role = validateRequest($userid, $userval);
+$role = validateRequest($userid, $userval, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }
@@ -216,7 +216,7 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
     
     $objPHPExcel->getActiveSheet()->getStyle("A1:$col" . "3")->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle("A1:B$row")->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle("C1:$col$row")->getAlignment()->setHorizontal(center);
+    $objPHPExcel->getActiveSheet()->getStyle("C1:$col$row")->getAlignment()->setHorizontal('center');
     $styleArray = array(
         'borders' => array(
             'allborders' => array(
