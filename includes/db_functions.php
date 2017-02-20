@@ -114,6 +114,7 @@ function db_back_up() {
    $dbuser = $config['username'];
    $dbpass = $config['password'];
    $dbname = $config['dbname'];
+   $server = $config['server'];
    $mysqldump = $config['mysqldump'];
    
    $backup_name = "$dbname-" . date("Y-m-d-H-i-s") . ".sql.gz";
@@ -122,7 +123,7 @@ function db_back_up() {
    $command = "$mysqldump --host=$dbhost --user=$dbuser --password=$dbpass $dbname | gzip > $backup_file";
    exec($command);
    
-   if($dbhost === "localhost") {
+   if($server === "local") {
        return ["LOCAL:", $backup_name, $backup_file];
    } else {
        return ["", $backup_name, $backup_file];
