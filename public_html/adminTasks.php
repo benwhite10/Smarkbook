@@ -73,31 +73,33 @@ if(isset($_SESSION['message'])){
             <div id="temp_message"></div> 
             
             <div id="main_content">
-                <div id="task_downloads" class="task">
-                    <div class="task_description">
-                        <p>Delete all of the temporary download files.</p>
+                <div id="tasks">
+                    <div id="task_downloads" class="task">
+                        <div class="task_description">
+                            <p>Delete all of the temporary download files.</p>
+                        </div>
+                        <div id="task_downloads_button" class="task_button" onclick="runDeleteDownloads()">
+                            <p>Run</p>
+                        </div>
                     </div>
-                    <div id="task_downloads_button" class="task_button" onclick="runDeleteDownloads()">
-                        <p>Run</p>
+                    <div id="task_backup" class="task">
+                        <div class="task_description">
+                            <p>Back up the database.</p>
+                        </div>
+                        <div id="task_backup_button" class="task_button" onclick="runBackUp(false)">
+                            <p>Run</p>
+                        </div>
                     </div>
-                </div>
-                <div id="task_backup" class="task">
-                    <div class="task_description">
-                        <p>Back up the database.</p>
-                    </div>
-                    <div id="task_backup_button" class="task_button" onclick="runBackUp(false)">
-                        <p>Run</p>
-                    </div>
-                </div>
-                <div id="task_version" class="task" style="border-bottom: none">
-                    <div class="task_description input">
-                        <p>Update the version number</p>
-                    </div>
-                    <div class="task_text_input">
-                        <input id="version_number" type="text" class="task_text_input" value="<?php echo $info_version; ?>"/>
-                    </div>
-                    <div id="task_version_button" class="task_button" onclick="runUpdateVersion()">
-                        <p>Update</p>
+                    <div id="task_version" class="task" style="border-bottom: none">
+                        <div class="task_description input">
+                            <p>Update the version number</p>
+                        </div>
+                        <div class="task_text_input">
+                            <input id="version_number" type="text" class="task_text_input" value="<?php echo $info_version; ?>"/>
+                        </div>
+                        <div id="task_version_button" class="task_button" onclick="runUpdateVersion()">
+                            <p>Update</p>
+                        </div>
                     </div>
                 </div>
             </div>
