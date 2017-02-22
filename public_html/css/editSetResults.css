@@ -168,7 +168,6 @@ td.student_name{
 
 td.total_mark {
     text-align: center;
-    padding-left: 10px;
     cursor: default;
     user-select: none;
 }
@@ -657,7 +656,30 @@ th.status_col {
     max-width: 160px;
 }
 
-th.notes_col {
+th.date_col {
+    min-width: 90px;
+    max-width: 130px;
+}
+
+th.notes_col, th.grade_col, th.ums_col {
     min-width: 60px;
     max-width: 80px;
+}
+
+input[type="text"].grade_input
+{ display: block;
+  line-height: 20px;
+  height: 100%;
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: normal;
+  padding: 0px;
+  color: #323232;
+  margin: 0px;
+  outline: none;
+  text-align: center;
+  border-radius: 0px;
+  font-weight: bold;
 }

@@ -175,16 +175,33 @@ function parseMainTable() {
         col++;
 
     }
-    row_head_1 += "<th class='results results_header total_col'></th><th class='results results_header status_col'></th><th class='results results_header status_col'></th><th class='results results_header notes_col'></th>";
-    
+    row_head_1 += "<th class='results results_header total_col'></th>";
     row_head_2 += "<th class='results results_header' style='min-width: 100px;'>Total</th>";
-    row_head_2 += "<th class='results results_header' style='min-width: 150px;'>Status</th>";
-    row_head_2 += "<th class='results results_header' style='min-width: 150px;'>Date</th>";
-    row_head_2 += "<th class='results results_header'>Note</th>";
     
-    average_row_1 += "<td class='averages'></td><td class='averages' colspan='3'></td></tr>";
-    average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages' colspan='3'></td></tr>";
-    average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages' colspan='3'></td></tr>";
+    var count = 0;    
+    row_head_2 += "<th class='results results_header'>Grade</th>";
+    row_head_1 += "<th class='results results_header grade_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header'>UMS</th>";
+    row_head_1 += "<th class='results results_header ums_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header' style='min-width: 140px;'>Status</th>";
+    row_head_1 += "<th class='results results_header status_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header' style='min-width: 120px;'>Date</th>";
+    row_head_1 += "<th class='results results_header date_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header'>Note</th>";
+    row_head_1 += "<th class='results results_header notes_col'></th>";
+    count++;
+    
+    average_row_1 += "<td class='averages'></td><td class='averages' colspan='" + count + "'></td></tr>";
+    average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
+    average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
     
     /* Students */
     var student_rows = "";
@@ -218,6 +235,8 @@ function parseMainTable() {
             col++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
+        student_rows += "<td class='results total_mark'><input type='text' class='grade_input' id='grade_" + stuid + "' /></td>";
+        student_rows += "<td class='results total_mark'><input type='text' class='grade_input' id='ums_" + stuid + "' /></td>";
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
