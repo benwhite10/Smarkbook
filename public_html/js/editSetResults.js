@@ -235,8 +235,8 @@ function parseMainTable() {
             col++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
-        student_rows += "<td class='results total_mark'><input type='text' class='grade_input' id='grade_" + stuid + "' /></td>";
-        student_rows += "<td class='results total_mark'><input type='text' class='grade_input' id='ums_" + stuid + "' /></td>";
+        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='saveGradeAndUMS(" + stuid + ")' /></td>";
+        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='saveGradeAndUMS(" + stuid + ")' /></td>";
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
@@ -547,8 +547,9 @@ function sendSaveWorksheetsRequest(save_worksheets_array) {
         success: function(json){
             saveWorksheetsSuccess(json);
         },
-        error: function(json){
+        error: function(){
             clearLock("save_worksheets_request_lock", req_id);
+            console.log("There was an error sending the request");
         }
     });
 }
@@ -647,12 +648,13 @@ function saveWorksheetsSuccess(json) {
                 var stu_id = worksheet["Student ID"];
                 for (var j in save_worksheets_array) {
                     var saved_worksheet = save_worksheets_array[j];
-                    if (saved_worksheet["Student ID"] === stu_id && !saved_worksheet["saved"]) {
+                    if (parseInt(saved_worksheet["Student ID"]) === parseInt(stu_id) && !saved_worksheet["saved"]) {
                         if (worksheet["success"]) {
                             save_worksheets_array[j]["saved"] = true;
                             setStatusSaved(stu_id);
                         } else {
                             save_worksheets_array[j]["request_sent"] = false;
+                            console.log(saved_worksheet["message"]);
                         }
                         break;
                     }
@@ -662,7 +664,7 @@ function saveWorksheetsSuccess(json) {
             clearLock("save_worksheets_request_lock", req_id);
         });
     } else {
-        console.log("Something didn't go well");
+        console.log("There was an error saving the worksheet: " + json["message"]);
         clearLock("save_worksheets_request_lock", null, true);
     }
 }
@@ -749,18 +751,26 @@ function setAwatingSaveClass(id_string) {
 function setAwatingSaveClassWorksheets(student) {
     $("#comp" + student).addClass("awaiting_save");
     $("#late" + student).addClass("awaiting_save");
+    $("#grade_" + student).addClass("awaiting_save");
+    $("#ums_" + student).addClass("awaiting_save");
 }
 
 function setStatusSaved(student) {
     $("#comp" + student).removeClass("awaiting_save");
     $("#late" + student).removeClass("awaiting_save");
+    $("#grade_" + student).removeClass("awaiting_save");
+    $("#ums_" + student).removeClass("awaiting_save");
     $("#comp" + student).css({backgroundColor: '#c2f4a4'});
     $("#late" + student).css({backgroundColor: '#c2f4a4'});
     $("#note" + student).css({backgroundColor: '#c2f4a4'});
+    $("#grade_div_" + student).css({backgroundColor: '#c2f4a4'});
+    $("#ums_div_" + student).css({backgroundColor: '#c2f4a4'});
     setTimeout(function(){
       $("#comp" + student).animate({backgroundColor: 'transparent'}, 'slow');
       $("#late" + student).animate({backgroundColor: 'transparent'}, 'slow');  
       $("#note" + student).animate({backgroundColor: 'transparent'}, 'slow');  
+      $("#grade_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
+      $("#ums_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
     }, 1000);
 }
 
@@ -1149,7 +1159,9 @@ function saveChanges(){
         "Date Status": "",
         "Group Worksheet ID": gwid,
         "Notes": "",
-        "Student ID": student
+        "Student ID": student,
+        "Grade": "",
+        "UMS": ""
     };
     if (completed_worksheets[student]) {
         completed_worksheet = completed_worksheets[student];
@@ -1164,6 +1176,31 @@ function saveChanges(){
     
     //Set comp status
     updateStatusRow(student);
+}
+
+function saveGradeAndUMS(student){
+    var gwid = $("#gwid").val();
+    // Save to completed worksheet array
+    var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
+    var completed_worksheet = {
+        "Completion Status": "",
+        "Date Completed": "",
+        "Date Status": "",
+        "Group Worksheet ID": gwid,
+        "Notes": "",
+        "Student ID": student,
+        "Grade": "",
+        "UMS": ""
+    };
+    if (completed_worksheets[student]) {
+        completed_worksheet = completed_worksheets[student];
+    }
+    
+    completed_worksheet["Grade"] = $("#grade_" + student).val();
+    completed_worksheet["UMS"] = $("#ums_" + student).val();
+    completed_worksheets[student] = completed_worksheet;
+    updateSaveWorksheetsArray(completed_worksheet, student);
+    sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
 }
 
 function getDaysLateFromPopUp(value) {
@@ -1213,9 +1250,22 @@ function updateStatusRow(student) {
     var lateClass = getLateClass(daysLate);
     var noteClass = note === undefined || note === "" ? "note_none" : "note_note";
     
+    var grade = completed_worksheet["Grade"];
+    var ums = completed_worksheet["UMS"];
+    
     setCompletionStatus(student, compClass, completionStatus);
     setLateStatus(student, lateClass, dateStatus, daysLate);
     setNoteStatus(student, noteClass);
+    setGrade(student, grade);
+    setUMS(student, ums);
+}
+
+function setGrade(student, grade) {
+    $("#grade_" + student).val(grade);
+}
+
+function setUMS(student, ums) {
+    $("#ums_" + student).val(ums);
 }
 
 function setCompletionStatus(student, comp_class, status){

@@ -104,6 +104,9 @@ function addNewWorksheet($worksheet) {
     $notes = db_escape_string($worksheet["Notes"]);
     $comp_status = $worksheet["Completion Status"];
     $date_status = $worksheet["Date Status"] == "" ? "NULL" : $worksheet["Date Status"];
+    $grade = db_escape_string($worksheet["Grade"]);
+    $ums = $worksheet["UMS"] ? intval($worksheet["UMS"]) : "NULL";
+    
     $update = FALSE;
     // Try and get an ID
     db_begin_transaction();
@@ -124,8 +127,11 @@ function addNewWorksheet($worksheet) {
             . "`Student ID`= $stu_id,"
             . "`Notes`= '$notes',"
             . "`Completion Status`= '$comp_status',"
-            . "`Date Status`= $date_status "
-            . "WHERE `Completed Worksheet ID` = $cwid;";
+            . "`Date Status`= $date_status ,"
+            . "`Grade`= '$grade' ,"
+            . "`UMS`= $ums "
+            . " WHERE `Completed Worksheet ID` = $cwid;";
+
         try {
             db_query_exception($query1);
             db_commit_transaction();
@@ -133,10 +139,11 @@ function addNewWorksheet($worksheet) {
         } catch (Exception $ex) {
             db_rollback_transaction();
             $worksheet["success"] = FALSE;
+            $worksheet["message"] = $ex->getMessage();
         }
     } else {
-        $query1 = "INSERT INTO `TCOMPLETEDWORKSHEETS`(`Group Worksheet ID`, `Student ID`, `Notes`, `Completion Status`, `Date Status`) "
-                . "VALUES ($gwid,$stu_id,'$notes','$comp_status',$date_status)";
+        $query1 = "INSERT INTO `TCOMPLETEDWORKSHEETS`(`Group Worksheet ID`, `Student ID`, `Notes`, `Completion Status`, `Date Status`, `Grade`, `UMS`) "
+                . "VALUES ($gwid,$stu_id,'$notes','$comp_status',$date_status, '$grade', $ums)";
         try {
             db_insert_query_exception($query1);
             db_commit_transaction();
@@ -144,6 +151,7 @@ function addNewWorksheet($worksheet) {
         } catch (Exception $ex) {
             db_rollback_transaction();
             $worksheet["success"] = FALSE;
+            $worksheet["message"] = $ex->getMessage();
         }
     }
     return $worksheet;
