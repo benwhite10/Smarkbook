@@ -235,8 +235,8 @@ function parseMainTable() {
             col++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
-        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='saveGradeAndUMS(" + stuid + ")' /></td>";
-        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='saveGradeAndUMS(" + stuid + ")' /></td>";
+        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
+        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
@@ -1178,6 +1178,40 @@ function saveChanges(){
     updateStatusRow(student);
 }
 
+function changeGrade(student, value){
+    if(validateGrade(value)){
+        saveGradeAndUMS(student);
+    } else {
+        $("#grade_" + student).val($("#grade_" + student).val().substring(0,10));
+        $("#grade_" + student).focus();
+    }
+}
+
+function changeUMS(student, value){
+    if(validateUMS(value)){
+        saveGradeAndUMS(student);
+    } else {
+        $("#ums_" + student).val("");
+        $("#ums_" + student).focus();
+    }
+}
+
+function validateGrade(value) {
+    if (value.length > 9) {
+        alert("The maximum length of a grade is a 10 characters.");
+        return false;
+    }
+    return true;
+}
+
+function validateUMS(value) {
+    if (isNaN(value) || value < 0) {
+        alert("Please enter a valid number.");
+        return false;
+    }
+    return true;
+}
+
 function saveGradeAndUMS(student){
     var gwid = $("#gwid").val();
     // Save to completed worksheet array
@@ -1239,19 +1273,20 @@ function updateStatusRow(student) {
     var completionStatus = "Not Required";
     var daysLate = "";
     var note = "";
+    var grade = "";
+    var ums = "";
     if (completed_worksheet){
         completionStatus = completed_worksheet["Completion Status"];
         daysLate = completed_worksheet["Date Status"];
         note = completed_worksheet["Notes"];
+        grade = completed_worksheet["Grade"];
+        ums = completed_worksheet["UMS"];
     }
     
     var compClass = getCompClass(completionStatus);
     var dateStatus = getLateText(daysLate);
     var lateClass = getLateClass(daysLate);
     var noteClass = note === undefined || note === "" ? "note_none" : "note_note";
-    
-    var grade = completed_worksheet["Grade"];
-    var ums = completed_worksheet["UMS"];
     
     setCompletionStatus(student, compClass, completionStatus);
     setLateStatus(student, lateClass, dateStatus, daysLate);

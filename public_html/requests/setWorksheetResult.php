@@ -7,14 +7,14 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/errorReporting.php';
 
-$postData = json_decode($_POST["data"], TRUE);
+$postData = json_decode(filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING), TRUE);
 $worksheetDetails = $postData['details'];
 $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
 $requestType = $postData['type'] ? $postData['type'] : filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
-$save_changes = $_POST["save_changes_array"];
-$save_worksheets = $_POST["save_worksheets_array"];
-$worksheet_details = $_POST["worksheet_details"];
+$save_changes = filter_input(INPUT_POST, 'save_changes_array', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+$save_worksheets = filter_input(INPUT_POST, 'save_worksheets_array', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+$worksheet_details = filter_input(INPUT_POST, 'worksheet_details', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
 $userid = $postData['userid'] ? $postData['userid'] : filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = $postData['userval'] ? base64_decode($postData['userval']) : base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
