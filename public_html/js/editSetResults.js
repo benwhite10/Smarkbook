@@ -56,6 +56,7 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("worksheet", safelyGetObject(json["worksheet"]));
         sessionStorage.setItem("results", safelyGetObject(json["results"]));
         sessionStorage.setItem("details", safelyGetObject(json["details"]));
+        sessionStorage.setItem("boundaries", safelyGetObject(json["boundaries"]));
         sessionStorage.setItem("completedWorksheets", safelyGetObject(json["completedWorksheets"]));
         sessionStorage.setItem("students", safelyGetObject(json["students"]));
         setScreenSize();
@@ -147,9 +148,35 @@ function setUpWorksheetInfo() {
     setUpStaffInput("staff2", details["StaffID2"],"Extra Teacher");
     setUpStaffInput("staff3", details["StaffID3"],"Extra Teacher");
     $("#staffNotes").text(details["StaffNotes"] ? details["StaffNotes"] : "");
+    parseGradeBoundaries();
     var show = details["Hidden"] !== "1";
     document.getElementById("hide_checkbox").checked = show;
     sessionStorage.setItem("hidden_selected", show);
+}
+
+function parseGradeBoundaries() {
+    var grade_boundaries = JSON.parse(sessionStorage.getItem("boundaries"));
+    var count = 10;
+    var html_string = "<table class='grade_boundaries'><tbody class='grade_boundaries'>";
+    var grade_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>Grade</td>";
+    var boundary_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>Boundary</td>";
+    var ums_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>UMS</td>";
+    for (var i = 0; i < Math.max(count, grade_boundaries.length); i++) {
+        var grade = "";
+        var boundary = "";
+        var ums = "";
+        if (grade_boundaries[i]) {
+            var grade_boundary = grade_boundaries[i];
+            var grade = grade_boundary["Grade"]  ? grade_boundary["Grade"] : "";
+            var boundary = grade_boundary["Boundary"] ? grade_boundary["Boundary"] : "";
+            var ums = grade_boundary["UMS"] ? grade_boundary["UMS"] : "";
+        }
+        grade_string += "<td class='grade_boundaries'><input type='text' class='grade_boundaries' id='grade_boundary_grade_" + i + "' onBlur='changeGradeBoundary(\"grade\", this.value, " + i + ")' value='" + grade + "'/></td>";
+        boundary_string += "<td class='grade_boundaries'><input type='text' class='grade_boundaries' id='grade_boundary_boundary_" + i + "' onBlur='changeGradeBoundary(\"boundary\", this.value, " + i + ")' value='" + boundary + "'/></td>";
+        ums_string += "<td class='grade_boundaries'><input type='text' class='grade_boundaries' id='grade_boundary_ums_" + i + "' onBlur='changeGradeBoundary(\"ums\", this.value, " + i + ")' value='" + ums + "'/></td>";
+    }
+    html_string += grade_string + "</tr>" + boundary_string + "</tr>" + ums_string + "</tr></tbody></table>";
+    $("#grade_boundaries_table").html(html_string);
 }
 
 function parseMainTable() {
@@ -481,11 +508,15 @@ function saveGroupWorksheet() {
         staff2: staff2,
         staff3: staff3,
         staffNotes: notes,
-        hide: hide,
-    }
+        hide: hide
+    };
+    
+    var grade_boundaries = getGradeBoundariesFromTable();
+    
     var infoArray = {
         type: "SAVEGROUPWORKSHEET",
         worksheet_details: worksheet_details,
+        grade_boundaries: grade_boundaries,
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
@@ -506,6 +537,24 @@ function saveGroupWorksheet() {
             console.log("Error updating group worksheet");
         }
     });
+}
+
+function getGradeBoundariesFromTable() {
+    var grade_boundaries = [];
+    for (var i = 0; i < 25; i++) {
+        if (!document.getElementById("grade_boundary_grade_" + i)) { break; }
+        var grade = $("#grade_boundary_grade_" + i).val();
+        var boundary = $("#grade_boundary_boundary_" + i).val();
+        var ums = $("#grade_boundary_ums_" + i).val();
+        if (grade !== "" && boundary !== "") {
+            grade_boundaries.push({
+                grade: grade,
+                boundary: boundary,
+                ums: ums
+            });
+        }
+    }
+    return grade_boundaries;
 }
 
 function changeDateDueMain(){
@@ -1178,6 +1227,27 @@ function saveChanges(){
     updateStatusRow(student);
 }
 
+function changeGradeBoundary(type, value, number) {
+    switch(type) {
+        case "grade":
+            if(!validateGrade(value)){
+                $("#grade_boundary_grade_" + number).val($("#grade_boundary_grade_" + number).val().substring(0,10));
+                $("#grade_boundary_grade_" + number).focus();
+            }
+            break;
+        case "ums":
+        case "boundary":
+            if(!validateUMS(value)){
+                $("#grade_boundary_" + type + "_" + number).val("");
+                $("#grade_boundary_" + type + "_" + number).focus();
+            }
+            break;
+        default:
+            break;
+    }
+    changeGWValue();
+}
+
 function changeGrade(student, value){
     if(validateGrade(value)){
         saveGradeAndUMS(student);
@@ -1197,7 +1267,7 @@ function changeUMS(student, value){
 }
 
 function validateGrade(value) {
-    if (value.length > 9) {
+    if (value.length > 10) {
         alert("The maximum length of a grade is a 10 characters.");
         return false;
     }
