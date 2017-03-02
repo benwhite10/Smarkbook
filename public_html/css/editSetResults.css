@@ -161,6 +161,22 @@ td.grade_boundaries {
     height: 32px;
 }
 
+.grade_button {
+    display: inline-block;
+    width: 50%;
+    height: 100%;
+    float: left;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    text-align: center;
+    line-height: 32px;
+}
+
+#update_all_button:hover {
+    background: #c2f4a4;
+}
+
 td.grade_boundaries_row_title {
     min-width: 150px;
     max-width: 200px;

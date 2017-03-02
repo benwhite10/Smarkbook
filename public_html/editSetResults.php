@@ -222,49 +222,19 @@ if(isset($_SESSION['message'])){
                                 </td>
                             </tr>
                             <tr class="form">
-                                <td class="form title" colspan="2">
+                                <td class="form title">
                                     <h1>Grade Boundaries</h1>
+                                </td>
+                                <td class="form buttons">
+                                    <div class="grade_button"></div>
+                                    <div class="grade_button" id="update_all_button" onclick="updateAllResults()">Update All</div>
                                 </td>
                             </tr>
                             <tr class="form">
                                 <td class="form boundaries" colspan="2">
                                     <div class="grade_boundaries_input" id="grade_boundaries_table">
                                         <table class="grade_boundaries">
-                                            <tbody class="grade_boundaries">
-                                                <tr class="grade_boundaries">
-                                                    <td class="grade_boundaries_row_title">Grade</td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                </tr>
-                                                <tr class="grade_boundaries">
-                                                    <td class="grade_boundaries_row_title">Boundary</td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                </tr>
-                                                <tr class="grade_boundaries">
-                                                    <td class="grade_boundaries_row_title">UMS</td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                    <td class="grade_boundaries"><input type="text" class="grade_boundaries" /></td>
-                                                </tr>
-                                            </tbody>
+                                            <tbody class="grade_boundaries"></tbody>
                                         </table>
                                     </div>
                                 </td>
