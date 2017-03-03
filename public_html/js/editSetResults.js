@@ -1009,10 +1009,16 @@ function updateGrade(stu_id, row) {
         var desc = first_boundary > last_boundary;
         var grade_val = "";
         for (var i = 0; i < length; i++) {
-            var boundary = grade_boundaries[i]["boundary"];
+            var boundary = grade_boundaries[i]["boundary"] === "" ? "" : parseFloat(grade_boundaries[i]["boundary"]);
+            var ums = grade_boundaries[i]["ums"] === "" ? "" : parseFloat(grade_boundaries[i]["ums"]);
             if (desc) {
                 if (value >= boundary) {
                     grade_val = grade_boundaries[i]["grade"];
+                    if (ums !== "") {
+                        var previous_boundary = i === 0 ? getTotalMarks() : parseFloat(grade_boundaries[i - 1]["boundary"]);
+                        var previous_ums = i === 0 ? 100 : parseFloat(grade_boundaries[i - 1]["ums"]);
+                        $("#ums_" + stu_id).val(calculateUMS(boundary, previous_boundary, ums, previous_ums, value));  
+                    }
                     $("#grade_" + stu_id).val(grade_val);
                     changeGrade(stu_id, grade_val);
                     return;
@@ -1020,17 +1026,50 @@ function updateGrade(stu_id, row) {
             } else {
                 if (value < boundary) {
                     grade_val = i === 0 ? "-" : grade_boundaries[i - 1]["grade"];
+                    if (ums !== "") {
+                        var previous_boundary = i === 0 ? 0 : parseFloat(grade_boundaries[i - 1]["boundary"]);
+                        var previous_ums = i === 0 ? 0 : parseFloat(grade_boundaries[i - 1]["ums"]);
+                        $("#ums_" + stu_id).val(calculateUMS(previous_boundary, boundary, previous_ums, ums, value));
+                    }
                     $("#grade_" + stu_id).val(grade_val);
                     changeGrade(stu_id, grade_val);
                     return;
                 }
             }
         }
-        grade_val = desc ? "-" : grade_boundaries[i - 1]["grade"];
+        if (desc) {
+            grade_val = "-";
+            if (ums !== "") {
+                $("#ums_" + stu_id).val(calculateUMS(0, boundary, 0, ums, value)); 
+            }      
+        } else {
+            grade_val = grade_boundaries[i - 1]["grade"];
+            var previous_boundary = parseFloat(grade_boundaries[i - 1]["boundary"]);
+            var previous_ums = parseFloat(grade_boundaries[i - 1]["ums"]);
+            if (ums !== "") {
+                $("#ums_" + stu_id).val(calculateUMS(previous_boundary, getTotalMarks(), previous_ums, 100, value)); 
+            }
+        }
         $("#grade_" + stu_id).val(grade_val);
         changeGrade(stu_id, grade_val);
         return;
     } 
+}
+
+function calculateUMS(lower_boundary, upper_boundary, lower_ums, upper_ums, value) {
+    var ums_width = Math.abs(upper_ums - lower_ums);
+    var grade_width = Math.abs(upper_boundary - lower_boundary);
+    if (ums_width === 0 || grade_width === 0) return "";
+    return parseInt(lower_ums + (value - lower_boundary) * (ums_width/grade_width));
+}
+
+function getTotalMarks() {
+    var worksheet = JSON.parse(sessionStorage.getItem("worksheet"));
+    var marks = 0;
+    for (var key in worksheet) {
+        marks += parseFloat(worksheet[key]["Marks"]);
+    }
+    return marks;
 }
 
 function updateAllResults() {
