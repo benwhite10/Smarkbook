@@ -7,14 +7,15 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/errorReporting.php';
 
-$postData = json_decode($_POST["data"], TRUE);
+$postData = json_decode(filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING), TRUE);
 $worksheetDetails = $postData['details'];
 $newResults = $postData['newResults'];
 $completedWorksheets = $postData['compWorksheets'];
 $requestType = $postData['type'] ? $postData['type'] : filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
-$save_changes = $_POST["save_changes_array"];
-$save_worksheets = $_POST["save_worksheets_array"];
-$worksheet_details = $_POST["worksheet_details"];
+$save_changes = filter_input(INPUT_POST, 'save_changes_array', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+$grade_boundaries = filter_input(INPUT_POST, 'grade_boundaries', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+$save_worksheets = filter_input(INPUT_POST, 'save_worksheets_array', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+$worksheet_details = filter_input(INPUT_POST, 'worksheet_details', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
 $userid = $postData['userid'] ? $postData['userid'] : filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = $postData['userval'] ? base64_decode($postData['userval']) : base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
@@ -54,7 +55,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        saveGroupWorksheet($worksheet_details);
+        saveGroupWorksheet($worksheet_details, $grade_boundaries);
         break;
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
@@ -104,6 +105,9 @@ function addNewWorksheet($worksheet) {
     $notes = db_escape_string($worksheet["Notes"]);
     $comp_status = $worksheet["Completion Status"];
     $date_status = $worksheet["Date Status"] == "" ? "NULL" : $worksheet["Date Status"];
+    $grade = db_escape_string($worksheet["Grade"]);
+    $ums = $worksheet["UMS"] ? intval($worksheet["UMS"]) : "NULL";
+    
     $update = FALSE;
     // Try and get an ID
     db_begin_transaction();
@@ -124,8 +128,11 @@ function addNewWorksheet($worksheet) {
             . "`Student ID`= $stu_id,"
             . "`Notes`= '$notes',"
             . "`Completion Status`= '$comp_status',"
-            . "`Date Status`= $date_status "
-            . "WHERE `Completed Worksheet ID` = $cwid;";
+            . "`Date Status`= $date_status ,"
+            . "`Grade`= '$grade' ,"
+            . "`UMS`= $ums "
+            . " WHERE `Completed Worksheet ID` = $cwid;";
+
         try {
             db_query_exception($query1);
             db_commit_transaction();
@@ -133,10 +140,11 @@ function addNewWorksheet($worksheet) {
         } catch (Exception $ex) {
             db_rollback_transaction();
             $worksheet["success"] = FALSE;
+            $worksheet["message"] = $ex->getMessage();
         }
     } else {
-        $query1 = "INSERT INTO `TCOMPLETEDWORKSHEETS`(`Group Worksheet ID`, `Student ID`, `Notes`, `Completion Status`, `Date Status`) "
-                . "VALUES ($gwid,$stu_id,'$notes','$comp_status',$date_status)";
+        $query1 = "INSERT INTO `TCOMPLETEDWORKSHEETS`(`Group Worksheet ID`, `Student ID`, `Notes`, `Completion Status`, `Date Status`, `Grade`, `UMS`) "
+                . "VALUES ($gwid,$stu_id,'$notes','$comp_status',$date_status, '$grade', $ums)";
         try {
             db_insert_query_exception($query1);
             db_commit_transaction();
@@ -144,6 +152,7 @@ function addNewWorksheet($worksheet) {
         } catch (Exception $ex) {
             db_rollback_transaction();
             $worksheet["success"] = FALSE;
+            $worksheet["message"] = $ex->getMessage();
         }
     }
     return $worksheet;
@@ -183,7 +192,7 @@ function addNewResult($change, $gwid) {
     }
 }
 
-function saveGroupWorksheet($worksheetDetails) {
+function saveGroupWorksheet($worksheetDetails, $grade_boundaries) {
     // Update the details for the group worksheet
     try{
         $gwid = $worksheetDetails["gwid"];
@@ -191,8 +200,8 @@ function saveGroupWorksheet($worksheetDetails) {
         $staff2 = (!$worksheetDetails["staff2"] || $worksheetDetails["staff2"] == "0") ? "null" : $worksheetDetails["staff2"];
         $staff3 = (!$worksheetDetails["staff3"] || $worksheetDetails["staff3"] == "0") ? "null" : $worksheetDetails["staff3"];
         $datedue = $worksheetDetails["dateDueMain"];
-        $stuNotes = db_escape_string($worksheetDetails["studentNotes"]);
-        $staffNotes = db_escape_string($worksheetDetails["staffNotes"]);
+        $stuNotes = array_key_exists("studentNotes", $worksheetDetails) ? db_escape_string($worksheetDetails["studentNotes"]) : "";
+        $staffNotes = array_key_exists("staffNotes", $worksheetDetails) ? db_escape_string($worksheetDetails["staffNotes"]) : "";
         $hidden = $worksheetDetails["hide"] == "true" ? "0" : "1";
         
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
@@ -201,6 +210,7 @@ function saveGroupWorksheet($worksheetDetails) {
                 . "WHERE `Group Worksheet ID` = $gwid;";
 
         db_query_exception($query);
+        updateGradeBoundaries($grade_boundaries, $gwid);
     } catch (Exception $ex) {
         $message = "There was an error saving the details for the worksheet.";
         errorLog($message . " Exception: " . $ex->getMessage());
@@ -214,6 +224,51 @@ function saveGroupWorksheet($worksheetDetails) {
     $response = array("result" => TRUE);
     echo json_encode($response);
     exit();
+}
+
+function updateGradeBoundaries($grade_boundaries, $gwid) {
+    $query1 = "SELECT * FROM `TGRADEBOUNDARIES` "
+                . "WHERE `GroupWorksheet` = $gwid "
+                . "ORDER BY `BoundaryOrder`;";
+    db_begin_transaction();
+    try {
+        $existing_boundaries = db_select_exception($query1);
+        $count = 0;
+        foreach ($grade_boundaries as $i=>$new_boundary) {
+            $grade = $new_boundary["grade"];
+            $boundary = $new_boundary["boundary"];
+            $ums = $new_boundary["ums"] != "" ? $new_boundary["ums"] : "NULL";
+            if ($existing_boundaries[$i]) {
+                // Update existing boundary
+                $id = $existing_boundaries[$i]["ID"];
+                $update_query = "UPDATE `TGRADEBOUNDARIES` SET `Grade` = '$grade', `Boundary` = $boundary, `UMS` = $ums, `BoundaryOrder` = $i WHERE `ID` = $id;";
+                db_query_exception($update_query);
+            } else {
+                // Add boundary
+                $insert_query = "INSERT INTO `TGRADEBOUNDARIES` (`GroupWorksheet`, `Grade`, `Boundary`, `UMS`, `BoundaryOrder`) VALUES ($gwid, '$grade', $boundary, $ums, $i);";
+                db_insert_query_exception($insert_query);
+            }
+            $count++;
+        }
+        for ($i = $count; $i < count($existing_boundaries); $i++) {
+            // Delete existing boundary
+            $id = $existing_boundaries[$i]["ID"];
+            $delete_query = "DELETE FROM `TGRADEBOUNDARIES` WHERE `ID` = $id;";
+            db_query_exception($delete_query);
+        }
+        db_commit_transaction();
+        return;
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        $message = "There was an error updating the grade boundaries.";
+        errorLog($message . " Exception: " . $ex->getMessage());
+        $array = array(
+            "result" => FALSE,
+            "message" => $message
+        );
+        echo json_encode($array);
+        exit();
+    }
 }
 
 function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets){

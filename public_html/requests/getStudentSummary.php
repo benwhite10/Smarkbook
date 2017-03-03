@@ -120,7 +120,8 @@ function getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId
 function getWorksheetSummary($gwid, $stu_id) {
     $query_1 = "SELECT CQ.`Stored Question ID` SQID, CQ.`Mark` Mark, SQ.`Marks` Marks, SQ.`Number` Number, SQ.`Question Order` QOrder FROM `TCOMPLETEDQUESTIONS` CQ
             JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0";
+            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0 
+            GROUP BY CQ.`Stored Question ID`;";
     
     $query_1_1 = "SELECT CQ.`Stored Question ID` SQID, TT.`Name` Name FROM `TCOMPLETEDQUESTIONS` CQ
             JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID` 
@@ -128,12 +129,14 @@ function getWorksheetSummary($gwid, $stu_id) {
             JOIN `TTAGS` TT ON QT.`Tag ID` = TT.`Tag ID` 
             WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0 ORDER BY TT.`Name`";
     
-    $query_2 = "SELECT T.`Tag ID` TID, T.`Name` Name, SUM(CQ.`Mark`) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.`Mark`)/SUM(SQ.`Marks`) Perc, COUNT(1) Count FROM `TCOMPLETEDQUESTIONS` CQ
+    $query_2 = "SELECT TID, Name, SUM(Mark) Mark, SUM(Marks) Marks, SUM(Mark)/SUM(Marks) Perc, COUNT(1) Count FROM (
+            SELECT T.`Tag ID` TID, T.`Name` Name, CQ.`Mark` Mark, SQ.`Marks` Marks FROM `TCOMPLETEDQUESTIONS` CQ
             JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             JOIN `TQUESTIONTAGS` QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
             JOIN `TTAGS` T ON QT.`Tag ID` = T.`Tag ID`
             WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0
-            GROUP BY T.`Tag ID`";
+            GROUP BY T.`Tag ID`, CQ.`Stored Question ID`) AS A 
+            GROUP BY TID";
     try {
         $questions = db_select_exception($query_1);
         $tag_names = db_select_exception($query_1_1);
@@ -671,7 +674,8 @@ function setSetWorksheetMarks(){
 function setStudentWorksheetResults(){
     global $studentWorksheets, $returns;
             
-    $query = "SELECT CQ.`Group Worksheet ID` GWID, SUM(CQ.Mark) Mark, SUM(SQ.`Marks`) Marks, SUM(CQ.Mark)/SUM(SQ.`Marks`) AVG FROM TCOMPLETEDQUESTIONS CQ
+    $query = "SELECT GWID, SUM(Mark) Mark, SUM(Marks) Marks, SUM(Mark)/SUM(Marks) AVG FROM ( 
+            SELECT CQ.`Group Worksheet ID` GWID, CQ.`Stored Question ID` SQID, CQ.Mark Mark, SQ.`Marks` Marks FROM TCOMPLETEDQUESTIONS CQ
             JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             WHERE CQ.`Deleted` = 0 AND ";
     $inputs = $returns["inputs"];
@@ -684,7 +688,7 @@ function setStudentWorksheetResults(){
         $query .= $worksheet["GWID"] . ", ";
     }
     $query = substr($query, 0, -2);
-    $query .= ") GROUP BY CQ.`Group Worksheet ID`;";
+    $query .= ") GROUP BY CQ.`Group Worksheet ID`, CQ.`Stored Question ID`) AS A GROUP BY GWID";
     try{
         $results = db_select_exception($query);
         foreach($results as $result){

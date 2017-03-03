@@ -1114,5 +1114,6 @@ function backToWorksheets() {
 
 function addResults() {
     var wid = sessionStorage.getItem("worksheet_id");
-    window.location.href = "/resultsEntryHome.php?level=1&staffid=1&vid=" + wid;
+    var staff_id = $("#userid").val();
+    window.location.href = "/resultsEntryHome.php?level=1&staffid=" + staff_id + "&vid=" + wid;
 }

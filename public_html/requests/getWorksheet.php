@@ -66,6 +66,10 @@ function getWorksheetForGWID($gwid){
                 JOIN TGROUPS G ON G.`Group ID` = GW.`Group ID`
                 WHERE `Group Worksheet ID` = $gwid;";
     
+    $query3a = "SELECT * FROM `TGRADEBOUNDARIES` "
+            . "WHERE `GroupWorksheet` = $gwid "
+            . "ORDER BY `BoundaryOrder`;";
+    
     // Notes for each student, late reason etc
     $query4 = "SELECT * FROM TCOMPLETEDWORKSHEETS WHERE `Group Worksheet ID` = $gwid;";
     
@@ -85,6 +89,7 @@ function getWorksheetForGWID($gwid){
         $worksheetDetails = optimiseArray(db_select_exception($query1), "SQID");
         $results = db_select_exception($query2);
         $details = db_select_exception($query3);
+        $boundaries = db_select_exception($query3a);
         $completedWorksheets = optimiseArray(db_select_exception($query4), "Student ID");
         $notes = optimiseArray(db_select_exception($query5), "Student ID");
         $students = db_select_exception($query6);
@@ -103,6 +108,7 @@ function getWorksheetForGWID($gwid){
         "worksheet" => $worksheetDetails,
         "results" => $finalResults,
         "details" => $details[0],
+        "boundaries" => $boundaries,
         "completedWorksheets" => $completedWorksheets,
         "notes" => $notes,
         "students" => $students);

@@ -110,7 +110,18 @@ td.form
   font-size: 0.9rem;
   font-weight: normal;
   color: #323232;
-  vertical-align: top; }
+  vertical-align: top; 
+}
+
+td.form > h1 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    line-height: 30px;
+}
+
+td.form.title {
+    height: 30px;
+}
 
 tr.form
 { background: transparent; }
@@ -125,6 +136,65 @@ tr.form:hover
 
 tr.form:nth-child(even):hover {
     background-color: transparent;
+}
+
+table.grade_boundaries {
+    width: 100%;
+    height: auto;
+    border: 1px solid #323232;
+    margin: 0;
+}
+
+tr.grade_boundaries {
+    width: 100%;
+    height: 30px;
+    background: transparent;
+}
+
+tr.grade_boundaries:hover {
+    background: transparent;
+}
+
+td.grade_boundaries {
+    min-width: 60px;
+    border:1px solid #323232;
+    height: 32px;
+}
+
+.grade_button {
+    display: inline-block;
+    width: 50%;
+    height: 100%;
+    float: left;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    text-align: center;
+    line-height: 32px;
+}
+
+#update_all_button:hover {
+    background: #c2f4a4;
+}
+
+td.grade_boundaries_row_title {
+    min-width: 150px;
+    max-width: 200px;
+    border:1px solid #323232;
+    height: 32px;
+    font-weight: bold;
+    text-align: center;
+}
+
+input[type="text"].grade_boundaries {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    line-height: 30px;
+    text-align: center;
+    font-size: 1.0rem;
 }
 
 table.results {
@@ -168,7 +238,6 @@ td.student_name{
 
 td.total_mark {
     text-align: center;
-    padding-left: 10px;
     cursor: default;
     user-select: none;
 }
@@ -657,7 +726,33 @@ th.status_col {
     max-width: 160px;
 }
 
-th.notes_col {
+th.date_col {
+    min-width: 90px;
+    max-width: 130px;
+}
+
+th.notes_col, th.grade_col, th.ums_col {
     min-width: 60px;
     max-width: 80px;
+}
+
+input[type="text"].grade_input{ 
+    display: block;
+    line-height: 20px;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: normal;
+    padding: 0px;
+    color: #323232;
+    margin: 0px;
+    outline: none;
+    text-align: center;
+    border-radius: 0px;
+}
+
+input[type="text"].grade_input.awaiting_save{ 
+    font-weight: bold;
 }

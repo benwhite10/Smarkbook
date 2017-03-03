@@ -56,6 +56,7 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("worksheet", safelyGetObject(json["worksheet"]));
         sessionStorage.setItem("results", safelyGetObject(json["results"]));
         sessionStorage.setItem("details", safelyGetObject(json["details"]));
+        sessionStorage.setItem("boundaries", safelyGetObject(json["boundaries"]));
         sessionStorage.setItem("completedWorksheets", safelyGetObject(json["completedWorksheets"]));
         sessionStorage.setItem("students", safelyGetObject(json["students"]));
         setScreenSize();
@@ -147,9 +148,36 @@ function setUpWorksheetInfo() {
     setUpStaffInput("staff2", details["StaffID2"],"Extra Teacher");
     setUpStaffInput("staff3", details["StaffID3"],"Extra Teacher");
     $("#staffNotes").text(details["StaffNotes"] ? details["StaffNotes"] : "");
+    parseGradeBoundaries();
     var show = details["Hidden"] !== "1";
     document.getElementById("hide_checkbox").checked = show;
     sessionStorage.setItem("hidden_selected", show);
+}
+
+function parseGradeBoundaries() {
+    var grade_boundaries = JSON.parse(sessionStorage.getItem("boundaries"));
+    var count = 10;
+    var html_string = "<table class='grade_boundaries'><tbody class='grade_boundaries'>";
+    var grade_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>Grade</td>";
+    var boundary_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>Boundary</td>";
+    var ums_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>UMS</td>";
+    var max = grade_boundaries.length ? Math.max(count, grade_boundaries.length) : count;
+    for (var i = 0; i < max; i++) {
+        var grade = "";
+        var boundary = "";
+        var ums = "";
+        if (grade_boundaries[i]) {
+            var grade_boundary = grade_boundaries[i];
+            var grade = grade_boundary["Grade"]  ? grade_boundary["Grade"] : "";
+            var boundary = grade_boundary["Boundary"] ? grade_boundary["Boundary"] : "";
+            var ums = grade_boundary["UMS"] ? grade_boundary["UMS"] : "";
+        }
+        grade_string += "<td class='grade_boundaries'><input type='text' class='grade_boundaries' id='grade_boundary_grade_" + i + "' onBlur='changeGradeBoundary(\"grade\", this.value, " + i + ")' value='" + grade + "'/></td>";
+        boundary_string += "<td class='grade_boundaries'><input type='text' class='grade_boundaries' id='grade_boundary_boundary_" + i + "' onBlur='changeGradeBoundary(\"boundary\", this.value, " + i + ")' value='" + boundary + "'/></td>";
+        ums_string += "<td class='grade_boundaries'><input type='text' class='grade_boundaries' id='grade_boundary_ums_" + i + "' onBlur='changeGradeBoundary(\"ums\", this.value, " + i + ")' value='" + ums + "'/></td>";
+    }
+    html_string += grade_string + "</tr>" + boundary_string + "</tr>" + ums_string + "</tr></tbody></table>";
+    $("#grade_boundaries_table").html(html_string);
 }
 
 function parseMainTable() {
@@ -175,16 +203,33 @@ function parseMainTable() {
         col++;
 
     }
-    row_head_1 += "<th class='results results_header total_col'></th><th class='results results_header status_col'></th><th class='results results_header status_col'></th><th class='results results_header notes_col'></th>";
-    
+    row_head_1 += "<th class='results results_header total_col'></th>";
     row_head_2 += "<th class='results results_header' style='min-width: 100px;'>Total</th>";
-    row_head_2 += "<th class='results results_header' style='min-width: 150px;'>Status</th>";
-    row_head_2 += "<th class='results results_header' style='min-width: 150px;'>Date</th>";
-    row_head_2 += "<th class='results results_header'>Note</th>";
     
-    average_row_1 += "<td class='averages'></td><td class='averages' colspan='3'></td></tr>";
-    average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages' colspan='3'></td></tr>";
-    average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages' colspan='3'></td></tr>";
+    var count = 0;    
+    row_head_2 += "<th class='results results_header'>Grade</th>";
+    row_head_1 += "<th class='results results_header grade_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header'>UMS</th>";
+    row_head_1 += "<th class='results results_header ums_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header' style='min-width: 140px;'>Status</th>";
+    row_head_1 += "<th class='results results_header status_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header' style='min-width: 120px;'>Date</th>";
+    row_head_1 += "<th class='results results_header date_col'></th>";
+    count++;
+    
+    row_head_2 += "<th class='results results_header'>Note</th>";
+    row_head_1 += "<th class='results results_header notes_col'></th>";
+    count++;
+    
+    average_row_1 += "<td class='averages'></td><td class='averages' colspan='" + count + "'></td></tr>";
+    average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
+    average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
     
     /* Students */
     var student_rows = "";
@@ -218,6 +263,8 @@ function parseMainTable() {
             col++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
+        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
+        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
@@ -305,7 +352,7 @@ function changeResult(value, id_string, row){
     if(validateResult(value, parseInt(result_array["marks"]), id_string)){
         updateSaveChangesArray(value, id_string);
         updateCompletionStatus(stuid, row);
-        updateValues(id_string);
+        updateValues(id_string, stuid);
         getQuestionAverages(id_string);
     } else {
         resetQuestion(id_string);
@@ -462,11 +509,15 @@ function saveGroupWorksheet() {
         staff2: staff2,
         staff3: staff3,
         staffNotes: notes,
-        hide: hide,
-    }
+        hide: hide
+    };
+    
+    var grade_boundaries = getGradeBoundariesFromTable();
+    
     var infoArray = {
         type: "SAVEGROUPWORKSHEET",
         worksheet_details: worksheet_details,
+        grade_boundaries: grade_boundaries,
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
@@ -487,6 +538,24 @@ function saveGroupWorksheet() {
             console.log("Error updating group worksheet");
         }
     });
+}
+
+function getGradeBoundariesFromTable() {
+    var grade_boundaries = [];
+    for (var i = 0; i < 25; i++) {
+        if (!document.getElementById("grade_boundary_grade_" + i)) { break; }
+        var grade = $("#grade_boundary_grade_" + i).val();
+        var boundary = $("#grade_boundary_boundary_" + i).val();
+        var ums = $("#grade_boundary_ums_" + i).val();
+        if (grade !== "" && boundary !== "") {
+            grade_boundaries.push({
+                grade: grade,
+                boundary: boundary,
+                ums: ums
+            });
+        }
+    }
+    return grade_boundaries;
 }
 
 function changeDateDueMain(){
@@ -528,8 +597,9 @@ function sendSaveWorksheetsRequest(save_worksheets_array) {
         success: function(json){
             saveWorksheetsSuccess(json);
         },
-        error: function(json){
+        error: function(){
             clearLock("save_worksheets_request_lock", req_id);
+            console.log("There was an error sending the request");
         }
     });
 }
@@ -628,12 +698,13 @@ function saveWorksheetsSuccess(json) {
                 var stu_id = worksheet["Student ID"];
                 for (var j in save_worksheets_array) {
                     var saved_worksheet = save_worksheets_array[j];
-                    if (saved_worksheet["Student ID"] === stu_id && !saved_worksheet["saved"]) {
+                    if (parseInt(saved_worksheet["Student ID"]) === parseInt(stu_id) && !saved_worksheet["saved"]) {
                         if (worksheet["success"]) {
                             save_worksheets_array[j]["saved"] = true;
                             setStatusSaved(stu_id);
                         } else {
                             save_worksheets_array[j]["request_sent"] = false;
+                            console.log(saved_worksheet["message"]);
                         }
                         break;
                     }
@@ -643,7 +714,7 @@ function saveWorksheetsSuccess(json) {
             clearLock("save_worksheets_request_lock", req_id);
         });
     } else {
-        console.log("Something didn't go well");
+        console.log("There was an error saving the worksheet: " + json["message"]);
         clearLock("save_worksheets_request_lock", null, true);
     }
 }
@@ -730,18 +801,26 @@ function setAwatingSaveClass(id_string) {
 function setAwatingSaveClassWorksheets(student) {
     $("#comp" + student).addClass("awaiting_save");
     $("#late" + student).addClass("awaiting_save");
+    $("#grade_" + student).addClass("awaiting_save");
+    $("#ums_" + student).addClass("awaiting_save");
 }
 
 function setStatusSaved(student) {
     $("#comp" + student).removeClass("awaiting_save");
     $("#late" + student).removeClass("awaiting_save");
+    $("#grade_" + student).removeClass("awaiting_save");
+    $("#ums_" + student).removeClass("awaiting_save");
     $("#comp" + student).css({backgroundColor: '#c2f4a4'});
     $("#late" + student).css({backgroundColor: '#c2f4a4'});
     $("#note" + student).css({backgroundColor: '#c2f4a4'});
+    $("#grade_div_" + student).css({backgroundColor: '#c2f4a4'});
+    $("#ums_div_" + student).css({backgroundColor: '#c2f4a4'});
     setTimeout(function(){
       $("#comp" + student).animate({backgroundColor: 'transparent'}, 'slow');
       $("#late" + student).animate({backgroundColor: 'transparent'}, 'slow');  
       $("#note" + student).animate({backgroundColor: 'transparent'}, 'slow');  
+      $("#grade_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
+      $("#ums_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
     }, 1000);
 }
 
@@ -872,11 +951,12 @@ function updateMarkIfNew(id_string, new_mark) {
     }
 }
 
-function updateValues(id_string) {
+function updateValues(id_string, stu_id) {
     var info = id_string.split("-");
     var row = info[0];
     var col = info[1];
     updateTotal(row);
+    updateGrade(stu_id, row);
 }
 
 function updateTotal(row) {
@@ -897,6 +977,106 @@ function updateTotal(row) {
             $("#total" + row).text(totalMark + " / " + totalMarks);
             break;
         }
+    }
+}
+
+function getTotal(row) {
+    var totalMark = 0;
+    for(var i = 0; i < 1000; i++) {
+        var id_string = row + "-" + i;
+        var marks = getMarks(id_string);
+        if (marks) {
+            if (marks !== "") {
+                var markString = $("#" + id_string).val();
+                if (markString !== "") {
+                    totalMark += parseFloat(markString);
+                }
+            }
+        } else {
+            return totalMark;
+        }
+    }
+    return totalMark;
+}
+
+function updateGrade(stu_id, row) {
+    var grade_boundaries = getGradeBoundariesFromTable();
+    if (grade_boundaries.length > 0) {
+        var length = grade_boundaries.length;
+        var first_boundary = parseFloat(grade_boundaries[0]["boundary"]);
+        var last_boundary = parseFloat(grade_boundaries[length - 1]["boundary"]);
+        var value = parseFloat(getTotal(row));
+        var desc = first_boundary > last_boundary;
+        var grade_val = "";
+        for (var i = 0; i < length; i++) {
+            var boundary = grade_boundaries[i]["boundary"] === "" ? "" : parseFloat(grade_boundaries[i]["boundary"]);
+            var ums = grade_boundaries[i]["ums"] === "" ? "" : parseFloat(grade_boundaries[i]["ums"]);
+            if (desc) {
+                if (value >= boundary) {
+                    grade_val = grade_boundaries[i]["grade"];
+                    if (ums !== "") {
+                        var previous_boundary = i === 0 ? getTotalMarks() : parseFloat(grade_boundaries[i - 1]["boundary"]);
+                        var previous_ums = i === 0 ? 100 : parseFloat(grade_boundaries[i - 1]["ums"]);
+                        $("#ums_" + stu_id).val(calculateUMS(boundary, previous_boundary, ums, previous_ums, value));  
+                    }
+                    $("#grade_" + stu_id).val(grade_val);
+                    changeGrade(stu_id, grade_val);
+                    return;
+                }
+            } else {
+                if (value < boundary) {
+                    grade_val = i === 0 ? "-" : grade_boundaries[i - 1]["grade"];
+                    if (ums !== "") {
+                        var previous_boundary = i === 0 ? 0 : parseFloat(grade_boundaries[i - 1]["boundary"]);
+                        var previous_ums = i === 0 ? 0 : parseFloat(grade_boundaries[i - 1]["ums"]);
+                        $("#ums_" + stu_id).val(calculateUMS(previous_boundary, boundary, previous_ums, ums, value));
+                    }
+                    $("#grade_" + stu_id).val(grade_val);
+                    changeGrade(stu_id, grade_val);
+                    return;
+                }
+            }
+        }
+        if (desc) {
+            grade_val = "-";
+            if (ums !== "") {
+                $("#ums_" + stu_id).val(calculateUMS(0, boundary, 0, ums, value)); 
+            }      
+        } else {
+            grade_val = grade_boundaries[i - 1]["grade"];
+            var previous_boundary = parseFloat(grade_boundaries[i - 1]["boundary"]);
+            var previous_ums = parseFloat(grade_boundaries[i - 1]["ums"]);
+            if (ums !== "") {
+                $("#ums_" + stu_id).val(calculateUMS(previous_boundary, getTotalMarks(), previous_ums, 100, value)); 
+            }
+        }
+        $("#grade_" + stu_id).val(grade_val);
+        changeGrade(stu_id, grade_val);
+        return;
+    } 
+}
+
+function calculateUMS(lower_boundary, upper_boundary, lower_ums, upper_ums, value) {
+    var ums_width = Math.abs(upper_ums - lower_ums);
+    var grade_width = Math.abs(upper_boundary - lower_boundary);
+    if (ums_width === 0 || grade_width === 0) return "";
+    return parseInt(lower_ums + (value - lower_boundary) * (ums_width/grade_width));
+}
+
+function getTotalMarks() {
+    var worksheet = JSON.parse(sessionStorage.getItem("worksheet"));
+    var marks = 0;
+    for (var key in worksheet) {
+        marks += parseFloat(worksheet[key]["Marks"]);
+    }
+    return marks;
+}
+
+function updateAllResults() {
+    var students = JSON.parse(sessionStorage.getItem("students"));
+    for (var i = 0; i < students.length; i++) {
+        var id = students[i]["ID"];
+        updateGrade(id, i);
     }
 }
 
@@ -1130,7 +1310,9 @@ function saveChanges(){
         "Date Status": "",
         "Group Worksheet ID": gwid,
         "Notes": "",
-        "Student ID": student
+        "Student ID": student,
+        "Grade": "",
+        "UMS": ""
     };
     if (completed_worksheets[student]) {
         completed_worksheet = completed_worksheets[student];
@@ -1145,6 +1327,86 @@ function saveChanges(){
     
     //Set comp status
     updateStatusRow(student);
+}
+
+function changeGradeBoundary(type, value, number) {
+    switch(type) {
+        case "grade":
+            if(!validateGrade(value)){
+                $("#grade_boundary_grade_" + number).val($("#grade_boundary_grade_" + number).val().substring(0,10));
+                $("#grade_boundary_grade_" + number).focus();
+            }
+            break;
+        case "ums":
+        case "boundary":
+            if(!validateUMS(value)){
+                $("#grade_boundary_" + type + "_" + number).val("");
+                $("#grade_boundary_" + type + "_" + number).focus();
+            }
+            break;
+        default:
+            break;
+    }
+    changeGWValue();
+}
+
+function changeGrade(student, value){
+    if(validateGrade(value)){
+        saveGradeAndUMS(student);
+    } else {
+        $("#grade_" + student).val($("#grade_" + student).val().substring(0,10));
+        $("#grade_" + student).focus();
+    }
+}
+
+function changeUMS(student, value){
+    if(validateUMS(value)){
+        saveGradeAndUMS(student);
+    } else {
+        $("#ums_" + student).val("");
+        $("#ums_" + student).focus();
+    }
+}
+
+function validateGrade(value) {
+    if (value.length > 10) {
+        alert("The maximum length of a grade is a 10 characters.");
+        return false;
+    }
+    return true;
+}
+
+function validateUMS(value) {
+    if (isNaN(value) || value < 0) {
+        alert("Please enter a valid number.");
+        return false;
+    }
+    return true;
+}
+
+function saveGradeAndUMS(student){
+    var gwid = $("#gwid").val();
+    // Save to completed worksheet array
+    var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
+    var completed_worksheet = {
+        "Completion Status": "",
+        "Date Completed": "",
+        "Date Status": "",
+        "Group Worksheet ID": gwid,
+        "Notes": "",
+        "Student ID": student,
+        "Grade": "",
+        "UMS": ""
+    };
+    if (completed_worksheets[student]) {
+        completed_worksheet = completed_worksheets[student];
+    }
+    
+    completed_worksheet["Grade"] = $("#grade_" + student).val();
+    completed_worksheet["UMS"] = $("#ums_" + student).val();
+    completed_worksheets[student] = completed_worksheet;
+    updateSaveWorksheetsArray(completed_worksheet, student);
+    sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
 }
 
 function getDaysLateFromPopUp(value) {
@@ -1183,10 +1445,14 @@ function updateStatusRow(student) {
     var completionStatus = "Not Required";
     var daysLate = "";
     var note = "";
+    var grade = "";
+    var ums = "";
     if (completed_worksheet){
         completionStatus = completed_worksheet["Completion Status"];
         daysLate = completed_worksheet["Date Status"];
         note = completed_worksheet["Notes"];
+        grade = completed_worksheet["Grade"];
+        ums = completed_worksheet["UMS"];
     }
     
     var compClass = getCompClass(completionStatus);
@@ -1197,6 +1463,16 @@ function updateStatusRow(student) {
     setCompletionStatus(student, compClass, completionStatus);
     setLateStatus(student, lateClass, dateStatus, daysLate);
     setNoteStatus(student, noteClass);
+    setGrade(student, grade);
+    setUMS(student, ums);
+}
+
+function setGrade(student, grade) {
+    $("#grade_" + student).val(grade);
+}
+
+function setUMS(student, ums) {
+    $("#ums_" + student).val(ums);
 }
 
 function setCompletionStatus(student, comp_class, status){
