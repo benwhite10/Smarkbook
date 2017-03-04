@@ -683,7 +683,7 @@ function refreshSummaryResults(){
     $('#summaryReportUserAvgValue').css('color', getColour(userAvg, 60, 40, [220, 0, 0], [240, 160, 0], [0, 240, 0]));
     
     setWorksheetsSummary();
-    setWorksheetsTable(0, false);
+    setWorksheetsTable(0, true);
     showSummaryResults();
 }
 
