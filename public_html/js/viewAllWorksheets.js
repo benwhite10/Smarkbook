@@ -16,8 +16,8 @@ function getWorksheets(restore) {
     }
     var infoArray = {
         type: type,
-        orderby: "WName",
-        desc: "FALSE",
+        orderby: "WV.`Date Added`",
+        desc: "TRUE",
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
@@ -75,6 +75,7 @@ function parseWorksheets(ids, searchTerm) {
             }
         }
     }
+    $
     goToOriginalWorksheet();
 }
 
