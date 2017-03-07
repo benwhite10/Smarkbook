@@ -957,6 +957,17 @@ function updateMarkIfNew(id_string, new_mark) {
     }
 }
 
+function updateStatusIfNew(id_string, new_value) {
+    var element = document.getElementById(id_string);
+    var old_value = element.dataset.old_value;
+    if (old_value !== undefined && !(old_value === "null" && new_value === "") && new_value !== old_value) {
+        element.dataset.old_value = new_value;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function updateValues(id_string, stu_id) {
     var info = id_string.split("-");
     var row = info[0];
@@ -1358,7 +1369,9 @@ function changeGradeBoundary(type, value, number) {
 
 function changeGrade(student, value){
     if(validateGrade(value)){
-        saveGradeAndUMS(student);
+        if(updateStatusIfNew("grade_" + student, value)) {
+            saveGradeAndUMS(student);
+        }
     } else {
         $("#grade_" + student).val($("#grade_" + student).val().substring(0,10));
         $("#grade_" + student).focus();
@@ -1367,7 +1380,9 @@ function changeGrade(student, value){
 
 function changeUMS(student, value){
     if(validateUMS(value)){
-        saveGradeAndUMS(student);
+        if(updateStatusIfNew("ums_" + student, value)) {
+            saveGradeAndUMS(student);
+        }
     } else {
         $("#ums_" + student).val("");
         $("#ums_" + student).focus();
@@ -1474,10 +1489,14 @@ function updateStatusRow(student) {
 }
 
 function setGrade(student, grade) {
+    var element = document.getElementById("grade_" + student);
+    element.dataset.old_value = grade;
     $("#grade_" + student).val(grade);
 }
 
 function setUMS(student, ums) {
+    var element = document.getElementById("ums_" + student);
+    element.dataset.old_value = ums;
     $("#ums_" + student).val(ums);
 }
 
