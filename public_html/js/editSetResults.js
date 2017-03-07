@@ -234,6 +234,10 @@ function parseMainTable() {
     /* Students */
     var student_rows = "";
     var row = 0;
+    var tab_index = 1;
+    var student_count = students.length;
+    var worksheet_count = Object.keys(worksheet).length;
+    var grade_tab_index = (student_count * worksheet_count) + 1;
     var local_results_data_array = new Object();
     for (var key in students) {
         var student = students[key];
@@ -259,16 +263,18 @@ function parseMainTable() {
             }
             var id_string = row + "-" + col;
             local_results_data_array[id_string] = {cqid: cqid, stuid: stuid, sqid: sqid, marks:marks};
-            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")'></td>";
+            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' tabindex='" + tab_index + "' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")'></td>";
             col++;
+            tab_index++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
-        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
-        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
+        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
+        grade_tab_index++;
+        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "'id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
-        
+        grade_tab_index++;
         row++;
     }
     
