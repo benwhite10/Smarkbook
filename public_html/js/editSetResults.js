@@ -960,11 +960,11 @@ function updateMarkIfNew(id_string, new_mark) {
 function updateStatusIfNew(id_string, new_value) {
     var element = document.getElementById(id_string);
     var old_value = element.dataset.old_value;
-    if (old_value !== undefined && !(old_value === "null" && new_value === "") && new_value !== old_value) {
+    if (((old_value === "null" || old_value === undefined || old_value === "undefined")  && new_value === "") || new_value === old_value) {
+        return false;
+    } else {
         element.dataset.old_value = new_value;
         return true;
-    } else {
-        return false;
     }
 }
 
