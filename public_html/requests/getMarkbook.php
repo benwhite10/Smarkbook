@@ -54,7 +54,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 WHERE GW.`Primary Staff ID` = $staffid AND GW.`Group ID` = $setid AND WV.`Deleted` = 0  
                 AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1) AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1) AND SQ.`Deleted` = 0 
                 GROUP BY GW.`Group Worksheet ID`                
-                ORDER BY GW.`Date Due`, WV.`WName`;";
+                ORDER BY GW.`Date Due` DESC, WV.`WName`;";
 
     try{
         $students = db_select_exception($query1);
