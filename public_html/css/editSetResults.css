@@ -521,7 +521,9 @@ td.date_completion {
 
 .status_div, .late_div, .note_div {
     width: 100%;
-    height: 100%;
+    height: 32px;
+    line-height: 32px;
+    overflow: hidden;
     margin: 0px;
     padding: 0px;
     background: transparent;
@@ -565,6 +567,10 @@ td.date_completion:hover {
 .partial
 {
     color: #eb8f00;
+}
+
+.partial:hover, td.awaiting_save.partial {
+    font-size: 0.8rem;
 }
 
 #daysLateText.notLate

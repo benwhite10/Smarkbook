@@ -234,6 +234,10 @@ function parseMainTable() {
     /* Students */
     var student_rows = "";
     var row = 0;
+    var tab_index = 1;
+    var student_count = students.length;
+    var worksheet_count = Object.keys(worksheet).length;
+    var grade_tab_index = (student_count * worksheet_count) + 1;
     var local_results_data_array = new Object();
     for (var key in students) {
         var student = students[key];
@@ -259,16 +263,18 @@ function parseMainTable() {
             }
             var id_string = row + "-" + col;
             local_results_data_array[id_string] = {cqid: cqid, stuid: stuid, sqid: sqid, marks:marks};
-            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")'></td>";
+            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' tabindex='" + tab_index + "' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")'></td>";
             col++;
+            tab_index++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
-        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
-        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
+        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
+        grade_tab_index++;
+        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "'id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
-        
+        grade_tab_index++;
         row++;
     }
     
@@ -951,6 +957,17 @@ function updateMarkIfNew(id_string, new_mark) {
     }
 }
 
+function updateStatusIfNew(id_string, new_value) {
+    var element = document.getElementById(id_string);
+    var old_value = element.dataset.old_value;
+    if (((old_value === "null" || old_value === undefined || old_value === "undefined")  && new_value === "") || new_value === old_value) {
+        return false;
+    } else {
+        element.dataset.old_value = new_value;
+        return true;
+    }
+}
+
 function updateValues(id_string, stu_id) {
     var info = id_string.split("-");
     var row = info[0];
@@ -1352,7 +1369,9 @@ function changeGradeBoundary(type, value, number) {
 
 function changeGrade(student, value){
     if(validateGrade(value)){
-        saveGradeAndUMS(student);
+        if(updateStatusIfNew("grade_" + student, value)) {
+            saveGradeAndUMS(student);
+        }
     } else {
         $("#grade_" + student).val($("#grade_" + student).val().substring(0,10));
         $("#grade_" + student).focus();
@@ -1361,7 +1380,9 @@ function changeGrade(student, value){
 
 function changeUMS(student, value){
     if(validateUMS(value)){
-        saveGradeAndUMS(student);
+        if(updateStatusIfNew("ums_" + student, value)) {
+            saveGradeAndUMS(student);
+        }
     } else {
         $("#ums_" + student).val("");
         $("#ums_" + student).focus();
@@ -1468,10 +1489,14 @@ function updateStatusRow(student) {
 }
 
 function setGrade(student, grade) {
+    var element = document.getElementById("grade_" + student);
+    element.dataset.old_value = grade;
     $("#grade_" + student).val(grade);
 }
 
 function setUMS(student, ums) {
+    var element = document.getElementById("ums_" + student);
+    element.dataset.old_value = ums;
     $("#ums_" + student).val(ums);
 }
 
