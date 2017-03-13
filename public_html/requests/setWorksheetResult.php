@@ -55,7 +55,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        saveGroupWorksheet($worksheet_details, $grade_boundaries);
+        saveGroupWorksheet($worksheet_details, $grade_boundaries, $userid);
         break;
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
@@ -192,11 +192,11 @@ function addNewResult($change, $gwid) {
     }
 }
 
-function saveGroupWorksheet($worksheetDetails, $grade_boundaries) {
+function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid) {
     // Update the details for the group worksheet
     try{
         $gwid = $worksheetDetails["gwid"];
-        $staff1 = $worksheetDetails["staff1"];
+        $staff1 = (!$worksheetDetails["staff1"] || $worksheetDetails["staff1"] == "0") ? $userid : $worksheetDetails["staff1"];
         $staff2 = (!$worksheetDetails["staff2"] || $worksheetDetails["staff2"] == "0") ? "null" : $worksheetDetails["staff2"];
         $staff3 = (!$worksheetDetails["staff3"] || $worksheetDetails["staff3"] == "0") ? "null" : $worksheetDetails["staff3"];
         $datedue = $worksheetDetails["dateDueMain"];
