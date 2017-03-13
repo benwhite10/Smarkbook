@@ -127,14 +127,14 @@ function getWorksheetSummary($gwid, $stu_id) {
             JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID` 
             JOIN `TQUESTIONTAGS` QT ON SQ.`Stored Question ID`  = QT.`Stored Question ID` 
             JOIN `TTAGS` TT ON QT.`Tag ID` = TT.`Tag ID` 
-            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0 ORDER BY TT.`Name`";
+            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0 AND QT.`Deleted` = 0 ORDER BY TT.`Name`";
     
     $query_2 = "SELECT TID, Name, SUM(Mark) Mark, SUM(Marks) Marks, SUM(Mark)/SUM(Marks) Perc, COUNT(1) Count FROM (
             SELECT T.`Tag ID` TID, T.`Name` Name, CQ.`Mark` Mark, SQ.`Marks` Marks FROM `TCOMPLETEDQUESTIONS` CQ
             JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             JOIN `TQUESTIONTAGS` QT ON CQ.`Stored Question ID` = QT.`Stored Question ID`
             JOIN `TTAGS` T ON QT.`Tag ID` = T.`Tag ID`
-            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0
+            WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0 AND QT.`Deleted` = 0 
             GROUP BY T.`Tag ID`, CQ.`Stored Question ID`) AS A 
             GROUP BY TID";
     try {
