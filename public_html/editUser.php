@@ -9,9 +9,11 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
 if($resultArray[0]){ 
-    $loggedInUser = $_SESSION['user'];
-    $fullName = $loggedInUser->getFirstName() . ' ' . $loggedInUser->getSurname();
-    $loggedInUserId = $loggedInUser->getUserId();
+	$user = $_SESSION['user'];
+    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
+    $userid = $user->getUserId();
+    $userRole = $user->getRole();
+    $userval = base64_encode($user->getValidation());
     $info = Info::getInfo();
     $info_version = $info->getVersion();
 }else{
@@ -19,7 +21,6 @@ if($resultArray[0]){
     exit;
 }
 
-$userid = filter_input(INPUT_GET,'userid',FILTER_SANITIZE_STRING);
 $query = "SELECT `Role` FROM TUSERS WHERE `User ID` = $userid";
 try{
     $role = db_select_single_exception($query, 'Role');
@@ -77,7 +78,7 @@ if(isset($_SESSION['message'])){
                     <a href="portalhome.php"><?php echo $fullName ?> &#x25BE</a>
                     <ul class="dropdown topdrop">
                         <li><a href="portalhome.php">Home</a></li>
-                        <li><a <?php echo "href='editUser.php?userid=$loggedInUserId'"; ?>>My Account</a></li>
+                        <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
                         <li><a href="includes/process_logout.php">Log Out</a></li>
                     </ul>
                 </li>
