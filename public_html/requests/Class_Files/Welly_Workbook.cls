@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{Welly_Workbook}
-\LoadClass[12pt,a4paper]{exam}
+\ProvidesClass{Class_Files/Welly_Workbook}
+\LoadClass[12pt,a4paper]{Class_Files/exam}
 
 %Class Version
 \newcommand{\classvers}{Class Version 1.0.1}
@@ -9,13 +9,13 @@
 \RequirePackage{graphicx} %Allows for the wellington logo
 \graphicspath{{Class_Files/images/}} %Lets the computer find the logo
 \RequirePackage[T1]{fontenc} %the font                
-\RequirePackage[oldstyle]{libertine} %more about the font         
-\RequirePackage[libertine]{newtxmath} %Even more about the font         
-%\RequirePackage{tikz} %this is for diagrams                       
-\RequirePackage[subpreambles=true]{standalone} %to be able to import other files into this document
-\RequirePackage{import} %to allow for the preprepared preamble files to be imported    
-\RequirePackage{hieroglf} 
-\RequirePackage{pgfplots}
+\RequirePackage[oldstyle]{Class_Files/packages/libertine} %more about the font         
+\RequirePackage[libertine]{Class_Files/packages/newtxmath} %Even more about the font         
+\RequirePackage{tikz} %this is for diagrams                       
+\RequirePackage[subpreambles=true]{Class_Files/packages/standalone} %to be able to import other files into this document
+\RequirePackage{Class_Files/packages/import} %to allow for the preprepared preamble files to be imported    
+%\RequirePackage{hieroglf} 
+%\RequirePackage{Class_Files/packages/pgfplots}
 
 
 \RequirePackage{pgf,tikz} %This is for diagrams
@@ -27,16 +27,16 @@
 
 \RequirePackage{mathrsfs} %Allows various mathematical symbols to be used
 \RequirePackage{amsmath} %Allows various mathematical symbols to be used
-\RequirePackage{cancel} %Allows you to print crossed out letters (to show cancelling in working)
+\RequirePackage{Class_Files/packages/cancel} %Allows you to print crossed out letters (to show cancelling in working)
 \RequirePackage{gensymb}  %Allows various mathematical symbols to be used
 \RequirePackage{mathtools} %Allows for varoius other mathematical symbols to be used
 \RequirePackage[hidelinks]{hyperref}  %All the hyperlinked cross references in the document  
 \RequirePackage{color} %Allows colours to be used throughout the document
 \RequirePackage{tabularx} %Allows formatting of tables
 \RequirePackage{multicol} %Allows 
-\RequirePackage{tabstackengine} %Allows for \alignshortunderstack environment used to align maths
-\RequirePackage{bigints} %Allows for bigger integrals  - NRC's favourite 
-\RequirePackage{mathdots} %Allows for various dots in maths mode
+\RequirePackage{Class_Files/packages/tabstackengine} %Allows for \alignshortunderstack environment used to align maths
+\RequirePackage{Class_Files/packages/bigints} %Allows for bigger integrals  - NRC's favourite 
+\RequirePackage{Class_Files/packages/mathdots} %Allows for various dots in maths mode
 \RequirePackage{hhline} %Allows a double line when formatting a table 
 \RequirePackage{ifthen} %Provides commands used for conditional commands
 \RequirePackage{xparse} %enables NewDocumentCommand, needed for advanced glossary commands.

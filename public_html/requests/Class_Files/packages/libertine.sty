@@ -272,8 +272,8 @@
 \iflibertine@otf
   \RequirePackage{fontspec}
 \else
-  \RequirePackage{mweights}
-  \RequirePackage{fontenc,fontaxes}
+  \RequirePackage{Class_Files/packages/mweights}
+  \RequirePackage{fontenc}
 \fi
 
 % Set main and/or sans and mono fonts:
@@ -585,7 +585,7 @@
       \ifx\lib@temp\lib@ini \@namedef{#1@#2}{{\libertineInitial\char#3\relax}}\else%
       \fi}
   %
-  \input{LinLibertine_I}
+  %\input{LinLibertine_I}
   %
   \DeclareRobustCommand*\libertineInitialGlyph[1]{\@nameuse{LinLibertine_I@#1}}
 
