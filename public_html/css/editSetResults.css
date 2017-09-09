@@ -784,13 +784,17 @@ input[type="text"].grade_input.awaiting_save{
 
 .select_input_title, .select_input_check_div {
     height: 100%;
-    width: 75%;
     margin: 0;
     padding: 0;
     display: inline-block;
     float: left;
 }
 
+.select_input_title {
+    padding-left: 10px;
+    width: calc(75% - 10px);
+    
+}
 .select_input_check_div {
     width: 25%;
     text-align: center;
@@ -812,4 +816,9 @@ input[type="text"].grade_input.awaiting_save{
     line-height: 25px;
     margin: 0;
     padding: 0;
+    user-select: none;
+}
+
+.select_input_title > h1.short_name {
+    line-height: 50px;
 }

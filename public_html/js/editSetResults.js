@@ -4,6 +4,7 @@ $(document).ready(function(){
     clearSaveChangesArray();
     clearSaveWorksheetsArray();
     clearGWChanges();
+    setUpInputs();
     requestWorksheet(gwid);
     requestAllStaff();
     log_event("EDIT_SET_RESULTS", $('#userid').val(), gwid);
@@ -59,13 +60,91 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("boundaries", safelyGetObject(json["boundaries"]));
         sessionStorage.setItem("completedWorksheets", safelyGetObject(json["completedWorksheets"]));
         sessionStorage.setItem("students", safelyGetObject(json["students"]));
+        sessionStorage.setItem("input_types", safelyGetObject(json["worksheetInputs"]));
         setScreenSize();
         setUpWorksheetInfo();
         parseMainTable();
         getQuestionAverages();
+        updateInputTypes();
     } else {
         console.log("There was an error getting the worksheet: " + json["message"]);
     }
+}
+
+function setUpInputs() {    
+    var infoArray = {
+        type: "GETINPUTTYPES",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/inputTypes.php",
+        dataType: "json",
+        success: function(json){
+            inputsSuccess(json);
+        }
+    });
+}
+
+function updateInputTypes() {
+    var input_types = JSON.parse(sessionStorage.getItem("input_types"));
+    for (var i = 0; i < input_types.length; i++) {
+        var row = input_types[i];
+        if (row["ShowInput"] === "1") {
+            var input_id = row["Input"];
+            document.getElementById("select_input_checkbox_" + input_id).checked = true;
+        }
+    }
+}
+
+function inputsSuccess(json) {
+    if (json["success"]) {
+        var results = JSON.parse(safelyGetObject(json["result"]));
+        var input_types = results["input_types"];
+        var div_text = "";
+        for (var i = 0; i < input_types.length; i++) {
+            var name = input_types[i]["Name"];
+            var short_name = input_types[i]["ShortName"];
+            var full_name = name + " (" + short_name + ")";
+            var id = input_types[i]["ID"];
+            var class_name = full_name.length < 34 ? "short_name" : "long_name";
+            div_text += "<div class='select_input'>";
+            div_text += "<div class='select_input_title' onclick='click_input(" + id + ")'><h1 class='" + class_name + "'>" + full_name + "</h1></div>";
+            div_text += "<div class='select_input_check_div' onclick='click_input(" + id + ")'><input type='checkbox' class='select_input_check' id='select_input_checkbox_" + id + "' onclick='click_checkbox(" + id + ")'/></div>";
+            div_text += "</div>";
+            $("#select_inputs_input").html(div_text);
+        }
+    } else {
+        console.log(json["message"]);
+    }
+}
+
+function updateInputs(input, show_input) {
+    var gwid = getParameterByName("gwid");
+    console.log("I ran an update on " + input);
+    var infoArray = {
+        type: "UPDATEGWINPUTs",
+        userid: $('#userid').val(),
+        userval: $('#userval').val(),
+        gwid: gwid,
+        input: input,
+        show_input: show_input
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/inputTypes.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                console.log("Updated");
+            } else {
+                console.log(json["message"]);
+            }
+        }
+    });
 }
 
 function setAutoSave(interval) {
@@ -1646,5 +1725,6 @@ function click_checkbox(id) {
 }
 
 function change_input(id) {
-    console.log(document.getElementById("select_input_checkbox_" + id).checked);
+    var show_input = document.getElementById("select_input_checkbox_" + id).checked ? 1 : 0;
+    updateInputs(id, show_input);
 }

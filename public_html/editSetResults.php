@@ -246,12 +246,7 @@ if(isset($_SESSION['message'])){
                             </tr>
                             <tr class="form">
                                 <td class="form inputs" colspan="2">
-                                    <div class="select_inputs_input" id="select_inputs_input">
-                                        <div class="select_input">
-                                            <div class="select_input_title" onclick="click_input(1)"><h1>Intellectual curiosity and some test text</h1></div>
-                                            <div class="select_input_check_div" onclick="click_input(1)"><input type="checkbox" class="select_input_check" id="select_input_checkbox_1" onclick="click_checkbox(1)"/></div>
-                                        </div>
-                                    </div>                                    
+                                    <div class="select_inputs_input" id="select_inputs_input"></div>                                    
                                 </td>
                             </tr>
                         </tbody>

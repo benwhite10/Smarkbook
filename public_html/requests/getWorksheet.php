@@ -85,6 +85,10 @@ function getWorksheetForGWID($gwid){
                 AND UG.`Archived` <> 1
                 ORDER BY U.`Surname`;";
     
+    // Worksheet inputs
+    $query7 = "SELECT * FROM `TGROUPWORKSHEETINPUT` 
+                WHERE `GWID` = $gwid;";
+    
     try{
         $worksheetDetails = optimiseArray(db_select_exception($query1), "SQID");
         $results = db_select_exception($query2);
@@ -93,6 +97,7 @@ function getWorksheetForGWID($gwid){
         $completedWorksheets = optimiseArray(db_select_exception($query4), "Student ID");
         $notes = optimiseArray(db_select_exception($query5), "Student ID");
         $students = db_select_exception($query6);
+        $worksheetInputs = db_select_exception($query7);
         $finalResults = groupResultsByStudent($results, $students);
     } catch (Exception $ex) {
         errorLog("Something went wrong loading the data for the worksheet: " . $ex->getMessage());
@@ -111,7 +116,8 @@ function getWorksheetForGWID($gwid){
         "boundaries" => $boundaries,
         "completedWorksheets" => $completedWorksheets,
         "notes" => $notes,
-        "students" => $students);
+        "students" => $students,
+        "worksheetInputs" => $worksheetInputs);
     
     echo json_encode($test);
 }
