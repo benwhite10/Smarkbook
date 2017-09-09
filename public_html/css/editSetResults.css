@@ -762,3 +762,54 @@ input[type="text"].grade_input{
 input[type="text"].grade_input.awaiting_save{ 
     font-weight: bold;
 }
+
+.select_inputs_input {
+    width: 100%; 
+    height: 150px; 
+    background: transparent;
+}
+
+.select_input {
+    width:33.33%; 
+    height: 50px; 
+    display: inline-block; 
+    float: left; 
+    margin: 0; 
+    padding: 0;
+}
+
+.select_input:hover {
+    background: rgba(0,0,0,0.1);
+}
+
+.select_input_title, .select_input_check_div {
+    height: 100%;
+    width: 75%;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    float: left;
+}
+
+.select_input_check_div {
+    width: 25%;
+    text-align: center;
+}
+
+.select_input_check {
+    height: 100%!important;
+    margin: auto!important;
+    text-align: center!important;
+    padding: 0;
+    cursor: pointer;
+}
+
+.select_input_title > h1 {
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: #323232;
+    text-align: center;
+    line-height: 25px;
+    margin: 0;
+    padding: 0;
+}

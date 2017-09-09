@@ -1633,3 +1633,18 @@ $(function() {
         }
     });
 });
+
+function click_input(id) {
+    console.log("Div");
+    document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
+    change_input(id);
+}
+
+function click_checkbox(id) {
+    document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
+    console.log("Checkbox");
+}
+
+function change_input(id) {
+    console.log(document.getElementById("select_input_checkbox_" + id).checked);
+}
