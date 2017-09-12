@@ -58,9 +58,11 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("results", safelyGetObject(json["results"]));
         sessionStorage.setItem("details", safelyGetObject(json["details"]));
         sessionStorage.setItem("boundaries", safelyGetObject(json["boundaries"]));
-        sessionStorage.setItem("completedWorksheets", safelyGetObject(json["completedWorksheets"]));
         sessionStorage.setItem("students", safelyGetObject(json["students"]));
         sessionStorage.setItem("input_types", safelyGetObject(json["worksheetInputs"]));
+        var completed_worksheets = combineInputs(JSON.parse(safelyGetObject(json["completedWorksheets"])), JSON.parse(safelyGetObject(json["completedWorksheetsInputs"])));
+        sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
+        
         setScreenSize();
         setUpWorksheetInfo();
         parseMainTable();
@@ -69,6 +71,20 @@ function requestWorksheetSuccess(json) {
     } else {
         console.log("There was an error getting the worksheet: " + json["message"]);
     }
+}
+
+function combineInputs(completed_worksheets, inputs) {
+    for (var stu_id in completed_worksheets) {
+        var cwid = parseInt(completed_worksheets[stu_id]["Completed Worksheet ID"]);
+        var input_array = [];
+        for (var j = 0; j < inputs.length; j++) {
+            if (parseInt(inputs[j]["CompletedWorksheet"]) === cwid) {
+                input_array.push(inputs[j]);
+            }
+        }
+        completed_worksheets[stu_id]["Inputs"] = input_array;
+    }
+    return completed_worksheets;
 }
 
 function setUpInputs() {    
@@ -1439,6 +1455,7 @@ function saveChanges(){
         "Grade": "",
         "UMS": ""
     };
+    //TODO: Add status
     if (completed_worksheets[student]) {
         completed_worksheet = completed_worksheets[student];
     }
@@ -1542,8 +1559,8 @@ function saveGradeAndUMS(student){
     for (var i = 0; i < inputs.length; i++) {
         var input = inputs[i];
         var row = {
-            "input_id": input["ID"],
-            "value": $("#" + input["ShortName"] + "_" + student).val()
+            "Input": input["ID"],
+            "Value": $("#" + input["ShortName"] + "_" + student).val()
         };
         inputs_array.push(row);
     }
@@ -1593,12 +1610,14 @@ function updateStatusRow(student) {
     var note = "";
     var grade = "";
     var ums = "";
+    var inputs = [];
     if (completed_worksheet){
         completionStatus = completed_worksheet["Completion Status"];
         daysLate = completed_worksheet["Date Status"];
         note = completed_worksheet["Notes"];
         grade = completed_worksheet["Grade"];
         ums = completed_worksheet["UMS"];
+        inputs = completed_worksheet["Inputs"];
     }
     
     var compClass = getCompClass(completionStatus);
@@ -1611,6 +1630,7 @@ function updateStatusRow(student) {
     setNoteStatus(student, noteClass);
     setGrade(student, grade);
     setUMS(student, ums);
+    setInputs(student, inputs);
 }
 
 function setGrade(student, grade) {
@@ -1623,6 +1643,16 @@ function setUMS(student, ums) {
     var element = document.getElementById("ums_" + student);
     element.dataset.old_value = ums;
     $("#ums_" + student).val(ums);
+}
+
+function setInputs(student, inputs) {
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        var input_id = input["Input"];
+        var input_info = getInputInfo(input_id);
+        var short_name = input_info["ShortName"];
+        $("#" + short_name + "_" + student).val(input["Value"]);
+    }
 }
 
 function setCompletionStatus(student, comp_class, status){

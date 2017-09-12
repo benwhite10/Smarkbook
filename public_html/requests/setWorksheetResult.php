@@ -158,7 +158,7 @@ function addNewWorksheet($worksheet) {
         }
     }
     foreach ($inputs as $input) {
-        updateInput($input["input_id"], $cwid, $input["value"]);
+        updateInput($input["Input"], $cwid, $input["Value"]);
     }
     return $worksheet;
 }
