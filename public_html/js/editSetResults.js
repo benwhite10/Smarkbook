@@ -933,6 +933,11 @@ function setAwatingSaveClassWorksheets(student) {
     $("#late" + student).addClass("awaiting_save");
     $("#grade_" + student).addClass("awaiting_save");
     $("#ums_" + student).addClass("awaiting_save");
+    var inputs = JSON.parse(sessionStorage.getItem("inputs"));
+    for (var i = 0; i < inputs.length; i++) {
+        var short_name = inputs[i]["ShortName"];
+        $("#" + short_name + "_" + student).addClass("awaiting_save");
+    }
 }
 
 function setStatusSaved(student) {
@@ -940,17 +945,32 @@ function setStatusSaved(student) {
     $("#late" + student).removeClass("awaiting_save");
     $("#grade_" + student).removeClass("awaiting_save");
     $("#ums_" + student).removeClass("awaiting_save");
+    var inputs = JSON.parse(sessionStorage.getItem("inputs"));
+    for (var i = 0; i < inputs.length; i++) {
+        var short_name = inputs[i]["ShortName"];
+        $("#" + short_name + "_" + student).removeClass("awaiting_save");
+    }
     $("#comp" + student).css({backgroundColor: '#c2f4a4'});
     $("#late" + student).css({backgroundColor: '#c2f4a4'});
     $("#note" + student).css({backgroundColor: '#c2f4a4'});
     $("#grade_div_" + student).css({backgroundColor: '#c2f4a4'});
     $("#ums_div_" + student).css({backgroundColor: '#c2f4a4'});
+    var inputs = JSON.parse(sessionStorage.getItem("inputs"));
+    for (var i = 0; i < inputs.length; i++) {
+        var short_name = inputs[i]["ShortName"];
+        $("#" + short_name + "_div_" + student).css({backgroundColor: '#c2f4a4'});
+    }
     setTimeout(function(){
-      $("#comp" + student).animate({backgroundColor: 'transparent'}, 'slow');
-      $("#late" + student).animate({backgroundColor: 'transparent'}, 'slow');  
-      $("#note" + student).animate({backgroundColor: 'transparent'}, 'slow');  
-      $("#grade_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
-      $("#ums_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
+        $("#comp" + student).animate({backgroundColor: 'transparent'}, 'slow');
+        $("#late" + student).animate({backgroundColor: 'transparent'}, 'slow');  
+        $("#note" + student).animate({backgroundColor: 'transparent'}, 'slow');  
+        $("#grade_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
+        $("#ums_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
+        var inputs = JSON.parse(sessionStorage.getItem("inputs"));
+        for (var i = 0; i < inputs.length; i++) {
+            var short_name = inputs[i]["ShortName"];
+            $("#" + short_name + "_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
+        }
     }, 1000);
 }
 
