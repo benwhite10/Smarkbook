@@ -374,7 +374,8 @@ function parseMainTable() {
         grade_tab_index++;
         for (var i = 0; i < inputs.length; i++) {
             var short_name = inputs[i]["ShortName"];
-            student_rows += "<td class='results total_mark " + short_name + "_col hide_col' id='" + short_name + "_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='" + short_name + "_" + stuid + "' /></td>";
+            var input_id = inputs[i]["ID"];
+            student_rows += "<td class='results total_mark " + short_name + "_col hide_col' id='" + short_name + "_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='" + short_name + "_" + stuid + "' onBlur='changeValue(" + stuid + ", " + input_id + ", this.value)' /></td>";
             grade_tab_index++;
         }
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
@@ -910,6 +911,7 @@ function setAwatingSaveClass(id_string) {
     $("#" + id_string).addClass("awaiting_save");
 }
 
+//TODO Update for new values
 function setAwatingSaveClassWorksheets(student) {
     $("#comp" + student).addClass("awaiting_save");
     $("#late" + student).addClass("awaiting_save");
@@ -1495,6 +1497,11 @@ function changeUMS(student, value){
     }
 }
 
+function changeValue(student, input_id, value) {
+    // Add update status if new
+    saveGradeAndUMS(student);
+}
+
 function validateGrade(value) {
     if (value.length > 10) {
         alert("The maximum length of a grade is a 10 characters.");
@@ -1513,6 +1520,7 @@ function validateUMS(value) {
 
 function saveGradeAndUMS(student){
     var gwid = $("#gwid").val();
+    var inputs = JSON.parse(sessionStorage.getItem("inputs"));
     // Save to completed worksheet array
     var completed_worksheets = JSON.parse(sessionStorage.getItem("completedWorksheets"));
     var completed_worksheet = {
@@ -1523,12 +1531,23 @@ function saveGradeAndUMS(student){
         "Notes": "",
         "Student ID": student,
         "Grade": "",
-        "UMS": ""
+        "UMS": "",
+        "Inputs": ""
     };
+    
     if (completed_worksheets[student]) {
         completed_worksheet = completed_worksheets[student];
     }
-    
+    var inputs_array = [];
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        var row = {
+            "input_id": input["ID"],
+            "value": $("#" + input["ShortName"] + "_" + student).val()
+        };
+        inputs_array.push(row);
+    }
+    completed_worksheet["Inputs"] = inputs_array;
     completed_worksheet["Grade"] = $("#grade_" + student).val();
     completed_worksheet["UMS"] = $("#ums_" + student).val();
     completed_worksheets[student] = completed_worksheet;
