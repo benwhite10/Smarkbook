@@ -94,7 +94,18 @@ function updateInputTypes() {
         var row = input_types[i];
         if (row["ShowInput"] === "1") {
             var input_id = row["Input"];
+            var input_info = getInputInfo(input_id);
             document.getElementById("select_input_checkbox_" + input_id).checked = true;
+            $("." + input_info["ShortName"] + "_col").removeClass('hide_col');
+        }
+    }
+}
+
+function getInputInfo(id) {
+    var inputs = JSON.parse(sessionStorage.getItem("inputs"));
+    for (var i = 0; i < inputs.length; i++) {
+        if (parseInt(inputs[i]["ID"]) === parseInt(id)) {
+            return inputs[i];
         }
     }
 }
@@ -103,6 +114,7 @@ function inputsSuccess(json) {
     if (json["success"]) {
         var results = JSON.parse(safelyGetObject(json["result"]));
         var input_types = results["input_types"];
+        sessionStorage.setItem("inputs", JSON.stringify(input_types));
         var div_text = "";
         for (var i = 0; i < input_types.length; i++) {
             var name = input_types[i]["Name"];
@@ -263,6 +275,7 @@ function parseMainTable() {
     var worksheet = JSON.parse(sessionStorage.getItem("worksheet"));
     var results = JSON.parse(sessionStorage.getItem("results"));
     var students = JSON.parse(sessionStorage.getItem("students"));
+    var inputs = JSON.parse(sessionStorage.getItem("inputs"));
     
     /*First header*/
     var row_head_1 = "<th class='results results_header names_col'></th>";
@@ -293,6 +306,14 @@ function parseMainTable() {
     row_head_2 += "<th class='results results_header'>UMS</th>";
     row_head_1 += "<th class='results results_header ums_col'></th>";
     count++;
+    
+    for (var i = 0; i < inputs.length; i++) {
+        var short_name = inputs[i]["ShortName"];
+        var full_name = inputs[i]["Name"];
+        row_head_2 += "<th class='results results_header " + short_name + "_col hide_col' style='min-width: 50px;' title='" + full_name + "'>" + short_name + "</th>";
+        row_head_1 += "<th class='results results_header " + short_name + "_col hide_col'></th>";
+        count++;
+    }
     
     row_head_2 += "<th class='results results_header' style='min-width: 140px;'>Status</th>";
     row_head_1 += "<th class='results results_header status_col'></th>";
@@ -350,10 +371,16 @@ function parseMainTable() {
         student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
         grade_tab_index++;
         student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "'id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
+        grade_tab_index++;
+        for (var i = 0; i < inputs.length; i++) {
+            var short_name = inputs[i]["ShortName"];
+            student_rows += "<td class='results total_mark " + short_name + "_col hide_col' id='" + short_name + "_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='" + short_name + "_" + stuid + "' /></td>";
+            grade_tab_index++;
+        }
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
-        grade_tab_index++;
+        //grade_tab_index++;
         row++;
     }
     
@@ -1726,5 +1753,11 @@ function click_checkbox(id) {
 
 function change_input(id) {
     var show_input = document.getElementById("select_input_checkbox_" + id).checked ? 1 : 0;
+    var input_info = getInputInfo(id);
+    if(show_input === 1) {
+        $("." + input_info["ShortName"] + "_col").removeClass('hide_col');
+    } else {
+        $("." + input_info["ShortName"] + "_col").addClass('hide_col');
+    }
     updateInputs(id, show_input);
 }

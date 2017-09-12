@@ -788,6 +788,7 @@ input[type="text"].grade_input.awaiting_save{
     padding: 0;
     display: inline-block;
     float: left;
+    overflow: hidden;
 }
 
 .select_input_title {
@@ -821,4 +822,8 @@ input[type="text"].grade_input.awaiting_save{
 
 .select_input_title > h1.short_name {
     line-height: 50px;
+}
+
+.hide_col {
+    display: none;
 }
