@@ -223,6 +223,16 @@ if(isset($_SESSION['message'])){
                             </tr>
                             <tr class="form">
                                 <td class="form title">
+                                    <h1>Inputs</h1>
+                                </td>
+                            </tr>
+                            <tr class="form">
+                                <td class="form inputs" colspan="2">
+                                    <div class="select_inputs_input" id="select_inputs_input"></div>                                    
+                                </td>
+                            </tr>
+                            <tr class="form grade_boundaries_row">
+                                <td class="form title">
                                     <h1>Grade Boundaries</h1>
                                 </td>
                                 <td class="form buttons">
@@ -230,7 +240,7 @@ if(isset($_SESSION['message'])){
                                     <div class="grade_button" id="update_all_button" onclick="updateAllResults()">Update All</div>
                                 </td>
                             </tr>
-                            <tr class="form">
+                            <tr class="form grade_boundaries_row">
                                 <td class="form boundaries" colspan="2">
                                     <div class="grade_boundaries_input" id="grade_boundaries_table">
                                         <table class="grade_boundaries">

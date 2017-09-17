@@ -107,6 +107,7 @@ function addNewWorksheet($worksheet) {
     $date_status = $worksheet["Date Status"] == "" ? "NULL" : $worksheet["Date Status"];
     $grade = db_escape_string($worksheet["Grade"]);
     $ums = $worksheet["UMS"] ? intval($worksheet["UMS"]) : "NULL";
+    $inputs = $worksheet["Inputs"];
     
     $update = FALSE;
     // Try and get an ID
@@ -146,7 +147,8 @@ function addNewWorksheet($worksheet) {
         $query1 = "INSERT INTO `TCOMPLETEDWORKSHEETS`(`Group Worksheet ID`, `Student ID`, `Notes`, `Completion Status`, `Date Status`, `Grade`, `UMS`) "
                 . "VALUES ($gwid,$stu_id,'$notes','$comp_status',$date_status, '$grade', $ums)";
         try {
-            db_insert_query_exception($query1);
+            $result = db_insert_query_exception($query1);
+            $cwid = $result[1];
             db_commit_transaction();
             $worksheet["success"] = TRUE;
         } catch (Exception $ex) {
@@ -155,7 +157,32 @@ function addNewWorksheet($worksheet) {
             $worksheet["message"] = $ex->getMessage();
         }
     }
+    foreach ($inputs as $input) {
+        updateInput($input["Input"], $cwid, $input["Value"]);
+    }
     return $worksheet;
+}
+
+function updateInput($input_id, $cwid, $value) {
+    $query = "SELECT * FROM `TCOMPLETEDWORKSHEETINPUT` WHERE `CompletedWorksheet` = $cwid AND `Input` = $input_id LIMIT 1";
+    try {
+        $results = db_select_exception($query);
+        if (count($results) > 0) {
+            $id = $results[0]["ID"];
+            if ($value !== "") {
+                $update_query = "UPDATE `TCOMPLETEDWORKSHEETINPUT` SET `Value`='$value' WHERE `ID` = $id;";
+            } else {
+                $update_query = "DELETE FROM `TCOMPLETEDWORKSHEETINPUT` WHERE `ID` = $id;";
+            }
+            db_query_exception($update_query);
+        } else if ($value !== "") {
+            $insert_query = "INSERT INTO `TCOMPLETEDWORKSHEETINPUT`(`CompletedWorksheet`, `Input`, `Value`) VALUES ($cwid, $input_id, '$value');";
+            db_query_exception($insert_query);
+        }
+    } catch (Exception $ex) {
+        return;
+    }
+    return;
 }
 
 function updateResult($change) {

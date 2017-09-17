@@ -72,6 +72,9 @@ function getWorksheetForGWID($gwid){
     
     // Notes for each student, late reason etc
     $query4 = "SELECT * FROM TCOMPLETEDWORKSHEETS WHERE `Group Worksheet ID` = $gwid;";
+    $query4a = "SELECT CWI.* FROM TCOMPLETEDWORKSHEETS CW "
+            . "JOIN TCOMPLETEDWORKSHEETINPUT CWI ON CW.`Completed Worksheet ID` = CWI.`CompletedWorksheet` "
+            . "WHERE `Group Worksheet ID` = $gwid;";
     
     // Additional Notes
     $query5 = "SELECT * FROM TNOTES WHERE `Group Worksheet ID` = $gwid;";
@@ -85,14 +88,20 @@ function getWorksheetForGWID($gwid){
                 AND UG.`Archived` <> 1
                 ORDER BY U.`Surname`;";
     
+    // Worksheet inputs
+    $query7 = "SELECT * FROM `TGROUPWORKSHEETINPUT` 
+                WHERE `GWID` = $gwid;";
+    
     try{
         $worksheetDetails = optimiseArray(db_select_exception($query1), "SQID");
         $results = db_select_exception($query2);
         $details = db_select_exception($query3);
         $boundaries = db_select_exception($query3a);
         $completedWorksheets = optimiseArray(db_select_exception($query4), "Student ID");
+        $completedWorksheetsInputs = db_select_exception($query4a);
         $notes = optimiseArray(db_select_exception($query5), "Student ID");
         $students = db_select_exception($query6);
+        $worksheetInputs = db_select_exception($query7);
         $finalResults = groupResultsByStudent($results, $students);
     } catch (Exception $ex) {
         errorLog("Something went wrong loading the data for the worksheet: " . $ex->getMessage());
@@ -110,8 +119,10 @@ function getWorksheetForGWID($gwid){
         "details" => $details[0],
         "boundaries" => $boundaries,
         "completedWorksheets" => $completedWorksheets,
+        "completedWorksheetsInputs" => $completedWorksheetsInputs,
         "notes" => $notes,
-        "students" => $students);
+        "students" => $students,
+        "worksheetInputs" => $worksheetInputs);
     
     echo json_encode($test);
 }
