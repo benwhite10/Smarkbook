@@ -115,9 +115,31 @@ function updateInputTypes() {
             $("." + input_info["ShortName"] + "_col").removeClass('hide_col');
         }
     }
+    // Check UMS
+    if (!document.getElementById("select_input_checkbox_0").checked) {
+        $(".boundaries_ums_row").addClass("hide_col");
+    }
+    // Check Grade
+    if (!document.getElementById("select_input_checkbox_-1").checked) {
+        $(".grade_boundaries_row").addClass("hide_col");
+    }
 }
 
 function getInputInfo(id) {
+    if (parseInt(id) === 0) {
+        return {
+            ShortName: "UMS",
+            FullName: "UMS",
+            ID: 0
+        };
+    }
+    if (parseInt(id) === -1) {
+        return {
+            ShortName: "Grade",
+            FullName: "Grade",
+            ID: -1
+        };
+    }
     var inputs = JSON.parse(sessionStorage.getItem("inputs"));
     for (var i = 0; i < inputs.length; i++) {
         if (parseInt(inputs[i]["ID"]) === parseInt(id)) {
@@ -132,6 +154,14 @@ function inputsSuccess(json) {
         var input_types = results["input_types"];
         sessionStorage.setItem("inputs", JSON.stringify(input_types));
         var div_text = "";
+        div_text += "<div class='select_input'>";
+        div_text += "<div class='select_input_title' onclick='click_input(-1)'><h1 class='short_name'>Grade</h1></div>";
+        div_text += "<div class='select_input_check_div' onclick='click_input(-1)'><input type='checkbox' class='select_input_check' id='select_input_checkbox_-1' onclick='click_checkbox(-1)'/></div>";
+        div_text += "</div>";
+        div_text += "<div class='select_input'>";
+        div_text += "<div class='select_input_title' onclick='click_input(0)'><h1 class='short_name'>UMS</h1></div>";
+        div_text += "<div class='select_input_check_div' onclick='click_input(0)'><input type='checkbox' class='select_input_check' id='select_input_checkbox_0' onclick='click_checkbox(0)'/></div>";
+        div_text += "</div>";
         for (var i = 0; i < input_types.length; i++) {
             var name = input_types[i]["Name"];
             var short_name = input_types[i]["ShortName"];
@@ -142,8 +172,8 @@ function inputsSuccess(json) {
             div_text += "<div class='select_input_title' onclick='click_input(" + id + ")'><h1 class='" + class_name + "'>" + full_name + "</h1></div>";
             div_text += "<div class='select_input_check_div' onclick='click_input(" + id + ")'><input type='checkbox' class='select_input_check' id='select_input_checkbox_" + id + "' onclick='click_checkbox(" + id + ")'/></div>";
             div_text += "</div>";
-            $("#select_inputs_input").html(div_text);
         }
+        $("#select_inputs_input").html(div_text);
     } else {
         console.log(json["message"]);
     }
@@ -267,7 +297,7 @@ function parseGradeBoundaries() {
     var html_string = "<table class='grade_boundaries'><tbody class='grade_boundaries'>";
     var grade_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>Grade</td>";
     var boundary_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>Boundary</td>";
-    var ums_string = "<tr class='grade_boundaries'><td class='grade_boundaries_row_title'>UMS</td>";
+    var ums_string = "<tr class='grade_boundaries boundaries_ums_row'><td class='grade_boundaries_row_title'>UMS</td>";
     var max = grade_boundaries.length ? Math.max(count, grade_boundaries.length) : count;
     for (var i = 0; i < max; i++) {
         var grade = "";
@@ -315,12 +345,12 @@ function parseMainTable() {
     row_head_2 += "<th class='results results_header' style='min-width: 100px;'>Total</th>";
     
     var count = 0;    
-    row_head_2 += "<th class='results results_header'>Grade</th>";
-    row_head_1 += "<th class='results results_header grade_col'></th>";
+    row_head_2 += "<th class='results results_header Grade_col hide_col'>Grade</th>";
+    row_head_1 += "<th class='results results_header Grade_col hide_col'></th>";
     count++;
     
-    row_head_2 += "<th class='results results_header'>UMS</th>";
-    row_head_1 += "<th class='results results_header ums_col'></th>";
+    row_head_2 += "<th class='results results_header UMS_col hide_col'>UMS</th>";
+    row_head_1 += "<th class='results results_header UMS_col hide_col'></th>";
     count++;
     
     for (var i = 0; i < inputs.length; i++) {
@@ -384,9 +414,9 @@ function parseMainTable() {
             tab_index++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
-        student_rows += "<td class='results total_mark' id='grade_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
+        student_rows += "<td class='results total_mark Grade_col hide_col' id='grade_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
         grade_tab_index++;
-        student_rows += "<td class='results total_mark' id='ums_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "'id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
+        student_rows += "<td class='results total_mark UMS_col hide_col' id='ums_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "'id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
         grade_tab_index++;
         for (var i = 0; i < inputs.length; i++) {
             var short_name = inputs[i]["ShortName"];
@@ -1810,7 +1840,6 @@ $(function() {
 });
 
 function click_input(id) {
-    console.log("Div");
     document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
     change_input(id);
 }
@@ -1825,8 +1854,20 @@ function change_input(id) {
     var input_info = getInputInfo(id);
     if(show_input === 1) {
         $("." + input_info["ShortName"] + "_col").removeClass('hide_col');
+        if (id === -1) {
+            $(".grade_boundaries_row").removeClass("hide_col");
+        }
+        if (id === 0) {
+            $(".boundaries_ums_row").removeClass("hide_col");
+        }
     } else {
         $("." + input_info["ShortName"] + "_col").addClass('hide_col');
+        if (id === -1) {
+            $(".grade_boundaries_row").addClass("hide_col");
+        }
+        if (id === 0) {
+            $(".boundaries_ums_row").addClass("hide_col");
+        } 
     }
     updateInputs(id, show_input);
 }

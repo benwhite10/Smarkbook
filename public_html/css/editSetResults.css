@@ -737,7 +737,7 @@ th.date_col {
     max-width: 130px;
 }
 
-th.notes_col, th.grade_col, th.ums_col {
+th.notes_col, th.Grade_col, th.UMS_col {
     min-width: 60px;
     max-width: 80px;
 }
