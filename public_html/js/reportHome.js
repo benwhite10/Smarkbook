@@ -771,6 +771,9 @@ function changeSection(id) {
             case "section_tags":
                 setWorksheetSummary(1);
                 break;
+            case "section_details":
+                setWorksheetSummary(2);
+                break;
         }
     } 
 }
@@ -981,6 +984,33 @@ function setWorksheetSummary(type) {
                 });
             }
             id = "section_tags";
+            break;
+        case 2:
+            summary_info = summary["cw_info"];
+            if (summary_info["Grade"] && summary_info["Grade"] !== "") {
+                parse_array.push({
+                    main: "Grade",
+                    main_display: summary_info["Grade"],
+                    width: 0
+                });
+            }
+            if (summary_info["UMS"] && summary_info["UMS"] !== "") {
+                parse_array.push({
+                    main: "UMS",
+                    main_display: summary_info["UMS"],
+                    width: 0
+                });
+            }
+            var inputs = summary_info["Inputs"]
+            for (var i = 0; i < inputs.length; i++) {
+                var value = inputs[i];
+                parse_array.push({
+                    main: value["Name"],
+                    main_display: value["Value"],
+                    width: 0
+                });
+            }
+            id = "section_details";
             break;
     }
     changeSectionTab(id);

@@ -218,7 +218,7 @@ $set_student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_NUMBER_INT);
                                 <div id="new_worksheet_report_title_top" class="report_column_title_top">
                                     <div id="section_questions" class="title_sections selected" onclick="changeSection('section_questions')"><h1>Questions</h1></div>
                                     <div id="section_tags" class="title_sections" onclick="changeSection('section_tags')"><h1>Tags</h1></div>
-                                    <div id="section_blank_1" class="title_sections nosection"></div>
+                                    <div id="section_details" class="title_sections" onclick="changeSection('section_details')"><h1>Details</h1></div>
                                     <div id="section_blank_2" class="title_sections nosection" style="border-right: none"></div>
                                 </div>
                                 <div id="new_worksheet_report_title_bottom" class="report_column_title_bottom">
