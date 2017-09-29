@@ -937,12 +937,12 @@ function clearWorksheetSelected() {
 
 function clearWorksheetSummary() {
     $("#new_worksheet_report_main").html("<div id='new_worksheet_placeholder'><p>Click on a worksheet to view the details for that worksheet.</p></div>");
-    changeSectionTab("section_questions");
+    changeSectionTab("section_details");
 }
 
 function worksheetSummaryRequestSuccess(json) {
     sessionStorage.setItem("worksheet_summary", JSON.stringify(json["result"]));
-    setWorksheetSummary(0);
+    setWorksheetSummary(2);
 }
 
 function setWorksheetSummary(type) {
@@ -951,6 +951,7 @@ function setWorksheetSummary(type) {
     var parse_array = [];
     var id = "";
     var order_display = "";
+    var no_hide = false;
     switch(type) {
         case 0:
         default:
@@ -1011,13 +1012,14 @@ function setWorksheetSummary(type) {
                 });
             }
             id = "section_details";
+            no_hide = true;
             break;
     }
     changeSectionTab(id);
-    parseWorksheetSummary(parse_array, "#new_worksheet_report", order_display);
+    parseWorksheetSummary(parse_array, "#new_worksheet_report", order_display, no_hide);
 }
 
-function parseWorksheetSummary(info, id, order_display) {
+function parseWorksheetSummary(info, id, order_display, no_hide) {
     $(id + "_main").html("");
     $(id + "_criteria_title").html("<h2>" + order_display + "</h2>");
     for (var i = 0; i < info.length; i++) {
@@ -1027,8 +1029,12 @@ function parseWorksheetSummary(info, id, order_display) {
         var string = "<div class='new_tag worksheet_summary'>";
         string += "<div class='background_block_summary' style='width:" + width + "%'></div>";
         string += "<div class='tag_content'>";
-        string += "<div class='tag_content_name'><p>" + row["main"] + "</p></div>";
-        string += "<div class='tag_content_main_display'><p>" + row["main_display"] + "</p></div>";
+        string += "<div class='tag_content_name ";
+        if(no_hide) string += "no_hide";
+        string += "'><p>" + row["main"] + "</p></div>";
+        string += "<div class='tag_content_main_display ";
+        if(no_hide) string += "no_hide";
+        string += "'><p>" + row["main_display"] + "</p></div>";
         if(row["option_tags"]) {
             var tags_string = row["option_tags"];
             if(tags_string.length < 70) {
@@ -1050,7 +1056,7 @@ function parseWorksheetSummary(info, id, order_display) {
         }
         string += "</div></div>";
         $(id + "_main").append(string);
-    }
+    } 
 }
 
 function getExtraContentWidth(row) {
