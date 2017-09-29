@@ -857,7 +857,9 @@ p.two_lines {
 }
 
 .tag_content:hover .tag_content_main_extra,
-.tag_content:hover .tag_content_tags_string {
+.tag_content:hover .tag_content_tags_string,
+.tag_content:hover .tag_content_name.no_hide,
+.tag_content:hover .tag_content_main_display.no_hide {
     display: inline-block;
 }
 

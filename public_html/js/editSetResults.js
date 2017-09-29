@@ -1696,13 +1696,15 @@ function setUMS(student, ums) {
 }
 
 function setInputs(student, inputs) {
-    for (var i = 0; i < inputs.length; i++) {
-        var input = inputs[i];
-        var input_id = input["Input"];
-        var input_info = getInputInfo(input_id);
-        var short_name = input_info["ShortName"];
-        $("#" + short_name + "_" + student).val(input["Value"]);
-    }
+    if(inputs) {
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs[i];
+            var input_id = input["Input"];
+            var input_info = getInputInfo(input_id);
+            var short_name = input_info["ShortName"];
+            $("#" + short_name + "_" + student).val(input["Value"]);
+        }
+    } 
 }
 
 function setCompletionStatus(student, comp_class, status){

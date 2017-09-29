@@ -137,16 +137,27 @@ function getWorksheetSummary($gwid, $stu_id) {
             WHERE CQ.`Group Worksheet ID` = $gwid AND CQ.`Student ID` = $stu_id AND CQ.`Deleted` = 0 AND QT.`Deleted` = 0 
             GROUP BY T.`Tag ID`, CQ.`Stored Question ID`) AS A 
             GROUP BY TID";
+    
+    $query_3 = "SELECT `Completed Worksheet ID`, `Date Status`, `Grade`, `UMS` FROM `TCOMPLETEDWORKSHEETS` CW 
+            WHERE `Group Worksheet ID` = $gwid AND `Student ID` = $stu_id;";
     try {
-        $questions = db_select_exception($query_1);
         $tag_names = db_select_exception($query_1_1);
-        $questions = addTagStringToQuestion($questions, $tag_names);
+        $questions = addTagStringToQuestion(db_select_exception($query_1), $tag_names);
         $tags = db_select_exception($query_2);
+        $results = db_select_exception($query_3);
+        $cw_info = $results[0];
+        $cwid = $cw_info["Completed Worksheet ID"];
+        $query_4 = "SELECT IT.`Name`, IT.`ShortName`, CW.`Value` FROM `TCOMPLETEDWORKSHEETINPUT` CW
+                    JOIN `TINPUTTYPE` IT ON CW.`Input` = IT.`ID`
+                    WHERE CW.`CompletedWorksheet` = $cwid";
+        $inputs_info = db_select_exception($query_4);
+        $cw_info["Inputs"] = $inputs_info;
         succeedRequest(array(
             "student" => $stu_id,
             "gwid" => $gwid,
             "questions" => $questions,
-            "tags" => $tags));
+            "tags" => $tags,
+            "cw_info" => $cw_info));
     } catch (Exception $ex) {
         $message = "There was an error getting the worksheet summary.";
         failRequestWithException($message, $ex);
