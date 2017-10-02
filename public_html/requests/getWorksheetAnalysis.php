@@ -315,7 +315,7 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
     $j = 0;
     $objPHPExcel->getActiveSheet()
         ->setCellValue("B" . ($sum_row + $i),"Question")
-        ->setCellValue("I" . ($sum_row + $i),"Total");
+        ->setCellValue("$old_col" . ($sum_row + $i),"Total");
     
     for ($it_col = "C"; $it_col < $col; $it_col++) {
         $question = $ques_info[$j];
