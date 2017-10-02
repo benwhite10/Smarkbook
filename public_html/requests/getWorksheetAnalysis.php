@@ -11,8 +11,9 @@ include_once $include_path . '/public_html/libraries/PHPExcel.php';
 $requestType = "INDIVIDUALWORKSHEET";
 //$orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
 //$desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
-$version_id = 393;
-$staff_ids = [1, 2, 2898];
+$version_id = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
+//$version_id = 393;
+$staff_ids = [];
 //$staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 //$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 //$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
@@ -108,7 +109,7 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
         echo $ex->getMessage();
     }
     
-    $title = "Test Student";
+    $title = "Results Analysis";
     $file_name = "download";
     $objPHPExcel = new PHPExcel();
     $objPHPExcel->getProperties()->setCreator("Smarkbook")
@@ -118,7 +119,7 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
     $objPHPExcel = outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $title);
     
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-    $objWriter->save("../excel/$file_name.xlsx");
+    $objWriter->save("../downloads/$file_name.xlsx");
     
     $response = array (
         "success" => TRUE,

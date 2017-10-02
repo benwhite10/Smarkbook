@@ -1099,6 +1099,34 @@ function deleteWorksheet(){
     }
 }
 
+function getResultsAnalysis() {
+    var wid = sessionStorage.getItem("worksheet_id");
+    var infoArray = {
+        type: "INDIVIDUALWORKSHEET",
+        vid: wid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getWorksheetAnalysis.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                var link = document.createElement("a");
+                link.setAttribute("href", json["url"]);
+                link.setAttribute("download", json["title"]);
+                document.body.appendChild(link);
+                link.click();
+            }
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
+}
+
 function deleteWorksheetSuccess(json) {
     if(json["success"]){
         window.location.href = "/viewAllWorksheets.php";
