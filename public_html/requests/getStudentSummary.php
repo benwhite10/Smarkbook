@@ -23,6 +23,9 @@ $role = validateRequest($userid, $userval, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }
+if ($role === "STUDENT" & $studentId !== $userid){
+    failRequest("You are not authorised to complete that request"); 
+}
 
 $questions = [];
 $setWorksheets = [];
