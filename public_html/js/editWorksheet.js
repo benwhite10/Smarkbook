@@ -549,11 +549,13 @@ function parseWorksheetDetails(details) {
     var author = details["Author ID"];
     var date = moment(details["Date Added"]);
     var date_text = date.format("DD/MM/YYYY");
+    var internal = details["InternalResults"] === "1";
     $("#title2").html("<h1>" + name + "</h1>");
     $("#worksheet_name").val(name);
     $("#worksheet_link").val(link);
     $("#worksheet_author").val(author);
     $("#worksheet_date").val(date_text);
+    $("#worksheet_internal").prop('checked', internal);
 }
 
 function parseWorksheetMarks(questions) {
@@ -935,13 +937,15 @@ function saveWorksheetRequest(delete_sqid) {
             var link = $("#worksheet_link").val();
             var date = $("#worksheet_date").val();
             var author = $("#worksheet_author").val();
+            var internal = $("#worksheet_internal").prop('checked') ? 1 : 0;
             var array = {
                 type: type,
                 wid: wid,
                 name: name,
                 link: link,
                 date: date,
-                author: author
+                author: author,
+                internal: internal
             };
             array_to_send.push(array);
         } else {

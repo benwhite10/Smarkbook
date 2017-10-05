@@ -21,6 +21,10 @@ input[type="text"], textarea, input[type="password"], input[type="submit"], sele
     color: #323232;
     outline: none;
 }
+
+input[type="checkbox"] {
+    cursor: pointer;
+}
   
 select{
   width: calc(100% - 162px);

@@ -82,7 +82,9 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                         <option value="0">No Teachers</option>
                     </select>
                     <label>Date Added:    
-                    </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" onchange="saveQuestion('worksheet_details')"/> 
+                    </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" onchange="saveQuestion('worksheet_details')"/>
+                    <label>Internal Results:    
+                    </label><input type="checkbox" id="worksheet_internal" onchange="saveQuestion('worksheet_details')"/>
                 </div>
                 <div id="worksheet_marks_titles" class="section_title">
                     <h2>Marks</h2>
