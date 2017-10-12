@@ -1,5 +1,7 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/session_functions.php';
