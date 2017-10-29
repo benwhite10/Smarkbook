@@ -38,6 +38,16 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
+    <div id="dialog_message_background">
+        <div id="dialog_message_box">
+            <div id="dialog_title">
+                <h1>Results Analysis</h1>
+            </div>
+            <div id="dialog_text">
+                <p>Generating results analysis...</p>
+            </div>
+        </div>
+    </div>
     <div id="main">
     	<div id="header">
             <div id="title">
