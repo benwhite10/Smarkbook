@@ -1,0 +1,108 @@
+body {
+    height: auto;
+}
+
+td, th {
+    height: 40px;
+}
+
+th {
+    font-weight: 300;
+}
+
+tr {
+    cursor: pointer;
+}
+
+table {
+    border: 1px solid #000;
+}
+
+#main_content {
+    margin-top: 0px;
+}
+
+#search_bar {
+    height: 50px;
+    width: calc(100% - 2px);
+    background: #CCC;
+    border: 1px solid #323232;
+    margin-bottom: 20px;
+}
+
+#search_bar_text {
+    background: transparent;
+    width: calc(100% - 68px);
+    height: 50px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+}
+
+#search_bar_cancel {
+    background-image: url("/images/error_light.png");
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+    float: left;
+    display: inline-block;
+    margin: 17px 10px 17px 0;
+    cursor: pointer;
+}
+
+#search_bar_cancel:hover {
+    background-image: url("/images/error.png");
+}
+
+#search_bar_button {
+    background-image: url("/images/search.png");
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+    float: left;
+    display: inline-block;
+    margin: 10px 10px 10px 0;
+    cursor: pointer;
+}
+
+#search_bar input {
+    background: transparent;
+    width: calc(100% - 30px);
+    height: 50px;
+    line-height: 50px;
+    margin: 0;
+    padding: 0 20px 0 10px;
+    border: none;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 300;
+}
+
+th.author_column {
+    width: 70px;
+    text-align: center;
+}
+
+th.date_column {
+    width: 80px;
+    text-align: center;
+}
+
+td.author_column, td.date_column {
+    text-align: center;
+    padding: 0 20px 0 0;
+}
+
+span.highlight {
+    background-color: #a4ef76;
+}
+
+tr:hover span.highlight {
+    background-color: #323232;
+    color: #a4ef76;
+}
+
+input[type="checkbox"] {
+    cursor: pointer;
+    text-align: center;
+}

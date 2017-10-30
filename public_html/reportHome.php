@@ -36,7 +36,7 @@ $studentid = filter_input(INPUT_GET, 'stu', FILTER_SANITIZE_NUMBER_INT);
 $setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
 $startdate = filter_input(INPUT_GET, 'start', FILTER_SANITIZE_STRING);
 $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
-$set_student = filter_input(INPUT_GET, 'student', FILTER_SANITIZE_NUMBER_INT);
+$set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'student', FILTER_SANITIZE_NUMBER_INT);
 ?>
 
 <!DOCTYPE html>

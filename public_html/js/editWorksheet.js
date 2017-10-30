@@ -4,6 +4,8 @@ $(document).ready(function(){
     requestAllTags();
     startSpinnerInDiv('spinner');
     
+    $("#dialog_message_background").css("display", "none");
+    
     sessionStorage.setItem("save_requests", "[]");
     
     // Get the modal
@@ -549,11 +551,13 @@ function parseWorksheetDetails(details) {
     var author = details["Author ID"];
     var date = moment(details["Date Added"]);
     var date_text = date.format("DD/MM/YYYY");
+    var internal = details["InternalResults"] === "1";
     $("#title2").html("<h1>" + name + "</h1>");
     $("#worksheet_name").val(name);
     $("#worksheet_link").val(link);
     $("#worksheet_author").val(author);
     $("#worksheet_date").val(date_text);
+    $("#worksheet_internal").prop('checked', internal);
 }
 
 function parseWorksheetMarks(questions) {
@@ -935,13 +939,15 @@ function saveWorksheetRequest(delete_sqid) {
             var link = $("#worksheet_link").val();
             var date = $("#worksheet_date").val();
             var author = $("#worksheet_author").val();
+            var internal = $("#worksheet_internal").prop('checked') ? 1 : 0;
             var array = {
                 type: type,
                 wid: wid,
                 name: name,
                 link: link,
                 date: date,
-                author: author
+                author: author,
+                internal: internal
             };
             array_to_send.push(array);
         } else {
@@ -1097,6 +1103,46 @@ function deleteWorksheet(){
             }
         });
     }
+}
+
+function getResultsAnalysis() {
+    var wid = sessionStorage.getItem("worksheet_id");
+    $("#dialog_message_background").css("display", "");
+    var infoArray = {
+        type: "INDIVIDUALWORKSHEET",
+        vid: wid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getWorksheetAnalysis.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                var link = document.createElement("a");
+                link.setAttribute("href", json["url"]);
+                link.setAttribute("download", json["title"]);
+                document.body.appendChild(link);
+                link.click();
+                $("#dialog_text").html("<p>Analysis completed, downloading file.</p>");
+            } else {
+                $("#dialog_text").html("<p>There was an error completing the results analysis.</p>");
+            }
+            setTimeout(clearDialogBox, 1500);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+            $("#dialog_text").html("<p>There was an error completing the results analysis.</p>");
+            setTimeout(clearDialogBox, 1500);
+        }
+    });
+}
+
+function clearDialogBox() {
+    $("#dialog_message_background").css('display', 'none');
+    $("#dialog_text").html("<p>Generating results analysis...</p>");
 }
 
 function deleteWorksheetSuccess(json) {

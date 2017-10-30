@@ -106,6 +106,7 @@ function setVariableInputs(json) {
             localStorage.setItem("initialRun", false);
         }
     } else {
+        setNoResults();
         console.log("Something went wrong getting the details for the students.");
         console.log(json["message"]);
     }
@@ -411,6 +412,7 @@ function reportRequestSuccess(json){
         }
         refreshTagResults();
     } else {
+        setNoResults();
         console.log("Something went wrong generating the reports.");
     }
 }
@@ -427,6 +429,7 @@ function newReportRequestSuccess(json) {
         }
         refreshNewTagResults();
     } else {
+        setNoResults();
         console.log("Something went wrong generating the reports.");
     }
 }
@@ -447,6 +450,7 @@ function summaryRequestSuccess(json){
             setNoResults();
         }
     } else {
+        setNoResults();
         console.log("Something went wrong generating the report summary.");
     }
 }

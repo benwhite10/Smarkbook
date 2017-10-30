@@ -47,7 +47,8 @@ function updateWorksheet($info_array, $req_id) {
             $link = $info["link"];
             $author = $info["author"];
             $date = $info["date"];
-            array_push($result_array, updateWorksheetDetails($wid, $name, $link, $date, $author));
+            $internal = $info["internal"];
+            array_push($result_array, updateWorksheetDetails($wid, $name, $link, $date, $author, $internal));
         } else if ($info["type"] === "delete_question"){
             $sqid = $info["sqid"];
             array_push($result_array, deleteQuestion($sqid));
@@ -175,12 +176,13 @@ function updateWorksheetTags($wid, $tags) {
     }
 }
 
-function updateWorksheetDetails($wid, $name, $link, $date, $author) {
+function updateWorksheetDetails($wid, $name, $link, $date, $author, $internal) {
     $query = "UPDATE `TWORKSHEETVERSION` SET "
             . "`WName`='$name', "
             . "`Link`='$link', "
             . "`Date Added`=STR_TO_DATE('$date','%d/%m/%Y'), "
-            . "`Author ID`=$author "
+            . "`Author ID`=$author, "
+            . "`InternalResults`=$internal "
             . "WHERE `Version ID` = $wid;";
     try {
         if ($wid == 0) throw new Exception('Error getting worksheet id');
