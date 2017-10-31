@@ -29,6 +29,203 @@ $(document).ready(function(){
     };
 });
 
+function pressKeyInDiv(div, e) {
+    //console.log(e.keyCode);
+    switch(e.keyCode) {
+        case 9:
+        case 39:
+        case 13:
+            moveRight(div.id);
+            return false;
+        case 37:
+            moveLeft(div.id);
+            return false;
+        case 38:
+            moveUpDown(div.id, true);
+            return false;
+        case 40:
+            moveUpDown(div.id, false);
+            return false;
+        default:
+            break;
+    }
+    //console.log(div.id);
+}
+
+function splitId(id) {
+    return id.split("-");
+}
+
+function nextInput(input) {
+    // TODO get this properly
+    var inputs_array = ["grade", "ums", "WTG", "DWH", "CE", "IIS", "CDL"];
+    if (input === "") return inputs_array[0];
+    for (var i = 0; i < (inputs_array.length - 1); i++) {
+        if (input === inputs_array[i]) {
+            return inputs_array[i+1];
+        }
+    }
+    return false;
+}
+
+function previousInput(input) {
+    // TODO get this properly
+    var inputs_array = ["grade", "ums", "WTG", "DWH", "CE", "IIS", "CDL"];
+    if (input === "") return inputs_array[inputs_array.length - 1];
+    for (var i = inputs_array.length - 1; i > 0; i--) {
+        if (input === inputs_array[i]) {
+            return inputs_array[i-1];
+        }
+    }
+    return false;
+}
+
+function moveLeft(id) {
+    var new_id = "";
+    var row_student_array = JSON.parse(sessionStorage.getItem("row_student_array"));
+    if (id.includes("-")) {
+        // In results section
+        var pos = splitId(id);
+        pos[1] = parseInt(pos[1]) - 1;
+        new_id = pos[0] + "-" + pos[1];
+        if(!document.getElementById(new_id)) {
+            // Go up a row and to the end of the inputs
+            new_id = stepLeftInputs("", getStudentId(row_student_array, parseInt(pos[0]) - 1));
+            if (!new_id) {
+                // Go to end of row
+                new_id = maxResult(parseInt(pos[0]) - 1);
+            }
+        }
+    } else {
+        // In inputs section
+        var pos = id.split("_");
+        new_id = stepLeftInputs(pos[0], pos[1]);
+        if (!new_id) {
+            // Go to end of row
+            new_id = maxResult(getRow(row_student_array, pos[1]));
+        }
+    }
+    
+    $("#" + new_id).focus();
+    $("#" + new_id).select();
+}
+
+function moveRight(id) {
+    var new_id = "";
+    var row_student_array = JSON.parse(sessionStorage.getItem("row_student_array"));
+    if (id.includes("-")) {
+        // In results section
+        var pos = splitId(id);
+        pos[1] = parseInt(pos[1]) + 1;
+        new_id = pos[0] + "-" + pos[1];
+        if(!document.getElementById(new_id)) {
+            new_id = stepRightInputs("", getStudentId(row_student_array, pos[0]));
+            if (!new_id) {
+                new_id = newRow(pos[0]);
+            }
+        }
+    } else {
+        // In inputs section
+        var pos = id.split("_");
+        new_id = stepRightInputs(pos[0], pos[1]);
+        if (!new_id) {
+            new_id = newRow(getRow(row_student_array, pos[1]));
+        }
+    }
+    
+    $("#" + new_id).focus();
+    $("#" + new_id).select();
+}
+
+function moveUpDown(id, up) {
+    var new_id = "";
+    var row_student_array = JSON.parse(sessionStorage.getItem("row_student_array"));
+    if (id.includes("-")) {
+        // In results section
+        var pos = splitId(id);
+        pos[0] = up ? parseInt(pos[0]) - 1 : parseInt(pos[0]) + 1;
+        new_id = pos[0] + "-" + pos[1];
+    } else {
+        // In inputs section
+        var pos = id.split("_");
+        var row = up ? parseInt(getRow(row_student_array, pos[1])) - 1 : parseInt(getRow(row_student_array, pos[1])) + 1;
+        var student = getStudentId(row_student_array, row);
+        if (!student) return;
+        new_id = pos[0] + "_" + student;
+    }
+    
+    $("#" + new_id).focus();
+    $("#" + new_id).select();
+}
+
+function maxResult(row) {
+    for (var i = 0; i < 1000; i++) {
+        if(!document.getElementById(row + "-" + i)){
+            return row + "-" + (i - 1);
+        }
+    }
+    return 100;
+}
+
+function stepRightInputs(input, student_id) {
+    for (var i = 0; i < 1000; i++) {
+        input = nextInput(input);
+        if (input) {
+            new_id = input + "_" + student_id;
+            if(document.getElementById(new_id)) {
+                var classes = document.getElementById(input + "_div_" + student_id).className.split(" ");
+                if ($.inArray("hide_col", classes) === -1) {
+                    return new_id;
+                }
+            }
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
+
+function stepLeftInputs(input, student_id) {
+    for (var i = 0; i < 1000; i++) {
+        input = previousInput(input);
+        if (input) {
+            new_id = input + "_" + student_id;
+            if(document.getElementById(new_id)) {
+                var classes = document.getElementById(input + "_div_" + student_id).className.split(" ");
+                if ($.inArray("hide_col", classes) === -1) {
+                    return new_id;
+                }
+            }
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
+
+function newRow(row) {
+    new_row = parseInt(row) + 1;
+    return new_row + "-0";
+}
+
+function getStudentId(row_student_array, row) {
+    for (var i = 0; i < row_student_array.length; i++) {
+        if (parseInt(row_student_array[i][0]) === parseInt(row)) {
+            return row_student_array[i][1];
+        }
+    }
+    return false;
+}
+
+function getRow(row_student_array, student_id) {
+    for (var i = 0; i < row_student_array.length; i++) {
+        if (parseInt(row_student_array[i][1]) === parseInt(student_id)) {
+            return row_student_array[i][0];
+        }
+    }
+    return false;
+}
+
 /* Get worksheets */
 function requestWorksheet(gwid) {
     if(!gwid) {
@@ -380,16 +577,16 @@ function parseMainTable() {
     /* Students */
     var student_rows = "";
     var row = 0;
-    var tab_index = 1;
     var student_count = students.length;
     var worksheet_count = Object.keys(worksheet).length;
-    var grade_tab_index = (student_count * worksheet_count) + 1;
     var local_results_data_array = new Object();
+    var row_student_array = [];
     for (var key in students) {
         var student = students[key];
         var stuid = student["ID"];
         var results_array = results[stuid];
         var col = 0;
+        row_student_array.push([row, stuid]);
         student_rows += "<tr class='results'><td class='results student_name' id='stu" + stuid + "'>" + student["Name"] + "</td>";
         var totalMark = 0;
         var totalMarks = 0;
@@ -409,29 +606,25 @@ function parseMainTable() {
             }
             var id_string = row + "-" + col;
             local_results_data_array[id_string] = {cqid: cqid, stuid: stuid, sqid: sqid, marks:marks};
-            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' tabindex='" + tab_index + "' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")'></td>";
+            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")' onkeydown='return pressKeyInDiv(this, event)'></td>";
             col++;
-            tab_index++;
         }
         student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
-        student_rows += "<td class='results total_mark Grade_col hide_col' id='grade_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' /></td>";
-        grade_tab_index++;
-        student_rows += "<td class='results total_mark UMS_col hide_col' id='ums_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "'id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' /></td>";
-        grade_tab_index++;
+        student_rows += "<td class='results total_mark Grade_col hide_col' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
+        student_rows += "<td class='results total_mark UMS_col hide_col' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
         for (var i = 0; i < inputs.length; i++) {
             var short_name = inputs[i]["ShortName"];
             var input_id = inputs[i]["ID"];
-            student_rows += "<td class='results total_mark " + short_name + "_col hide_col' id='" + short_name + "_div_" + stuid + "'><input type='text' class='grade_input' tabindex='" + grade_tab_index + "' id='" + short_name + "_" + stuid + "' onBlur='changeValue(" + stuid + ", " + input_id + ", this.value)' /></td>";
-            grade_tab_index++;
+            student_rows += "<td class='results total_mark " + short_name + "_col hide_col' id='" + short_name + "_div_" + stuid + "'><input type='text' class='grade_input' id='" + short_name + "_" + stuid + "' onBlur='changeValue(" + stuid + ", " + input_id + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
         }
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
-        //grade_tab_index++;
         row++;
     }
     
     sessionStorage.setItem("local_results_data_array", JSON.stringify(local_results_data_array));
+    sessionStorage.setItem("row_student_array", JSON.stringify(row_student_array));
     $("#row_head_1").html(row_head_1);
     $("#row_head_2").html(row_head_2);
     $("#table_body").html(student_rows + average_row_1 + average_row_2 + average_row_3);
