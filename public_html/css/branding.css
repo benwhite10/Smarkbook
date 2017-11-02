@@ -77,7 +77,7 @@ ul
   color: #66E11B;
   z-index: 1;
   display: block;
-  }
+}
 
 #title
 { height: 40px;
@@ -104,7 +104,7 @@ input[type="text"], input[type="password"], input[type="submit"]
   -moz-border-radius: 2px; /* Firefox */
   -webkit-border-radius: 2px; /* Safari, Chrome */
   -khtml-border-radius: 2px; /* KHTML */
-  border-radius: 2px; /* CSS3 */ 
+  border-radius: 2px; /* CSS3 */
   font-size: 0.9rem;
   color: #323232;
   outline: none;}
@@ -132,7 +132,7 @@ input[type="text"].failed
 }
 
 input[type="text"].awaiting_save
-{ 
+{
     font-weight: bold;
 }
 
@@ -140,9 +140,9 @@ input[type="submit"]
 { width: 160px;
   background: #66E11B;
   color: #323232;
-  border-color: #323232; 
+  border-color: #323232;
   font-size: 1rem; }
-  
+
 input[type="submit"]:hover
 { background: #323232;
   color: #66E11B;
@@ -175,13 +175,13 @@ label {
   margin-left: auto;
   margin-right:auto;
   height: 100%;
-  width: 90%; 
+  width: 90%;
   overflow: visible; }
 
 /*#main:after, #body:after{
     content: "";
     display: block;
-    clear: both; 
+    clear: both;
 }*/
 
 #top_bar
@@ -231,7 +231,7 @@ label {
 { width: 20px;
   height: 20px;
   background: transparent;
-  display: inline-block; 
+  display: inline-block;
   vertical-align: middle;
   margin-top: auto;
   margin-bottom: auto;
@@ -286,7 +286,7 @@ ul.sidebar {
 ul.menu li {
   display: inline-block;
   line-height: 60px;
-  text-decoration:none; 
+  text-decoration:none;
   padding: 0px 15px;
   position: relative;
   cursor: pointer; }
@@ -380,13 +380,13 @@ ul.navdrop {
   z-index: 10;
 }
 
-ul.dropdown li { 
+ul.dropdown li {
   padding: 0px 20px;
   height: 50px;
   line-height: 50px;
   display: block;
   cursor: pointer;}
-  
+
 ul.topdrop li {
   background: #323232; }
 
@@ -399,10 +399,10 @@ ul.topdrop li a {
 ul.navdrop li a {
   color: #FFF; }
 
-ul.topdrop li:hover { 
+ul.topdrop li:hover {
   background: #555; }
 
-ul.navdrop li:hover { 
+ul.navdrop li:hover {
   background: #323232; }
 
 #main_content
@@ -474,5 +474,47 @@ label.error{
     font-size: 0.9rem;
     text-align: center;
     line-height: 20px;
-    color: #323232; 
+    color: #323232;
+}
+
+#msg_IE {
+    height: 50px;
+    position: absolute;
+    top: 0px;
+    overflow: visible;
+    width: calc(100% - 20px);
+    background: #F00;
+    color: #000;
+    z-index: 2;
+    display: none;
+    margin: 10px;
+    overflow: hidden;
+}
+
+#msg_IE_text > p {
+  font-size: 20px;
+  padding-left: 10px;
+  line-height: 50px;
+}
+
+#msg_IE_text {
+    display: inline-block;
+    float: left;
+    height: 50px;
+    margin: 0;
+    padding: 0;
+    width: calc(100% - 50px);
+}
+
+#msg_IE_close {
+  display: inline-block;
+  float: left;
+  height: 50px;
+  width: 50px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  line-height: 50px;
+  font-size: 20px;
+  text-align: center;
 }

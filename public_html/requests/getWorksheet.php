@@ -197,8 +197,12 @@ function downloadGWID($gwid) {
         $objPHPExcel ->getActiveSheet()->setCellValue($col . $row, $student["Name"]);
         foreach($worksheet_questions as $worksheet) {
             $col++;
-            $result = $finalResults[$student["ID"]][$worksheet["SQID"]] ? $finalResults[$student["ID"]][$worksheet["SQID"]]["Mark"] : "";
-            $objPHPExcel ->getActiveSheet()->setCellValue($col . $row, $result);
+            if ($finalResults[$student["ID"]]) {
+				$result = $finalResults[$student["ID"]][$worksheet["SQID"]] ? $finalResults[$student["ID"]][$worksheet["SQID"]]["Mark"] : "";
+				$objPHPExcel ->getActiveSheet()->setCellValue($col . $row, $result);
+			} else {
+				$objPHPExcel ->getActiveSheet()->setCellValue($col . $row, "");
+			}
         }
         $row++;
     }

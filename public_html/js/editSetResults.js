@@ -786,7 +786,10 @@ function sendDownloadRequest() {
         dataType: "json",
         success: function(json){
             downloadResultSuccess(json);
-        }
+        },
+		error: function(response) {
+			console.log(response.responseText);
+		}
     });
 }
 

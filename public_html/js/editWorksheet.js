@@ -458,9 +458,9 @@ function clearTagFromList(list_id, tag_id) {
     var len = tag_array.length;
     while(len > 0) {
         len--;
-        var tag_data = tag_array[len].dataset;
-        var id = tag_data["value"];
-        if (parseInt(id) === parseInt(tag_id)) {
+        tag_data = tag_array[len];
+		id = tag_data.getAttribute("data-value");
+		if (parseInt(id) === parseInt(tag_id)) {
             list.removeChild(tag_array[len]);
             return;
         }

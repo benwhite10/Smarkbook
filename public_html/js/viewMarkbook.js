@@ -16,7 +16,10 @@ function downloadExcel(set_id){
         dataType: "json",
         success: function(json){
             downloadSuccess(json);
-        }
+        },
+		error: function (response) {
+			console.log(response.responseText);
+		}
     });
 }
 

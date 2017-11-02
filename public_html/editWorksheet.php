@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -80,7 +80,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     </div>
                     <div id="worksheet_details_button" class="section_title_button" onclick="showHideDetails()">
                     </div>
-                    
+
                 </div>
                 <div id="worksheet_details" class="section_main">
                     <label>Name:
@@ -91,9 +91,9 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     </label><select id="worksheet_author" onchange="saveQuestion('worksheet_details')">
                         <option value="0">No Teachers</option>
                     </select>
-                    <label>Date Added:    
+                    <label>Date Added:
                     </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" onchange="saveQuestion('worksheet_details')"/>
-                    <label>Internal Results:    
+                    <label>Internal Results:
                     </label><input type="checkbox" id="worksheet_internal" onchange="saveQuestion('worksheet_details')"/>
                 </div>
                 <div id="worksheet_marks_titles" class="section_title">
@@ -160,4 +160,3 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
         </ul>
     </nav>
 </body>
-
