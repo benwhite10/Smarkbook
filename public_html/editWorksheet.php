@@ -35,6 +35,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
     <script src="js/editWorksheet.js?<?php echo $info_version; ?>"></script>
     <script src="libraries/spin.js?<?php echo $info_version; ?>"></script>
+    <link rel="stylesheet" href="libraries/awesomplete.css" />
+    <script src="libraries/awesomplete.min.js" async></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -73,7 +75,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </ul>
             </div>
             <div id="spinner" class="spinner"></div>
-            <div id="main_content" style="margin-bottom:300px">
+            <div id="main_content">
                 <div id="worksheet_details_title" class="section_title">
                     <div class="section_title_text">
                         <h2>Details</h2>
@@ -114,7 +116,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <div id="worksheet_questions_title" class="section_title">
                     <h2>Questions</h2>
                 </div>
-                <div id="worksheet_questions" class="section_main"></div>
+                <div id="worksheet_questions" class="section_main" style="margin-bottom:500px"></div>
             </div>
             <div id="side_bar">
             <ul class="menu sidebar">

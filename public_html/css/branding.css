@@ -518,3 +518,18 @@ label.error{
   font-size: 20px;
   text-align: center;
 }
+
+.awesomplete > ul {
+    min-width: 400px!important;
+    background: #EEE!important;
+    color: #323232!important;
+}
+
+.awesomplete > ul > li[aria-selected="true"] {
+    color: #EEE!important;
+    background: #323232!important;
+}
+
+.awesomplete mark {
+    background: #66E11B!important;
+}

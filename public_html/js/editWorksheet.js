@@ -1,13 +1,15 @@
+var awesompletes = [];
+
 $(document).ready(function(){
     setWorksheetID();
     requestAllStaff();
     requestAllTags();
     startSpinnerInDiv('spinner');
-    
+
     $("#dialog_message_background").css("display", "none");
-    
+
     sessionStorage.setItem("save_requests", "[]");
-    
+
     // Get the modal
     var modal = document.getElementById('modal_add_new');
 
@@ -18,7 +20,7 @@ $(document).ready(function(){
             closeModal();
         }
     };
-    
+
     document.addEventListener("contextmenu", function(e) {
         var id = clickInsideElement(e, "tag", "suggested");
         if (id) {
@@ -53,7 +55,8 @@ function addAllQuestions() {
     var info = context_tag_id.split("-");
     var tag_id = info[0];
     addTagIDForInput("worksheet_tags", tag_id);
-    clearTagFromList("worksheet_tags_list", tag_id);
+    //clearTagFromList("worksheet_tags_list", tag_id);
+    updateAwesomplete("worksheet_tags");
     parseTagsForDiv("worksheet_tags");
     saveQuestion("worksheet_tags");
     requestSuggestedTags("worksheet_tags");
@@ -63,19 +66,20 @@ function addAllQuestions() {
         var question = questions[i];
         var div_id = "question_" + question["Stored Question ID"];
         addTagIDForInput(div_id, tag_id);
-        clearTagFromList(div_id + "_list", tag_id); 
+        //clearTagFromList(div_id + "_list", tag_id);
+        updateAwesomplete(div_id);
         parseTagsForDiv(div_id);
         requestSuggestedTags(div_id);
         saveQuestion(div_id);
-    }  
+    }
 }
 
 function removeAllQuestions() {
     var info = context_tag_id.split("-");
     var tag_id = info[0];
-    
+
     removeTagIDFromInput("worksheet_tags", tag_id);
-    addTagToList("worksheet_tags_list", tag_id);
+    updateAwesomplete("worksheet_tags");
     parseTagsForDiv("worksheet_tags");
     saveQuestion("worksheet_tags");
     requestSuggestedTags("worksheet_tags");
@@ -85,11 +89,11 @@ function removeAllQuestions() {
         var question = questions[i];
         var div_id = "question_" + question["Stored Question ID"];
         removeTagIDFromInput(div_id, tag_id);
-        addTagToList(div_id + "_list", tag_id); 
+        updateAwesomplete(div_id);
         parseTagsForDiv(div_id);
         requestSuggestedTags(div_id);
         saveQuestion(div_id);
-    }  
+    }
 }
 
 function toggleMenuOn() {
@@ -110,9 +114,9 @@ function getPosition(e) {
     posx = e.pageX;
     posy = e.pageY;
   } else if (e.clientX || e.clientY) {
-    posx = e.clientX + document.body.scrollLeft + 
+    posx = e.clientX + document.body.scrollLeft +
                        document.documentElement.scrollLeft;
-    posy = e.clientY + document.body.scrollTop + 
+    posy = e.clientY + document.body.scrollTop +
                        document.documentElement.scrollTop;
   }
 
@@ -132,7 +136,7 @@ function positionMenu(e) {
 }
 
 function confirmLeave(){
-    return "You have unchanged saves, if you leave the page then your changes will be saved.";  
+    return "You have unchanged saves, if you leave the page then your changes will be saved.";
 }
 
 function startSpinnerInDiv(div){
@@ -308,7 +312,7 @@ function parseTagsForDiv(div_id) {
     var html_input_string = "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
-        if (tag) html_input_string += getTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
+        if (tag) html_input_string += getTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]);
     }
     $("#" + div_id + "_input").html(html_input_string);
 }
@@ -319,14 +323,15 @@ function parseSuggestedTagsForDiv(div_id) {
     var html_input_string = tags === "" ? "No Suggestions" : "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
-        if (tag) html_input_string += getSuggestedTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
+        if (tag) html_input_string += getSuggestedTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]);
     }
     $("#" + div_id + "_input_suggested").html(html_input_string);
 }
 
 function addSuggestedTag(div_id, tag_id) {
     addTagIDForInput(div_id, tag_id);
-    clearTagFromList(div_id + "_list", tag_id); 
+    //clearTagFromList(div_id + "_list", tag_id);
+    updateAwesomplete(div_id);
     parseTagsForDiv(div_id);
     removeSuggestedTagIDFromInput(div_id, tag_id);
     parseSuggestedTagsForDiv(div_id);
@@ -428,7 +433,7 @@ function removeSuggestedTagIDFromInput(div_id, tag_id) {
     $("#" + div_id + "_suggested_values").val(new_string);
 }
 
-function setUpTagSelect(div_id) {
+/*function setUpTagSelect(div_id) {
     var tags = JSON.parse(sessionStorage.getItem("tags_list"));
     var tags_string = "";
     for (var i in tags) {
@@ -436,7 +441,7 @@ function setUpTagSelect(div_id) {
         tags_string += "<option data-value='" + tag["Tag ID"] + "'>" + tag["Name"] + "</option>";
     }
     $("#" + div_id + "_list").html(tags_string);
-}
+}*/
 
 function getTagInputHTML(div_id, tag_name, tag_type, tag_id) {
     var str = "<div id='" + tag_id + "-" + div_id + "' class='tag " + tag_type.toLowerCase() + "'>";
@@ -453,6 +458,8 @@ function getSuggestedTagInputHTML(div_id, tag_name, tag_type, tag_id) {
 }
 
 function clearTagFromList(list_id, tag_id) {
+    // For awesomplete input update data
+
     var list = document.getElementById(list_id);
     var tag_array = list.children;
     var len = tag_array.length;
@@ -465,6 +472,7 @@ function clearTagFromList(list_id, tag_id) {
             return;
         }
     }
+
 }
 
 function addTagToList(list_id, tag_id) {
@@ -479,13 +487,62 @@ function parseWorksheetTags(worksheet_tags) {
     $("#worksheet_tags_input_text").keydown(function(event){
         changeTagInput(event);
     });
-    setUpTagSelect("worksheet_tags");
     for (var j in worksheet_tags) {
         var tag = worksheet_tags[j];
-        addTagIDForInput("worksheet_tags", tag["ID"]);
-        clearTagFromList("worksheet_tags_list", tag["ID"]);
+        if (tag["Deleted"] !== "1") { addTagIDForInput("worksheet_tags", tag["ID"]);}
     }
+
+    createAwesomeplete("worksheet_tags");
     parseTagsForDiv("worksheet_tags");
+}
+
+function createAwesomeplete(div_id) {
+    var tags = getTagsArray($("#" + div_id + "_input_values").val());
+
+    var input = document.getElementById(div_id + "_input_text");
+    var awesomplete = new Awesomplete(input, {
+      minChars: 1,
+      maxItems: 20,
+      autoFirst: true
+    });
+
+    var all_tags = JSON.parse(sessionStorage.getItem("tags_list"));
+    var tags_array = [];
+    for (var i in all_tags) {
+        if (!arrayContains(tags,all_tags[i]["Tag ID"])) {
+            tags_array.push(all_tags[i]["Name"]);
+        }
+    }
+    awesomplete.list = tags_array;
+
+    awesompletes.push([div_id, awesomplete]);
+}
+
+function updateAwesomplete(div_id) {
+    var awesomplete = false;
+    for (var i = 0; i < awesompletes.length; i++) {
+        if(awesompletes[i][0] == div_id) {
+            awesomplete = awesompletes[i][1];
+            break;
+        }
+    }
+    if (!awesomplete) return;
+    var tags = getTagsArray($("#" + div_id + "_input_values").val());
+    var all_tags = JSON.parse(sessionStorage.getItem("tags_list"));
+    var tags_array = [];
+    for (var i in all_tags) {
+        if (!arrayContains(tags,all_tags[i]["Tag ID"])) {
+            tags_array.push(all_tags[i]["Name"]);
+        }
+    }
+    awesomplete.list = tags_array;
+}
+
+function arrayContains(array, value) {
+    for (var i = 0; i < array.length; i++) {
+        if (value == array[i]) return true;
+    }
+    return false;
 }
 
 function parseQuestions(questions) {
@@ -506,14 +563,12 @@ function parseQuestions(questions) {
         $("#" + div_id + "_input_text").keydown(function(event){
             changeTagInput(event);
         });
-        setUpTagSelect(div_id);
+
         for (var j in tags) {
             var tag = tags[j];
-            if (tag["Deleted"] !== "1") {
-                addTagIDForInput(div_id, tag["Tag ID"]);
-                clearTagFromList(div_id + "_list", tag["Tag ID"]);
-            }  
+            if (tag["Deleted"] !== "1") { addTagIDForInput(div_id, tag["Tag ID"]);}
         }
+        createAwesomeplete(div_id);
         parseTagsForDiv(div_id);
     }
 }
@@ -540,7 +595,7 @@ function stringForBlankTagEntry(div_id) {
     html += "<div class='suggested_tags_container'>";
     html += "<div id='" + div_id + "_input_suggested' class='tags_input suggested'></div></div></div>";
     html += "<div id='" + div_id + "_input_text_div' class='tags_input_text_div'>";
-    html += "<input id='" + div_id + "_input_text' class='tags_input_text' type='text' list='" + div_id + "_list' placeholder='Enter tags here'>";
+    html += "<input id='" + div_id + "_input_text' class='tags_input_text setUpTagSelect awesomplete' type='text' list='" + div_id + "_list' placeholder='Enter tags here'>";
     html += "<datalist id='" + div_id + "_list'></datalist></div></div>";
     return html;
 }
@@ -593,18 +648,25 @@ function changeTagInput(e) {
     if(e && e.keyCode === 13) {
         var input_id = e.currentTarget.id;
         var div_id = input_id.substring(0, input_id.length - 11);
-        var tag_name = $("#" + div_id + "_input_text").val();
-        var tag_id = getIDForTag(tag_name);
-        if (tag_id) {
-            addTagIDForInput(div_id, tag_id);
-            saveQuestion(div_id);
-            $("#" + div_id + "_input_text").val("");
-            parseTagsForDiv(div_id);
-            clearTagFromList(div_id + "_list", tag_id);
-            requestSuggestedTags(div_id);
-        } else { 
-            openModal(tag_name, div_id);
+        if ($("#" + div_id + "_input_text").val() !== "") {
+            setTimeout(function(){ addTag(div_id); }, 100);
         }
+    }
+}
+
+function addTag(div_id) {
+    var tag_name = $("#" + div_id + "_input_text").val();
+    var tag_id = getIDForTag(tag_name);
+    if (tag_id) {
+        addTagIDForInput(div_id, tag_id);
+        saveQuestion(div_id);
+        $("#" + div_id + "_input_text").val("");
+        parseTagsForDiv(div_id);
+        updateAwesomplete(div_id);
+        //clearTagFromList(div_id + "_list", tag_id);
+        requestSuggestedTags(div_id);
+    } else {
+        openModal(tag_name, div_id);
     }
 }
 
@@ -613,7 +675,7 @@ function deleteTag(div_id, tag_id) {
     saveQuestion(div_id);
     $("#" + div_id + "_input_text").val("");
     parseTagsForDiv(div_id);
-    addTagToList(div_id + "_list", tag_id);
+    updateAwesomplete(div_id);
     requestSuggestedTags(div_id);
 }
 
@@ -783,7 +845,7 @@ function parseSimilarTagsForDiv(div_id) {
     var html_input_string = "";
     for (var i in tags_array) {
         var tag = getTagForID(tags_array[i]);
-        if (tag) html_input_string += getSimilarTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]); 
+        if (tag) html_input_string += getSimilarTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]);
     }
     $("#" + div_id + "_input").html(html_input_string);
 }
@@ -801,7 +863,8 @@ function addSimilarTag(tag_id) {
     saveQuestion(root_id);
     $("#" + root_id + "_input_text").val("");
     parseTagsForDiv(root_id);
-    clearTagFromList(root_id + "_list", tag_id);
+    updateAwesomplete(div_id);
+    //clearTagFromList(root_id + "_list", tag_id);
     closeModal();
 }
 
@@ -843,7 +906,8 @@ function addNewTagRequestSuccess(json) {
         saveQuestion(div_id);
         $("#" + div_id + "_input_text").val("");
         parseTagsForDiv(div_id);
-        clearTagFromList(div_id + "_list", tag_id);
+        updateAwesomplete(div_id);
+        //clearTagFromList(div_id + "_list", tag_id);
         closeModal();
     } else {
         console.log("Adding tag failed: " + json["message"]);
@@ -851,12 +915,10 @@ function addNewTagRequestSuccess(json) {
 }
 
 function addTagToAllLists(tag_id) {
-    var list_id = "worksheet_tags_list";
-    addTagToList(list_id, tag_id);
+    updateAwesomplete("worksheet_tags");
     var elems = document.getElementsByClassName("worksheet_question_div");
     for (var i = 0; i < elems.length; i++) {
-        var elem_id = elems[i].id;
-        addTagToList(elem_id + "_list", tag_id);
+        updateAwesomplete(elems[i].id);
     }
 }
 
@@ -882,12 +944,12 @@ function setSaveButton(status) {
         $("#save_worksheet_button").addClass("save");
         window.onbeforeunload = confirmLeave;
     } else if (status === "Saving") {
-        $("#save_worksheet_button").html("Saving..."); 
+        $("#save_worksheet_button").html("Saving...");
         $("#save_worksheet_button").addClass("saving");
         button.onclick = function() { };
         window.onbeforeunload = confirmLeave;
     } else {
-        $("#save_worksheet_button").html("Save"); 
+        $("#save_worksheet_button").html("Save");
         button.onclick = function() { };
         window.onbeforeunload = null;
     }
@@ -911,23 +973,23 @@ function saveWorksheet(delete_sqid) {
                 clearInterval(save_interval);
             }
         }, 1000);
-    }   
+    }
 }
 
 function saveWorksheetRequest(delete_sqid) {
     var save_worksheet_array = JSON.parse(sessionStorage.getItem("save_requests"));
-    if (save_worksheet_array.length === 0 && delete_sqid === null) return; 
-    
+    if (save_worksheet_array.length === 0 && delete_sqid === null) return;
+
     sessionStorage.setItem("save_requests", "[]");
     setSaveButton("Saving");
-    
+
     var wid = sessionStorage.getItem("worksheet_id");
     var req_id = generateRequestLock("save_worksheet_request_lock");
     var array_to_send = [];
     for (var i = 0; i < save_worksheet_array.length; i++) {
         var type = save_worksheet_array[i];
         if (type === "worksheet_tags") {
-            var tags = getTagsString($("#worksheet_tags_input_values").val()); 
+            var tags = getTagsString($("#worksheet_tags_input_values").val());
             var array = {
                 type: type,
                 wid: wid,
@@ -1019,7 +1081,7 @@ function saveWorksheetSuccess(json) {
             setSaveButton();
         } else {
             setSaveButton("Save");
-        }    
+        }
         if (reload_page) location.reload();
     } else {
         console.log("Saving worksheet failed: " + json["message"]);
@@ -1049,6 +1111,11 @@ function getTagsString(tags) {
         tags_string = tags_string.substring(0, tags_string.length - 1);
     }
     return tags_string;
+}
+
+function getTagsArray(tags) {
+    var tags_string = getTagsString(tags);
+    return tags_string.split(":");
 }
 
 function generateRequestLock(key, maxDuration) {
@@ -1150,7 +1217,7 @@ function deleteWorksheetSuccess(json) {
         window.location.href = "/viewAllWorksheets.php";
     } else {
         alert("There was an problem deleting the worksheet, it has not been deleted.");
-        console.log(json["message"]);        
+        console.log(json["message"]);
     }
 }
 
