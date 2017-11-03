@@ -55,7 +55,6 @@ function addAllQuestions() {
     var info = context_tag_id.split("-");
     var tag_id = info[0];
     addTagIDForInput("worksheet_tags", tag_id);
-    //clearTagFromList("worksheet_tags_list", tag_id);
     updateAwesomplete("worksheet_tags");
     parseTagsForDiv("worksheet_tags");
     saveQuestion("worksheet_tags");
@@ -66,7 +65,6 @@ function addAllQuestions() {
         var question = questions[i];
         var div_id = "question_" + question["Stored Question ID"];
         addTagIDForInput(div_id, tag_id);
-        //clearTagFromList(div_id + "_list", tag_id);
         updateAwesomplete(div_id);
         parseTagsForDiv(div_id);
         requestSuggestedTags(div_id);
@@ -330,7 +328,6 @@ function parseSuggestedTagsForDiv(div_id) {
 
 function addSuggestedTag(div_id, tag_id) {
     addTagIDForInput(div_id, tag_id);
-    //clearTagFromList(div_id + "_list", tag_id);
     updateAwesomplete(div_id);
     parseTagsForDiv(div_id);
     removeSuggestedTagIDFromInput(div_id, tag_id);
@@ -455,31 +452,6 @@ function getSuggestedTagInputHTML(div_id, tag_name, tag_type, tag_id) {
     str += "<div class='tag_text'>" + tag_name + "</div>";
     str += "<div class='tag_button' ></div></div>";
     return str;
-}
-
-function clearTagFromList(list_id, tag_id) {
-    // For awesomplete input update data
-
-    var list = document.getElementById(list_id);
-    var tag_array = list.children;
-    var len = tag_array.length;
-    while(len > 0) {
-        len--;
-        tag_data = tag_array[len];
-		id = tag_data.getAttribute("data-value");
-		if (parseInt(id) === parseInt(tag_id)) {
-            list.removeChild(tag_array[len]);
-            return;
-        }
-    }
-
-}
-
-function addTagToList(list_id, tag_id) {
-    var html = $("#" + list_id).html();
-    var tag = getTagForID(tag_id);
-    html += "<option data-value='" + tag["Tag ID"] + "'>" + tag["Name"] + "</option>";
-    $("#" + list_id).html(html);
 }
 
 function parseWorksheetTags(worksheet_tags) {
@@ -663,7 +635,6 @@ function addTag(div_id) {
         $("#" + div_id + "_input_text").val("");
         parseTagsForDiv(div_id);
         updateAwesomplete(div_id);
-        //clearTagFromList(div_id + "_list", tag_id);
         requestSuggestedTags(div_id);
     } else {
         openModal(tag_name, div_id);
@@ -863,8 +834,7 @@ function addSimilarTag(tag_id) {
     saveQuestion(root_id);
     $("#" + root_id + "_input_text").val("");
     parseTagsForDiv(root_id);
-    updateAwesomplete(div_id);
-    //clearTagFromList(root_id + "_list", tag_id);
+    updateAwesomplete(root_id);
     closeModal();
 }
 
@@ -907,7 +877,6 @@ function addNewTagRequestSuccess(json) {
         $("#" + div_id + "_input_text").val("");
         parseTagsForDiv(div_id);
         updateAwesomplete(div_id);
-        //clearTagFromList(div_id + "_list", tag_id);
         closeModal();
     } else {
         console.log("Adding tag failed: " + json["message"]);
