@@ -1,8 +1,8 @@
 $(document).ready(function(){
     sessionStorage.setItem("first_time", "TRUE");
-    
+
     getWorksheets(getParameterByName("rst"));
-    
+
     $("#search_bar_text_input").keyup(function(event){
         searchWorksheets();
     });

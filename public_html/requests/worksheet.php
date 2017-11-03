@@ -10,7 +10,7 @@ include_once $include_path . '/public_html/includes/logEvents.php';
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $user_val = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
-$info_array = $_POST["array"];
+$info_array = isset($_POST["array"]) ? $_POST["array"] : [];
 $tags = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
 $div_id = filter_input(INPUT_POST,'div_id',FILTER_SANITIZE_STRING);
 $req_id = filter_input(INPUT_POST,'req_id',FILTER_SANITIZE_NUMBER_INT);
@@ -36,6 +36,9 @@ switch ($request_type){
 
 function updateWorksheet($info_array, $req_id) {
     $result_array = [];
+	$author = "";
+	$wid = "";
+	$name = "";
     foreach ($info_array as $info) {
         if ($info["type"] === "worksheet_tags"){
             $wid = $info["wid"];
@@ -220,7 +223,8 @@ function newWorksheet($details) {
     $author = checkValidId($details["author"]);
     $date = $details["date"];
     $questions_count = $details["questions"];
-    
+    $vid = "";
+	
     $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`,`Date Added`,`Deleted`) "
             . "VALUES ('$name', '', '$link', $author, STR_TO_DATE('$date','%d/%m/%Y'),0);";
     try {

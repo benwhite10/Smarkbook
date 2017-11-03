@@ -9,9 +9,9 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
-    $loggedin = true; 
+    $loggedin = true;
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $userRole = $user->getRole();
@@ -33,7 +33,13 @@ if($resultArray[0]){
 </head>
 <body>
     <div id="main">
-    	<div id="header">
+      <div id="msg_IE">
+          <div id="msg_IE_text">
+            <p>Your browser is out of date and no longer supported, please update to a more secure browser.</p>
+          </div>
+          <div id="msg_IE_close" onclick="closeIEMsg()">X</div>
+      </div>
+      <div id="header">
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
             </div>
@@ -58,9 +64,9 @@ if($resultArray[0]){
                     <h1>Portal Home</h1>
                 </div>
                 <ul class="menu navbar"></ul>
-            </div>  
+            </div>
             <div id="menuContainer">
-                <?php   
+                <?php
                 $count = 0;
                 if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     $count++;
@@ -110,7 +116,7 @@ if($resultArray[0]){
                     }
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
-                } 
+                }
                 if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF"])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
@@ -133,4 +139,4 @@ if($resultArray[0]){
     	</div>
         <?php pageFooter($info_version) ?>
     </div>
-</body>	
+</body>

@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -35,6 +35,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
     <script src="js/editWorksheet.js?<?php echo $info_version; ?>"></script>
     <script src="libraries/spin.js?<?php echo $info_version; ?>"></script>
+    <link rel="stylesheet" href="libraries/awesomplete.css" />
+    <script src="libraries/awesomplete.min.js" async></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -73,14 +75,14 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </ul>
             </div>
             <div id="spinner" class="spinner"></div>
-            <div id="main_content" style="margin-bottom:300px">
+            <div id="main_content">
                 <div id="worksheet_details_title" class="section_title">
                     <div class="section_title_text">
                         <h2>Details</h2>
                     </div>
                     <div id="worksheet_details_button" class="section_title_button" onclick="showHideDetails()">
                     </div>
-                    
+
                 </div>
                 <div id="worksheet_details" class="section_main">
                     <label>Name:
@@ -91,9 +93,9 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     </label><select id="worksheet_author" onchange="saveQuestion('worksheet_details')">
                         <option value="0">No Teachers</option>
                     </select>
-                    <label>Date Added:    
+                    <label>Date Added:
                     </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" onchange="saveQuestion('worksheet_details')"/>
-                    <label>Internal Results:    
+                    <label>Internal Results:
                     </label><input type="checkbox" id="worksheet_internal" onchange="saveQuestion('worksheet_details')"/>
                 </div>
                 <div id="worksheet_marks_titles" class="section_title">
@@ -114,7 +116,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <div id="worksheet_questions_title" class="section_title">
                     <h2>Questions</h2>
                 </div>
-                <div id="worksheet_questions" class="section_main"></div>
+                <div id="worksheet_questions" class="section_main" style="margin-bottom:500px"></div>
             </div>
             <div id="side_bar">
             <ul class="menu sidebar">
@@ -160,4 +162,3 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
         </ul>
     </nav>
 </body>
-

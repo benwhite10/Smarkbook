@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     if(isset($_SESSION['url'])){
         $url = $_SESSION['url'];
     }else{
@@ -41,13 +41,19 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
 </head>
 <body>
     <div id="main">
+      <div id="msg_IE">
+          <div id="msg_IE_text">
+            <p>Your browser is out of date and no longer supported, please update to a more secure browser.</p>
+          </div>
+          <div id="msg_IE_close" onclick="closeIEMsg()">X</div>
+      </div>
     	<div id="header">
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
             </div>
     	</div>
     	<div class="login_div">
-            <div class="login_container">            
+            <div class="login_container">
                 <div id="messageText" class="error"><p><?php if(isset($message)){echo $message;} ?></p></div>
 
                 <form class="login_form" id="login_form" action="includes/process_login.php" method="POST">
@@ -64,5 +70,3 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	

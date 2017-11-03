@@ -8,7 +8,7 @@ function pageHeader($title, $info_version) {
     echo "<meta http-equiv='Content-Language' content='en'>";
     echo "<meta name='keywords' content='Intelligent, personalised feedback through smart data analysis' />";
     echo "<meta http-equiv='content-type' content='text/html; charset=utf-8' />";
-    echo "<meta http-equiv='X-UA-Compatible' content='IE=9' />";
+    echo "<meta http-equiv='X-UA-Compatible' content='IE=11' />";
     echo "<!--<link rel='stylesheet' media='screen and (min-device-width: 668px)' type='text/css' href='css/branding.css' />-->";
     echo "<link rel='stylesheet' type='text/css' href='css/branding.css?$info_version' />";
     echo "<link rel='stylesheet' type='text/css' href='css/table.css?$info_version' />";
