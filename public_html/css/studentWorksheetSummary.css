@@ -1,0 +1,111 @@
+#main_content {
+    width: 100%;
+}
+
+#side_bar {
+    display: none;
+}
+
+.section_main {
+    border: 1px solid black;
+    padding: 0;
+}
+
+.section_title {
+    margin-top: 20px;
+}
+
+.section_title_text, .section_title_button {
+    display: inline-block;
+    height: 100%;
+}
+
+.section_title_text {
+    width: calc(100% - 35px);
+    vertical-align: middle;
+}
+
+.section_title_button {
+    width: 25px;
+    height: 25px;
+    vertical-align: middle;
+    background-image: url("../images/plusminus.png");
+    background-repeat: no-repeat;
+    background-size: 100px 25px;
+    background-position: -75px;
+    cursor: pointer;
+}
+
+.section_title_button.minus {
+    background-position: -25px;
+}
+
+.section_title_button:hover {
+    background-position: -50px;
+}
+
+.section_title_button.minus:hover {
+    background-position: 0px;
+}
+
+table.worksheet_marks {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+tr.worksheet_marks, td.worksheet_marks {
+    height: 30px;
+    width: 50px;
+    text-align: center;
+    border: 1px solid black;
+    padding: 0px;
+}
+
+tr.worksheet_marks, tr.worksheet_marks:hover {
+    background: #EEE;
+}
+
+h2 {
+    font-weight: normal;
+    font-size: 1.8rem;
+    padding-left: 10px;
+}
+
+input[type="text"], textarea, input[type="password"], input[type="submit"], select, input[type="url"], input[type="date"]{
+    display: inline-block;
+    font: normal 100% 'Open Sans', sans-serif;
+    line-height: 20px;
+    height: 32px;
+    width: calc(100% - 182px);
+    background: #FFF;
+    margin: 0px auto 10px auto;
+    padding: 0 10px;
+    border: 1px solid;
+    -moz-border-radius: 2px; /* Firefox */
+    -webkit-border-radius: 2px; /* Safari, Chrome */
+    -khtml-border-radius: 2px; /* KHTML */
+    border-radius: 2px; /* CSS3 */
+    font-size: 0.9rem;
+    color: #323232;
+    outline: none;
+}
+
+input[type="text"].marks_input {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    text-align: center;
+    border: none;
+    border-radius: 0;
+}
+
+ul.navbar li:hover{
+  background: #323232;
+}
+
+input[type="text"].awaiting_save {
+    font-weight: bold;
+}
