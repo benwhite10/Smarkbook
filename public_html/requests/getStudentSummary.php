@@ -992,13 +992,21 @@ function getStudentWorksheetSummary($studentId, $gwid, $userid, $role) {
         WHERE CQ.`Group Worksheet ID` = $gwid
         AND CQ.`Student ID` = $studentId;";
 
+    $comp_worksheet_query = "SELECT * FROM `TCOMPLETEDWORKSHEETS`
+        WHERE `Group Worksheet ID` = $gwid
+        AND `Student ID` = $studentId;";
+
     try{
         $comp_questions = db_select_exception($comp_questions_query);
+        $comp_worksheet = db_select_exception($comp_worksheet_query);
     } catch (Exception $ex) {
         $message = "There was an error generating the report.";
         failRequestWithException($message, $ex);
     }
-    succeedRequest($comp_questions);
+    succeedRequest(array(
+        "Questions" => $comp_questions,
+        "Worksheet" => $comp_worksheet
+    ));
 }
 
 /* Exit page */

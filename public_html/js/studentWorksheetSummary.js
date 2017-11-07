@@ -26,7 +26,7 @@ function getStudentResults(stuid, gwid) {
 
 function getStudentResultsSuccess(json) {
     if (json["success"]) {
-        var results = json["result"];
+        var results = json["result"]["Questions"];
         var marks = 0;
         for (var i = 0; i < results.length; i++) {
             var sqid = results[i]["SQID"];
@@ -38,6 +38,14 @@ function getStudentResultsSuccess(json) {
                 $("#mark_" + sqid).val(mark);
                 marks += parseFloat(mark);
             }
+        }
+        var worksheets = json["result"]["Worksheet"];
+        if (worksheets.length > 0) {
+            var comp_worksheet = worksheets[0];
+            comp_worksheet["Inputs"] = [];
+            sessionStorage.setItem("comp_worksheet", JSON.stringify(comp_worksheet));
+        } else {
+            sessionStorage.setItem("comp_worksheet", "[]");
         }
         $("#total_marks").html("<b>" + marks + "</b>");
     } else {
@@ -142,15 +150,56 @@ function saveChanges(sqid, cqid, value) {
             saved: false
         });
     }
+    updateCompletedWorksheet(sqid, cqid);
     sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
+}
+
+function updateCompletedWorksheet(sqid, cqid) {
+    var gwid = sessionStorage.getItem("gwid");
+    var stuid = sessionStorage.getItem("stuid");
+    var elems = document.getElementsByClassName("marks_input");
+    var status = "Not Required";
+    var all_questions = true;
+    for (var i = 0; i < elems.length; i++) {
+        if (elems[i].value !== "") {
+            status = "Partially Completed";
+        } else {
+            all_questions = false;
+        }
+    }
+    if (all_questions) {status = "Completed";}
+    var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
+    if (comp_worksheet["Student ID"]) {
+        comp_worksheet["Completion Status"] = status;
+    } else {
+        comp_worksheet = {
+            "Group Worksheet ID": gwid,
+            "Student ID": stuid,
+            "Notes": "",
+            "Completion Status": status,
+            "Date Status": 0,
+            "Date Completed": null,
+            "Grade": "",
+            "Inputs": [],
+            "UMS": null
+        };
+    }
+    sessionStorage.setItem("comp_worksheet", JSON.stringify(comp_worksheet));
+}
+
+function updateSaveWorksheetsArray(worksheet, stu_id) {
+    var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
+    save_worksheets_array = updateCompletedWorksheet(save_worksheets_array, worksheet, stu_id);
+    sessionStorage.setItem("save_worksheets_array", JSON.stringify(save_worksheets_array));
+    setAwatingSaveClassWorksheets(stu_id);
 }
 
 function sendSaveChangesRequest() {
     var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+    var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
+    var gwid = sessionStorage.getItem("gwid");
+    var stuid = sessionStorage.getItem("stuid");
     if (save_changes_array.length > 0) {
-        var gwid = sessionStorage.getItem("gwid");
-        var stuid = sessionStorage.getItem("stuid");
-
         var infoArray = {
             gwid: gwid,
             req_id: 0,
@@ -166,10 +215,35 @@ function sendSaveChangesRequest() {
             dataType: "json",
             success: function(json){
                 getStudentResults(stuid, gwid);
-                sendSaveChangesSuccess(json)
+                sendSaveChangesSuccess(json);
+                console.log(sessionStorage.getItem("comp_worksheet"));
             },
             error: function(json){
                 console.log(json);
+            }
+        });
+    }
+    if (comp_worksheet["Student ID"]) {
+        comp_worksheet["request_sent"] = true;
+        comp_worksheet["saved"] = false;
+        var infoArray = {
+            gwid: gwid,
+            req_id: 0,
+            type: "SAVEWORKSHEETS",
+            save_worksheets_array: [comp_worksheet],
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/setWorksheetResult.php",
+            dataType: "json",
+            success: function(json){
+                console.log(json);
+            },
+            error: function(){
+                console.log("There was an error sending the request");
             }
         });
     }
@@ -204,7 +278,6 @@ function removeAwatingSaveClass(sqid) {
     $("#mark_" + sqid).css({backgroundColor: '#c2f4a4'});
     setTimeout(function(){
       $("#mark_" + sqid).animate({backgroundColor: 'transparent'}, 'slow');
-      console.log("#mark_" + sqid);
     }, 1000);
 }
 
@@ -254,32 +327,4 @@ function incorrectInput(message, id_string){
 function resetQuestion(id_string) {
     $("#" + id_string).val("");
     $("#" + id_string).focus();
-}
-
-function sendSaveResultsRequest(save_changes_array) {
-
-    var save_changes_send = "";
-
-    var infoArray = {
-        gwid: gwid,
-        req_id: req_id,
-        type: "SAVERESULTS",
-        save_changes_array: save_changes_send,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/setWorksheetResult.php",
-        dataType: "json",
-        success: function(json){
-            saveResultsSuccess(json);
-            fireResultsSavedEvent();
-        },
-        error: function(){
-            clearLock("save_changes_request_lock", req_id);
-            fireResultsSavedEvent();
-        }
-    });
 }
