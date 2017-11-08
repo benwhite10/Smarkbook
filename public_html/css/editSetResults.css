@@ -110,7 +110,7 @@ td.form
   font-size: 0.9rem;
   font-weight: normal;
   color: #323232;
-  vertical-align: top; 
+  vertical-align: top;
 }
 
 td.form > h1 {
@@ -247,7 +247,7 @@ td.date_completion {
     user-select: none;
 }
 
-#main_content{ 
+#main_content{
     width: 100%;
     margin-bottom: 20px;
 }
@@ -529,7 +529,7 @@ td.date_completion {
     background: transparent;
     border: 0px;
     text-align: center;
-    cursor: pointer !important; 
+    cursor: pointer !important;
 }
 
 td.note {
@@ -657,45 +657,46 @@ td.date_completion:hover {
     background-position: 0px;
 }
 
-input[type='checkbox'] {     
+input[type='checkbox'] {
     vertical-align: middle;
     height: 32px;
     margin: 4px 0 0 5px;
 }
 
-.hide_button, .delete_button_container {
+.detail_button {
     height: 40px;
     display: inline-block;
-    width: calc(50% - 6px);
+    width: calc(50% - 16px);
+    padding-left: 10px;
     vertical-align: top;
 }
 
-.hide_button, .hide_button > label, .hide_button > input[type='checkbox'] {
+.detail_button, .detail_button > label, .detail_button > input[type='checkbox'] {
     cursor: pointer;
 }
 
-.hide_button:hover {
+.detail_button:hover {
     background: #c2f4a4;
 }
 
-.hide_button > label {
+.detail_button.delete:hover {
+    background: #ff9999;
+    color: #323232;
+}
+
+.detail_button > label {
     margin: 4px 0 0 0;
 }
 
-.delete_button > h3{
+.detail_button > h3{
     color: #323232;
     font-size: 0.9rem;
     font-weight: bolder;
     line-height: 40px;
 }
 
-.delete_button:hover {
-    background: #ff9999;
-    color: #323232;
-}
-
 .results_header {
-    text-align: center; 
+    text-align: center;
     padding-left: 0px;
 }
 
@@ -742,7 +743,7 @@ th.notes_col, th.Grade_col, th.UMS_col {
     max-width: 80px;
 }
 
-input[type="text"].grade_input{ 
+input[type="text"].grade_input{
     display: block;
     line-height: 20px;
     height: 100%;
@@ -759,22 +760,22 @@ input[type="text"].grade_input{
     border-radius: 0px;
 }
 
-input[type="text"].grade_input.awaiting_save{ 
+input[type="text"].grade_input.awaiting_save{
     font-weight: bold;
 }
 
 .select_inputs_input {
-    width: 100%; 
-    height: 150px; 
+    width: 100%;
+    height: 150px;
     background: transparent;
 }
 
 .select_input {
-    width:33.33%; 
-    height: 50px; 
-    display: inline-block; 
-    float: left; 
-    margin: 0; 
+    width:33.33%;
+    height: 50px;
+    display: inline-block;
+    float: left;
+    margin: 0;
     padding: 0;
 }
 
@@ -794,7 +795,7 @@ input[type="text"].grade_input.awaiting_save{
 .select_input_title {
     padding-left: 10px;
     width: calc(75% - 10px);
-    
+
 }
 .select_input_check_div {
     width: 25%;

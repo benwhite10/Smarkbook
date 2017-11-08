@@ -9,7 +9,7 @@ include_once $include_path . '/public_html/requests/core.php';
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
 $desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
-$staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
+$enduserid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 $external = filter_input(INPUT_POST,'external',FILTER_SANITIZE_STRING);
@@ -24,25 +24,31 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        getSetsForStaffMember($staffid, $orderby, $desc);
+        getSetsForUser($enduserid, $orderby, $desc);
+        break;
+    case "SETSBYSTUDENT":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getSetsForUser($enduserid, $orderby, $desc);
         break;
     default:
         failRequest("There was a problem with your request, please try again.");
         break;
 }
 
-function getSetsForStaffMember($staffid, $orderby, $desc){
+function getSetsForUser($staffid, $orderby, $desc){
     $query = "select G.`Group ID` ID, G.`Name` Name from TGROUPS G
                 join TUSERGROUPS UG on G.`Group ID` = UG.`Group ID`";
     $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`"], [$staffid, 3, 0]);
     $query .= orderBy([$orderby], [$desc]);
-    
+
     try{
         $sets = db_select_exception($query);
     } catch (Exception $ex) {
         errorLog("Error loading the worksheets: " . $ex->getMessage());
         $response = array(
-            "success" => TRUE);      
+            "success" => TRUE);
         echo json_encode($response);
     }
 

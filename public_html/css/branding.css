@@ -334,7 +334,7 @@ ul.topbar a{
   color: #66E11B;
 }
 
-ul.navbar li:hover a, ul.sidebar li:hover a, ul.sidebar li:hover{
+ul.navbar li:hover a, ul.sidebar li:hover a, ul.sidebar li:hover, ul.navbar li:hover{
   color: #66E11B;
 }
 

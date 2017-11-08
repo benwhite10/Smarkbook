@@ -1,6 +1,6 @@
 $(document).ready(function(){
     var gwid = getParameterByName("gwid");
-    
+
     clearSaveChangesArray();
     clearSaveWorksheetsArray();
     clearGWChanges();
@@ -8,24 +8,26 @@ $(document).ready(function(){
     requestWorksheet(gwid);
     requestAllStaff();
     log_event("EDIT_SET_RESULTS", $('#userid').val(), gwid);
-    
+
     setAutoSave(5000);
-    
+
     $(window).resize(function(){
         setScreenSize();
         repositionStatusPopUp();
     });
-    
+
     $("#popUpBackground").click(function(e){
         clickBackground(e, this);
     });
-    
+
     $("#summaryBoxShowHide").click(function(){
         showHideDetails();
     });
-    
+
     window.onbeforeunload = function() {
-        return checkIfUnsavedChanges() ? "You have unsaved changes, if you leave now they will not be saved." : null;
+        if (checkIfUnsavedChanges()) {
+            return "You have unsaved changes, if you leave now they will not be saved.";
+        }
     };
 });
 
@@ -105,7 +107,7 @@ function moveLeft(id) {
             new_id = maxResult(getRow(row_student_array, pos[1]));
         }
     }
-    
+
     $("#" + new_id).focus();
     $("#" + new_id).select();
 }
@@ -132,7 +134,7 @@ function moveRight(id) {
             new_id = newRow(getRow(row_student_array, pos[1]));
         }
     }
-    
+
     $("#" + new_id).focus();
     $("#" + new_id).select();
 }
@@ -153,7 +155,7 @@ function moveUpDown(id, up) {
         if (!student) return;
         new_id = pos[0] + "_" + student;
     }
-    
+
     $("#" + new_id).focus();
     $("#" + new_id).select();
 }
@@ -231,7 +233,7 @@ function requestWorksheet(gwid) {
     if(!gwid) {
         gwid = getParameterByName("gwid");
     }
-    
+
     var infoArray = {
         type: "WORKSHEETFORGWID",
         gwid: gwid,
@@ -250,7 +252,7 @@ function requestWorksheet(gwid) {
 }
 
 function requestWorksheetSuccess(json) {
-    if(json["success"]) {    
+    if(json["success"]) {
         sessionStorage.setItem("worksheet", safelyGetObject(json["worksheet"]));
         sessionStorage.setItem("results", safelyGetObject(json["results"]));
         sessionStorage.setItem("details", safelyGetObject(json["details"]));
@@ -259,7 +261,7 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("input_types", safelyGetObject(json["worksheetInputs"]));
         var completed_worksheets = combineInputs(JSON.parse(safelyGetObject(json["completedWorksheets"])), JSON.parse(safelyGetObject(json["completedWorksheetsInputs"])));
         sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
-        
+
         setScreenSize();
         setUpWorksheetInfo();
         parseMainTable();
@@ -284,7 +286,7 @@ function combineInputs(completed_worksheets, inputs) {
     return completed_worksheets;
 }
 
-function setUpInputs() {    
+function setUpInputs() {
     var infoArray = {
         type: "GETINPUTTYPES",
         userid: $('#userid').val(),
@@ -486,6 +488,9 @@ function setUpWorksheetInfo() {
     var show = details["Hidden"] !== "1";
     document.getElementById("hide_checkbox").checked = show;
     sessionStorage.setItem("hidden_selected", show);
+    var student = details["StudentInput"] === "1";
+    document.getElementById("student_checkbox").checked = student;
+    sessionStorage.setItem("student_selected", student);
 }
 
 function parseGradeBoundaries() {
@@ -519,14 +524,14 @@ function parseMainTable() {
     var results = JSON.parse(sessionStorage.getItem("results"));
     var students = JSON.parse(sessionStorage.getItem("students"));
     var inputs = JSON.parse(sessionStorage.getItem("inputs"));
-    
+
     /*First header*/
     var row_head_1 = "<th class='results results_header names_col'></th>";
     var row_head_2 = "<th class='results results_header'  style='text-align: left; padding-left: 10px; padding-bottom: 5px;'>Students</th>";
     var average_row_1 = "<tr class='averages'><td class='averages'>Question</td>";
-    var average_row_2 = "<tr class='averages'><td class='averages'>Average</td>"; 
+    var average_row_2 = "<tr class='averages'><td class='averages'>Average</td>";
     var average_row_3 = "<tr class='averages'><td class='averages'>Average (%)</td>";
-    
+
     var col = 0;
     for (var key in worksheet) {
         var question = worksheet[key];
@@ -540,16 +545,16 @@ function parseMainTable() {
     }
     row_head_1 += "<th class='results results_header total_col'></th>";
     row_head_2 += "<th class='results results_header' style='min-width: 100px;'>Total</th>";
-    
-    var count = 0;    
+
+    var count = 0;
     row_head_2 += "<th class='results results_header Grade_col hide_col'>Grade</th>";
     row_head_1 += "<th class='results results_header Grade_col hide_col'></th>";
     count++;
-    
+
     row_head_2 += "<th class='results results_header UMS_col hide_col'>UMS</th>";
     row_head_1 += "<th class='results results_header UMS_col hide_col'></th>";
     count++;
-    
+
     for (var i = 0; i < inputs.length; i++) {
         var short_name = inputs[i]["ShortName"];
         var full_name = inputs[i]["Name"];
@@ -557,23 +562,23 @@ function parseMainTable() {
         row_head_1 += "<th class='results results_header " + short_name + "_col hide_col'></th>";
         count++;
     }
-    
+
     row_head_2 += "<th class='results results_header' style='min-width: 140px;'>Status</th>";
     row_head_1 += "<th class='results results_header status_col'></th>";
     count++;
-    
+
     row_head_2 += "<th class='results results_header' style='min-width: 120px;'>Date</th>";
     row_head_1 += "<th class='results results_header date_col'></th>";
     count++;
-    
+
     row_head_2 += "<th class='results results_header'>Note</th>";
     row_head_1 += "<th class='results results_header notes_col'></th>";
     count++;
-    
+
     average_row_1 += "<td class='averages'></td><td class='averages' colspan='" + count + "'></td></tr>";
     average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
     average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
-    
+
     /* Students */
     var student_rows = "";
     var row = 0;
@@ -622,13 +627,13 @@ function parseMainTable() {
         student_rows += "<td class='results date_completion note' id='note" + stuid + "' onClick='showStatusPopUp(" + stuid + ", " + row + ", \"note\")'><div id='note_div_" + stuid + "' class='note_div'></div></td>";
         row++;
     }
-    
+
     sessionStorage.setItem("local_results_data_array", JSON.stringify(local_results_data_array));
     sessionStorage.setItem("row_student_array", JSON.stringify(row_student_array));
     $("#row_head_1").html(row_head_1);
     $("#row_head_2").html(row_head_2);
     $("#table_body").html(student_rows + average_row_1 + average_row_2 + average_row_3);
-    
+
     for (var key in students) {
         var student = students[key];
         var stuid = student["ID"];
@@ -691,11 +696,18 @@ function hideButton() {
     changeGWValue();
 }
 
+function studentInputButton() {
+    var val = sessionStorage.getItem("student_selected") === "true" ? false : true;
+    document.getElementById("student_checkbox").checked = val;
+    sessionStorage.setItem("student_selected", val);
+    changeGWValue();
+}
+
 function deleteButton() {
     if(confirm("Are you sure you want to delete this group worksheet? This process is irreversible and you will lose any data entered.")){
         log_event("DELETE_GROUP_WORKSHEET", $('#userid').val(), getParameterByName("gwid"));
         deleteRequest();
-    }  
+    }
 }
 
 function changeResult(value, id_string, row){
@@ -712,20 +724,20 @@ function changeResult(value, id_string, row){
 }
 
 function clearSaveChangesArray() {
-    LockableStorage.lock("save_changes_array", function () { 
+    LockableStorage.lock("save_changes_array", function () {
         sessionStorage.setItem("save_changes_array", "[]");
     });
 }
 
 function clearSaveWorksheetsArray() {
-    LockableStorage.lock("save_worksheets_array", function () { 
+    LockableStorage.lock("save_worksheets_array", function () {
         sessionStorage.setItem("save_worksheets_array", "[]");
     });
 }
 
 function updateSaveChangesArray(value, id_string) {
     if (updateMarkIfNew(id_string, value)) {
-        LockableStorage.lock("save_changes_array", function () { 
+        LockableStorage.lock("save_changes_array", function () {
             var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
             save_changes_array = checkForExistingChangesAndUpdate(save_changes_array, id_string, value);
             sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
@@ -735,7 +747,7 @@ function updateSaveChangesArray(value, id_string) {
 }
 
 function updateSaveWorksheetsArray(worksheet, stu_id) {
-    LockableStorage.lock("save_worksheets_array", function () { 
+    LockableStorage.lock("save_worksheets_array", function () {
         var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
         save_worksheets_array = updateCompletedWorksheet(save_worksheets_array, worksheet, stu_id);
         sessionStorage.setItem("save_worksheets_array", JSON.stringify(save_worksheets_array));
@@ -809,7 +821,7 @@ function clickBack() {
 }
 
 function saveResults() {
-    LockableStorage.lock("save_changes_array", function () { 
+    LockableStorage.lock("save_changes_array", function () {
         var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
         if (save_changes_array.length > 0) {
             sendSaveResultsRequest(save_changes_array);
@@ -819,7 +831,7 @@ function saveResults() {
 }
 
 function saveWorksheets() {
-    LockableStorage.lock("save_worksheets_array", function () { 
+    LockableStorage.lock("save_worksheets_array", function () {
         var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
         if (save_worksheets_array.length > 0) {
             sendSaveWorksheetsRequest(save_worksheets_array);
@@ -840,7 +852,7 @@ function checkIfUnsavedChanges() {
 function checkForUnsavedChanges(array) {
     for (var i in array) {
         var change = array[i];
-        if (!change["saved"]) return true; 
+        if (!change["saved"]) return true;
     }
     return false;
 }
@@ -848,7 +860,7 @@ function checkForUnsavedChanges(array) {
 function saveGroupWorksheet() {
     var changed = sessionStorage.getItem("update_gw");
     if (changed === "false") return;
-    
+
     var gwid = $("#gwid").val();
     var date_due = $("#dateDueMain").val();
     var staff1 = $("#staff1").val();
@@ -856,7 +868,8 @@ function saveGroupWorksheet() {
     var staff3 = $("#staff3").val();
     var notes = $("#staffNotes").val();
     var hide = document.getElementById('hide_checkbox').checked;
-    
+    var student = document.getElementById('student_checkbox').checked;
+
     var worksheet_details = {
         gwid: gwid,
         dateDueMain: date_due,
@@ -864,11 +877,12 @@ function saveGroupWorksheet() {
         staff2: staff2,
         staff3: staff3,
         staffNotes: notes,
-        hide: hide
+        hide: hide,
+        student: student
     };
-    
+
     var grade_boundaries = getGradeBoundariesFromTable();
-    
+
     var infoArray = {
         type: "SAVEGROUPWORKSHEET",
         worksheet_details: worksheet_details,
@@ -930,12 +944,12 @@ function clearGWChanges() {
 
 function sendSaveWorksheetsRequest(save_worksheets_array) {
     if (checkLock("save_worksheets_request_lock")) return;
-    
+
     var save_worksheets_send = getChangesToSend(save_worksheets_array, "save_worksheets_array");
-    if (save_worksheets_send.length === 0) return;  
+    if (save_worksheets_send.length === 0) return;
     var req_id = generateRequestLock("save_worksheets_request_lock", 10000);
     var gwid = $("#gwid").val();
-    
+
     var infoArray = {
         gwid: gwid,
         req_id: req_id,
@@ -964,15 +978,15 @@ function sendSaveResultsRequest(save_changes_array) {
         fireResultsSavedEvent();
         return;
     }
-    
+
     var save_changes_send = getChangesToSend(save_changes_array, "save_changes_array");
     if (save_changes_send.length === 0){
         fireResultsSavedEvent();
         return;
-    }  
+    }
     var req_id = generateRequestLock("save_changes_request_lock", 10000);
     var gwid = $("#gwid").val();
-    
+
     var infoArray = {
         gwid: gwid,
         req_id: req_id,
@@ -998,7 +1012,11 @@ function sendSaveResultsRequest(save_changes_array) {
 }
 
 function fireResultsSavedEvent() {
-    document.dispatchEvent(new Event('results_saved'));
+    //document.dispatchEvent(new Event('results_saved'));
+    var event = document.createEvent("Event");
+    event.initEvent("results_saved", false, true);
+    // args: string type, boolean bubbles, boolean cancelable
+    document.dispatchEvent(event);
 }
 
 function generateRequestLock(key, maxDuration) {
@@ -1036,7 +1054,7 @@ function getChangesToSend(save_changes_array, key) {
         if (!change["saved"]) {
             change["request_sent"] = true;
             save_changes_send.push(change);
-        }   
+        }
     }
     sessionStorage.setItem(key, JSON.stringify(save_changes_array));
     return save_changes_send;
@@ -1044,7 +1062,7 @@ function getChangesToSend(save_changes_array, key) {
 
 function saveWorksheetsSuccess(json) {
     if(json["success"]) {
-        LockableStorage.lock("save_worksheetss_array", function () { 
+        LockableStorage.lock("save_worksheetss_array", function () {
             var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
             var returned_worksheets = json["worksheets"];
             var req_id = json["req_id"];
@@ -1076,7 +1094,7 @@ function saveWorksheetsSuccess(json) {
 
 function saveResultsSuccess(json) {
     if (json["success"]) {
-        LockableStorage.lock("save_changes_array", function () { 
+        LockableStorage.lock("save_changes_array", function () {
             var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
             var saved_changes = json["saved_changes"];
             var req_id = json["req_id"];
@@ -1104,7 +1122,7 @@ function saveResultsSuccess(json) {
                             break;
                         }
                     }
-                    
+
                 } else {
                     // Set failed class and remove request_sent tag
                     for (var j in save_changes_array) {
@@ -1118,7 +1136,7 @@ function saveResultsSuccess(json) {
             }
             clearLock("save_changes_request_lock", req_id);
             sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
-        }); 
+        });
     } else {
         clearLock("save_changes_request_lock", null, true);
         console.log("Something didn't go well");
@@ -1133,7 +1151,7 @@ function checkForExistingChangesAndUpdate(save_changes_array, id_string, value) 
             return save_changes_array;
         }
     }
-    
+
     var question_info = returnQuestionInfo(id_string);
 
     var change_object = {
@@ -1188,8 +1206,8 @@ function setStatusSaved(student) {
     }
     setTimeout(function(){
         $("#comp" + student).animate({backgroundColor: 'transparent'}, 'slow');
-        $("#late" + student).animate({backgroundColor: 'transparent'}, 'slow');  
-        $("#note" + student).animate({backgroundColor: 'transparent'}, 'slow');  
+        $("#late" + student).animate({backgroundColor: 'transparent'}, 'slow');
+        $("#note" + student).animate({backgroundColor: 'transparent'}, 'slow');
         $("#grade_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
         $("#ums_div_" + student).animate({backgroundColor: 'transparent'}, 'slow');
         var inputs = JSON.parse(sessionStorage.getItem("inputs"));
@@ -1205,7 +1223,7 @@ function removeAwatingSaveClass(id_string) {
     $("#" + id_string).removeClass("awaiting_save");
     $("#" + id_string).css({backgroundColor: '#c2f4a4'});
     setTimeout(function(){
-      $("#" + id_string).animate({backgroundColor: 'transparent'}, 'slow');  
+      $("#" + id_string).animate({backgroundColor: 'transparent'}, 'slow');
     }, 1000);
 }
 
@@ -1231,7 +1249,7 @@ function updateCompletionStatus(student, row){
     }
     var old_state = $("#comp" + student).text();
     var state = checkAllCompleted(row);
-    
+
     completed_worksheet["Completion Status"] = state;
     if (state === "Completed" || state === "Partially Completed") {
         completed_worksheet["Date Status"] = (!current_late || current_late === "NONE") ? "0": current_late;
@@ -1241,7 +1259,7 @@ function updateCompletionStatus(student, row){
     completed_worksheets[student] = completed_worksheet;
     if (old_state !== state) updateSaveWorksheetsArray(completed_worksheet, student);
     sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
-    
+
     updateStatusRow(student);
 }
 
@@ -1262,7 +1280,7 @@ function checkAllCompleted(row){
             break;
         }
     }
-    
+
     if(blank === 0){
         return "Completed";
     } else if (full === 0){
@@ -1318,7 +1336,7 @@ function updateCompletedQuestionId(id_string, cqid) {
 function updateMarkIfNew(id_string, new_mark) {
     var element = document.getElementById(id_string);
     var old_mark = element.dataset.old_value;
-    
+
     if (old_mark !== undefined && new_mark !== old_mark) {
         element.dataset.old_value = new_mark;
         return true;
@@ -1404,7 +1422,7 @@ function updateGrade(stu_id, row) {
                     if (ums !== "") {
                         var previous_boundary = i === 0 ? getTotalMarks() : parseFloat(grade_boundaries[i - 1]["boundary"]);
                         var previous_ums = i === 0 ? 100 : parseFloat(grade_boundaries[i - 1]["ums"]);
-                        $("#ums_" + stu_id).val(calculateUMS(boundary, previous_boundary, ums, previous_ums, value));  
+                        $("#ums_" + stu_id).val(calculateUMS(boundary, previous_boundary, ums, previous_ums, value));
                     }
                     $("#grade_" + stu_id).val(grade_val);
                     changeGrade(stu_id, grade_val);
@@ -1427,20 +1445,20 @@ function updateGrade(stu_id, row) {
         if (desc) {
             grade_val = "-";
             if (ums !== "") {
-                $("#ums_" + stu_id).val(calculateUMS(0, boundary, 0, ums, value)); 
-            }      
+                $("#ums_" + stu_id).val(calculateUMS(0, boundary, 0, ums, value));
+            }
         } else {
             grade_val = grade_boundaries[i - 1]["grade"];
             var previous_boundary = parseFloat(grade_boundaries[i - 1]["boundary"]);
             var previous_ums = parseFloat(grade_boundaries[i - 1]["ums"]);
             if (ums !== "") {
-                $("#ums_" + stu_id).val(calculateUMS(previous_boundary, getTotalMarks(), previous_ums, 100, value)); 
+                $("#ums_" + stu_id).val(calculateUMS(previous_boundary, getTotalMarks(), previous_ums, 100, value));
             }
         }
         $("#grade_" + stu_id).val(grade_val);
         changeGrade(stu_id, grade_val);
         return;
-    } 
+    }
 }
 
 function calculateUMS(lower_boundary, upper_boundary, lower_ums, upper_ums, value) {
@@ -1472,12 +1490,12 @@ function getQuestionAverages(id_string){
         var info = id_string.split("-");
         var row = info[0];
         var col = info[1];
-        parseAverageArrayForCol(col); 
+        parseAverageArrayForCol(col);
     } else {
         for(var i = 0; i < 1000; i++) {
             var id_string = "0-" + i;
             if (document.getElementById(id_string)) {
-                parseAverageArrayForCol(i); 
+                parseAverageArrayForCol(i);
             }   else {
                 break;
             }
@@ -1509,7 +1527,7 @@ function parseAverageArrayForCol(col) {
         rounded = Math.round(10 * average)/10;
         percentage = Math.round(100 * average / marks) + "%";
     }
-    
+
     $("#average-" + col).text(rounded);
     $("#averagePerc-" + col).text(percentage);
 }
@@ -1542,7 +1560,7 @@ function parseTotalsAverage() {
         percentage = Math.round(100 * average / averageMarks) + "%";
         all_text = rounded + " / " + roundedAvMarks;
     }
-    
+
     $("#average-ALL").text(all_text);
     $("#averagePerc-ALL").text(percentage);
 }
@@ -1553,17 +1571,17 @@ function showStatusPopUp(stuID, row, type){
     var days_late = "";
     var note = "";
     if(completed_worksheets[stuID])
-    { 
+    {
         var completed_worksheet = completed_worksheets[stuID];
         completion_status = completed_worksheet["Completion Status"];
         days_late = completed_worksheet["Date Status"];
-        note = completed_worksheet["Notes"]; 
+        note = completed_worksheet["Notes"];
     }
     setTitleAndMarks(stuID, row, completion_status);
     setPopUpCompletionStatus(completion_status, days_late);
     setDateDue(days_late);
     setNote(note);
-    
+
     $("#popUpStudent").val(stuID);
     $("#popUpBackground").fadeIn();
     repositionStatusPopUp();
@@ -1661,22 +1679,22 @@ function setDateDue(days_late){
     //Get the date the worksheet was due in
     var dateDueString = $("#dateDueMain").val();
     var dateDue = moment(dateDueString, "DD/MM/YYYY");
-    
+
     if(days_late == "" || days_late == 0){
         days_late = 1;
     }
-    
+
     var dateHandedIn = moment(dateDueString, "DD/MM/YYYY");
     dateHandedIn.add(days_late, 'd');
-    
+
     //Set the day, month and year for that date
     $("#day").val(parseInt(dateHandedIn.format("DD")));
     $("#month").val(parseInt(dateHandedIn.format("MM")));
     $("#year").val(parseInt(dateHandedIn.format("YYYY")));
-    
+
     //Set the date due text
     $("#dateDueText").text(dateDueString);
-    
+
     //Set the number of days late
     parseDaysLate(calculateHowLate(dateDue, dateHandedIn));
 }
@@ -1705,14 +1723,14 @@ function saveChanges(){
     if (completed_worksheets[student]) {
         completed_worksheet = completed_worksheets[student];
     }
-    
+
     completed_worksheet["Completion Status"] = $("#popUpCompletionStatusSelect").val();
     completed_worksheet["Date Status"] = getDaysLateFromPopUp($("#popUpDateStatusSelect").val());
     completed_worksheet["Notes"] = $("#popUpNoteText").val();
     completed_worksheets[student] = completed_worksheet;
     updateSaveWorksheetsArray(completed_worksheet, student);
     sessionStorage.setItem("completedWorksheets", safelyGetObject(completed_worksheets));
-    
+
     //Set comp status
     updateStatusRow(student);
 }
@@ -1797,7 +1815,7 @@ function saveGradeAndUMS(student){
         "UMS": "",
         "Inputs": ""
     };
-    
+
     if (completed_worksheets[student]) {
         completed_worksheet = completed_worksheets[student];
     }
@@ -1865,12 +1883,12 @@ function updateStatusRow(student) {
         ums = completed_worksheet["UMS"];
         inputs = completed_worksheet["Inputs"];
     }
-    
+
     var compClass = getCompClass(completionStatus);
     var dateStatus = getLateText(daysLate);
     var lateClass = getLateClass(daysLate);
     var noteClass = note === undefined || note === "" ? "note_none" : "note_note";
-    
+
     setCompletionStatus(student, compClass, completionStatus);
     setLateStatus(student, lateClass, dateStatus, daysLate);
     setNoteStatus(student, noteClass);
@@ -1900,7 +1918,7 @@ function setInputs(student, inputs) {
             var short_name = input_info["ShortName"];
             $("#" + short_name + "_" + student).val(input["Value"]);
         }
-    } 
+    }
 }
 
 function setCompletionStatus(student, comp_class, status){
@@ -1936,7 +1954,7 @@ function parseDaysLate(daysLate){
     } else {
         $("#daysLateText").text(daysLate + " days late");
         $("#daysLateText").removeClass("notLate");
-    } 
+    }
 }
 
 function dueDateChange(){
@@ -1946,10 +1964,10 @@ function dueDateChange(){
 function setDaysLate(){
     //Get current hand in date for student
     var dateHandedIn = getDateFromPicker();
-    
+
     //Get the due date
     var dueDate = moment($("#dateDueText").text(), "DD/MM/YYYY");
-    
+
     var daysLate = calculateHowLate(dueDate, dateHandedIn);
     parseDaysLate(daysLate);
 }
@@ -1970,7 +1988,7 @@ function showHideDate(value){
     } else {
         $("#popUpDateHandedIn").hide();
         $("#popUpDateDue").hide();
-    } 
+    }
 }
 
 function getParameterByName(name, url) {
@@ -2065,7 +2083,7 @@ function change_input(id) {
         }
         if (id === 0) {
             $(".boundaries_ums_row").addClass("hide_col");
-        } 
+        }
     }
     updateInputs(id, show_input);
 }

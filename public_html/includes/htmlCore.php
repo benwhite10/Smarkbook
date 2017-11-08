@@ -17,7 +17,7 @@ function pageHeader($title, $info_version) {
     echo "<script src='js/methods.js?$info_version'></script>";
     echo "<script src='js/jquery.validate.min.js?$info_version'></script>";
     echo "<link rel='shortcut icon' href='branding/favicon.ico?$info_version'>";
-    echo "<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>";
+    echo "<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>";
 }
 
 function setUpRequestAuthorisation($userid, $userval) {

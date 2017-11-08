@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -25,7 +25,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
     exit();
 }
 
-$query = "SELECT S.`Initials` Initials, S.`User ID` ID FROM TSTAFF S ORDER BY S.`Initials`;";
+$query = "SELECT U.`First Name` FName, U.`Surname` Surname, U.`User ID` ID FROM TUSERS U WHERE U.`First Name` <> '' ORDER BY U.`First Name`;";
 try{
     $staff = db_select_exception($query);
 } catch (Exception $ex) {
@@ -81,7 +81,7 @@ function failWithMessage($msg, $error){
                 <ul class="menu navbar">
                 </ul>
             </div>
-            
+
             <?php
                 if(isset($message)){
                     if($type == "ERROR"){
@@ -93,23 +93,23 @@ function failWithMessage($msg, $error){
                     $div = 'style="display:none;"';
                 }
             ?>
-            
+
             <div id="message" <?php echo $div; ?>>
                 <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>  
-            
+            </div>
+
             <form id="editForm" class="editWorksheet" action="includes/switch_user.php" method="POST">
                 <div id="main_content">
                     <label for="userid">User:
                     </label><select name="userid" id="author">
-                        <option value=0>Author:</option>
+                        <option value=0>User:</option>
                         <?php
                             if(isset($staff)){
                                 foreach($staff as $teacher){
-                                    $id = $teacher['ID'];
-                                    $initials = $teacher['Initials'];
-                                    echo "<option value='$id'>$initials</option>";
+                                    $name = $teacher["FName"] . " " . $teacher["Surname"];
+                                    $id = $teacher["ID"];
+                                    echo "<option value='$id'>$name</option>";
                                 }
                             }
                         ?>
@@ -119,11 +119,9 @@ function failWithMessage($msg, $error){
                         <li><input type="submit" value="Switch"/></li>
                     </ul>
                 </div>
-            </form> 
+            </form>
     	</div>
         <?php pageFooter($info_version) ?>
-    </div>  
+    </div>
     <script src="js/tagsList.js"></script>
 </body>
-
-	

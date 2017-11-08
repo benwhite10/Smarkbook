@@ -10,7 +10,7 @@ include_once $include_path . '/public_html/includes/logEvents.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -38,7 +38,7 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Smarkbook", $info_version); ?>    
+    <?php pageHeader("Smarkbook", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/editSetResults.css?<?php echo $info_version; ?>" />
     <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css?<?php echo $info_version; ?>"/>
@@ -156,17 +156,17 @@ if(isset($_SESSION['message'])){
                     $div = 'style="display:none;"';
                 }
             ?>
-            
+
             <div id="message" <?php echo $div; ?>>
                 <div id="messageText"><p><?php if(isset($string)) {echo $string;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
             </div>
-            
+
             <div id="top_bar">
                 <div id="title2"></div>
                 <ul class="menu navbar"></ul>
             </div>
-            
+
             <form id="editForm" class="editResults" action="" method="POST">
                 <input type='hidden' id ='gwid' name='gwid' />
                 <div id="summaryBox">
@@ -181,7 +181,7 @@ if(isset($_SESSION['message'])){
                         </div><div id="downloadButton" onclick="downloadCSV()"></div>
                     </div>
                 </div>
-                
+
                 <div id="details" style="display:none">
                     <table class="form">
                         <tbody class="form">
@@ -211,13 +211,16 @@ if(isset($_SESSION['message'])){
                                     <textarea name="staffNotes" id="staffNotes" onchange="changeGWValue()"></textarea>
                                 </td>
                                 <td class="form">
-                                    <div class="hide_button" onclick="hideButton()">
-                                        <label>Show in mark book</label><input type="checkbox" name="hide_checkbox" id="hide_checkbox" onchange="changeGWValue()"/>
+                                    <div class="detail_button" onclick="hideButton()">
+                                        <label>Show in mark book</label>
+                                        <input type="checkbox" name="hide_checkbox" id="hide_checkbox" onchange="changeGWValue()"/>
                                     </div>
-                                    <div class="delete_button_container" onclick="deleteButton()">
-                                        <div class="delete_button">
-                                            <h3>Delete Worksheet</h3>
-                                        </div>
+                                    <div class="detail_button delete" onclick="deleteButton()">
+                                        <h3>Delete Worksheet</h3>
+                                    </div>
+                                    <div class="detail_button student" onclick="studentInputButton()">
+                                        <label>Allow student input</label>
+                                        <input type="checkbox" name="student_checkbox" id="student_checkbox" onchange="changeGWValue()"
                                     </div>
                                 </td>
                             </tr>
@@ -228,7 +231,7 @@ if(isset($_SESSION['message'])){
                             </tr>
                             <tr class="form">
                                 <td class="form inputs" colspan="2">
-                                    <div class="select_inputs_input" id="select_inputs_input"></div>                                    
+                                    <div class="select_inputs_input" id="select_inputs_input"></div>
                                 </td>
                             </tr>
                             <tr class="form grade_boundaries_row">
@@ -252,7 +255,7 @@ if(isset($_SESSION['message'])){
                         </tbody>
                     </table>
                 </div>
-            
+
                 <div id="main_content" style="overflow: scroll;">
                     <table class="results" border="1">
                         <thead class="results">
@@ -263,10 +266,8 @@ if(isset($_SESSION['message'])){
                         </tbody>
                     </table>
                 </div>
-            </form> 
+            </form>
     	</div>
-        <?php pageFooter($info_version) ?>
+        <?php pageFooter($info_version); ?>
     </div>
 </body>
-
-	

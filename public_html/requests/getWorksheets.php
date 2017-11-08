@@ -36,6 +36,11 @@ switch ($requestType){
             failRequest("You are not authorised to complete that request");
         }
         getAllDeletedWorksheets($orderby, $desc);
+    case "STUDENTEDITABLESHEETS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getAllEditableWorksheetsForGroup($groupid, $orderby, $desc);
     default:
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
@@ -44,7 +49,7 @@ switch ($requestType){
         break;
 }
 
-function getAllWorksheetNames($orderby, $desc){    
+function getAllWorksheetNames($orderby, $desc){
     $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName "
             . "FROM TWORKSHEETVERSION WV "
             . "WHERE WV.`Deleted` = 0";
@@ -61,16 +66,16 @@ function getAllWorksheetNames($orderby, $desc){
         $message = "There was an error retrieving the worksheets.";
         returnToPageError($ex, $message);
     }
-    
+
     $response = array(
         "success" => TRUE,
         "worksheets" => $worksheets);
-    
+
     echo json_encode($response);
 
 }
 
-function getAllWorksheets($orderby, $desc){        
+function getAllWorksheets($orderby, $desc){
     $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, S.`Initials` Author "
             . "FROM TWORKSHEETVERSION WV "
             . "JOIN TSTAFF S ON S.`User ID` = WV.`Author ID` "
@@ -88,16 +93,16 @@ function getAllWorksheets($orderby, $desc){
         $message = "There was an error retrieving the worksheets.";
         returnToPageError($ex, $message);
     }
-    
+
     $response = array(
         "success" => TRUE,
         "worksheets" => $worksheets);
-    
+
     echo json_encode($response);
     exit();
 }
 
-function getAllDeletedWorksheets($orderby, $desc){        
+function getAllDeletedWorksheets($orderby, $desc){
     $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, S.`Initials` Author "
             . "FROM TWORKSHEETVERSION WV "
             . "JOIN TSTAFF S ON S.`User ID` = WV.`Author ID` "
@@ -115,34 +120,57 @@ function getAllDeletedWorksheets($orderby, $desc){
         $message = "There was an error retrieving the worksheets.";
         returnToPageError($ex, $message);
     }
-    
+
     $response = array(
         "success" => TRUE,
         "worksheets" => $worksheets);
-    
+
     echo json_encode($response);
     exit();
 }
 
 function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
-    $query = "SELECT GW.`Group Worksheet ID` ID, WV.`WName` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DueDate FROM TGROUPWORKSHEETS GW 
+    $query = "SELECT GW.`Group Worksheet ID` ID, WV.`WName` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DueDate FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID` ";
-    
+
     $query .= filterBy(["GW.`Group ID`", "GW.`Primary Staff ID`", "WV.`Deleted`"], [$groupid, $staffid, "0"]);
     $query .= "AND (GW.`Deleted` IS NULL OR GW.`Deleted` = 0) ";
     $query .= orderBy([$orderby], [$desc]);
-    
+
     try{
         $worksheets = db_select_exception($query);
     } catch (Exception $ex) {
         $message = "There was an error retrieving the worksheets";
         returnToPageError($ex, $message);
     }
-    
+
     $response = array(
         "success" => TRUE,
         "worksheets" => $worksheets);
-    
+
+    echo json_encode($response);
+    exit();
+}
+
+function getAllEditableWorksheetsForGroup($groupid, $orderby, $desc) {
+    $query = "SELECT GW.`Group Worksheet ID` GWID, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, WV.`WName` WName, S.`Initials` Initials FROM `TGROUPWORKSHEETS` GW
+            JOIN `TWORKSHEETVERSION` WV ON GW.`Version ID` = WV.`Version ID`
+            JOIN `TSTAFF` S ON GW.`Primary Staff ID` = S.`User ID`
+            WHERE GW.`Group ID` = $groupid
+            AND GW.`StudentInput` = 1
+            AND GW.`Deleted` = 0";
+
+    try{
+        $worksheets = db_select_exception($query);
+    } catch (Exception $ex) {
+        $message = "There was an error retrieving the worksheets";
+        returnToPageError($ex, $message);
+    }
+
+    $response = array(
+        "success" => TRUE,
+        "worksheets" => $worksheets);
+
     echo json_encode($response);
     exit();
 }
