@@ -3,6 +3,9 @@ $(document).ready(function(){
     sessionStorage.setItem("stuid", getParameterByName("s"));
     sessionStorage.setItem("save_changes_array", "[]");
     getWorksheetDetails(sessionStorage.getItem("gwid"));
+
+    setAutoSave(5000);
+    checkSaveButton();
 });
 
 function getStudentResults(stuid, gwid) {
@@ -126,6 +129,7 @@ function blurInput(id, value, sqid, marks) {
         }
         return;
     }
+    checkSaveButton();
 }
 
 function saveChanges(sqid, cqid, value) {
@@ -154,6 +158,7 @@ function saveChanges(sqid, cqid, value) {
     }
     updateCompletedWorksheet(sqid, cqid);
     sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
+    checkSaveButton();
 }
 
 function updateCompletedWorksheet(sqid, cqid) {
@@ -196,6 +201,12 @@ function updateSaveWorksheetsArray(worksheet, stu_id) {
     setAwatingSaveClassWorksheets(stu_id);
 }
 
+function setAutoSave(interval) {
+    window.setInterval(function(){
+        sendSaveChangesRequest();
+    }, interval);
+}
+
 function sendSaveChangesRequest() {
     var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
     var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
@@ -218,39 +229,54 @@ function sendSaveChangesRequest() {
             success: function(json){
                 getStudentResults(stuid, gwid);
                 sendSaveChangesSuccess(json);
+                checkSaveButton();
             },
             error: function(json){
                 console.log(json);
             }
         });
-    }
-    if (comp_worksheet["Student ID"]) {
-        comp_worksheet["request_sent"] = true;
-        comp_worksheet["saved"] = false;
-        var infoArray = {
-            gwid: gwid,
-            req_id: 0,
-            type: "SAVEWORKSHEETSSTUDENT",
-            save_worksheets_array: [comp_worksheet],
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
-        };
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "/requests/setWorksheetResult.php",
-            dataType: "json",
-            success: function(json){
-                if(!json["success"]) {
+        if (comp_worksheet["Student ID"]) {
+            comp_worksheet["request_sent"] = true;
+            comp_worksheet["saved"] = false;
+            var infoArray = {
+                gwid: gwid,
+                req_id: 0,
+                type: "SAVEWORKSHEETSSTUDENT",
+                save_worksheets_array: [comp_worksheet],
+                userid: $('#userid').val(),
+                userval: $('#userval').val()
+            };
+            $.ajax({
+                type: "POST",
+                data: infoArray,
+                url: "/requests/setWorksheetResult.php",
+                dataType: "json",
+                success: function(json){
+                    if(!json["success"]) {
+                        console.log("There was an error saving the worksheet");
+                        console.log(json);
+                    }
+                },
+                error: function(){
                     console.log("There was an error saving the worksheet");
                     console.log(json);
                 }
-            },
-            error: function(){
-                console.log("There was an error saving the worksheet");
-                console.log(json);
-            }
-        });
+            });
+        }
+    } else {
+        getStudentResults(stuid, gwid);
+        checkSaveButton();
+    }
+}
+
+function checkSaveButton() {
+    var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+    if (save_changes_array.length > 0) {
+        $("#save_button").removeClass("disabled");
+        $("#save_button").attr("onclick", "sendSaveChangesRequest()");
+    } else {
+        $("#save_button").addClass("disabled");
+        $("#save_button").attr("onclick", "");
     }
 }
 

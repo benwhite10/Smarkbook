@@ -100,6 +100,11 @@ input[type="text"].marks_input {
     text-align: center;
     border: none;
     border-radius: 0;
+    user-select: none;
+}
+
+ul.navbar {
+    user-select: none;
 }
 
 ul.navbar li:hover{
@@ -108,4 +113,8 @@ ul.navbar li:hover{
 
 input[type="text"].awaiting_save {
     font-weight: bold;
+}
+
+ul.menu li.disabled {
+    color: #999;
 }

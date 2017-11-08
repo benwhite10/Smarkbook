@@ -61,7 +61,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                     <h1></h1>
                 </div>
                 <ul class="menu navbar">
-                    <li onclick="sendSaveChangesRequest()">Save</li>
+                    <li id="save_button">Save</li>
                 </ul>
             </div>
             <div id="spinner" class="spinner"></div>
