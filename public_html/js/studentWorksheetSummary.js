@@ -50,6 +50,7 @@ function getStudentResultsSuccess(json) {
         $("#total_marks").html("<b>" + marks + "</b>");
     } else {
         console.log("Error");
+        console.log(json);
     }
 }
 
@@ -98,6 +99,7 @@ function setWorksheetDetails(json) {
         getStudentResults(sessionStorage.getItem("stuid"), sessionStorage.getItem("gwid"));
     } else {
         console.log("Error");
+        console.log(json);
     }
 }
 
@@ -203,7 +205,7 @@ function sendSaveChangesRequest() {
         var infoArray = {
             gwid: gwid,
             req_id: 0,
-            type: "SAVERESULTS",
+            type: "SAVERESULTSSTUDENT",
             save_changes_array: save_changes_array,
             userid: $('#userid').val(),
             userval: $('#userval').val()
@@ -216,7 +218,6 @@ function sendSaveChangesRequest() {
             success: function(json){
                 getStudentResults(stuid, gwid);
                 sendSaveChangesSuccess(json);
-                console.log(sessionStorage.getItem("comp_worksheet"));
             },
             error: function(json){
                 console.log(json);
@@ -229,7 +230,7 @@ function sendSaveChangesRequest() {
         var infoArray = {
             gwid: gwid,
             req_id: 0,
-            type: "SAVEWORKSHEETS",
+            type: "SAVEWORKSHEETSSTUDENT",
             save_worksheets_array: [comp_worksheet],
             userid: $('#userid').val(),
             userval: $('#userval').val()
@@ -240,10 +241,14 @@ function sendSaveChangesRequest() {
             url: "/requests/setWorksheetResult.php",
             dataType: "json",
             success: function(json){
-                console.log(json);
+                if(!json["success"]) {
+                    console.log("There was an error saving the worksheet");
+                    console.log(json);
+                }
             },
             error: function(){
-                console.log("There was an error sending the request");
+                console.log("There was an error saving the worksheet");
+                console.log(json);
             }
         });
     }

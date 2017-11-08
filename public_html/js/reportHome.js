@@ -1,18 +1,18 @@
 var displayed_gwid = "";
 var student_report_view = false;
 
-$(document).ready(function(){  
+$(document).ready(function(){
     $("#variablesInputBoxShowHideButton").click(function(){
         showHideButton("variablesInputMain", "variablesInputBoxShowHideButton");
     });
-    
+
     $("#worksheetSummaryDetails").click(function(){
         showHideWorksheetDetails();
     });
-    
+
     showAllSections();
     showAllSpinners();
-    setUpVariableInputs(); 
+    setUpVariableInputs();
 });
 
 $(function() {
@@ -63,7 +63,7 @@ function setVariableInputs(json) {
         var student_details = results["student"];
         var set_details = results["sets"];
         var staff_details = results["staff"];
-        
+
         var first_name = student_details["PName"] ? student_details["PName"] : student_details["FName"];
         var surname = student_details["Surname"];
         $('#student').html("");
@@ -71,26 +71,26 @@ function setVariableInputs(json) {
             value: student_details["UserID"],
             text: first_name + " " + surname
         }));
-        
+
         //Set up staff
         var htmlValue = staff_details.length === 0 ? "<option value='0'>No Teachers</option>" : "";
         $('#staff').html(htmlValue);
         for (var key in staff_details) {
-            $('#staff').append($('<option/>', { 
+            $('#staff').append($('<option/>', {
                 value: staff_details[key]["UserID"],
-                text : staff_details[key]["Title"] + " " + staff_details[key]["Surname"] 
+                text : staff_details[key]["Title"] + " " + staff_details[key]["Surname"]
             }));
         }
         //Set up sets
         htmlValue = set_details.length === 0 ? "<option value='0'>No Sets</option>" : "";
         $('#set').html(htmlValue);
         for (var key in set_details) {
-            $('#set').append($('<option/>', { 
+            $('#set').append($('<option/>', {
                 value: set_details[key]["Group ID"],
-                text : set_details[key]["Name"] 
+                text : set_details[key]["Name"]
             }));
         }
-        
+
         var initial_set_val = $('#setid').val();
         if($("#set option[value='" + initial_set_val + "']").length !== 0){
             $('#set').val(initial_set_val);
@@ -99,7 +99,7 @@ function setVariableInputs(json) {
         if($("#staff option[value='" + initial_staff_val + "']").length !== 0){
             $('#staff').val(initial_staff_val);
         }
-        
+
         enableGenerateReportButton();
         if(localStorage.getItem("initialRun") === "true"){
             generateReport();
@@ -120,7 +120,7 @@ function setDates(){
         $("#endDate").val($("#end").val());
     } else {
         $("#endDate").val(moment().format('DD/MM/YYYY'));
-    } 
+    }
 }
 
 function setInputsTitle(){
@@ -247,7 +247,7 @@ function generateQuestionsRequest(reqid, tagsArray){
         });
     } else {
         console.log("There was an error in sending the tag list.");
-    }   
+    }
 }
 
 function sendSummaryRequest(infoArray){
@@ -326,9 +326,9 @@ function getStaffSuccess(json){
         var htmlValue = staff.length === 0 ? "<option value='0'>No Teachers</option>" : "";
         $('#staff').html(htmlValue);
         for (var key in staff) {
-            $('#staff').append($('<option/>', { 
+            $('#staff').append($('<option/>', {
                 value: staff[key]["Staff ID"],
-                text : staff[key]["Initials"] 
+                text : staff[key]["Initials"]
             }));
         }
         var initialVal = $('#staffid').val();
@@ -347,9 +347,9 @@ function updateSetsSuccess(json){
         var htmlValue = sets.length === 0 ? "<option value='0'>No Sets</option>" : "";
         $('#set').html(htmlValue);
         for (var key in sets) {
-            $('#set').append($('<option/>', { 
+            $('#set').append($('<option/>', {
                 value: sets[key]["ID"],
-                text : sets[key]["Name"] 
+                text : sets[key]["Name"]
             }));
         }
         var initialVal = $('#setid').val();
@@ -370,9 +370,9 @@ function updateStudentsSuccess(json){
         for (var key in students) {
             var fname = students[key]["PName"] !== "" ? students[key]["PName"] : students[key]["FName"];
             var name = fname + " " + students[key]["SName"];
-            $('#student').append($('<option/>', { 
+            $('#student').append($('<option/>', {
                 value: students[key]["ID"],
-                text : name 
+                text : name
             }));
         }
         var initialVal = $('#studentid').val();
@@ -387,12 +387,12 @@ function updateStudentsSuccess(json){
 
 function generateQuestionsRequestSuccess(json){
     if(validateResponse(json)){
-        var result = json["result"]; 
+        var result = json["result"];
         if(result !== null){
             localStorage.setItem("suggested", JSON.stringify(result));
         } else {
             localStorage.setItem("suggested", null);
-        } 
+        }
         refreshSuggestedQuestions();
         showSuggestedQuestions();
         localStorage.setItem("activeReportRequest", null);
@@ -528,7 +528,7 @@ function parseNewTagResults(type, order, desc) {
         if (parseInt(type) === parseInt(result["type"])) {
             var tag_string = parseNewTagResult(result, order_info["array_key"]);
             $("#new_tags_report_" + type_name).append(tag_string);
-        }        
+        }
     }
 }
 
@@ -667,7 +667,7 @@ function refreshTagResults(){
             $('#bottom5tags tbody').append(setNewHalfWidthTagResults(results[i], i));
             $('#top5tags tbody').append(setNewHalfWidthTagResults(results[length - (i+1)], i));
         }
-        
+
         for(var i = 0; i < length; i++){
             $('#alltags tbody').append(setNewHalfWidthTagResults(results[i], i));
         }
@@ -677,7 +677,7 @@ function refreshTagResults(){
 function refreshSummaryResults(){
     $('#worksheetSummaryTable tbody').html('');
     setSummaryReportToDefaults();
-    
+
     // Set the averages
     var userAvg = Math.round(JSON.parse(localStorage.getItem("userAverage")));
     var setAvg = Math.round(JSON.parse(localStorage.getItem("setAverage")));
@@ -685,7 +685,7 @@ function refreshSummaryResults(){
     $('#summaryReportSetAvgValue').text(setAvg + "%");
     $('#summaryReportSetAvgValue').css('color', getColour(setAvg, 60, 40, [220, 0, 0], [240, 160, 0], [0, 240, 0]));
     $('#summaryReportUserAvgValue').css('color', getColour(userAvg, 60, 40, [220, 0, 0], [240, 160, 0], [0, 240, 0]));
-    
+
     setWorksheetsSummary();
     setWorksheetsTable(0, true);
     showSummaryResults();
@@ -726,7 +726,7 @@ function refreshSuggestedQuestions(){
                 string += "<td class='worksheetName'>" + name + "</td>";
             } else {
                 string += "<td class='worksheetName'><a href='" + link + "'>" + name + "</a></td>";
-            } 
+            }
             string += "<td class='worksheetName'>" + tagString + "</td>";
             string += "<td>" + marks + "</td>";
             string += "<td>" + date + "</td>";
@@ -762,7 +762,7 @@ function setWorksheetsSummary(){
         $('#lateValue').text(summary["dateStatus"]["Late"]);
         $('#dateNoInfoValue').text(summary["dateStatus"]["-"]);
         $('#compNoInfoValue').text(summary["compStatus"]["-"]);
-    }  
+    }
 }
 
 function changeSection(id) {
@@ -779,7 +779,7 @@ function changeSection(id) {
                 setWorksheetSummary(2);
                 break;
         }
-    } 
+    }
 }
 
 function changeSectionTab(id) {
@@ -819,7 +819,7 @@ function setUpWorksheetList() {
             var stuMarks = sheet["StuMarks"] ? sheet["StuMarks"] : 0;
             var display_marks = stuMark + "/" + stuMarks;
             var set_score = sheet["AVG"] ? Math.round(100 * sheet["AVG"]) : 0;
-            var relative_score = stu_score - set_score; 
+            var relative_score = stu_score - set_score;
             if (stu_score !== 0.1) {
                 if (relative_score < 0) {
                     display_relative = "\u2193" + Math.abs(relative_score) + "%";
@@ -847,7 +847,7 @@ function setUpWorksheetList() {
             worksheet["relative_colour"] = relative_colour;
             worksheet["display_marks"] = display_marks;
             worksheet_list.push(worksheet);
-        }  
+        }
     }
     sessionStorage.setItem("worksheet_list", JSON.stringify(worksheet_list));
 }
@@ -869,7 +869,7 @@ function setWorksheetsTable(order, desc){
         if (sheet_name.length > 50) {
             class_name = (sheet_name.length < 70) ? "medium_worksheet_name" : "long_worksheet_name";
         }
-        string += "<div class='tag_content_name'><p class='" + class_name + "'>" + sheet_name + "</p></div>";      
+        string += "<div class='tag_content_name'><p class='" + class_name + "'>" + sheet_name + "</p></div>";
         string += "<div class='tag_content_main_display'><p>" + getMainWorksheetsDisplayCriteria(order_info["display_key"], sheet) + " </p></div>";
         string += "<div class='tag_content_main_extra'><div class='tag_content_main_extra_value'><p>" + sheet["date_string"] + "</p></div>";
         string += "<div class='tag_content_main_extra_writing'><p>DATE</p></div></div>";
@@ -917,7 +917,7 @@ function clickWorksheet(gwid) {
         displayed_gwid = gwid;
         sendWorksheetSummaryRequest(gwid);
         setWorksheetSelected(gwid);
-    } 
+    }
 }
 
 function setWorksheetSelected(gwid) {
@@ -1047,7 +1047,7 @@ function parseWorksheetSummary(info, id, order_display, no_hide) {
                 string += "<div class='tag_content_tags_string'><p class='smaller'>" + row["option_tags"] + "</p></div>";
             } else {
                 string += "<div class='tag_content_tags_string'><p class='two_lines'>" + row["option_tags"] + "</p></div>";
-            } 
+            }
         } else {
             for (var j = 1; j < 5; j++) {
                 if(row["option_" + j]) {
@@ -1060,7 +1060,7 @@ function parseWorksheetSummary(info, id, order_display, no_hide) {
         }
         string += "</div></div>";
         $(id + "_main").append(string);
-    } 
+    }
 }
 
 function getExtraContentWidth(row) {

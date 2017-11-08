@@ -45,8 +45,20 @@ switch ($requestType){
         }
         saveResults($gwid, $save_changes, $req_id);
         break;
+    case "SAVERESULTSSTUDENT":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        saveResults($gwid, $save_changes, $req_id);
+        break;
     case "SAVEWORKSHEETS":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        saveWorksheets($gwid, $save_worksheets, $req_id);
+        break;
+    case "SAVEWORKSHEETSSTUDENT":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
         }
         saveWorksheets($gwid, $save_worksheets, $req_id);
@@ -66,7 +78,7 @@ switch ($requestType){
 }
 
 
-function saveResults($gwid, $save_changes, $req_id) {    
+function saveResults($gwid, $save_changes, $req_id) {
     foreach($save_changes as $key => $change) {
         if ($change["cqid"] !== "0") {
             $change["success"] = updateResult($change);
@@ -108,7 +120,7 @@ function addNewWorksheet($worksheet) {
     $grade = db_escape_string($worksheet["Grade"]);
     $ums = $worksheet["UMS"] ? intval($worksheet["UMS"]) : "NULL";
     $inputs = $worksheet["Inputs"];
-    
+
     $update = FALSE;
     // Try and get an ID
     db_begin_transaction();
@@ -122,7 +134,7 @@ function addNewWorksheet($worksheet) {
     } catch (Exception $ex) {
         errorLog("There was an error getting the old completed worksheet id: " . $ex->getMessage());
     }
-    
+
     if ($update) {
         $query1 = "UPDATE `TCOMPLETEDWORKSHEETS` SET "
             . "`Group Worksheet ID`= $gwid,"
@@ -193,7 +205,7 @@ function updateResult($change) {
     } else {
         $query = "UPDATE `TCOMPLETEDQUESTIONS` SET `Mark` = $value, `Deleted` = 0 WHERE `Completed Question ID` = $cqid;";
     }
-    
+
     try {
         db_query_exception($query);
         return true;
@@ -230,10 +242,11 @@ function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid) {
         $stuNotes = array_key_exists("studentNotes", $worksheetDetails) ? db_escape_string($worksheetDetails["studentNotes"]) : "";
         $staffNotes = array_key_exists("staffNotes", $worksheetDetails) ? db_escape_string($worksheetDetails["staffNotes"]) : "";
         $hidden = $worksheetDetails["hide"] == "true" ? "0" : "1";
-        
+        $student_input = $worksheetDetails["student"] == "true" ? "1" : "0";
+
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
                 . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
-                . ",`Hidden` = $hidden, `Date Last Modified` = NOW() "
+                . ",`Hidden` = $hidden, `StudentInput` = $student_input, `Date Last Modified` = NOW() "
                 . "WHERE `Group Worksheet ID` = $gwid;";
 
         db_query_exception($query);
@@ -300,7 +313,7 @@ function updateGradeBoundaries($grade_boundaries, $gwid) {
 
 function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets){
     db_begin_transaction();
-    
+
     // Update the details for the group worksheet
     try{
         $gwid = $worksheetDetails["gwid"];
@@ -311,7 +324,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         $stuNotes = db_escape_string($worksheetDetails["studentNotes"]);
         $staffNotes = db_escape_string($worksheetDetails["staffNotes"]);
         $hidden = $worksheetDetails["hidden"] ? "0" : "1";
-        
+
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
                 . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
                 . ",`Hidden` = $hidden, `Date Last Modified` = NOW() "
@@ -329,7 +342,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         echo json_encode($array);
         exit();
     }
-    
+
     try{
         foreach($newResults as $key => $newResult){
             $array = explode("-", $key);
@@ -369,7 +382,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         echo json_encode($array);
         exit();
     }
-    
+
     //Save all completed worksheet information
     try{
         $notes = $completedWorksheets["notes"];
@@ -409,8 +422,8 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
                 }
             }
             // Calculate the date the student handed the work in
-            if ($late == null || $late == 'null') { 
-                $late = 0; 
+            if ($late == null || $late == 'null') {
+                $late = 0;
             }
             $dateHandedIn = date_format(date_add(date_create_from_format('d/m/Y',$datedue), date_interval_create_from_date_string("$late days")), 'd/m/Y');
             // Update the completed questions for that student
@@ -430,7 +443,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         echo json_encode($array);
         exit();
     }
-    
+
     db_commit_transaction();
     $test = array(
         "result" => TRUE

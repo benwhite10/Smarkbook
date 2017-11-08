@@ -59,26 +59,26 @@ function getWorksheetForGWID($gwid){
     $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark, C.`Deleted` Deleted
                 FROM TCOMPLETEDQUESTIONS C
                 WHERE `Group Worksheet ID` = $gwid  AND C.`Deleted` = 0;";
-    
+
     //Details for the worksheet, date due, notes etc
-    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded, GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden, GW.`Deleted` Deleted FROM TGROUPWORKSHEETS GW
+    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded, GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden, GW.`Deleted` Deleted, GW.`StudentInput` StudentInput FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                 JOIN TGROUPS G ON G.`Group ID` = GW.`Group ID`
                 WHERE `Group Worksheet ID` = $gwid;";
-    
+
     $query3a = "SELECT * FROM `TGRADEBOUNDARIES` "
             . "WHERE `GroupWorksheet` = $gwid "
             . "ORDER BY `BoundaryOrder`;";
-    
+
     // Notes for each student, late reason etc
     $query4 = "SELECT * FROM TCOMPLETEDWORKSHEETS WHERE `Group Worksheet ID` = $gwid;";
     $query4a = "SELECT CWI.* FROM TCOMPLETEDWORKSHEETS CW "
             . "JOIN TCOMPLETEDWORKSHEETINPUT CWI ON CW.`Completed Worksheet ID` = CWI.`CompletedWorksheet` "
             . "WHERE `Group Worksheet ID` = $gwid;";
-    
+
     // Additional Notes
     $query5 = "SELECT * FROM TNOTES WHERE `Group Worksheet ID` = $gwid;";
-    
+
     // Students
     $query6 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name
                 FROM TUSERS U JOIN TSTUDENTS S ON U.`User ID` = S.`User ID`
@@ -87,11 +87,11 @@ function getWorksheetForGWID($gwid){
                 WHERE GW.`Group Worksheet ID` = $gwid
                 AND UG.`Archived` <> 1
                 ORDER BY U.`Surname`;";
-    
+
     // Worksheet inputs
-    $query7 = "SELECT * FROM `TGROUPWORKSHEETINPUT` 
+    $query7 = "SELECT * FROM `TGROUPWORKSHEETINPUT`
                 WHERE `GWID` = $gwid;";
-    
+
     try{
         $worksheetDetails = optimiseArray(db_select_exception($query1), "SQID");
         $results = db_select_exception($query2);
@@ -111,7 +111,7 @@ function getWorksheetForGWID($gwid){
         echo json_encode($test);
         exit();
     }
-    
+
     $test = array(
         "success" => TRUE,
         "worksheet" => $worksheetDetails,
@@ -123,7 +123,7 @@ function getWorksheetForGWID($gwid){
         "notes" => $notes,
         "students" => $students,
         "worksheetInputs" => $worksheetInputs);
-    
+
     echo json_encode($test);
 }
 
@@ -138,13 +138,13 @@ function downloadGWID($gwid) {
     $query2 = "SELECT C.`Completed Question ID` CQID, C.`Stored Question ID` SQID, C.`Student ID` StuUserID, C.`Mark` Mark, C.`Deleted` Deleted
                 FROM TCOMPLETEDQUESTIONS C
                 WHERE `Group Worksheet ID` = $gwid  AND C.`Deleted` = 0;";
-    
+
     //Details for the worksheet, date due, notes etc
     $query3 = "SELECT WV.`WName` WName, G.`Name` SetName FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                 JOIN TGROUPS G ON G.`Group ID` = GW.`Group ID`
                 WHERE `Group Worksheet ID` = $gwid;";
-    
+
     // Students
     $query4 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name
                 FROM TUSERS U JOIN TSTUDENTS S ON U.`User ID` = S.`User ID`
@@ -153,7 +153,7 @@ function downloadGWID($gwid) {
                 WHERE GW.`Group Worksheet ID` = $gwid
                 AND UG.`Archived` <> 1
                 ORDER BY U.`Surname`;";
-    
+
     try{
         $worksheet_questions = db_select_exception($query1);
         $results = db_select_exception($query2);
@@ -168,14 +168,14 @@ function downloadGWID($gwid) {
         echo json_encode($test);
         exit();
     }
-    
+
     $title = $details[0]["WName"] . " - " . $details[0]["SetName"];
     $file_name = $gwid . time();
     $objPHPExcel = new PHPExcel();
     $objPHPExcel->getProperties()->setCreator("Smarkbook")
                                 ->setLastModifiedBy("Ben White")
                                 ->setTitle($title);
-   
+
     //Set first 2 rows
     $objPHPExcel->setActiveSheetIndex(0)
             ->setCellValue('A1', '')
@@ -207,7 +207,7 @@ function downloadGWID($gwid) {
         $row++;
     }
     $row--;
-    
+
     //Styling
     $objPHPExcel->getActiveSheet()->getColumnDimension("A")->setVisible(false);
     $objPHPExcel->getActiveSheet()->getColumnDimension("B")->setAutoSize(true);
@@ -215,7 +215,7 @@ function downloadGWID($gwid) {
         $objPHPExcel->getActiveSheet()->getColumnDimension($i)->setWidth(3.00);
     }
     $objPHPExcel->getActiveSheet()->getColumnDimension($col)->setWidth(3.00);
-    
+
     $objPHPExcel->getActiveSheet()->getStyle("A1:$col" . "2")->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle("A1:B$row")->getFont()->setBold(true);
     $styleArray = array(
@@ -226,10 +226,10 @@ function downloadGWID($gwid) {
         )
     );
     $objPHPExcel->getActiveSheet()->getStyle("A1:$col$row")->applyFromArray($styleArray);
-    
+
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
     $objWriter->save("../downloads/$file_name.xlsx");
-    
+
     $response = array (
         "success" => TRUE,
         "url" => "/downloads/$file_name.xlsx",
@@ -263,7 +263,7 @@ function groupResultsByStudent($results, $students){
 
 function getNotesForGWID($gwid){
     $query = "SELECT `Student ID`, `Notes` FROM TCOMPLETEDWORKSHEETS WHERE `Group Worksheet ID` = $gwid;";
-    
+
     try{
         $notes = optimiseArray(db_select_exception($query), "Student ID");
     } catch (Exception $ex) {
@@ -272,11 +272,11 @@ function getNotesForGWID($gwid){
                 "success" => FALSE);
         echo json_encode($test);
     }
-    
+
     $test = array(
         "success" => TRUE,
         "notes" => $notes);
-    
+
     echo json_encode($test);
 }
 
@@ -312,10 +312,10 @@ function getTagsForQuestions($questions) {
     foreach ($questions as $i => $question) {
         $id = $question["Stored Question ID"];
         try {
-            $query = "SELECT QT.`Link ID`, QT.`Tag ID`, QT.`Deleted`, T.`Name` TagName, T.`Type` TypeID, TT.`Name` TypeName FROM `TQUESTIONTAGS` QT 
-                    JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID` 
+            $query = "SELECT QT.`Link ID`, QT.`Tag ID`, QT.`Deleted`, T.`Name` TagName, T.`Type` TypeID, TT.`Name` TypeName FROM `TQUESTIONTAGS` QT
+                    JOIN TTAGS T ON QT.`Tag ID` = T.`Tag ID`
                     JOIN TTAGTYPES TT ON T.`Type` = TT.`ID`
-                    WHERE `Stored Question ID` = $id AND QT.`Deleted` = 0 
+                    WHERE `Stored Question ID` = $id AND QT.`Deleted` = 0
                     ORDER BY T.`Type` DESC, T.`Name`;";
             $tags = db_select_exception($query);
             $questions[$i]["Tags"] = $tags;

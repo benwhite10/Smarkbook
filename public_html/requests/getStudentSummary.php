@@ -23,9 +23,9 @@ $role = validateRequest($userid, $userval, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }
-if ($role === "STUDENT" & $studentId !== $userid){
+/*if ($role === "STUDENT" & $studentId !== $userid){
     failRequest("You are not authorised to complete that request");
-}
+}*/
 
 $questions = [];
 $setWorksheets = [];
@@ -72,7 +72,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
         }
-        getWorksheetDetails($gwid, $userid, $role);
+        getWorksheetDetails($gwid, $userid, $studentId, $role);
         break;
     default:
         failRequest("Invalid request type.");
@@ -948,11 +948,6 @@ function succeedSummaryRequest($list, $userAvg, $setAvg){
 }
 
 function getWorksheetDetails($gwid, $userid, $role) {
-    if ($role == "STUDENT") {
-        if ($studentId == $userid) {
-            failRequest("You do not have permission to complete this request.");
-        }
-    }
 
     // Get worksheet
     $questions_query = "SELECT SQ.`Stored Question ID` SQID, SQ.`Number` Num, SQ.`Marks` Marks FROM `TGROUPWORKSHEETS` GW
@@ -983,7 +978,7 @@ function getWorksheetDetails($gwid, $userid, $role) {
 
 function getStudentWorksheetSummary($studentId, $gwid, $userid, $role) {
     if ($role == "STUDENT") {
-        if ($studentId == $userid) {
+        if ($studentId !== $userid) {
             failRequest("You do not have permission to complete this request.");
         }
     }

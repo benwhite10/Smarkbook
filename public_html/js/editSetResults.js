@@ -486,6 +486,9 @@ function setUpWorksheetInfo() {
     var show = details["Hidden"] !== "1";
     document.getElementById("hide_checkbox").checked = show;
     sessionStorage.setItem("hidden_selected", show);
+    var student = details["StudentInput"] === "1";
+    document.getElementById("student_checkbox").checked = student;
+    sessionStorage.setItem("student_selected", student);
 }
 
 function parseGradeBoundaries() {
@@ -691,6 +694,13 @@ function hideButton() {
     changeGWValue();
 }
 
+function studentInputButton() {
+    var val = sessionStorage.getItem("student_selected") === "true" ? false : true;
+    document.getElementById("student_checkbox").checked = val;
+    sessionStorage.setItem("student_selected", val);
+    changeGWValue();
+}
+
 function deleteButton() {
     if(confirm("Are you sure you want to delete this group worksheet? This process is irreversible and you will lose any data entered.")){
         log_event("DELETE_GROUP_WORKSHEET", $('#userid').val(), getParameterByName("gwid"));
@@ -856,6 +866,7 @@ function saveGroupWorksheet() {
     var staff3 = $("#staff3").val();
     var notes = $("#staffNotes").val();
     var hide = document.getElementById('hide_checkbox').checked;
+    var student = document.getElementById('student_checkbox').checked;
 
     var worksheet_details = {
         gwid: gwid,
@@ -864,7 +875,8 @@ function saveGroupWorksheet() {
         staff2: staff2,
         staff3: staff3,
         staffNotes: notes,
-        hide: hide
+        hide: hide,
+        student: student
     };
 
     var grade_boundaries = getGradeBoundariesFromTable();
