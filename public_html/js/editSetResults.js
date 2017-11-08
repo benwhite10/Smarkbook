@@ -25,7 +25,9 @@ $(document).ready(function(){
     });
 
     window.onbeforeunload = function() {
-        return checkIfUnsavedChanges() ? "You have unsaved changes, if you leave now they will not be saved." : null;
+        if (checkIfUnsavedChanges()) {
+            return "You have unsaved changes, if you leave now they will not be saved.";
+        }
     };
 });
 
@@ -1010,7 +1012,11 @@ function sendSaveResultsRequest(save_changes_array) {
 }
 
 function fireResultsSavedEvent() {
-    document.dispatchEvent(new Event('results_saved'));
+    //document.dispatchEvent(new Event('results_saved'));
+    var event = document.createEvent("Event");
+    event.initEvent("results_saved", false, true);
+    // args: string type, boolean bubbles, boolean cancelable
+    document.dispatchEvent(event);
 }
 
 function generateRequestLock(key, maxDuration) {
