@@ -37,8 +37,10 @@ function getStudentResultsSuccess(json) {
             var mark = results[i]["Mark"];
             var deleted = results[i]["Deleted"];
             $("#cqid_" + sqid).val(cqid);
-            if (deleted === "0" && !$("#mark_" + sqid).is(":focus")) {
-                $("#mark_" + sqid).val(mark);
+            if (deleted === "0") {
+                if (!$("#mark_" + sqid).is(":focus")) {
+                    $("#mark_" + sqid).val(mark);
+                }
                 marks += parseFloat(mark);
             }
         }

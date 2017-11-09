@@ -104,6 +104,15 @@ function worksheetsSuccess(json){
     if(option) option.selected = true;
 }
 
+function changeGroup(){
+    setUpWorksheets();
+}
+
+function goToInput() {
+    var gwid = $("#worksheet").val();
+    var url = "/studentWorksheetSummary.php?gw=" + gwid + "&s=" + $("#userid").val();
+    window.location.href = url;
+}
 
 
 
@@ -149,17 +158,6 @@ function staffSuccess(json){
         console.log("There was an error retrieving the staff.");
     }
 }
-
-function changeGroup(){
-    setUpWorksheets();
-}
-
-function goToInput() {
-    var gwid = $("#worksheet").val();
-    var url = "/studentWorksheetSummary.php?gw=" + gwid + "&s=" + $("#userid").val();
-    window.location.href = url;
-}
-
 
 
 
