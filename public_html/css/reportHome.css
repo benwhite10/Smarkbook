@@ -3,7 +3,7 @@ body {
 }
 
 th, td
-{ 
+{
     height: auto;
     padding-left: 0px;
 }
@@ -224,11 +224,11 @@ th.results
 }
 
 tr.results
-{ 
+{
     background: #EEE;width:  100%;margin-left: 0px;margin-right: 0px;
 }
 
-tr.results:nth-child(even) 
+tr.results:nth-child(even)
 {
     background-color: #DDD;
 }
@@ -335,7 +335,7 @@ label {
 #tagsReportShort:after{
     content: "";
     display: block;
-    clear: both; 
+    clear: both;
 }
 
 
@@ -365,7 +365,7 @@ table.fullResults{
 }
 
 #noResults{
-    text-align: center; 
+    text-align: center;
     margin-top: 20px;
     display: none;
 }
@@ -451,7 +451,7 @@ table.fullResults{
     width: 100%;
     border-collapse: collapse;
     cursor: pointer;
-    -webkit-user-select: none;       
+    -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     -o-user-select: none;
@@ -566,14 +566,14 @@ tr.tableHead:nth-child(odd){
 }
 
 #questionsSummaryDetailsTable tr
-{ 
+{
     background: #EEE;
     width:  100%;
     margin-left: 0px;
     margin-right: 0px;
 }
 
-#questionsSummaryDetailsTable tr:nth-child(even) 
+#questionsSummaryDetailsTable tr:nth-child(even)
 {
     background-color: #DDD;
 }
@@ -583,7 +583,7 @@ tr.tableHead:nth-child(odd){
     background-color: #c2f4a4;
 }
 
-#questionsSummaryDetailsTable td, #questionsSummaryDetailsTable a 
+#questionsSummaryDetailsTable td, #questionsSummaryDetailsTable a
 {
     line-height: 30px;
     font-size: 0.9rem;
@@ -612,7 +612,7 @@ tr.tableHead:nth-child(odd){
 }
 
 #report_notes {
-    border-bottom: thin solid #323232; 
+    border-bottom: thin solid #323232;
 }
 
 #body {
@@ -738,7 +738,7 @@ tr.tableHead:nth-child(odd){
     height: 100%;
     display: inline-block;
     float: left;
-    background: rgba(27, 175, 249, 1); 
+    background: rgba(27, 175, 249, 1);
 }
 
 .background_block.classification {
@@ -851,7 +851,7 @@ p.two_lines {
     line-height: 10px;
 }
 
-.tag_content:hover .tag_content_name, 
+.tag_content:hover .tag_content_name,
 .tag_content:hover .tag_content_main_display  {
     display: none;
 }
@@ -888,7 +888,7 @@ p.two_lines {
 
 .new_tags_report_title_bottom {
     cursor: pointer;
-    -webkit-user-select: none;       
+    -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     -o-user-select: none;
@@ -956,7 +956,7 @@ td.ind_worksheet {
 }
 
 .title_sections {
-    width: calc(25% - 0.75px);
+    width: calc(25% - 1px);
     height: 100%;
     float: left;
     text-align: center;
