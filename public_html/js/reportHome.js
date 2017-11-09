@@ -839,6 +839,7 @@ function setUpWorksheetList() {
                 status_colour = "rgb(255,0,0)";
             }
             worksheet["stu_score"] = stu_score;
+            worksheet["set_score"] = set_score;
             worksheet["percentage"] = stu_perc;
             worksheet["display_status"] = display_status;
             worksheet["display_status_colour"] = status_colour;
@@ -951,6 +952,7 @@ function worksheetSummaryRequestSuccess(json) {
 
 function setWorksheetSummary(type) {
     var summary = JSON.parse(sessionStorage.getItem("worksheet_summary"));
+    var worksheet_list = JSON.parse(sessionStorage.getItem("worksheet_list"));
     var summary_info = [];
     var parse_array = [];
     var id = "";
@@ -991,6 +993,31 @@ function setWorksheetSummary(type) {
             id = "section_tags";
             break;
         case 2:
+            var worksheet = false;
+            for (var i = 0; i < worksheet_list.length; i++) {
+                if (worksheet_list[i]["gwid"] == summary["gwid"]) {
+                    worksheet = worksheet_list[i];
+                    break;
+                }
+            }
+            if (worksheet) {
+                parse_array.push({
+                    main: "Marks",
+                    main_display: worksheet["display_marks"],
+                    width: 0
+                })
+                parse_array.push({
+                    main: "Percentage",
+                    main_display: worksheet["percentage"] + "%",
+                    width: 0
+                })
+                parse_array.push({
+                    main: "Set Average",
+                    main_display: worksheet["set_score"] + "%",
+                    width: 0
+                })
+            }
+
             summary_info = summary["cw_info"];
             if (summary_info["Grade"] && summary_info["Grade"] !== "") {
                 parse_array.push({
