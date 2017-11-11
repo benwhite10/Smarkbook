@@ -10,7 +10,8 @@ $(document).ready(function(){
     log_event("EDIT_SET_RESULTS", $('#userid').val(), gwid);
 
     setAutoSave(5000);
-
+    updateSummary();
+    
     $(window).resize(function(){
         setScreenSize();
         repositionStatusPopUp();
@@ -409,6 +410,7 @@ function setAutoSave(interval) {
         saveResults();
         saveWorksheets();
         saveGroupWorksheet();
+        //updateSummary();
     }, interval);
 }
 
@@ -639,6 +641,29 @@ function parseMainTable() {
         var stuid = student["ID"];
         updateStatusRow(stuid);
     }
+}
+
+function updateSummary() {
+    var gwid = getParameterByName("gwid");
+    var infoArray = {
+        gwid: gwid,
+        type: "SETSUMMARY",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getSetSummary.php",
+        dataType: "json",
+        success: function(json){
+            console.log(json);
+        },
+        error: function(json){
+            console.log("There was an error retrieving the set summary.");
+            console.log(json);
+        }
+    }); 
 }
 
 function getCompClass(status) {
