@@ -50,6 +50,8 @@ if(isset($_SESSION['message'])){
     <script src="pickadate/picker.js?<?php echo $info_version; ?>"></script>
     <script src="pickadate/picker.date.js?<?php echo $info_version; ?>"></script>
     <script src="pickadate/legacy.js?<?php echo $info_version; ?>"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -255,7 +257,7 @@ if(isset($_SESSION['message'])){
                         </tbody>
                     </table>
                 </div>
-
+                
                 <div id="main_content" style="overflow: scroll;">
                     <table class="results" border="1">
                         <thead class="results">
@@ -265,6 +267,9 @@ if(isset($_SESSION['message'])){
                         <tbody class="results" id="table_body">
                         </tbody>
                     </table>
+                    <div id="summary">
+                        <canvas id="myChart"></canvas>
+                    </div>
                 </div>
             </form>
     	</div>

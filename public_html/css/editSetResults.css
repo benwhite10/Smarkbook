@@ -9,6 +9,22 @@
     width: calc(100% - 10px);
 }
 
+#summary {
+    background: transparent;
+    padding: 20px 5px;
+    //padding-top:  10px;
+    border: 1px solid #323232;
+    display: inline-block;
+    width: calc(100% - 12px);
+    height: auto;
+}
+
+#myChart {
+    width: 90% !important;
+    margin: auto;
+    height: auto !important;
+}
+
 input[type="text"], input[type="password"], input[type="submit"], select, textarea{
     display: inline-block;
     font: normal 'Open Sans', sans-serif;

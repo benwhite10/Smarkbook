@@ -657,13 +657,115 @@ function updateSummary() {
         url: "/requests/getSetSummary.php",
         dataType: "json",
         success: function(json){
-            console.log(json);
+            //console.log(json);
+            makeChart(json);
         },
         error: function(json){
             console.log("There was an error retrieving the set summary.");
             console.log(json);
         }
     }); 
+}
+
+function makeChart(json) {
+    var data_1 = json["result"]["3001"];
+    var data_2 = json["result"]["Set"];
+    
+    var labels_1 = [];
+    for (var i = 0; i < data_2.length; i++) {
+        var data = data_2[i];
+        labels_1.push("Q" + data_2[i]["Number"]);
+    }
+    
+    var chart_data_1 = [];
+    for (var i = 0; i < data_2.length; i++) {
+        var flag = true;
+        for (var j = 0; j < data_1.length; j++) {
+            if (data_2[i]["SQID"] === data_1[j]["SQID"]) {
+                chart_data_1.push(data_1[j]["PercVal"]);
+                flag = false;
+                break;
+            }
+        }
+        if (flag) chart_data_1.push(NaN);
+    }
+    
+    var chart_data_2 = [];
+    for (var i = 0; i < data_2.length; i++) {
+        var flag = true;
+        for (var j = 0; j < data_2.length; j++) {
+            if (data_2[i]["SQID"] === data_2[j]["SQID"]) {
+                chart_data_2.push(data_2[j]["PercVal"]);
+                flag = false;
+                break;
+            }
+        }
+        if (flag) chart_data_2.push();
+    }
+    
+    // TODO add total
+    // TODO make label a percentage
+    console.log(labels_1);
+    console.log(chart_data_1);
+    console.log(chart_data_2);
+    
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels_1,
+            datasets: [{
+                label: "Percentage 1",
+                data: chart_data_1,
+                borderColor: 'rgba(255,99,132,1)',
+                borderWidth: 1,
+                fill: false,
+                lineTension: 0,
+                spanGaps: true,
+                borderDash: [10, 15]
+            }, {
+                data: chart_data_1,
+                borderColor: 'rgba(255,99,132,1)',
+                borderWidth: 1,
+                fill: false,
+                lineTension: 0,
+                spanGaps: false,
+            }, {
+                label: 'Percentage 2',
+                data: chart_data_2,
+                borderColor: 'rgba(20,200,132,1)',
+                borderWidth: 1,
+                fill: false, 
+                lineTension: 0,
+                spanGaps: true,
+                borderDash: [10, 15]
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        steps: 10,
+                        stepValue: 0.1,
+                        max: 1.0,
+                        callback: function(tick) {
+                            return (Math.round(tick * 100, 0)) + "%";
+                        }
+                    }
+                }]
+            }, 
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || 'Other';
+                        var perc_val = Math.round(tooltipItem.yLabel * 100,0);
+                        return datasetLabel + ": " + perc_val + "%";
+                    }
+                }
+            }
+        }
+    });
 }
 
 function getCompClass(status) {
