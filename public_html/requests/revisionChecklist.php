@@ -48,7 +48,8 @@ function getAllSpecificationPoints($courseId, $userid) {
             $id = $point["ID"];
             $links_query = "SELECT `ID`, `Title`, `Link` 
                 FROM `TREVISIONLINKS` 
-                WHERE `ChecklistID` = $id";
+                WHERE `ChecklistID` = $id
+                ORDER BY `Title`";
             $score_query = "SELECT `Score` 
                         FROM `TUSERREVISIONSCORES` 
                         WHERE `UserID` = $userid 
