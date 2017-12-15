@@ -91,15 +91,6 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
     <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
     <script src="js/tagsList.js?<?php echo $info_version; ?>"></script>
     <script src="js/viewMarkbook.js?<?php echo $info_version; ?>"></script>
-    <script>
-        function viewWorksheet(gwid) {
-            window.location.href = "editSetResults.php?gwid=" + gwid;
-        }
-        
-        function viewStudent(stuid, setid, staffid) {
-            window.location.href = "individualSummary.php?stuid=" + stuid + "&setid=" + setid + "&staffid=" + staffid;
-        }
-    </script>
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>

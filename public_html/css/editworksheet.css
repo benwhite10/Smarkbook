@@ -639,3 +639,7 @@ input[type="text"].pop_up_input_text {
     padding: 10px 20px;
     font-size: 0.8rem;
 }
+
+.tags_input_text_div > .awesomplete {
+    width: 100%;
+}

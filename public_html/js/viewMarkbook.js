@@ -33,4 +33,10 @@ function downloadSuccess(json) {
     }
 }
 
+function viewWorksheet(gwid) {
+    window.location.href = "editSetResults.php?gwid=" + gwid;
+}
 
+function viewStudent(stuid, setid, staffid) {
+    window.location.href = "reportHome.php?stu=" + stuid + "&set=" + setid + "&staff=" + staffid;
+}
