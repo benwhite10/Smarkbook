@@ -62,7 +62,90 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <ul class="menu navbar">
                 </ul>
             </div><div id="main_content">
-                
+                <table border="1" id='results_table'>
+                    <thead>
+                        <tr class="no_hover">
+                            <th class="blank_cell" ></th>
+                            <th class="blank_cell" ></th>
+                            <th class="blank_cell" ></th>
+                            <th style='text-align: center' class='rotate'><div title='Worksheet Name' onclick=''><span title='Worksheet Name'>Worksheet Name 1</span></div></th>
+                            <th style='text-align: center' class='rotate'><div title='Worksheet Name' onclick=''><span title='Worksheet Name'>Worksheet Name 2</span></div></th>
+                            <th style='text-align: center' class='rotate'><div title='Worksheet Name' onclick=''><span title='Worksheet Name'>Worksheet Name 3</span></div></th>
+                            <th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>
+                            <th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>
+                            <th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>
+                            <th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>
+                            <th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class='no_hover blank_cell'>
+                            <td class='blank_cell'></td>
+                            <td class='blank_cell'></td>
+                            <td class='blank_cell'></td>
+                            <td class='date' title='02/11/17' onclick=''><b>02/11</b></td>
+                            <td class='date' title='02/11/17' onclick=''><b>03/11</b></td>
+                            <td class='date' title='02/11/17' onclick=''><b>04/11</b></td>
+                            <td class='date'></td>
+                            <td class='date'></td>
+                            <td class='date'></td>
+                            <td class='date'></td>
+                            <td class='date'></td>
+                        </tr>
+                        <tr class='no_hover'>
+                            <td class='blank_cell'></td>
+                            <td class='blank_cell'></td>
+                            <td class='blank_cell'></td>
+                            <td class='total_marks'><b>/ 30</b></td>
+                            <td class='total_marks'><b>/ 40</b></td>
+                            <td class='total_marks'><b>/ 50</b></td>
+                            <td class='total_marks'></td>
+                            <td class='total_marks'></td>
+                            <td class='total_marks'></td>
+                            <td class='total_marks'></td>
+                            <td class='total_marks'></td>
+                        </tr>
+                        <tr>
+                            <td class='name' onclick=''>Student 1</td>
+                            <td class='set' onclick=''>09CGCMaN</td>
+                            <td class='initials' onclick=''>BJW</td>
+                            <td class='marks'>10</td>
+                            <td class='marks'>20</td>
+                            <td class='marks'>30</td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                        </tr>
+                        <tr>
+                            <td class='name' onclick=''>Student 2</td>
+                            <td class='set' onclick=''>09CGCMaN</td>
+                            <td class='initials' onclick=''>BJW</td>
+                            <td class='marks'>10</td>
+                            <td class='marks'>20</td>
+                            <td class='marks'>30</td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                        </tr>
+                        <tr>
+                            <td class='name' onclick=''>Student 3</td>
+                            <td class='set' onclick=''>09CGCMaE</td>
+                            <td class='initials' onclick=''>RPJ</td>
+                            <td class='marks'>10</td>
+                            <td class='marks'>20</td>
+                            <td class='marks'>30</td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                            <td class='marks'></td>
+                        </tr>                        
+                    </tbody>
+                </table>
             </div><div id="side_bar" class="menu_bar">
 
             </div>

@@ -64,7 +64,7 @@ function getCourseOverview($course_id) {
     $results_array = addStudentDetailsToResults($students, $set_details);
     
     // Get worksheets
-    $worksheets_query = "SELECT CW.`ID`, CW.`CourseID`, CW.`Date`, WV.`Version ID`, WV.`WName` , SUM(SQ.`Marks`) Marks 
+    $worksheets_query = "SELECT CW.`ID`, CW.`CourseID`, DATE_FORMAT(CW.`Date`, '%d/%m/%Y') LongDate, DATE_FORMAT(CW.`Date`, '%d/%m') ShortDate, WV.`Version ID`, WV.`WName` , SUM(SQ.`Marks`) Marks 
                         FROM `TCOURSEWORKSHEET` CW
                         JOIN `TWORKSHEETVERSION` WV ON CW.`WorksheetID` = WV.`Version ID`
                         JOIN `TSTOREDQUESTIONS` SQ ON WV.`Version ID` = SQ.`Version ID`
