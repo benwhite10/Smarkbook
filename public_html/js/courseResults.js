@@ -1,8 +1,37 @@
 $(document).ready(function(){
-    getDetails(getParameterByName("cid"));
+    sessionStorage.setItem("details", "[]");
+    getResultsRequest(1);
 });
 
-function getDetails(course_id) {
+function createTabs(tabs, selected) {
+    $("#main_content").html("<div id='tab_bar'></div>");
+    for (var i = 0; i < tabs.length; i++) {
+        $("#tab_bar").append("<div id='tab_" + i + "' class='tab_button' onclick='switchTab(" + i + ")'></div>");
+        $("#main_content").append("<div id='tab_option_" + i + "' class='tab_option'>");
+        if (i === tabs.length - 1) $("#tab_" + i).addClass("last");
+    }
+ 
+    for (var i = 0; i < tabs.length; i++) {
+        switch (tabs[i]) {
+            case "TABLE":
+                parseTable(i);
+                break;
+            case "SUMMARY":
+                parseSummary(i);
+                break;
+            default:
+                break;
+        }
+    }
+    
+    if (!selected || selected >= tabs.length) {
+        selected = 0;
+    }
+    $("#tab_" + selected).addClass("selected");
+    $("#tab_option_" + selected).addClass("selected");
+}
+
+function getResultsRequest(course_id) {
     var infoArray = {
         type: "GETCOURSEOVERVIEW",
         course: course_id,
@@ -25,15 +54,38 @@ function getDetails(course_id) {
 
 function getDetailsSuccess(json) {
     if (json["success"]) {
-        console.log(json);
         var results = json["result"];
+        sessionStorage.setItem("details", JSON.stringify(results));
         parseTitle(results["course_details"][0]);
-        var table_html = parseWorksheetTitles(results["worksheets"]);
-        table_html += parseResults(results["results_array"], results["worksheets"]);
-        $("#results_table").html(table_html);
+        createTabs(["TABLE", "SUMMARY"], 0);
     } else {
         console.log(json["message"]);
     }
+}
+
+function getResults() {
+    for (var i = 0; i < 1000; i++) {
+        var details = JSON.parse(sessionStorage.getItem("details"));
+        if (details) return details;
+    }
+    return false;
+}
+
+function parseTable(tab_id) {
+    $("#tab_option_" + tab_id).html("<table border='1' id='results_table'></table>");
+    $("#tab_" + tab_id).html("Table");
+    var details = getResults();
+    if (details) {
+        var table_html = parseWorksheetTitles(details["worksheets"]);
+        table_html += parseResults(details["results_array"], details["worksheets"]);
+        $("#results_table").html(table_html);
+    }
+    
+}
+
+function parseSummary(tab_id) {
+    $("#tab_option_" + tab_id).html("<p>This is a summary</p>");
+    $("#tab_" + tab_id).html("Summary");
 }
 
 function parseTitle(course_details) {
@@ -112,6 +164,19 @@ function parseResults(results_array, worksheets) {
     }
     table_html += "</tbody>";
     return table_html;
+}
+
+function switchTab(id) {
+    var tabs = document.getElementsByClassName("tab_button");
+    for (var i = 0; i < tabs.length; i++) {
+        $("#" + tabs[i].id).removeClass("selected");
+    }
+    $("#tab_" + id).addClass("selected");
+    var divs = document.getElementsByClassName("tab_option");
+    for (var i = 0; i < divs.length; i++) {
+        $("#" + divs[i].id).removeClass("selected");
+    }
+    $("#tab_option_" + id).addClass("selected");
 }
 
 function getParameterByName(name, url) {

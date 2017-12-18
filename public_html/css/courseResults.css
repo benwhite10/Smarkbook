@@ -125,4 +125,57 @@ input[type="text"].markInput{
 
 #main_content {
     width: 100%;
+    margin-top: 0px;
+    float: left;
+}
+
+/* Tab Bar */
+
+#tab_bar {
+    width: calc(100% - 2px);
+    height: 40px;
+    border: 1px solid #323232;
+    background: transparent;
+    margin: 0 0 10px 0;
+    float: left;
+    user-select: none;
+}
+
+.tab_button {
+    width: calc(50% - 1px);
+    border: none;
+    border-right: 1px solid #555;
+    height: 100%;
+    display: inline-block;
+    float: left;
+    cursor: pointer;
+    color: #323232;
+    font-size: 18px;
+    text-align: center;
+    font-weight: 400;
+    line-height: 40px;
+}
+
+.tab_button.last {
+    width: 50%;
+    border-right: none;
+}
+
+.tab_button:hover {
+    background: #DDD;
+}
+
+.tab_button.selected {
+    background: #AAA;
+}
+
+.tab_option {
+    display: none;
+    float: left;
+    width: 100%;
+    height: auto;
+}
+
+.tab_option.selected {
+    display: inline-block;
 }
