@@ -93,6 +93,17 @@ function getCourseOverview($course_id) {
                             AND CQ.`Deleted` = 0
                             GROUP BY CQ.`Stored Question ID`, CQ.`Student ID`) AS A
                             GROUP BY A.`Student ID`";
+        $set_results_query = "SELECT B.`Student ID`, B.`Group ID`, SUM(B.`Mark`) Mark FROM (
+    SELECT CQ.`Student ID`, CQ.`Mark`, GW.`Group ID` 
+    FROM `TCOMPLETEDQUESTIONS` CQ 
+    JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID` 
+    WHERE CQ.`Group Worksheet ID` IN (
+        SELECT GW.`Group Worksheet ID` 
+        FROM `TGROUPWORKSHEETS` GW
+        WHERE GW.`CourseWorksheetID` = 1 AND GW.`Version ID` = 700)
+    AND CQ.`Deleted` = 0
+    GROUP BY CQ.`Stored Question ID`, CQ.`Student ID`) AS B
+                            GROUP BY B.`Student ID` ";
         try {
             $results = db_select_exception($results_query);
         } catch (Exception $ex) {
@@ -100,6 +111,9 @@ function getCourseOverview($course_id) {
         }
         $results_array = addResultsToResultsArray($results_array, $results, $cwid);
     }
+    
+    // Get set summary
+    
     
     // Return results table, course details and worksheet details
     $return = array(
@@ -157,6 +171,10 @@ function addResultsToResultsArray($results_array, $results, $cwid) {
         }
     }
     return $results_array;
+}
+
+function getSetSummary($results, $cwid) {
+    
 }
 
 function getSetFromID($set_id, $sets) {

@@ -12,7 +12,6 @@ td
 td.marks{
     padding: 0px;
     text-align: center;
-    cursor: default;
 }
 
 table {
@@ -27,6 +26,8 @@ td, th {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
 }
 
 th {
@@ -38,8 +39,6 @@ td.name, td.set, td.initials {
     min-width: 150px;
     max-width: 250px;
     width: auto;
-    cursor: pointer;
-    user-select: none;
 }
 
 td.set, td.initials {
@@ -57,7 +56,6 @@ td.initials {
 
 td.date {
     text-align: center; 
-    cursor:pointer;
     padding-left: 0px;
 }
 
@@ -67,7 +65,6 @@ td.date:hover {
 
 td.total_marks {
     text-align: center; 
-    cursor:default;
     padding-left: 0px;
 }
 
@@ -76,7 +73,6 @@ th.rotate {
   height: 200px;
   white-space: nowrap;
   overflow: visible;
-  cursor: pointer;
 }
 
 th.rotate > div {
@@ -117,10 +113,6 @@ tr.no_hover:nth-child(even):hover {
 td.blank_cell {
     background-color: #EEE;
     border: none;
-}
-
-input[type="text"].markInput{
-    cursor: default;
 }
 
 #main_content {
