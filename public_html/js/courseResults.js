@@ -17,7 +17,7 @@ function createTabs(tabs, selected) {
                 parseTable(i);
                 break;
             case "SUMMARY":
-                parseSummary(i);
+                parseSummaryTable(i);
                 break;
             default:
                 break;
@@ -77,29 +77,34 @@ function parseTable(tab_id) {
     $("#tab_" + tab_id).html("Table");
     var details = getResults();
     if (details) {
-        var table_html = parseWorksheetTitles(details["worksheets"]);
+        var table_html = parseWorksheetTitles(details["worksheets"], 3);
         table_html += parseResults(details["results_array"], details["worksheets"]);
         $("#results_table").html(table_html);
     }
     
 }
 
-function parseSummary(tab_id) {
-    $("#tab_option_" + tab_id).html("<p>This is a summary</p>");
+function parseSummaryTable(tab_id) {
+    $("#tab_option_" + tab_id).html("<table border='1' id='summary_table'></table>");
     $("#tab_" + tab_id).html("Summary");
+    var details = getResults();
+    if (details) {
+        var table_html = parseWorksheetTitles(details["worksheets"], 2);
+        table_html += parseSummary(details["summary_array"], details["worksheets"]);
+        $("#summary_table").html(table_html);
+    }
 }
 
 function parseTitle(course_details) {
     $("#title2").html("<h1>" + course_details["Title"] + "</h1>");
 }
 
-function parseWorksheetTitles(worksheets) {
+function parseWorksheetTitles(worksheets, starting_blank_cols) {
     var worksheet_text = "<thead><tr class='no_hover'>";
     var min_cols = 10;
-    var stating_blank_cols = 3;
     var blank_cols = min_cols - worksheets.length;
     
-    for (var i = 0; i < stating_blank_cols; i++) {
+    for (var i = 0; i < starting_blank_cols; i++) {
         worksheet_text += "<th class='blank_cell'></th>";
     }
     for (var i = 0; i < worksheets.length; i++) {
@@ -111,7 +116,7 @@ function parseWorksheetTitles(worksheets) {
     }
     
     worksheet_text += "</tr><tr class='no_hover blank_cell'>";
-    for (var i = 0; i < stating_blank_cols; i++) {
+    for (var i = 0; i < starting_blank_cols; i++) {
         worksheet_text += "<td class='blank_cell'></td>";
     }
     for (var i = 0; i < worksheets.length; i++) {
@@ -124,7 +129,7 @@ function parseWorksheetTitles(worksheets) {
     }
     
     worksheet_text += "</tr><tr class='no_hover blank_cell'>";
-    for (var i = 0; i < stating_blank_cols; i++) {
+    for (var i = 0; i < starting_blank_cols; i++) {
         worksheet_text += "<td class='blank_cell'></td>";
     }
     for (var i = 0; i < worksheets.length; i++) {
@@ -157,6 +162,35 @@ function parseResults(results_array, worksheets) {
                 table_html += "<td class='marks'></td>";
             }
             
+        }
+        for (var k = 0; k < blank_cols; k++) {
+            table_html += "<td class='marks'></td>";
+        }
+        table_html += "</tr>";
+    }
+    table_html += "</tbody>";
+    return table_html;
+}
+
+function parseSummary(summary_array, worksheets) {
+    var table_html = "<tbody>";
+    var min_cols = 10;
+    var blank_cols = min_cols - worksheets.length;
+    for (var i = 0; i < summary_array.length; i++) {
+        var set = summary_array[i]["Details"];
+        table_html += "<tr>";
+        if (set === "Total") {
+            table_html += "<td class='total' colspan='2'><b>Total</b></td>";
+        } else {
+            table_html += "<td class='set' onclick=''>" + set["Name"] + "</td>";
+            table_html += "<td class='initials' onclick=''>" + set["Staff Initials"] + "</td>";
+        }      
+        for (var j = 0; j < worksheets.length; j++) {
+            var result = summary_array[i][worksheets[j]["ID"]];
+            var display_result = result ? Math.round(result["Av Mark"],0) : "";
+            table_html += "<td class='marks'>";
+            table_html += set === "Total" ? "<b>" + display_result + "</b>" : display_result;
+            table_html += "</td>";            
         }
         for (var k = 0; k < blank_cols; k++) {
             table_html += "<td class='marks'></td>";

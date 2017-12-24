@@ -108,12 +108,11 @@ function getCourseOverview($course_id) {
     $return = array(
         "course_details" => $course_details,
         "results_array" => $results_array,
-        "summary" => $summary_array,
+        "summary_array" => $summary_array,
         "worksheets" => $worksheets
     );
     
     succeedRequest($return);
-    // Should set summary be a different function or the same?
 }
 
 function addStudentDetailsToResults($students, $sets) {
