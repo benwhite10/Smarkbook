@@ -58,6 +58,7 @@ function getDetailsSuccess(json) {
         sessionStorage.setItem("details", JSON.stringify(results));
         parseTitle(results["course_details"][0]);
         createTabs(["TABLE", "SUMMARY"], 0);
+        console.log(json);
     } else {
         console.log(json["message"]);
     }

@@ -45,6 +45,8 @@ function getCourseOverview($course_id) {
         failRequest("There was an error getting the set details: " . $ex->getMessage());
     }
     
+    $summary_array = addSetDetailsToSummary($set_details);
+    
     // Get students and add (with set details) to a results table
     $students_query = "SELECT G.`Group ID`, U.`User ID`
                     FROM `TGROUPCOURSE` GC 
@@ -93,32 +95,20 @@ function getCourseOverview($course_id) {
                             AND CQ.`Deleted` = 0
                             GROUP BY CQ.`Stored Question ID`, CQ.`Student ID`) AS A
                             GROUP BY A.`Student ID`";
-        $set_results_query = "SELECT B.`Student ID`, B.`Group ID`, SUM(B.`Mark`) Mark FROM (
-    SELECT CQ.`Student ID`, CQ.`Mark`, GW.`Group ID` 
-    FROM `TCOMPLETEDQUESTIONS` CQ 
-    JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID` 
-    WHERE CQ.`Group Worksheet ID` IN (
-        SELECT GW.`Group Worksheet ID` 
-        FROM `TGROUPWORKSHEETS` GW
-        WHERE GW.`CourseWorksheetID` = 1 AND GW.`Version ID` = 700)
-    AND CQ.`Deleted` = 0
-    GROUP BY CQ.`Stored Question ID`, CQ.`Student ID`) AS B
-                            GROUP BY B.`Student ID` ";
         try {
             $results = db_select_exception($results_query);
         } catch (Exception $ex) {
             failRequest("There was an error getting the results: " . $ex->getMessage());
         }
         $results_array = addResultsToResultsArray($results_array, $results, $cwid);
+        $summary_array = addResultsToSummaryArray($summary_array, $results, $cwid, $students, $worksheets);
     }
-    
-    // Get set summary
-    
     
     // Return results table, course details and worksheet details
     $return = array(
         "course_details" => $course_details,
         "results_array" => $results_array,
+        "summary" => $summary_array,
         "worksheets" => $worksheets
     );
     
@@ -156,6 +146,25 @@ function addStudentDetailsToResults($students, $sets) {
     return $results_array;
 }
 
+function addSetDetailsToSummary($set_details) {
+    $summary_array = [];
+    
+    foreach ($set_details as $set) {
+        $staff_user = Teacher::createTeacherFromId($set["User ID"]);
+        $set["Staff Name"] = $staff_user->getTitle() . " " . $staff_user->getSurname();
+        $set["Staff Initials"] = $staff_user->getInitials();
+        array_push($summary_array, array(
+            "Details" => $set
+        ));
+    }
+    
+    array_push($summary_array, array(
+        "Details" => "Total"
+    ));
+    
+    return $summary_array;
+}
+
 function addResultsToResultsArray($results_array, $results, $cwid) {
     foreach ($results as $result) {
         $student_id = $result["Student ID"];
@@ -173,8 +182,48 @@ function addResultsToResultsArray($results_array, $results, $cwid) {
     return $results_array;
 }
 
-function getSetSummary($results, $cwid) {
+function addResultsToSummaryArray($summary_array, $results, $cwid, $students, $worksheets) {
+    $marks = getMarksForWorksheet($cwid, $worksheets);
     
+    foreach ($results as $key=>$result) {
+        $group_id = getSetFromStudent($result["Student ID"], $students);
+        $result["Group ID"] = $group_id;
+        $results[$key] = $result;
+    }
+    
+    foreach ($summary_array as $key=>$set) {
+        $group_id = $set["Details"] !== "Total" ? $set["Details"]["Group ID"] : "Total";
+        $total_mark = $total_marks = $count = 0;
+        foreach ($results as $result) {
+            if ($group_id == "Total" || $group_id == $result["Group ID"]) {
+                $total_mark += $result["Mark"];
+                $total_marks += $marks;
+                $count++;
+            }
+        }
+        $summary_array[$key][$cwid] = array(
+            "CWID" => $cwid,
+            "Percentage" => round($total_mark/$total_marks, 2),
+            "Av Mark" => round($total_mark/$count, 1),
+            "Count" => $count
+        );;
+    }
+    
+    return $summary_array;
+}
+
+function getSetFromStudent($student_id, $students) {
+    foreach ($students as $student) {
+        if ($student["User ID"] == $student_id) return $student["Group ID"];
+    }
+    return null;
+}
+
+function getMarksForWorksheet($cwid, $worksheets) {
+    foreach ($worksheets as $worksheet) {
+        if ($cwid = $worksheet["ID"]) return $worksheet["Marks"];
+    }
+    return null;
 }
 
 function getSetFromID($set_id, $sets) {
