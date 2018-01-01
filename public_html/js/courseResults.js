@@ -3,6 +3,29 @@ $(document).ready(function(){
     getResultsRequest(1);
 });
 
+function getColour(num, av) {
+    var colours = av ? [
+        [0, 0, 0],
+        [38, 50, 56],
+        [84, 110, 122]
+    ] : [
+        [244, 67, 54],
+        [63, 81, 181],
+        [76, 175, 80],
+        [255, 235, 59],
+        [141, 110, 99],
+        [156, 39, 176],
+        [3, 169, 244],
+        [255, 152, 0],
+        [158, 158, 158],
+        [156, 204, 101]
+    ];
+    
+    num = Math.min(num, (colours.length - 1));
+    var colour = colours[num];
+    return "rgba(" + colour[0] + "," + colour[1] + "," + colour[2] + ",1)";
+}
+
 function createTabs(tabs, selected) {
     $("#main_content").html("<div id='tab_bar'></div>");
     for (var i = 0; i < tabs.length; i++) {
@@ -57,8 +80,8 @@ function getDetailsSuccess(json) {
         var results = json["result"];
         sessionStorage.setItem("details", JSON.stringify(results));
         parseTitle(results["course_details"][0]);
-        createTabs(["TABLE", "SUMMARY"], 0);
-        console.log(json);
+        createTabs(["TABLE", "SUMMARY"], 1);
+        //console.log(json);
     } else {
         console.log(json["message"]);
     }
@@ -89,9 +112,11 @@ function parseSummaryTable(tab_id) {
     $("#tab_" + tab_id).html("Summary");
     var details = getResults();
     if (details) {
-        var table_html = parseWorksheetTitles(details["worksheets"], 2);
+        var table_html = parseWorksheetTitles(details["worksheets"], 3);
         table_html += parseSummary(details["summary_array"], details["worksheets"]);
         $("#summary_table").html(table_html);
+        $("#tab_option_" + tab_id).append("<div id='summary'><canvas id='myChart'></canvas></div>");
+        createSummaryChart(details["summary_array"], details["worksheets"]);
     }
 }
 
@@ -178,9 +203,10 @@ function parseSummary(summary_array, worksheets) {
     var blank_cols = min_cols - worksheets.length;
     for (var i = 0; i < summary_array.length; i++) {
         var set = summary_array[i]["Details"];
-        table_html += "<tr>";
+        var group_id = set === "Total" ? "average" : set["Group ID"];
+        table_html += "<tr><td class='checkbox selected' id='set_" + group_id + "' onclick=clickCheckbox('" + group_id + "')></td>";
         if (set === "Total") {
-            table_html += "<td class='total' colspan='2'><b>Total</b></td>";
+            table_html += "<td class='total' colspan='2'><b>Average</b></td>";
         } else {
             table_html += "<td class='set' onclick=''>" + set["Name"] + "</td>";
             table_html += "<td class='initials' onclick=''>" + set["Staff Initials"] + "</td>";
@@ -199,6 +225,155 @@ function parseSummary(summary_array, worksheets) {
     }
     table_html += "</tbody>";
     return table_html;
+}
+
+function createSummaryChart(summary_array, worksheets) {
+    var labels = [""];
+    var datasets = [];
+    for (var i = 0; i < worksheets.length; i++) {
+        labels.push(worksheets[i]["WName"]);
+    }
+    labels.push("");
+    var max_perc = 0;
+    var min_perc = 1;
+    
+    for (var j = 0; j < summary_array.length; j++) {
+        var chart_data = [null];
+        var set_name = "";
+        var border_colour = "";
+        var border_width = "";
+        var group_id = summary_array[j]["Details"] === "Total" ? "average" : summary_array[j]["Details"]["Group ID"];
+        if (!$("#set_" + group_id).hasClass("selected")) continue;
+        
+        if (summary_array[j]["Details"] === "Total") {
+            set_name = "Average";
+            border_colour = getColour(0,true);
+            border_width = 2;
+        } else {
+            set_name = summary_array[j]["Details"]["Name"] + " - " + summary_array[j]["Details"]["Staff Initials"];
+            border_colour = getColour(j,false);
+            border_width = 1;
+        }
+        
+        for (var i = 0; i < worksheets.length; i++) {
+            var cwid = worksheets[i]["ID"];
+            if (summary_array[j][cwid]) {
+                var perc = summary_array[j][cwid]["Percentage"];
+                chart_data.push(perc);
+                min_perc = Math.min(min_perc, perc);
+                max_perc = Math.max(max_perc, perc);
+            } else {
+                chart_data.push(null);
+            }
+        }
+        chart_data.push(null);
+        datasets.push({
+            label: set_name,
+            data: chart_data,
+            borderColor: border_colour,
+            borderWidth: border_width,
+            fill: false,
+            lineTension: 0,
+            spanGaps: false
+        });
+    }
+    
+    min_perc = Math.floor(10*(min_perc - 0.05))/10;
+    max_perc = Math.ceil(10*(max_perc + 0.05))/10;
+    
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        steps: 10,
+                        max: max_perc,
+                        min: min_perc,
+                        callback: function(tick) {
+                            return (Math.round(tick * 100, 0)) + "%";
+                        }
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        autoSkip: false
+                    }
+                }]
+            }, 
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || 'Other';
+                        var perc_val = Math.round(tooltipItem.yLabel * 100,0);
+                        return datasetLabel + ": " + perc_val + "%";
+                    }
+                }
+            },
+            animation: {
+                duration: 0, // general animation time
+            },
+            hover: {
+                animationDuration: 0, // duration of animations when hovering an item
+            },
+            responsiveAnimationDuration: 0
+        }
+    });
+}
+
+function makeChart(json) {
+    var data_1 = json["result"]["3001"];
+    var data_2 = json["result"]["Set"];
+    
+    var labels_1 = [];
+    for (var i = 0; i < data_2.length; i++) {
+        var data = data_2[i];
+        labels_1.push("Q" + data_2[i]["Number"]);
+    }
+    
+    var chart_data_1 = [];
+    for (var i = 0; i < data_2.length; i++) {
+        var flag = true;
+        for (var j = 0; j < data_1.length; j++) {
+            if (data_2[i]["SQID"] === data_1[j]["SQID"]) {
+                chart_data_1.push(data_1[j]["PercVal"]);
+                flag = false;
+                break;
+            }
+        }
+        if (flag) chart_data_1.push(NaN);
+    }
+    
+    var chart_data_2 = [];
+    for (var i = 0; i < data_2.length; i++) {
+        var flag = true;
+        for (var j = 0; j < data_2.length; j++) {
+            if (data_2[i]["SQID"] === data_2[j]["SQID"]) {
+                chart_data_2.push(data_2[j]["PercVal"]);
+                flag = false;
+                break;
+            }
+        }
+        if (flag) chart_data_2.push();
+    }
+}
+
+function clickCheckbox(id) {
+    if ($("#set_" + id).hasClass("selected")) {
+        $("#set_" + id).removeClass("selected");
+    } else {
+        $("#set_" + id).addClass("selected");
+    }
+    var details = getResults();
+    if (details) {
+        createSummaryChart(details["summary_array"], details["worksheets"]);
+    }
 }
 
 function switchTab(id) {

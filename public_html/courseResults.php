@@ -34,6 +34,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     <?php pageHeader("Internal Results", $info_version); ?>
     <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
     <script src="js/courseResults.js?<?php echo $info_version; ?>"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/courseResults.css?<?php echo $info_version; ?>" />
 </head>
 <body>
