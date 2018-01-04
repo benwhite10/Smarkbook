@@ -85,6 +85,7 @@ function getAllWorksheets($orderby, $desc){
         if(isset($desc) && $desc == "TRUE"){
             $query .= " DESC";
         }
+        $query .= ", WV.`Version ID` DESC";
     }
 
     try{

@@ -8,6 +8,7 @@ include_once $include_path . '/public_html/requests/core.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $course_id = filter_input(INPUT_POST,'course',FILTER_SANITIZE_NUMBER_INT);
+$vid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
@@ -19,6 +20,12 @@ if(!$role){
 switch ($request_type){
     case "GETCOURSEOVERVIEW":
         getCourseOverview($course_id);
+        break;
+    case "GETEXISTINGRESULTS":
+        getExistingResults($course_id, $vid);
+        break;
+    default:
+        break;
 }
 
 function getCourseOverview($course_id) {
@@ -110,6 +117,34 @@ function getCourseOverview($course_id) {
         "results_array" => $results_array,
         "summary_array" => $summary_array,
         "worksheets" => $worksheets
+    );
+    
+    succeedRequest($return);
+}
+
+function getExistingResults($course_id, $vid) {
+    $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Group ID` GID, G.`Name`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, COUNT(*) Count, S.`Initials`   
+                FROM `TGROUPWORKSHEETS` GW
+                JOIN `TCOMPLETEDWORKSHEETS` CW ON GW.`Group Worksheet ID` = CW.`Group Worksheet ID` 
+                JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID` 
+                JOIN `TSTAFF` S ON GW.`Primary Staff ID` = S.`User ID`
+                WHERE GW.`Group ID` IN (
+                SELECT `GroupID` FROM `TGROUPCOURSE` 
+                WHERE `CourseID` = $course_id
+                ) AND GW.`Version ID` = $vid 
+                AND GW.`Deleted` = 0
+                AND (CW.`Completion Status` = 'Completed'
+                     OR CW.`Completion Status` = 'Partially Completed')
+                GROUP BY GW.`Group Worksheet ID`
+                ORDER BY GW.`Group ID`, Date DESC";
+    try {
+        $results = db_select_exception($query);
+    } catch (Exception $ex) {
+        failRequest("There was an error getting the existing results: " . $ex->getMessage());
+    }
+    
+    $return = array(
+        "existing_results" => $results
     );
     
     succeedRequest($return);

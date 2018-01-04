@@ -1,6 +1,12 @@
+var awesompletes = [];
+
 $(document).ready(function(){
     sessionStorage.setItem("details", "[]");
-    getResultsRequest(1);
+    sessionStorage.setItem("worksheets", "[]");
+    sessionStorage.setItem("search_results", "no_results");
+    sessionStorage.setItem("course_id", getParameterByName("cid"));
+    getResultsRequest(sessionStorage.getItem("course_id"));
+    getWorksheets();
 });
 
 function getColour(num, av) {
@@ -28,8 +34,11 @@ function getColour(num, av) {
 
 function createTabs(tabs, selected) {
     $("#main_content").html("<div id='tab_bar'></div>");
+    var perc_width = 100/tabs.length;
+    var subtract = (tabs.length - 1)/tabs.length;
+    var width = "calc(" + perc_width + "% - " + subtract + "px)";
     for (var i = 0; i < tabs.length; i++) {
-        $("#tab_bar").append("<div id='tab_" + i + "' class='tab_button' onclick='switchTab(" + i + ")'></div>");
+        $("#tab_bar").append("<div id='tab_" + i + "' class='tab_button' onclick='switchTab(" + i + ")' style='width:" + width + "'></div>");
         $("#main_content").append("<div id='tab_option_" + i + "' class='tab_option'>");
         if (i === tabs.length - 1) $("#tab_" + i).addClass("last");
     }
@@ -41,6 +50,12 @@ function createTabs(tabs, selected) {
                 break;
             case "SUMMARY":
                 parseSummaryTable(i);
+                break;
+            case "GROUPS":
+                parseGroupsTab(i);
+                break;
+            case "WORKSHEETS":
+                parseWorksheetsTab(i);
                 break;
             default:
                 break;
@@ -75,12 +90,44 @@ function getResultsRequest(course_id) {
     });
 }
 
+function getWorksheets() {
+    var type = "ALLWORKSHEETS";
+    var infoArray = {
+        type: type,
+        orderby: "WV.`Date Added`",
+        desc: "TRUE",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getWorksheets.php",
+        dataType: "json",
+        success: function(json){
+            getWorksheetsSuccess(json);
+        },
+        error: function() {
+            console.log("There was an error sending the worksheets request.");
+        }
+    });
+}
+
+function getWorksheetsSuccess(json) {
+    if(json["success"]) {
+        sessionStorage.setItem("worksheets", JSON.stringify(json["worksheets"]));
+    } else {
+        console.log("There was an error getting the worksheets.");
+        console.log(json["message"]);
+    }
+}
+
 function getDetailsSuccess(json) {
     if (json["success"]) {
         var results = json["result"];
         sessionStorage.setItem("details", JSON.stringify(results));
         parseTitle(results["course_details"][0]);
-        createTabs(["TABLE", "SUMMARY"], 1);
+        createTabs(["TABLE", "SUMMARY", "WORKSHEETS"], 2);
         //console.log(json);
     } else {
         console.log(json["message"]);
@@ -118,6 +165,147 @@ function parseSummaryTable(tab_id) {
         $("#tab_option_" + tab_id).append("<div id='summary'><canvas id='myChart'></canvas></div>");
         createSummaryChart(details["summary_array"], details["worksheets"]);
     }
+}
+
+function parseGroupsTab(tab_id) {
+    $("#tab_option_" + tab_id).html("<table border='1' id='groups_table'></table>");
+    $("#tab_" + tab_id).html("Groups");
+    var details = getResults();
+    if (details) {
+        
+    }
+}
+
+function parseWorksheetsTab(tab_id) {
+    $("#tab_option_" + tab_id).html("<div id='worksheets_tab'></div>");
+    $("#tab_" + tab_id).html("Worksheets");
+    var details = getResults();
+    if (details) {
+        $("#worksheets_tab").html(courseWorksheetsTab(details["worksheets"]));
+        refreshNewWorksheetsTable();
+        $("#search_bar_text_input").keyup(function(){
+            //console.log("Halsdkjfhlas");
+            searchWorksheets();
+        });
+        //createAwesomeplete("worksheets");
+    }
+}
+
+function courseWorksheetsTab(worksheets) {
+    var worksheets_html = "<div id='current_worksheets'>";
+    if (worksheets.length > 0) {
+        for (var i = 0; i < worksheets.length; i++) {
+            var name = worksheets[i]["WName"];
+            var long_date = worksheets[i]["LongDate"];
+            var class_text = "current_worksheet_row";
+            if (i === worksheets.length - 1) class_text += " bottom";
+            worksheets_html += "<div class='" + class_text + "'>";
+            worksheets_html += "<div class='name'>" + name + "</div>";
+            worksheets_html += "<div class='date'>" + long_date + "</div>";
+            worksheets_html += "<div class='button'>Remove</div></div>";
+        }
+    } else {
+        worksheets_html += "<i>No worksheets</i>";
+    }
+    worksheets_html += "</div><div id='add_worksheets_div'>";
+    worksheets_html += "<div id='add_worksheets_title'>Add New Worksheets</div>";
+    worksheets_html += "<div id='add_worksheets_left'>" + parseNewWorksheetsTable() + "</div>";
+    worksheets_html += "<div id='add_worksheets_right'></div>";
+    return worksheets_html;
+}
+
+function parseNewWorksheetsTable() {
+    var table_html = "<div id='search_bar'><div id='search_bar_text'>";
+    table_html += "<input id='search_bar_text_input' type='text' placeholder='Search Worksheets'></div>";
+    table_html += "<div id='search_bar_cancel' onclick='clearSearch()'></div>";
+    table_html += "<div id='search_bar_button' onclick='searchWorksheets()'></div></div>";
+    table_html += "<div id='worksheet_rows'></div>";
+    return table_html;
+}
+
+function refreshNewWorksheetsTable() {
+    var search_results = sessionStorage.getItem("search_results");
+    var name_key = "Name";
+    var id_key = "Version ID";
+    var sheets = "";
+    if (search_results === "no_results" || search_results === "undefined") {
+        var sheets = JSON.parse(sessionStorage.getItem("worksheets"));
+        name_key = "WName";
+        id_key = "ID";
+    } else {
+        sheets = JSON.parse(search_results);
+    }
+    
+    var table_html = "";
+    for (var key in sheets) {
+        table_html += "<div class='worksheet_row' onclick='clickWorksheet(" + sheets[key][id_key] + ")'>";
+        table_html += "<div class='worksheet_row_title'>" + sheets[key][name_key] + "</div>";
+        table_html += "<div class='worksheet_row_detail'>" + sheets[key]["Date"] + "</div>";
+        table_html += "</div>";
+    }
+   $("#worksheet_rows").html(table_html);
+}
+
+function clickWorksheet(vid) {
+    var infoArray = {
+        type: "GETEXISTINGRESULTS",
+        course: sessionStorage.getItem("course_id"),
+        vid: vid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/internalResults.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                showExistingResults(vid, json["result"]["existing_results"]);
+            }
+            console.log(json);
+        },
+        error: function() {
+            console.log("There was an error getting the existing results.");
+        }
+    });
+}
+
+function showExistingResults(vid, results) {
+    var worksheets = JSON.parse(sessionStorage.getItem("worksheets"));
+    var worksheet = "";
+    for (var key in worksheets) {
+        if (worksheets[key]["ID"] == vid) {
+            worksheet = worksheets[key];
+            break;
+        }
+    }
+    var title = worksheet["WName"];
+    var html = "<div id='existing_worksheets_title'>" + title + "</div>";
+    html += "<div id='add_worksheet_description'>Click to add '" + title + "' to the markbook of each group assigned to this course. <br><br>First check the list below for any results that have already been entered that you may want to include in the markbook.</div>";
+    html += "<div id='add_worksheet_buttons'>Add worksheet to course</div>";
+    if (results.length > 0) {
+        html += "<div id='existing_worksheets'>";
+        for (var i = 0; i < results.length; i++) {
+            var group = results[i]["Name"];
+            var initials = results[i]["Initials"];
+            var date = results[i]["Date"];
+            var gwid = results[i]["GWID"];
+            var count = results[i]["Count"];
+            html += "<div class='existing_worksheet_row";
+            if (i + 1 === results.length) html += " bottom";
+            html += "' onclick='clickExistingCheckbox(" + gwid + ")'>";
+            html += "<div class='existing_checkbox selected' id='result_" + gwid + "'></div>";
+            html += "<div class='group'>" + group + " (" + initials + ")</div>";
+            html += "<div class='count'>" + count + " result(s)</div>";
+            html += "<div class='date'>" + date + "</div>";
+            html += "</div>";
+        }
+        html += "</div>";
+    } else {
+        html += "<div id='existing_worksheets'><i>No existing worksheets</i></div>";
+    }
+    $("#add_worksheets_right").html(html);
 }
 
 function parseTitle(course_details) {
@@ -373,6 +561,61 @@ function clickCheckbox(id) {
     var details = getResults();
     if (details) {
         createSummaryChart(details["summary_array"], details["worksheets"]);
+    }
+}
+
+function clickExistingCheckbox(id) {
+    if ($("#result_" + id).hasClass("selected")) {
+        $("#result_" + id).removeClass("selected");
+    } else {
+        $("#result_" + id).addClass("selected");
+    }
+}
+
+function searchWorksheets() {
+    var searchTerm = $("#search_bar_text_input").val();
+    if(searchTerm.length < 2) {
+        sessionStorage.setItem("search_results", "no_results");
+        refreshNewWorksheetsTable();
+        return;
+    }
+    var infoArray = {
+        type: "SEARCH",
+        search: searchTerm,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/searchWorksheets.php",
+        dataType: "json",
+        success: function(json){
+            searchSuccess(json, searchTerm);
+        },
+        error: function() {
+            console.log("There was an error sending the search worksheets request.");
+        }
+    });
+}
+
+function clearSearch() {
+    $("#search_bar_text_input").val("");
+    sessionStorage.setItem("search_results", "no_results");
+    refreshNewWorksheetsTable();
+}
+
+function searchSuccess(json, searchTerm) {
+    if(json["success"]) {
+        if (json["noresults"]) {
+            sessionStorage.setItem("search_results", "no_results");
+        } else {
+            sessionStorage.setItem("search_results", JSON.stringify(json["vids"]));
+        }
+        refreshNewWorksheetsTable();
+    } else {
+        console.log("There was an error searching the worksheets.");
+        console.log(json["message"]);
     }
 }
 

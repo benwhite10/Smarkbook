@@ -59,7 +59,7 @@ td.initials {
     text-align: center;
 }
 
-td.checkbox {
+td.checkbox, .existing_checkbox {
     min-width: 32px;
     max-width: 32px;
     padding: 0;
@@ -71,7 +71,11 @@ td.checkbox {
     background-position-y: 0;
 }
 
-td.checkbox.selected {
+.existing_checkbox {
+    margin: 0;
+}
+
+td.checkbox.selected, .existing_checkbox.selected {
     background-position-x: -96px;
 }
 
@@ -191,4 +195,344 @@ td.blank_cell {
 
 .tab_option.selected {
     display: inline-block;
+}
+
+
+#current_worksheets {
+    width: calc(100% - 2px);
+    min-height: 32px;
+    line-height: 32px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #323232;
+}
+
+.current_worksheet_row {
+    width: 100%;
+    height: 32px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 1px solid #CCC;
+    user-select: none;
+}
+
+.current_worksheet_row.bottom {
+    border-bottom: none;
+}
+
+.current_worksheet_row:hover {
+    background: #a4ef76;
+}
+
+.current_worksheet_row > .name, .current_worksheet_row > .date, .current_worksheet_row > .button {
+    width: calc(100% - 310px);
+    float: left;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: #323232;
+    line-height: 32px
+}
+
+.current_worksheet_row > .name {
+    text-align: left;
+    padding-left: 10px;
+}
+
+.current_worksheet_row > .date {
+    width: 200px;
+    text-align: center;
+}
+
+.current_worksheet_row > .button {
+    width: 100px;
+    text-align: center;
+}
+
+.current_worksheet_row > .button:hover {
+    background: #ff9999;
+}
+
+#add_worksheets_div, #add_worksheets_title, #add_worksheets_left, #add_worksheets_right {
+    display: inline-block;
+    width: 100%;
+    float: left;
+    margin: 10px 0;
+    padding: 0;
+    border: none;
+}
+
+#add_worksheets_title, #add_worksheets_left, #add_worksheets_right {
+    margin: 0;
+}
+
+#add_worksheets_title {
+    padding-left: 10px;
+    line-height: 50px;
+    font-size: 1.6rem;
+    font-weight: 400;
+}
+
+#add_worksheets_left, #add_worksheets_right {
+    width: calc(50% - 20px);
+    min-height: 300px;
+    padding: 0 10px;
+}
+
+/*#add_worksheets_right {
+    width: calc(50% - 22px);
+    border: 1px solid #323232;
+}
+*/
+/*
+#add_worksheets_input {
+    display: inline-block;
+    float: left;
+    width: 80%;
+}
+
+#add_worksheets_button {
+    display: inline-block;
+    float: left;
+    width: calc(20% - 1px);
+    border-left: 1px solid #CCC;
+    background: transparent;
+    cursor: pointer;
+    line-height: 32px;
+    font-size: 0.9rem;
+    color: #323232;
+    text-align: center;
+}
+
+#add_worksheets_button:hover {
+    background: #a4ef76;
+}
+
+.awesomplete {
+    width: 100%!important;
+    background: transparent!important;
+    border: none!important;
+    margin: 0!important;
+}*/
+
+#search_bar {
+    height: 32px;
+    width: calc(100% - 2px);
+    background: #CCC;
+    border: 1px solid #323232;
+    margin-bottom: 20px;
+}
+
+#search_bar_text {
+    background: transparent;
+    width: calc(100% - 50px);
+    height: 32px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+}
+
+#search_bar_cancel {
+    background-image: url("/images/error_light.png");
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+    float: left;
+    display: inline-block;
+    margin: 8px 5px 8px 0;
+    cursor: pointer;
+}
+
+#search_bar_cancel:hover {
+    background-image: url("/images/error.png");
+}
+
+#search_bar_button {
+    background-image: url("/images/search.png");
+    background-size: cover;
+    width: 24px;
+    height: 24px;
+    float: left;
+    display: inline-block;
+    margin: 4px 5px 4px 0;
+    cursor: pointer;
+}
+
+#search_bar input {
+    background: transparent;
+    width: calc(100% - 30px);
+    height: 32px;
+    line-height: 32px;
+    margin: 0;
+    padding: 0 20px 0 10px;
+    border: none;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+}
+
+#worksheet_rows {
+    display: inline-block;
+    width: calc(100% - 2px);
+    float: left;
+    height: 500px;
+    overflow-y: scroll;
+    border: 1px solid #323232;
+}
+
+.worksheet_row {
+    display: inline-block;
+    width: 100%;
+    float: left;
+    height: 32px;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 1px solid #CCC;
+    overflow: hidden;
+}
+
+.worksheet_row:hover {
+    background: #a4ef76;
+}
+
+.worksheet_row_title {
+    display: inline-block;
+    width: calc(100% - 110px);
+    float: left;
+    margin: 0;
+    padding: 0;
+    line-height: 32px;
+    font-size: 0.9rem;
+    text-align: left;
+    user-select: none;
+    padding-left: 10px;
+}
+
+.worksheet_row_title.long {
+    line-height: 16px;
+    font-size: 0.6rem;
+}
+
+.worksheet_row_detail {
+    display: inline-block;
+    width: 100px;
+    float: left;
+    margin: 0;
+    padding: 0;
+    line-height: 32px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+#existing_worksheets_title {
+    width: calc(100% - 10px);
+    height: 32px;
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0;
+    line-height: 32px;
+    font-size: 1.3rem;
+    padding-left: 10px;
+    user-select: none;
+}
+
+#existing_worksheets {
+    width: calc(100% - 22px);
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0 10px;
+    border: 1px solid #323232;
+    text-align: center;
+    font-size: 0.9rem;
+    min-height: 40px;
+    line-height: 40px;
+}
+
+.existing_worksheet_row {
+    width: 100%;
+    display: inline-block;
+    height: 32px;
+    float: left;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    border-bottom: 1px solid #CCC;
+}
+
+.existing_worksheet_row.bottom {
+    border-bottom: none;
+}
+
+.existing_worksheet_row:hover {
+    background: #a4ef76;
+}
+
+.existing_worksheet_row > .existing_checkbox, 
+.existing_worksheet_row > .group, 
+.existing_worksheet_row > .date,
+.existing_worksheet_row > .count {
+    display: inline-block;
+    float: left;
+    line-height: 32px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.existing_worksheet_row > .existing_checkbox {
+    width: 32px;
+    height: 32px;
+}
+
+.existing_worksheet_row > .group {
+    text-align: left;
+    width: calc(100% - 212px); 
+}
+
+.existing_worksheet_row > .date {
+    width: 80px; 
+}
+
+.existing_worksheet_row > .count {
+    width: 100px; 
+}
+
+#add_worksheet_description {
+    display: inline-block;
+    width: calc(100% - 20px);
+    margin: 0;
+    padding: 10px;
+    float: left;
+    font-size: 0.8rem;
+    text-align: justify;
+}
+
+#add_worksheet_buttons {
+    display: inline-block;
+    width: calc(100% - 22px);
+    height: 40px;
+    line-height: 40px;
+    cursor: pointer;
+    margin: 10px;
+    padding: 0;
+    float: left;
+    font-size: 1.0rem;
+    text-align: center;
+    border: 1px solid #323232;
+    background: #aaa;
+}
+
+#add_worksheet_buttons:hover {
+    background: #a4ef76;
 }
