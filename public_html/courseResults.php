@@ -59,7 +59,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     	<div id="body">
             <div id="top_bar">
                 <div id="title2">
-                    <h1>-</h1>
+                    <h1></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>

@@ -3,6 +3,7 @@ var awesompletes = [];
 $(document).ready(function(){
     sessionStorage.setItem("details", "[]");
     sessionStorage.setItem("worksheets", "[]");
+    sessionStorage.setItem("active_tab", "");
     sessionStorage.setItem("search_results", "no_results");
     sessionStorage.setItem("course_id", getParameterByName("cid"));
     getResultsRequest(sessionStorage.getItem("course_id"));
@@ -18,7 +19,7 @@ function getColour(num, av) {
         [244, 67, 54],
         [63, 81, 181],
         [76, 175, 80],
-        [255, 235, 59],
+        [249, 105, 14],
         [141, 110, 99],
         [156, 39, 176],
         [3, 169, 244],
@@ -89,7 +90,7 @@ function getResultsRequest(course_id) {
         }
     });
 }
-
+    
 function getWorksheets() {
     var type = "ALLWORKSHEETS";
     var infoArray = {
@@ -126,9 +127,8 @@ function getDetailsSuccess(json) {
     if (json["success"]) {
         var results = json["result"];
         sessionStorage.setItem("details", JSON.stringify(results));
-        parseTitle(results["course_details"][0]);
-        createTabs(["TABLE", "SUMMARY", "WORKSHEETS"], 2);
-        //console.log(json);
+        parseTitle(results["course_details"][0]);        
+        createTabs(["TABLE", "SUMMARY", "WORKSHEETS"], sessionStorage.getItem("active_tab"));
     } else {
         console.log(json["message"]);
     }
@@ -184,10 +184,8 @@ function parseWorksheetsTab(tab_id) {
         $("#worksheets_tab").html(courseWorksheetsTab(details["worksheets"]));
         refreshNewWorksheetsTable();
         $("#search_bar_text_input").keyup(function(){
-            //console.log("Halsdkjfhlas");
             searchWorksheets();
         });
-        //createAwesomeplete("worksheets");
     }
 }
 
@@ -195,6 +193,7 @@ function courseWorksheetsTab(worksheets) {
     var worksheets_html = "<div id='current_worksheets'>";
     if (worksheets.length > 0) {
         for (var i = 0; i < worksheets.length; i++) {
+            var cwid = worksheets[i]["ID"];
             var name = worksheets[i]["WName"];
             var long_date = worksheets[i]["LongDate"];
             var class_text = "current_worksheet_row";
@@ -202,7 +201,7 @@ function courseWorksheetsTab(worksheets) {
             worksheets_html += "<div class='" + class_text + "'>";
             worksheets_html += "<div class='name'>" + name + "</div>";
             worksheets_html += "<div class='date'>" + long_date + "</div>";
-            worksheets_html += "<div class='button'>Remove</div></div>";
+            worksheets_html += "<div class='button' onclick='removeWorksheet(" + cwid + ")'>Remove</div></div>";
         }
     } else {
         worksheets_html += "<i>No worksheets</i>";
@@ -275,7 +274,7 @@ function showExistingResults(vid, results) {
     var worksheets = JSON.parse(sessionStorage.getItem("worksheets"));
     var worksheet = "";
     for (var key in worksheets) {
-        if (worksheets[key]["ID"] == vid) {
+        if (parseInt(worksheets[key]["ID"]) === parseInt(vid)) {
             worksheet = worksheets[key];
             break;
         }
@@ -283,7 +282,7 @@ function showExistingResults(vid, results) {
     var title = worksheet["WName"];
     var html = "<div id='existing_worksheets_title'>" + title + "</div>";
     html += "<div id='add_worksheet_description'>Click to add '" + title + "' to the markbook of each group assigned to this course. <br><br>First check the list below for any results that have already been entered that you may want to include in the markbook.</div>";
-    html += "<div id='add_worksheet_buttons'>Add worksheet to course</div>";
+    html += "<div id='add_worksheet_buttons' onclick='addWorksheet(" + vid + ")'>Add worksheet to course</div>";
     if (results.length > 0) {
         html += "<div id='existing_worksheets'>";
         for (var i = 0; i < results.length; i++) {
@@ -296,6 +295,8 @@ function showExistingResults(vid, results) {
             if (i + 1 === results.length) html += " bottom";
             html += "' onclick='clickExistingCheckbox(" + gwid + ")'>";
             html += "<div class='existing_checkbox selected' id='result_" + gwid + "'></div>";
+            html += "<input type='hidden' id='result_" + gwid + "_gwid' value='" + gwid + "'>";
+            html += "<input type='hidden' id='result_" + gwid + "_group' value='" + results[i]["GID"] + "'>";
             html += "<div class='group'>" + group + " (" + initials + ")</div>";
             html += "<div class='count'>" + count + " result(s)</div>";
             html += "<div class='date'>" + date + "</div>";
@@ -306,6 +307,76 @@ function showExistingResults(vid, results) {
         html += "<div id='existing_worksheets'><i>No existing worksheets</i></div>";
     }
     $("#add_worksheets_right").html(html);
+}
+
+function addWorksheet(vid) {
+    var infoArray = {
+        type: "ADDNEWWORKSHEET",
+        course: sessionStorage.getItem("course_id"),
+        results: JSON.stringify(getExistingWorksheets()),
+        vid: vid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/internalResults.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                var url = window.location.href;
+                var active_tab = sessionStorage.getItem("active_tab");
+                url += url.indexOf('?') > -1 ? "&tab=" + active_tab : url += "?tab=" + active_tab;
+                window.location.href = url;
+            }
+        },
+        error: function() {
+            console.log("There was an error sending the add worksheets request.");
+        }
+    });
+}
+
+function getExistingWorksheets() {
+    var divs = document.getElementsByClassName("existing_checkbox");
+    var worksheets = [];
+    for (var i = 0;i < divs.length; i++) {
+        var id = divs[i].id;
+        if($("#" + id).hasClass("selected")) {
+            var array = [
+                parseInt($("#" + id + "_gwid").val()),
+                parseInt($("#" + id + "_group").val())
+            ];
+            worksheets.push(array);
+        }
+    }
+    return worksheets;
+}
+
+function removeWorksheet(cwid) {
+    var infoArray = {
+        type: "REMOVEWORKSHEET",
+        cwid: cwid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/internalResults.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                var url = window.location.href;
+                var active_tab = sessionStorage.getItem("active_tab");
+                url += url.indexOf('?') > -1 ? "&tab=" + active_tab : url += "?tab=" + active_tab;
+                window.location.href = url;
+            }
+        },
+        error: function() {
+            console.log("There was an error sending the add worksheets request.");
+        }
+    });
 }
 
 function parseTitle(course_details) {
@@ -401,7 +472,7 @@ function parseSummary(summary_array, worksheets) {
         }      
         for (var j = 0; j < worksheets.length; j++) {
             var result = summary_array[i][worksheets[j]["ID"]];
-            var display_result = result ? Math.round(result["Av Mark"],0) : "";
+            var display_result = (result && result["Av Mark"] !== "") ? Math.round(result["Av Mark"],0) : "";
             table_html += "<td class='marks'>";
             table_html += set === "Total" ? "<b>" + display_result + "</b>" : display_result;
             table_html += "</td>";            
@@ -430,26 +501,31 @@ function createSummaryChart(summary_array, worksheets) {
         var set_name = "";
         var border_colour = "";
         var border_width = "";
+        var border_dash = "";
         var group_id = summary_array[j]["Details"] === "Total" ? "average" : summary_array[j]["Details"]["Group ID"];
         if (!$("#set_" + group_id).hasClass("selected")) continue;
         
         if (summary_array[j]["Details"] === "Total") {
             set_name = "Average";
             border_colour = getColour(0,true);
-            border_width = 2;
+            border_width = 3;
+            border_dash = [10,5];
         } else {
             set_name = summary_array[j]["Details"]["Name"] + " - " + summary_array[j]["Details"]["Staff Initials"];
             border_colour = getColour(j,false);
-            border_width = 1;
+            border_width = 2;
+            border_dash = [10,0];
         }
         
         for (var i = 0; i < worksheets.length; i++) {
             var cwid = worksheets[i]["ID"];
             if (summary_array[j][cwid]) {
-                var perc = summary_array[j][cwid]["Percentage"];
-                chart_data.push(perc);
-                min_perc = Math.min(min_perc, perc);
-                max_perc = Math.max(max_perc, perc);
+                if (summary_array[j][cwid]["Percentage"] !== "") {
+                    var perc = summary_array[j][cwid]["Percentage"];
+                    chart_data.push(perc);
+                    min_perc = Math.min(min_perc, perc);
+                    max_perc = Math.max(max_perc, perc);
+                }
             } else {
                 chart_data.push(null);
             }
@@ -460,14 +536,15 @@ function createSummaryChart(summary_array, worksheets) {
             data: chart_data,
             borderColor: border_colour,
             borderWidth: border_width,
+            borderDash: border_dash,
             fill: false,
             lineTension: 0,
             spanGaps: false
         });
     }
     
-    min_perc = Math.floor(10*(min_perc - 0.05))/10;
-    max_perc = Math.ceil(10*(max_perc + 0.05))/10;
+    min_perc = Math.max(Math.floor(10*(min_perc - 0.05))/10, 0);
+    max_perc = Math.min(Math.ceil(10*(max_perc + 0.05))/10, 1);
     
     var ctx = document.getElementById("myChart").getContext('2d');
     var myChart = new Chart(ctx, {
@@ -630,6 +707,7 @@ function switchTab(id) {
         $("#" + divs[i].id).removeClass("selected");
     }
     $("#tab_option_" + id).addClass("selected");
+    sessionStorage.setItem("active_tab", id);
 }
 
 function getParameterByName(name, url) {

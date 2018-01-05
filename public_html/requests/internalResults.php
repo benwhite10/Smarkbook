@@ -9,6 +9,8 @@ include_once $include_path . '/public_html/requests/core.php';
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $course_id = filter_input(INPUT_POST,'course',FILTER_SANITIZE_NUMBER_INT);
 $vid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
+$cwid = filter_input(INPUT_POST,'cwid',FILTER_SANITIZE_NUMBER_INT);
+$existing_results = json_decode(filter_input(INPUT_POST,'results', FILTER_SANITIZE_STRING));
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 
@@ -23,6 +25,12 @@ switch ($request_type){
         break;
     case "GETEXISTINGRESULTS":
         getExistingResults($course_id, $vid);
+        break;
+    case "ADDNEWWORKSHEET":
+        addNewWorksheet($course_id, $vid, $existing_results);
+        break;
+    case "REMOVEWORKSHEET":
+        removeWorksheet($cwid);
         break;
     default:
         break;
@@ -80,6 +88,7 @@ function getCourseOverview($course_id) {
                         WHERE CW.`CourseID` = $course_id
                         AND WV.`Deleted` = 0
                         AND SQ.`Deleted` = 0
+                        AND CW.`Deleted` = 0
                         GROUP BY CW.`ID`
                         ORDER BY CW.`Date`";
     try {
@@ -123,22 +132,29 @@ function getCourseOverview($course_id) {
 }
 
 function getExistingResults($course_id, $vid) {
-    $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Group ID` GID, G.`Name`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, COUNT(*) Count, S.`Initials`   
+    $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Group ID` GID, G.`Name`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, S.`Initials`, S.`User ID` UID
                 FROM `TGROUPWORKSHEETS` GW
-                JOIN `TCOMPLETEDWORKSHEETS` CW ON GW.`Group Worksheet ID` = CW.`Group Worksheet ID` 
                 JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID` 
                 JOIN `TSTAFF` S ON GW.`Primary Staff ID` = S.`User ID`
                 WHERE GW.`Group ID` IN (
                 SELECT `GroupID` FROM `TGROUPCOURSE` 
                 WHERE `CourseID` = $course_id
                 ) AND GW.`Version ID` = $vid 
-                AND GW.`Deleted` = 0
-                AND (CW.`Completion Status` = 'Completed'
-                     OR CW.`Completion Status` = 'Partially Completed')
+                AND GW.`Deleted` = 0 
+                AND GW.`CourseWorksheetID` IS NULL
                 GROUP BY GW.`Group Worksheet ID`
                 ORDER BY GW.`Group ID`, Date DESC";
     try {
         $results = db_select_exception($query);
+        foreach($results as $key => $result) {
+            $gwid = $result["GWID"];
+            $count_query = "SELECT COUNT(*) Count FROM `TCOMPLETEDWORKSHEETS` 
+                            WHERE `Group Worksheet ID` = $gwid
+                            GROUP BY `Group Worksheet ID`";
+            $count_result = db_select_exception($count_query);
+            $count = count($count_result) > 0 ? $count_result[0]["Count"] : 0;
+            $results[$key]["Count"] = $count;
+        }
     } catch (Exception $ex) {
         failRequest("There was an error getting the existing results: " . $ex->getMessage());
     }
@@ -148,6 +164,86 @@ function getExistingResults($course_id, $vid) {
     );
     
     succeedRequest($return);
+}
+
+function addNewWorksheet($course_id, $vid, $existing_results) {
+    // Create course worksheet
+    db_begin_transaction();
+    $create_query = "INSERT INTO `TCOURSEWORKSHEET`(`CourseID`, `WorksheetID`, `Date`, `Deleted`) "
+            . "VALUES ($course_id,$vid,NOW(),0)";
+    try {
+        $return = db_insert_query_exception($create_query);
+        $cwid = $return[1];
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("There was an error creating the course worksheet: " . $ex->getMessage());
+    }
+    
+    // Get groups
+    $groups_query = "SELECT GC.`GroupID`, U.`User ID` 
+                    FROM `TGROUPCOURSE` GC
+                    JOIN `TUSERGROUPS` UG ON GC.`GroupID` = UG.`Group ID` 
+                    JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
+                    WHERE GC.`CourseID` = $course_id 
+                    AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')";
+    try {
+        $groups = db_select_exception($groups_query);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("There was an error getting the groups for the course: " . $ex->getMessage());
+    }
+        
+    foreach ($groups as $group) {
+        $group_id = $group["GroupID"];
+        $user_id = $group["User ID"];
+        foreach ($existing_results as $result) {
+            $updated = FALSE;
+            if ($group_id == $result[1]) {
+                $gwid = $result[0];
+                $update_query = "UPDATE `TGROUPWORKSHEETS` 
+                            SET `CourseWorksheetID` = $cwid
+                            WHERE `Group Worksheet ID` = $gwid;";
+                try {
+                    db_query_exception($update_query);
+                } catch (Exception $ex) {
+                    db_rollback_transaction();
+                    failRequest("There was an error updating the group worksheets: " . $ex->getMessage());
+                }
+                $updated = TRUE;
+                break;
+            }
+        }
+        if (!$updated) {
+            $insert_query = "INSERT INTO `TGROUPWORKSHEETS`"
+                    . "(`Group ID`, `Primary Staff ID`, `Version ID`, `Date Last Modified`, `Date Due`, `Hidden`, `Deleted`, `CourseWorksheetID`) "
+                    . "VALUES ($group_id, $user_id, $vid, NOW(), NOW(), 0, 0, $cwid)";
+            try {
+                db_insert_query_exception($insert_query);
+            } catch (Exception $ex) {
+                db_rollback_transaction();
+                failRequest("There was an error adding the new group worksheets: " . $ex->getMessage());
+            }
+        }
+    }
+
+    db_commit_transaction();
+    succeedRequest();
+}
+
+function removeWorksheet($cwid) {
+    db_begin_transaction();
+    $remove_query = "UPDATE `TCOURSEWORKSHEET` SET `Deleted`=1 WHERE `ID` = $cwid;";
+    $remove_gw_query = "UPDATE `TGROUPWORKSHEETS` SET `CourseWorksheetID`= NULL 
+                    WHERE `CourseWorksheetID` = $cwid";
+    try {
+        db_query_exception($remove_query);
+        db_query_exception($remove_gw_query);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("There was an removing the worksheet: " . $ex->getMessage());
+    }
+    db_commit_transaction();
+    succeedRequest(null);
 }
 
 function addStudentDetailsToResults($students, $sets) {
@@ -235,12 +331,15 @@ function addResultsToSummaryArray($summary_array, $results, $cwid, $students, $w
                 $count++;
             }
         }
+        $perc = $count > 0 ? round($total_mark/$total_marks, 2) : "";
+        $av_mark = $count > 0 ? round($total_mark/$count, 1) : "";
         $summary_array[$key][$cwid] = array(
             "CWID" => $cwid,
-            "Percentage" => round($total_mark/$total_marks, 2),
-            "Av Mark" => round($total_mark/$count, 1),
-            "Count" => $count
-        );;
+            "Percentage" => $perc,
+            "Av Mark" => $av_mark,
+            "Count" => $count,
+            "Marks" => $marks
+        );
     }
     
     return $summary_array;
@@ -255,7 +354,7 @@ function getSetFromStudent($student_id, $students) {
 
 function getMarksForWorksheet($cwid, $worksheets) {
     foreach ($worksheets as $worksheet) {
-        if ($cwid = $worksheet["ID"]) return $worksheet["Marks"];
+        if ($cwid == $worksheet["ID"]) return $worksheet["Marks"];
     }
     return null;
 }
