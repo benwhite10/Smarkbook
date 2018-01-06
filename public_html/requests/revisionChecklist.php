@@ -50,10 +50,14 @@ function getAllSpecificationPoints($courseId, $userid) {
                 FROM `TREVISIONLINKS` 
                 WHERE `ChecklistID` = $id
                 ORDER BY `Title`";
-            $score_query = "SELECT `Score` 
-                        FROM `TUSERREVISIONSCORES` 
-                        WHERE `UserID` = $userid 
-                        AND `ChecklistID` = $id;";
+            $score_query = "SELECT `Score` FROM (
+                            SELECT *
+                            FROM `TUSERREVISIONSCORES` 
+                            WHERE `UserID` = $userid 
+                            AND `ChecklistID` = $id
+                            ORDER BY `Date Added` DESC
+                        ) as A
+                        GROUP BY A.`UserID`, A.`ChecklistID`";
             $links = db_select_exception($links_query);
             $score = db_select_exception($score_query);
             $point["Score"] = count($score) > 0 ? $score[0]["Score"] : "";
@@ -69,22 +73,35 @@ function getAllSpecificationPoints($courseId, $userid) {
 }
 
 function updateScore($checklistId, $userid, $score) {
-    $query = "SELECT `ID` 
-                FROM `TUSERREVISIONSCORES` 
-                WHERE `UserID` = $userid 
-                AND `ChecklistID` = $checklistId;";
+    $query = "SELECT `ID`, `Score`, `Date Added` FROM (
+                    SELECT *
+                    FROM `TUSERREVISIONSCORES` 
+                    WHERE `UserID` = 1 
+                    AND `ChecklistID` = 6
+                    ORDER BY `Date Added` DESC
+                ) as A
+                GROUP BY A.`UserID`, A.`ChecklistID`";
     db_begin_transaction();
     try {
         $currentIds = db_select_exception($query);
         if (count($currentIds) > 0) {
             $id = $currentIds[0]["ID"];
-            $update_query = "UPDATE `TUSERREVISIONSCORES` "
-                    . "SET `Score`=$score "
-                    . "WHERE `ID` = $id";
-            db_query_exception($update_query);
+            $date = strtotime($currentIds[0]["Date Added"]);
+            $now = strtotime("now");
+            if ($now - $date > 300) {
+                $insert_query = "INSERT INTO `TUSERREVISIONSCORES`(`UserID`, `ChecklistID`, `Score`, `Date Added`)"
+                        . " VALUES ($userid,$checklistId,$score,NOW())";
+                db_insert_query_exception($insert_query);
+            } else {
+                $update_query = "UPDATE `TUSERREVISIONSCORES` 
+                                SET `Score` = $score,
+                                `Date Added` = NOW() 
+                                WHERE `ID` = $id;";
+                db_query_exception($update_query);
+            }
         } else {
-            $insert_query = "INSERT INTO `TUSERREVISIONSCORES`(`UserID`, `ChecklistID`, `Score`)"
-                    . " VALUES ($userid,$checklistId,$score)";
+            $insert_query = "INSERT INTO `TUSERREVISIONSCORES`(`UserID`, `ChecklistID`, `Score`, `Date Added`)"
+                    . " VALUES ($userid,$checklistId,$score,NOW())";
             db_insert_query_exception($insert_query);
         }
     } catch (Exception $ex) {

@@ -113,10 +113,8 @@ function getChecklistClass(score) {
 }
 
 function clickChecklistButton(spec_id, score) {
-    // Update html
     setChecklistScore(spec_id, score);
     updateStoredInfo(spec_id, score);
-    // Send request to update score
     updateScore(spec_id, score);
 }
 
