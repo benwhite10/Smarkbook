@@ -71,8 +71,8 @@ if($resultArray[0]){
                 if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='viewAllWorksheets.php' class='title'>Worksheets</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='viewAllWorksheets.php'>";
+                    echo "<a href='viewAllWorksheets.php?opt=0' class='title'>Worksheets</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='viewAllWorksheets.php?opt=0'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     $count++;
                     echo "</div><div class='menuobject' id='menuobject$count' >";
@@ -93,18 +93,10 @@ if($resultArray[0]){
                         echo "<a href='newResultsEntryHome.php' class='title'>Enter Results</a>";
                         echo "<input type='hidden' id='menuObjectLink$count' value='newResultsEntryHome.php'>";
                     } else {
-                        echo "<a href='resultsEntryHome.php?level=1&staffid=$userid' class='title'>Enter Results</a>";
-                        echo "<input type='hidden' id='menuObjectLink$count' value='resultsEntryHome.php?level=1&staffid=$userid'>";
+                        echo "<a href='viewAllWorksheets.php?opt=1' class='title'>Enter Results</a>";
+                        echo "<input type='hidden' id='menuObjectLink$count' value='viewAllWorksheets.php?opt=1'>";
                     }
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-enter-results.png'>";
-                    echo "</div>";
-                }
-                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
-                    $count++;
-                    echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='resultsEntryHome.php?level=2&staffid=$userid' class='title'>Edit Results</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='resultsEntryHome.php?level=2&staffid=$userid'>";
-                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-edit-results.png'>";
                     echo "</div>";
                 }
                 if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF", "STUDENT"])){

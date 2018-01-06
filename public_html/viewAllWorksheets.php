@@ -39,6 +39,15 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
+        <div id="pop_up_background">
+            <div id="pop_up_box">
+                <div id="pop_up_title"></div>
+                <div id="pop_up_details"></div>
+                <div id="pop_up_table"></div>
+                <div id="pop_up_button_1"></div>
+                <div id="pop_up_button_2"></div>
+            </div>
+        </div>
     	<div id="header">
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
@@ -54,24 +63,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 </li>
             </ul>
     	</div>
-    	<div id="body">
-            <?php
-                if(isset($message)){
-                    if($type == "ERROR"){
-                        $div = 'class="error"';
-                    }else if($type == "SUCCESS"){
-                        $div = 'class="success"';
-                    }
-                }else{
-                    $div = 'style="display:none;"';
-                }
-            ?>
-            
-            <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
-                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>
-            
+    	<div id="body">            
             <div id="top_bar">
                 <div id="title2">
                     <h1>Worksheets</h1>
@@ -79,6 +71,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <ul class="menu navbar">
                 </ul>
             </div><div id="main_content">
+                <div id="options"></div>
                 <div id="search_bar">
                     <div id="search_bar_text">
                         <input id="search_bar_text_input" type="text" placeholder="Search Worksheets">
@@ -86,24 +79,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     <div id="search_bar_cancel" onclick="clearSearch()"></div>
                     <div id="search_bar_button" onclick="searchWorksheets()"></div>
                 </div>
-                <table class="sortable" id="worksheetsTable">
-                    <thead>
-                        <tr>
-                            <th class="sortable">Worksheet</th>
-                            <th class="sortable author_column">Author</th>
-                            <th class="sortable reversed date_column">Date</th> 
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div><div id="side_bar" class="menu_bar">
-                <ul class="menu sidebar">
-                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                    <li><a href="/addNewWorksheet.php">Add a New Worksheet</a></li>
-                    <li id="restore_link"><a href="/viewAllWorksheets.php?rst=1">Restore Worksheets</a></li> 
-                    <?php } ?>
-                </ul>
+                <div id="worksheets_table"></div>
             </div>
     	</div>
         <?php pageFooter($info_version) ?>
