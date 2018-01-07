@@ -33,6 +33,12 @@ switch ($requestType){
         }
         updateScore($checklistId, $userid, $score);
         break;
+    case "GETCOURSES":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getCourses();
+        break;
     default:
         break;
 }
@@ -110,6 +116,16 @@ function updateScore($checklistId, $userid, $score) {
     }
     db_commit_transaction();
     succeedRequest(null);
+}
+
+function getCourses() {
+    $query = "SELECT `ID`, `Title` FROM `TREVISIONCOURSE`";
+    try {
+        $courses = db_select_exception($query);
+    } catch (Exception $ex) {
+        failRequestWithException("There was an error getting the courses.", $ex);
+    }
+    succeedRequest($courses);
 }
 
 function failRequestWithException($message, $ex){
