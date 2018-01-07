@@ -33,8 +33,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
 <head lang="en">
     <?php pageHeader("Revision Checklist", $info_version); ?>
     <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
-    <script src='js/revisionChecklistMenu.js?<?php echo $info_version; ?>'></script>
-    <link rel='stylesheet' type='text/css' href='css/revisionChecklist.css?<?php echo $info_version; ?>' />
+    <script src='js/internalResultsMenu.js?<?php echo $info_version; ?>'></script>
+    <link rel='stylesheet' type='text/css' href='css/internalResultsMenu.css?<?php echo $info_version; ?>' />
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -57,20 +57,19 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
     	<div id="body">
             <div id="top_bar">
                 <div id="title2">
-                    <h1>Revision Checklist</h1>
+                    <h1>Internal Results</h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>
             </div><div id="main_content">
-                <div id="course_input_div">
-                    <div class="label">Course:</div>
-                    <div class="input">
-                        <select id="course_input"></select>
-                    </div>
+                <div class="half_content left">
+                    <div id="courses_title">Courses</div>
+                    <div id="courses_table"></div>
                 </div>
-                <div id="buttons_div">
-                    <div class="button" id="edit">Edit</div>
-                    <div class="button" id="checklist">Checklist</div>
+                <div id="course_details" class="half_content">
+                    <div id="course_details_title"></div>
+                    <div id="sets_table"></div>
+                    <div id="course_button"></div>
                 </div>
             </div>
         </div>

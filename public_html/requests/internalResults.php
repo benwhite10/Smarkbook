@@ -32,8 +32,62 @@ switch ($request_type){
     case "REMOVEWORKSHEET":
         removeWorksheet($cwid);
         break;
+    case "GETCOURSES":
+        getCourses();
+        break;
+    case "GETCOURSEDETAILS":
+        getCourseDetails($course_id);
+        break;
     default:
         break;
+}
+
+function getCourses() {
+    $course_query = "SELECT * FROM `TCOURSE` WHERE `Deleted` = 0;";
+    try {
+        $courses = db_select_exception($course_query);
+    } catch (Exception $ex) {
+        failRequest("There was an error getting the courses: " . $ex->getMessage());
+    }
+    succeedRequest(array(
+        "courses" => $courses
+    ));
+}
+
+function getCourseDetails($course_id) {
+    $course_details_query = "SELECT * FROM `TCOURSE`
+                            WHERE `CourseID` = $course_id";
+    try {
+        $course_details = db_select_exception($course_details_query);
+    } catch (Exception $ex) {
+        failRequest("There was an error getting the course details: " . $ex->getMessage());
+    }
+    
+    $set_details_query = "SELECT G.`Group ID`, G.`Name`, U.`User ID` 
+                            FROM `TGROUPCOURSE` GC 
+                            JOIN `TGROUPS` G ON GC.`GroupID` = G.`Group ID`
+                            JOIN `TUSERGROUPS` UG ON G.`Group ID` = UG.`Group ID`
+                            JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
+                            WHERE GC.`CourseID` = $course_id
+                            AND U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER'";
+    try {
+        $set_details = db_select_exception($set_details_query);
+        foreach ($set_details as $key => $set) {
+            $userid = $set["User ID"];
+            $query = "SELECT `Initials` FROM TSTAFF WHERE `User ID` = $userid";
+            $result = db_select_exception($query);
+            $set_details[$key]["Initials"] = $result[0]["Initials"]; 
+        }
+    } catch (Exception $ex) {
+        failRequest("There was an error getting the set details: " . $ex->getMessage());
+    }
+    
+    $return = array(
+        "course_details" => $course_details,
+        "set_details" => $set_details
+    );
+    
+    succeedRequest($return);
 }
 
 function getCourseOverview($course_id) {
