@@ -176,6 +176,19 @@ tr:hover span.highlight {
     background: #FFB94E;
 }
 
+.worksheet_row.header {
+    background: #323232;
+    border-bottom: none;
+    color: #66E11B;
+}
+
+.worksheet_row_title.header,
+.worksheet_row_author.header,
+.worksheet_row_date.header {
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
 #pop_up_background
 {
     position: fixed;

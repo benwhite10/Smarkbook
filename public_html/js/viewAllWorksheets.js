@@ -1,6 +1,9 @@
 $(document).ready(function(){
     sessionStorage.setItem("first_time", "TRUE");
     sessionStorage.setItem("groups", "[]");
+    sessionStorage.setItem("search_ids", "[]");
+    var order = [['Author','0'],['WName','0'],['CustomDate','1']];
+    sessionStorage.setItem("order", JSON.stringify(order));
     
     setUpOptions(getParameterByName("rst"));
     
@@ -100,7 +103,7 @@ function getGroups() {
 function getWorksheetsSuccess(json) {
     if(json["success"]) {
         localStorage.setItem("worksheets", JSON.stringify(json["worksheets"]));
-        parseWorksheets([]);
+        parseWorksheets();
     } else {
         console.log("There was an error getting the worksheets.");
         console.log(json["message"]);
@@ -117,9 +120,10 @@ function getWorksheetName(vid) {
     return "";
 }
 
-function parseWorksheets(ids, searchTerm) {
-    var worksheets = JSON.parse(localStorage.getItem("worksheets"));
-    var string = "";
+function parseWorksheets(searchTerm) {
+    var worksheets = orderWorksheets();
+    var ids = JSON.parse(sessionStorage.getItem("search_ids"));
+    var string = parseWorksheetHeaderRow();
     if(ids === undefined || ids.length === 0) {
         for(var key in worksheets){
             var worksheet = worksheets[key];
@@ -145,6 +149,26 @@ function parseWorksheets(ids, searchTerm) {
     goToOriginalWorksheet();
 }
 
+function orderWorksheets() {
+    var worksheets = JSON.parse(localStorage.getItem("worksheets"));
+    var order = JSON.parse(sessionStorage.getItem("order"));
+    for (var i = 0; i < order.length; i++) {
+        worksheets = orderArrayBy(worksheets, order[i][0], order[i][1] === "1");
+    }
+    return worksheets;
+}
+
+function orderArrayBy(array, key, desc) {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        if (desc) {
+            return ((x > y) ? -1 : ((x < y) ? 1 : 0));
+        } else {
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+        }
+    });
+}
+
 function parseWorksheetRow(title, author, date, id) {
     var class_text = getParameterByName("rst") !== "1" ? "worksheet_row_title" : "worksheet_row_title restore";
     var string = "<div class='worksheet_row'>";
@@ -157,6 +181,51 @@ function parseWorksheetRow(title, author, date, id) {
     }
     string += "</div>";
     return string;
+}
+
+function parseWorksheetHeaderRow() {
+    var string = "<div class='worksheet_row header'>";
+    string += "<div class='worksheet_row_title header' onclick='clickHeading(0)'>Title</div>";
+    string += "<div class='worksheet_row_author header' onclick='clickHeading(1)'>Author</div>";
+    string += "<div class='worksheet_row_date header' onclick='clickHeading(2)'>Date</div>";
+    if (getParameterByName("rst") !== "1") {
+        string += "<div class='worksheet_row_edit header'></div>";
+        string += "<div class='worksheet_row_add header'></div>";
+    }
+    string += "</div>";
+    return string;
+}
+
+function clickHeading(id) {
+    var order = JSON.parse(sessionStorage.getItem("order"));
+    var key = getKey(id);
+    var new_order = [];
+    var desc = "0";
+    for (var i = 0; i < order.length; i++) {
+        if (order[i][0] !== key) {
+            new_order.push(order[i]);
+        } else if (i + 1 === order.length) {
+            desc = order[i][1] === "0" ? "1" : "0";
+        }
+    }
+    new_order.push([key, desc]);
+    sessionStorage.setItem("order", JSON.stringify(new_order));
+    parseWorksheets();
+}
+
+function getKey(id) {
+    switch(id) {
+        case 0:
+        default:
+            return "WName";
+            break;
+        case 1:
+            return "Author";
+            break;
+        case 2:
+            return "CustomDate";
+            break;
+    }
 }
 
 function clickWorksheet(id) {
@@ -340,7 +409,7 @@ function clickGroup(gwid) {
 function searchWorksheets() {
     var searchTerm = $("#search_bar_text_input").val();
     if(searchTerm.length < 2) {
-        parseWorksheets([]);
+        parseWorksheets();
     }
     var infoArray = {
         type: "SEARCH",
@@ -369,7 +438,8 @@ function searchSuccess(json, searchTerm) {
             if(ids.length === 0) {
                 ids.push(0);
             }
-            parseWorksheets(ids, searchTerm);
+            sessionStorage.setItem("search_ids", JSON.stringify(ids));
+            parseWorksheets(searchTerm);
         }
     } else {
         console.log("There was an error searching the worksheets.");
