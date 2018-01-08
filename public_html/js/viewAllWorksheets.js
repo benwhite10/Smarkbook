@@ -308,7 +308,7 @@ function addResults(vid) {
     $("#pop_up_button_2").html("Cancel");
     $("#pop_up_button_1").css("display", "none");
     $("#pop_up_button_2").css("display", "block");
-    $("#pop_up_button_1").click();
+    $("#pop_up_button_1").click(function(){});
     $("#pop_up_button_2").click(function() {
         closePopUp();
     });

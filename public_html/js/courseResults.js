@@ -3,7 +3,7 @@ var awesompletes = [];
 $(document).ready(function(){
     sessionStorage.setItem("details", "[]");
     sessionStorage.setItem("worksheets", "[]");
-    sessionStorage.setItem("active_tab", "");
+    sessionStorage.setItem("active_tab", isNaN(parseInt(getParameterByName("tab"))) ? 0 : parseInt(getParameterByName("tab")));
     sessionStorage.setItem("search_results", "no_results");
     sessionStorage.setItem("course_id", getParameterByName("cid"));
     getResultsRequest(sessionStorage.getItem("course_id"));
