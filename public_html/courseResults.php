@@ -33,8 +33,10 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <head lang="en">
     <?php pageHeader("Internal Results", $info_version); ?>
     <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
-    <script src="js/internalResultsWorksheets.js?<?php echo $info_version; ?>"></script>
-    <link rel="stylesheet" type="text/css" href="css/internalResultsWorksheets.css?<?php echo $info_version; ?>" />
+    <script src="js/courseResults.js?<?php echo $info_version; ?>"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/courseResults.css?<?php echo $info_version; ?>" />
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
@@ -55,55 +57,16 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             </ul>
     	</div>
     	<div id="body">
-            <?php
-                if(isset($message)){
-                    if($type == "ERROR"){
-                        $div = 'class="error"';
-                    }else if($type == "SUCCESS"){
-                        $div = 'class="success"';
-                    }
-                }else{
-                    $div = 'style="display:none;"';
-                }
-            ?>
-            
-            <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
-                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>
-            
             <div id="top_bar">
                 <div id="title2">
-                    <h1>Worksheets</h1>
+                    <h1></h1>
                 </div>
                 <ul class="menu navbar">
                 </ul>
             </div><div id="main_content">
-                <div id="search_bar">
-                    <div id="search_bar_text">
-                        <input id="search_bar_text_input" type="text" placeholder="Search Worksheets">
-                    </div>
-                    <div id="search_bar_cancel" onclick="clearSearch()"></div>
-                    <div id="search_bar_button" onclick="searchWorksheets()"></div>
-                </div>
-                <table class="sortable" id="worksheetsTable">
-                    <thead>
-                        <tr>
-                            <th class="checkbox_column"></th>
-                            <th class="sortable">Worksheet</th>
-                            <th class="sortable author_column">Author</th>
-                            <th class="sortable reversed date_column">Date</th> 
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+                
             </div><div id="side_bar" class="menu_bar">
-                <ul class="menu sidebar">
-                    <?php if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){?>
-                    <li onclick="goToInternalResults()"><a>Internal Results</a></li> 
-                    <?php } ?>
-                </ul>
+
             </div>
     	</div>
         <?php pageFooter($info_version) ?>

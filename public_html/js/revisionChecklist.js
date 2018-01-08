@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    getSpecificationPoints(1);
+    getSpecificationPoints(getParameterByName("course"));
 });
 
 function setContentHeight() {
@@ -113,10 +113,8 @@ function getChecklistClass(score) {
 }
 
 function clickChecklistButton(spec_id, score) {
-    // Update html
     setChecklistScore(spec_id, score);
     updateStoredInfo(spec_id, score);
-    // Send request to update score
     updateScore(spec_id, score);
 }
 
@@ -207,4 +205,16 @@ function checkIfDetailsDisplayed(id) {
     var div = document.getElementById("checklist_item_detail_" + id);
     var classes = div.className;
     return classes.indexOf("display") !== -1;
+}
+
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }

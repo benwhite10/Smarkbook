@@ -1,0 +1,82 @@
+#main_content {
+    width: 100%;
+}
+
+.half_content {
+    display: inline-block;
+    float: left;
+    width: 50%;
+    height: auto;
+    min-height: 100px;
+    margin: 0;
+    padding: 0;
+}
+
+#courses_title, #course_details_title {
+    width: 100%;
+    display: inline-block;
+    float: left;
+    height: 40px;
+    line-height: 40px;
+    font-size: 1.2rem;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+#courses_table, #sets_table {
+    width: calc(100% - 22px);
+    display: inline-block;
+    float: left;
+    font-size: 1.1rem;
+    margin: 0 10px;
+    padding: 0;
+    border: 1px solid #323232;
+}
+
+.course_row, .set_row {
+    display: inline-block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    padding-left: 10px;
+    width: calc(100% - 10px);
+    height: 32px;
+    line-height: 32px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background: transparent;
+    border-bottom: 1px solid #CCC;
+}
+
+.course_row.bottom, .set_row.bottom {
+    border-bottom: none;
+}
+
+.course_row:hover, .set_row:hover {
+    background: #a4ef76;
+}
+
+#course_button {
+    width: calc(100% - 22px);
+    display: inline-block;
+    float: left;
+    height: 40px;
+    line-height: 40px;
+    font-size: 1.0rem;
+    text-align: center;
+    margin: 10px;
+    padding: 0;
+    user-select: none;
+    background: transparent;
+    cursor: pointer;
+    border: 1px solid #323232;
+}
+
+#course_button:hover {
+    background: #a4ef76;
+}
+
+#course_details {
+    display: none;
+}

@@ -20,10 +20,17 @@ table {
 
 #main_content {
     margin-top: 0px;
+    width: 100%;
+}
+
+#side_bar {
+    display: none;
 }
 
 #search_bar {
-    height: 50px;
+    height: 40px;
+    display: inline-block;
+    float: left;
     width: calc(100% - 2px);
     background: #CCC;
     border: 1px solid #323232;
@@ -33,7 +40,7 @@ table {
 #search_bar_text {
     background: transparent;
     width: calc(100% - 68px);
-    height: 50px;
+    height: 40px;
     float: left;
     display: inline-block;
     margin: 0;
@@ -46,7 +53,7 @@ table {
     height: 16px;
     float: left;
     display: inline-block;
-    margin: 17px 10px 17px 0;
+    margin: 12px 10px 12px 0;
     cursor: pointer;
 }
 
@@ -57,24 +64,24 @@ table {
 #search_bar_button {
     background-image: url("/images/search.png");
     background-size: cover;
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     float: left;
     display: inline-block;
-    margin: 10px 10px 10px 0;
+    margin: 7.5px 10px 7.5px 0;
     cursor: pointer;
 }
 
 #search_bar input {
     background: transparent;
     width: calc(100% - 30px);
-    height: 50px;
-    line-height: 50px;
+    height: 40px;
+    line-height: 40px;
     margin: 0;
     padding: 0 20px 0 10px;
     border: none;
     font: normal 100% 'Open Sans', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.0rem;
     font-weight: 300;
 }
 
@@ -100,4 +107,218 @@ span.highlight {
 tr:hover span.highlight {
     background-color: #323232;
     color: #a4ef76;
+}
+
+#worksheets_table {
+    width: calc(100% - 2px);
+    display: inline-block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #323232;
+}
+
+.worksheet_row, 
+.worksheet_row_title, 
+.worksheet_row_author, 
+.worksheet_row_date, 
+.worksheet_row_edit,
+.worksheet_row_add {
+    width: 100%;
+    display: inline-block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    height: 32px;
+    line-height: 32px;
+    font-size: 0.9rem;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.worksheet_row {
+    border-bottom: 1px solid #CCC;
+    background: transparent;
+}
+
+.worksheet_row.bottom {
+    border-bottom: none;
+}
+
+.worksheet_row:hover {
+    background: #a4ef76;
+}
+
+.worksheet_row_author, 
+.worksheet_row_date, 
+.worksheet_row_edit,
+.worksheet_row_add {
+    width: 100px;
+    background: transparent;
+}
+
+.worksheet_row_title {
+    width: calc(100% - 410px);
+    padding-left: 10px;
+    text-align: left;
+}
+
+.worksheet_row_title.restore {
+    width: calc(100% - 210px);
+}
+
+.worksheet_row_edit:hover {
+    background: #A3E0FF;
+}
+
+.worksheet_row_add:hover {
+    background: #FFB94E;
+}
+
+.worksheet_row.header {
+    background: #323232;
+    border-bottom: none;
+    color: #66E11B;
+}
+
+.worksheet_row_title.header,
+.worksheet_row_author.header,
+.worksheet_row_date.header {
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
+#pop_up_background
+{
+    position: fixed;
+    padding:0;
+    margin:0;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background:rgba(0,0,0,0.5);
+    display: none;
+    z-index: 10000;
+}
+
+#pop_up_box
+{
+    position: absolute;
+    width: 500px;
+    top: 50%;
+    left: 50%;
+    margin-left: -250px;
+    margin-top: -200px;
+    height: auto;
+    min-height: 200px;
+    padding: 0px;
+    display: block;
+    background: #FFF;
+    z-index: 99999;
+}
+
+#pop_up_title, #pop_up_details, #pop_up_table, #pop_up_title, #pop_up_button_1, #pop_up_button_2 {
+    width: 100%;
+    height: 45px;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    float: left;
+}
+
+#pop_up_title {
+    text-align: center;
+    font-size: 1.1rem;
+    line-height: 50px;
+}
+
+#pop_up_details {
+    width: calc(100% - 22px);
+    height: auto;
+    padding: 10px;
+    font-size: 0.8rem;
+    line-height: 16px;
+    text-align: center;
+}
+
+#pop_up_table {
+    width: calc(100% - 20px);
+    height: auto;
+    margin: 10px 10px 20px 10px;
+    border: 1px solid #323232;
+}
+
+#pop_up_button_1, #pop_up_button_2 {
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    font-size: 1.0rem;
+    cursor: pointer;
+    border-top: 1px solid #999;
+}
+
+#pop_up_button_1:hover {
+    background: #a4ef76;
+}
+
+#pop_up_button_2:hover {
+    background: #FF8282;
+}
+
+.table_row {
+    height: 32px;
+    line-height: 32px;
+    padding-left: 10px;
+    width: calc(100% - 10px);
+    cursor: pointer;
+    display: inline-block;
+    float: left;
+    background: transparent;
+    border-bottom: 1px solid #CCC;
+}
+
+.table_row.bottom {
+    border-bottom: none;
+}
+
+.table_row:hover {
+    background: #a4ef76;
+}
+
+#options {
+    width: calc(100% - 2px);
+    height: 40px;
+    display: inline-block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #323232;
+    margin-bottom: 20px;
+}
+
+.option {
+    width: calc(50% - 1px);
+    height: 40px;
+    display: inline-block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    border: none;
+    line-height: 40px;
+    text-align: center;
+    color: #323232;
+    font-size: 18px;
+    font-weight: 400;
+    border-right: 1px solid #323232;
+    cursor: pointer;
+}
+
+.option:hover {
+    background: #a4ef76;
+}
+
+.option.last {
+    border-right: none;
 }

@@ -71,19 +71,25 @@ if($resultArray[0]){
                 if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='viewAllWorksheets.php' class='title'>Worksheets</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='viewAllWorksheets.php'>";
+                    echo "<a href='viewAllWorksheets.php?opt=0' class='title'>Worksheets</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='viewAllWorksheets.php?opt=0'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
+                    echo "</div>";
+                }
+                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     $count++;
-                    echo "</div><div class='menuobject' id='menuobject$count' >";
+                    echo "<div class='menuobject' id='menuobject$count' >";
                     echo "<a href='viewSetMarkbook.php?staffId=$userid' class='title'>Mark Book</a>";
                     echo "<input type='hidden' id='menuObjectLink$count' value='viewSetMarkbook.php?staffId=$userid'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-markbook.png'>";
+                    echo "</div>";
+                }
+                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                     $count++;
-                    echo "</div><div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='viewMySets.php?staffId=$userid' class='title'>My Sets</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='viewMySets.php?staffId=$userid'>";
-                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-sets.png'>";
+                    echo "<div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='revisionChecklist.php?course=1' class='title'>Revision</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='revisionChecklist.php?course=1'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 }
                 if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF", "STUDENT"])){
@@ -93,26 +99,10 @@ if($resultArray[0]){
                         echo "<a href='newResultsEntryHome.php' class='title'>Enter Results</a>";
                         echo "<input type='hidden' id='menuObjectLink$count' value='newResultsEntryHome.php'>";
                     } else {
-                        echo "<a href='resultsEntryHome.php?level=1&staffid=$userid' class='title'>Enter Results</a>";
-                        echo "<input type='hidden' id='menuObjectLink$count' value='resultsEntryHome.php?level=1&staffid=$userid'>";
+                        echo "<a href='viewAllWorksheets.php?opt=1' class='title'>Enter Results</a>";
+                        echo "<input type='hidden' id='menuObjectLink$count' value='viewAllWorksheets.php?opt=1'>";
                     }
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-enter-results.png'>";
-                    echo "</div>";
-                }
-                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
-                    $count++;
-                    echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='resultsEntryHome.php?level=2&staffid=$userid' class='title'>Edit Results</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='resultsEntryHome.php?level=2&staffid=$userid'>";
-                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-edit-results.png'>";
-                    echo "</div>";
-                }
-                if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF", "STUDENT"])){
-                    $count++;
-                    echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='editUser.php?userid=$userid' class='title'>My Account</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='editUser.php?userid=$userid'>";
-                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-user.png'>";
                     echo "</div>";
                 }
                 if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF", "STUDENT"])){
@@ -128,6 +118,30 @@ if($resultArray[0]){
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 }
+                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+                    $count++;
+                    echo "<div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='internalResultsMenu.php' class='title'>Int. Results</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='internalResultsMenu.php'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-markbook.png'>";
+                    echo "</div>";
+                }
+                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
+                    $count++;
+                    echo "<div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='viewMySets.php?staffId=$userid' class='title'>My Sets</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='viewMySets.php?staffId=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-sets.png'>";
+                    echo "</div>";
+                }
+                if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF", "STUDENT"])){
+                    $count++;
+                    echo "<div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='editUser.php?userid=$userid' class='title'>My Account</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='editUser.php?userid=$userid'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-user.png'>";
+                    echo "</div>";
+                }
                 if(authoriseUserRoles($userRole, ["SUPER_USER","STAFF"])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
@@ -141,14 +155,6 @@ if($resultArray[0]){
                     echo "<div class='menuobject' id='menuobject$count' >";
                     echo "<a href='reportNotes.php?t=$userid' class='title'>Report Notes</a>";
                     echo "<input type='hidden' id='menuObjectLink$count' value='reportNotes.php?t=$userid'>";
-                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
-                    echo "</div>";
-                }
-                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
-                    $count++;
-                    echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='revisionChecklist.php' class='title'>Revision</a>";
-                    echo "<input type='hidden' id='menuObjectLink$count' value='revisionChecklist.php'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 }

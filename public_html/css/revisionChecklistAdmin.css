@@ -1,0 +1,539 @@
+/*Markbook*/
+body {
+    height: auto;
+}
+
+table
+{ border-color: #323232; }
+
+td
+{ height: 32px; }
+
+td.marks{
+    padding: 0px;
+    text-align: center;
+}
+
+table {
+    width: auto;
+    overflow: visible;
+    float: left;
+    border-color: #000;
+}
+
+td, th {
+    max-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+th {
+    background: transparent;
+    border: none;
+}
+
+td.name, td.set, td.initials {
+    min-width: 150px;
+    max-width: 250px;
+    width: auto;
+}
+
+td.set, td.initials {
+    min-width: 50px;
+    max-width: 120px;
+    text-align: center; 
+    padding: 0 5px;
+}
+
+td.total {
+    text-align: right;
+    padding: 0 5px;
+}
+
+td.initials {
+    min-width: 20px;
+    max-width: 80px;
+    text-align: center;
+}
+
+td.checkbox, .existing_checkbox {
+    min-width: 32px;
+    max-width: 32px;
+    padding: 0;
+    margin: 0 5px;
+    background-image: url("../images/custom-check.png");
+    background-repeat: no-repeat;
+    background-size: 128px;
+    background-position-x: 0;
+    background-position-y: 0;
+}
+
+.existing_checkbox {
+    margin: 0;
+}
+
+td.checkbox.selected, .existing_checkbox.selected {
+    background-position-x: -96px;
+}
+
+td.date {
+    text-align: center; 
+    padding-left: 0px;
+}
+
+td.date:hover {
+    color: #a4ef76;
+}
+
+td.total_marks {
+    text-align: center; 
+    padding-left: 0px;
+}
+
+th.rotate {
+  /* Something you can count on */
+  height: 200px;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+th.rotate > div {
+  transform: 
+    translate(0px, -2px)
+    rotate(315deg);
+  width: 250px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-bottom: 1px solid #000;
+  font-size: 1.0rem;
+  color: #323232;
+  font-weight: 700;
+  line-height: 40px;
+}
+
+th.rotate > div > span:hover {
+    color: #a4ef76;
+}
+
+th.rotate > div > span {
+  margin-left: 0px;
+  font-size: 1.0rem;
+  color: #323232;
+  font-weight: 700;
+}
+
+tr.no_hover:hover {
+    background-color: transparent;
+}
+
+tr.no_hover:nth-child(even):hover {
+    background-color: #DDD;
+}
+
+td.blank_cell {
+    background-color: #EEE;
+    border: none;
+}
+
+#main_content {
+    width: 100%;
+    margin-top: 0px;
+    float: left;
+}
+
+/* Tab Bar */
+
+#tab_bar {
+    width: calc(100% - 2px);
+    height: 40px;
+    border: 1px solid #323232;
+    background: transparent;
+    margin: 0 0 10px 0;
+    float: left;
+    user-select: none;
+}
+
+.tab_button {
+    width: calc(50% - 1px);
+    border: none;
+    border-right: 1px solid #555;
+    height: 100%;
+    display: inline-block;
+    float: left;
+    cursor: pointer;
+    color: #323232;
+    font-size: 18px;
+    text-align: center;
+    font-weight: 400;
+    line-height: 40px;
+}
+
+.tab_button.last {
+    width: 50%;
+    border-right: none;
+}
+
+.tab_button:hover {
+    background: #DDD;
+}
+
+.tab_button.selected {
+    background: #AAA;
+}
+
+.tab_option {
+    display: none;
+    float: left;
+    width: 100%;
+    height: auto;
+}
+
+.tab_option.selected {
+    display: inline-block;
+}
+
+
+#current_worksheets {
+    width: calc(100% - 2px);
+    min-height: 32px;
+    line-height: 32px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #323232;
+}
+
+.current_worksheet_row {
+    width: 100%;
+    height: 32px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 1px solid #CCC;
+    user-select: none;
+}
+
+.current_worksheet_row.bottom {
+    border-bottom: none;
+}
+
+.current_worksheet_row:hover {
+    background: #a4ef76;
+}
+
+.current_worksheet_row > .name, .current_worksheet_row > .date, .current_worksheet_row > .button {
+    width: calc(100% - 310px);
+    float: left;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: #323232;
+    line-height: 32px
+}
+
+.current_worksheet_row > .name {
+    text-align: left;
+    padding-left: 10px;
+}
+
+.current_worksheet_row > .date {
+    width: 200px;
+    text-align: center;
+}
+
+.current_worksheet_row > .button {
+    width: 100px;
+    text-align: center;
+}
+
+.current_worksheet_row > .button:hover {
+    background: #ff9999;
+}
+
+#add_worksheets_div, #add_worksheets_title, #add_worksheets_left, #add_worksheets_right {
+    display: inline-block;
+    width: 100%;
+    float: left;
+    margin: 10px 0;
+    padding: 0;
+    border: none;
+}
+
+#add_worksheets_title, #add_worksheets_left, #add_worksheets_right {
+    margin: 0;
+}
+
+#add_worksheets_title {
+    padding-left: 10px;
+    line-height: 50px;
+    font-size: 1.6rem;
+    font-weight: 400;
+}
+
+#add_worksheets_left, #add_worksheets_right {
+    width: calc(50% - 20px);
+    min-height: 300px;
+    padding: 0 10px;
+}
+
+/*#add_worksheets_right {
+    width: calc(50% - 22px);
+    border: 1px solid #323232;
+}
+*/
+/*
+#add_worksheets_input {
+    display: inline-block;
+    float: left;
+    width: 80%;
+}
+
+#add_worksheets_button {
+    display: inline-block;
+    float: left;
+    width: calc(20% - 1px);
+    border-left: 1px solid #CCC;
+    background: transparent;
+    cursor: pointer;
+    line-height: 32px;
+    font-size: 0.9rem;
+    color: #323232;
+    text-align: center;
+}
+
+#add_worksheets_button:hover {
+    background: #a4ef76;
+}
+
+.awesomplete {
+    width: 100%!important;
+    background: transparent!important;
+    border: none!important;
+    margin: 0!important;
+}*/
+
+#search_bar {
+    height: 32px;
+    width: calc(100% - 2px);
+    background: #CCC;
+    border: 1px solid #323232;
+    margin-bottom: 20px;
+}
+
+#search_bar_text {
+    background: transparent;
+    width: calc(100% - 50px);
+    height: 32px;
+    float: left;
+    display: inline-block;
+    margin: 0;
+}
+
+#search_bar_cancel {
+    background-image: url("/images/error_light.png");
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+    float: left;
+    display: inline-block;
+    margin: 8px 5px 8px 0;
+    cursor: pointer;
+}
+
+#search_bar_cancel:hover {
+    background-image: url("/images/error.png");
+}
+
+#search_bar_button {
+    background-image: url("/images/search.png");
+    background-size: cover;
+    width: 24px;
+    height: 24px;
+    float: left;
+    display: inline-block;
+    margin: 4px 5px 4px 0;
+    cursor: pointer;
+}
+
+#search_bar input {
+    background: transparent;
+    width: calc(100% - 30px);
+    height: 32px;
+    line-height: 32px;
+    margin: 0;
+    padding: 0 20px 0 10px;
+    border: none;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+}
+
+#worksheet_rows {
+    display: inline-block;
+    width: calc(100% - 2px);
+    float: left;
+    height: 500px;
+    overflow-y: scroll;
+    border: 1px solid #323232;
+}
+
+.worksheet_row {
+    display: inline-block;
+    width: 100%;
+    float: left;
+    height: 32px;
+    background: transparent;
+    cursor: pointer;
+    border-bottom: 1px solid #CCC;
+    overflow: hidden;
+}
+
+.worksheet_row:hover {
+    background: #a4ef76;
+}
+
+.worksheet_row_title {
+    display: inline-block;
+    width: calc(100% - 110px);
+    float: left;
+    margin: 0;
+    padding: 0;
+    line-height: 32px;
+    font-size: 0.9rem;
+    text-align: left;
+    user-select: none;
+    padding-left: 10px;
+}
+
+.worksheet_row_title.long {
+    line-height: 16px;
+    font-size: 0.6rem;
+}
+
+.worksheet_row_detail {
+    display: inline-block;
+    width: 100px;
+    float: left;
+    margin: 0;
+    padding: 0;
+    line-height: 32px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+#existing_worksheets_title {
+    width: calc(100% - 20px);
+    height: 32px;
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0;
+    line-height: 32px;
+    font-size: 1.3rem;
+    padding-left: 10px;
+    user-select: none;
+    overflow: hidden;
+}
+
+#existing_worksheets {
+    width: calc(100% - 22px);
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0 10px;
+    border: 1px solid #323232;
+    text-align: center;
+    font-size: 0.9rem;
+    min-height: 32px;
+    line-height: 32px;
+}
+
+.existing_worksheet_row {
+    width: 100%;
+    display: inline-block;
+    height: 32px;
+    float: left;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    border-bottom: 1px solid #CCC;
+}
+
+.existing_worksheet_row.bottom {
+    border-bottom: none;
+}
+
+.existing_worksheet_row:hover {
+    background: #a4ef76;
+}
+
+.existing_worksheet_row > .existing_checkbox, 
+.existing_worksheet_row > .group, 
+.existing_worksheet_row > .date,
+.existing_worksheet_row > .count {
+    display: inline-block;
+    float: left;
+    line-height: 32px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.existing_worksheet_row > .existing_checkbox {
+    width: 32px;
+    height: 32px;
+}
+
+.existing_worksheet_row > .group {
+    text-align: left;
+    width: calc(100% - 212px); 
+}
+
+.existing_worksheet_row > .date {
+    width: 80px; 
+}
+
+.existing_worksheet_row > .count {
+    width: 100px; 
+}
+
+#add_worksheet_description {
+    display: inline-block;
+    width: calc(100% - 20px);
+    margin: 0;
+    padding: 10px;
+    float: left;
+    font-size: 0.8rem;
+    text-align: justify;
+}
+
+#add_worksheet_buttons {
+    display: inline-block;
+    width: calc(100% - 22px);
+    height: 40px;
+    line-height: 40px;
+    cursor: pointer;
+    margin: 10px;
+    padding: 0;
+    float: left;
+    font-size: 1.0rem;
+    text-align: center;
+    border: 1px solid #323232;
+    background: #aaa;
+}
+
+#add_worksheet_buttons:hover {
+    background: #a4ef76;
+}

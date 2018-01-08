@@ -32,7 +32,7 @@ function searchWorksheets($searchTerms){
     
     if (count($searchArray) === 0) { returnToPageNoResults(); }
         
-    $query = "SELECT `Version ID`, `WName` Name FROM `TWORKSHEETVERSION` WHERE ";
+    $query = "SELECT `Version ID`, `WName` Name, DATE_FORMAT(`Date Added`, '%d/%m/%y') Date FROM `TWORKSHEETVERSION` WHERE ";
     foreach($searchArray as $key => $searchTerm) {
         if ($key != 0) $query .= " OR ";
         $query .= "`WName` LIKE '%$searchTerm%' ";

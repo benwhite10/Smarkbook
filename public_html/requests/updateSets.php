@@ -31,6 +31,12 @@ switch ($requestType){
         }
         removeFromGroup($studentid, $groupid);
         break;
+    case "GETGROUPS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getGroupsForStaff($userid);
+        break;
     default:
         failRequest("There was a problem with your request, please try again.");
         break;
@@ -74,6 +80,21 @@ function removeFromGroup($studentid, $groupid) {
     succeedRequest();
 }
 
+function getGroupsForStaff($userid) {
+    $query = "SELECT G.`Group ID`, G.`Name`
+                FROM TGROUPS G 
+                JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`
+                WHERE UG.`User ID` = $userid 
+                    AND UG.`Archived` = 0
+                ORDER BY G.`Name`";
+    try {
+        $groups = db_select_exception($query);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    succeedRequest($groups);
+}
+
 function failRequest($message){
     errorLog("There was an error in the edit group request: " . $message);
     $response = array(
@@ -83,9 +104,10 @@ function failRequest($message){
     exit();
 }
 
-function succeedRequest() {
+function succeedRequest($result) {
     $response = array(
-        "success" => TRUE);
+        "success" => TRUE,
+        "result" => $result);
     echo json_encode($response);
     exit();
 }
