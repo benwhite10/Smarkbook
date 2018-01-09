@@ -1,5 +1,6 @@
 $(document).ready(function(){
     sessionStorage.setItem("first_time", "TRUE");
+    sessionStorage.setItem("check_add", "TRUE");
     sessionStorage.setItem("groups", "[]");
     sessionStorage.setItem("search_ids", "[]");
     var order = [['Author','0'],['WName','0'],['CustomDate','1']];
@@ -147,6 +148,7 @@ function parseWorksheets(searchTerm) {
     $('#worksheets_table').html(string);
     $("#worksheets_table").css("display", "inline-block");
     goToOriginalWorksheet();
+    checkAddResults();
 }
 
 function orderWorksheets() {
@@ -472,6 +474,15 @@ function goToOriginalWorksheet() {
         window.scrollTo(window.scrollX, window.scrollY - 200);
     }
     sessionStorage.setItem("first_time", "FALSE");
+}
+
+function checkAddResults() {
+    var check_add = sessionStorage.getItem("check_add");
+    var add_vid = parseInt(getParameterByName("addv"));
+    if (check_add && !isNaN(add_vid) && check_add === "TRUE") {
+        addResults(add_vid);
+    }
+    sessionStorage.setItem("check_add", "FALSE");
 }
 
 function getParameterByName(name, url) {
