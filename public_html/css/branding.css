@@ -109,7 +109,8 @@ input[type="text"], input[type="password"], input[type="submit"]
   color: #323232;
   outline: none;}
 
-input[type="text"].markInput
+input[type="text"].markInput,
+input[type="text"].totalMarkInput
 { display: block;
   line-height: 20px;
   height: 32px;

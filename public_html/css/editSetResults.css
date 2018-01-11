@@ -828,3 +828,7 @@ input[type="text"].grade_input.awaiting_save{
 .hide_col {
     display: none;
 }
+
+.markInput.disabled {
+    color: #CCC!important;
+}

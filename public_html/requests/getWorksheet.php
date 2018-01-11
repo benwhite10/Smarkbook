@@ -61,7 +61,12 @@ function getWorksheetForGWID($gwid){
                 WHERE `Group Worksheet ID` = $gwid  AND C.`Deleted` = 0;";
 
     //Details for the worksheet, date due, notes etc
-    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded, GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden, GW.`Deleted` Deleted, GW.`StudentInput` StudentInput FROM TGROUPWORKSHEETS GW
+    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, 
+                GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, 
+                GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded, 
+                GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden, 
+                GW.`Deleted` Deleted, GW.`StudentInput` StudentInput, GW.`EnterTotals` EnterTotals, GW.`DisplayName` DisplayName  
+                FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                 JOIN TGROUPS G ON G.`Group ID` = GW.`Group ID`
                 WHERE `Group Worksheet ID` = $gwid;";

@@ -240,13 +240,15 @@ function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid) {
         $staff3 = (!$worksheetDetails["staff3"] || $worksheetDetails["staff3"] == "0") ? "null" : $worksheetDetails["staff3"];
         $datedue = $worksheetDetails["dateDueMain"];
         $stuNotes = array_key_exists("studentNotes", $worksheetDetails) ? db_escape_string($worksheetDetails["studentNotes"]) : "";
-        $staffNotes = array_key_exists("staffNotes", $worksheetDetails) ? db_escape_string($worksheetDetails["staffNotes"]) : "";
+        //$staffNotes = array_key_exists("staffNotes", $worksheetDetails) ? db_escape_string($worksheetDetails["staffNotes"]) : "";
+        $displayName = array_key_exists("displayName", $worksheetDetails) ? db_escape_string($worksheetDetails["displayName"]) : "";
         $hidden = $worksheetDetails["hide"] == "true" ? "0" : "1";
         $student_input = $worksheetDetails["student"] == "true" ? "1" : "0";
+        $enter_totals = $worksheetDetails["enter_totals"] == "true" ? "1" : "0";
 
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
-                . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
-                . ",`Hidden` = $hidden, `StudentInput` = $student_input, `Date Last Modified` = NOW() "
+                . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `DisplayName` = '$displayName' "
+                . ",`Hidden` = $hidden, `StudentInput` = $student_input, `Date Last Modified` = NOW() , `EnterTotals` = $enter_totals "
                 . "WHERE `Group Worksheet ID` = $gwid;";
 
         db_query_exception($query);
@@ -322,12 +324,15 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
         $staff3 = (!$worksheetDetails["staff3"] || $worksheetDetails["staff3"] == "0") ? "null" : $worksheetDetails["staff3"];
         $datedue = $worksheetDetails["dateDueMain"];
         $stuNotes = db_escape_string($worksheetDetails["studentNotes"]);
-        $staffNotes = db_escape_string($worksheetDetails["staffNotes"]);
+        //$staffNotes = db_escape_string($worksheetDetails["staffNotes"]);
+        $displayName = db_escape_string($worksheetDetails["displayName"]);
         $hidden = $worksheetDetails["hidden"] ? "0" : "1";
+        $student_input = $worksheetDetails["student"] == "true" ? "1" : "0";
+        $enter_totals = $worksheetDetails["enter_totals"] == "true" ? "1" : "0";
 
         $query = "UPDATE TGROUPWORKSHEETS SET `Primary Staff ID` = $staff1, `Additional Staff ID` = $staff2, `Additional Staff ID 2` = $staff3, "
-                . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `Additional Notes Staff` = '$staffNotes' "
-                . ",`Hidden` = $hidden, `Date Last Modified` = NOW() "
+                . "`Date Due` = STR_TO_DATE('$datedue', '%d/%m/%Y'), `Additional Notes Student` = '$stuNotes', `DisplayName` = '$displayName' "
+                . ",`Hidden` = $hidden, `StudentInput` = $student_input, `EnterTotals` = $enter_totals, `Date Last Modified` = NOW() "
                 . "WHERE `Group Worksheet ID` = $gwid;";
 
         db_query_exception($query);

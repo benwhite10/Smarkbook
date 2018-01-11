@@ -207,8 +207,8 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
                                     $marks = $worksheet['Marks'];
                                     if(array_key_exists($gwid, $results) && array_key_exists($stuId, $results[$gwid])){
                                         $resultArray = $results[$gwid][$stuId];
-                                        $mark = $resultArray['Mark'];
-                                        $stumarks = $resultArray['Marks'];
+                                        $mark = floatval($resultArray['Mark']);
+                                        $stumarks = intval($resultArray['Marks']);
                                         if($stumarks != $marks){
                                             $mark .= "/" . $stumarks;
                                         }
