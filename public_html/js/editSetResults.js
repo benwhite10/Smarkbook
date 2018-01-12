@@ -32,7 +32,6 @@ $(document).ready(function(){
 });
 
 function pressKeyInDiv(div, e) {
-    //console.log(e.keyCode);
     switch(e.keyCode) {
         case 9:
         case 39:
@@ -99,12 +98,17 @@ function moveLeft(id) {
             }
         }
     } else {
-        // In inputs section
-        var pos = id.split("_");
-        new_id = stepLeftInputs(pos[0], pos[1]);
-        if (!new_id) {
-            // Go to end of row
-            new_id = maxResult(getRow(row_student_array, pos[1]));
+        if (id.includes("total_input")) {
+            var pos = id.split("_");
+            new_id = "total_input_" + (parseInt(pos[2]) - 1);
+        } else {
+            // In inputs section
+            var pos = id.split("_");
+            new_id = stepLeftInputs(pos[0], pos[1]);
+            if (!new_id) {
+                // Go to end of row
+                new_id = maxResult(getRow(row_student_array, pos[1]));
+            }
         }
     }
 
@@ -127,11 +131,16 @@ function moveRight(id) {
             }
         }
     } else {
-        // In inputs section
-        var pos = id.split("_");
-        new_id = stepRightInputs(pos[0], pos[1]);
-        if (!new_id) {
-            new_id = newRow(getRow(row_student_array, pos[1]));
+        if (id.includes("total_input")) {
+            var pos = id.split("_");
+            new_id = "total_input_" + (parseInt(pos[2]) + 1);
+        } else {
+            // In inputs section
+            var pos = id.split("_");
+            new_id = stepRightInputs(pos[0], pos[1]);
+            if (!new_id) {
+                new_id = newRow(getRow(row_student_array, pos[1]));
+            }
         }
     }
 
@@ -148,14 +157,20 @@ function moveUpDown(id, up) {
         pos[0] = up ? parseInt(pos[0]) - 1 : parseInt(pos[0]) + 1;
         new_id = pos[0] + "-" + pos[1];
     } else {
-        // In inputs section
-        var pos = id.split("_");
-        var row = up ? parseInt(getRow(row_student_array, pos[1])) - 1 : parseInt(getRow(row_student_array, pos[1])) + 1;
-        var student = getStudentId(row_student_array, row);
-        if (!student) return;
-        new_id = pos[0] + "_" + student;
+        if (id.includes("total_input")) {
+            var pos = id.split("_");
+            new_id = "total_input_";
+            new_id += up ? (parseInt(pos[2]) - 1) : (parseInt(pos[2]) + 1);
+        } else {
+            // In inputs section
+            var pos = id.split("_");
+            var row = up ? parseInt(getRow(row_student_array, pos[1])) - 1 : parseInt(getRow(row_student_array, pos[1])) + 1;
+            var student = getStudentId(row_student_array, row);
+            if (!student) return;
+            new_id = pos[0] + "_" + student;
+        }
+        
     }
-
     $("#" + new_id).focus();
     $("#" + new_id).select();
 }
@@ -476,8 +491,8 @@ function setUpWorksheetInfo() {
     var details = JSON.parse(sessionStorage.getItem("details"));
     var dateDue = moment(details["DateDue"]);
     var dateString = dateDue.format("DD/MM/YYYY");
-    // Worksheet Name
-    $("#title2").html("<h1>" + details["WName"] + "</h1>");
+    var name = (details["DisplayName"] && details["DisplayName"] !== "") ? details["DisplayName"] : details["WName"];
+    $("#title2").html("<h1>" + name + "</h1>");
     $("#gwid").val(getParameterByName("gwid"));
     $("#summaryBoxShowDetailsTextMain").text(details["SetName"] + " - " + dateString);
     $("#dateDueMain").val(dateString);
@@ -538,18 +553,19 @@ function parseMainTable() {
     var average_row_3 = "<tr class='averages'><td class='averages'>Average (%)</td>";
 
     var col = 0;
+    var total_marks = 0;
     for (var key in worksheet) {
         var question = worksheet[key];
+        total_marks += parseInt(question["Marks"]);
         row_head_1 += "<th class='results results_header questions_col'>" + question["Number"] + "</th>";
         row_head_2 += "<th class='results results_header'>/ " + question["Marks"] + "</th>";
         average_row_1 += "<td class='averages display' style='text-align: center; padding-left: 0px;'>" + question["Number"] + "</ts>";
         average_row_2 += "<td class='averages display' style='padding:0px;' id='average-" + col + "'></td>";
         average_row_3 += "<td class='averages display' style='padding:0px;' id='averagePerc-" + col + "'> %</td>";
         col++;
-
     }
-    row_head_1 += "<th class='results results_header total_input_col'></th>";
-    row_head_2 += "<th class='results results_header total_input_col' style='min-width: 50px;'>Total</th>";
+    row_head_1 += "<th class='results results_header total_input_col'>Total</th>";
+    row_head_2 += "<th class='results results_header total_input_col' style='min-width: 60px;'>/" + total_marks + "</th>";
     
     row_head_1 += "<th class='results results_header total_col'></th>";
     row_head_2 += "<th class='results results_header total_col' style='min-width: 100px;'>Total</th>";
@@ -624,9 +640,13 @@ function parseMainTable() {
             student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")' onkeydown='return pressKeyInDiv(this, event)'></td>";
             col++;
         }
-        totalMark = totalMark !== "" ? Math.round(10 * parseFloat(totalMark)) / 10 : "";
+        var display_total = "0 / 0";
+        if (totalMark !== "") {
+            totalMark = Math.round(10 * parseFloat(totalMark)) / 10;
+            display_total = totalMark + " / " + totalMarks;
+        }
         student_rows += "<td class='results total_mark total_input_col'><input type='text' class='totalMarkInput' value='" + totalMark + "' id='total_input_" + row + "' onBlur='changeTotal(this.value," + row + ")' onkeydown='return pressKeyInDiv(this, event)'></td>";
-        student_rows += "<td class='results total_mark total_col'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + parseInt(totalMarks) + "</b></td>";
+        student_rows += "<td class='results total_mark total_col'><b class='totalMarks' id='total" + row + "'>" + display_total + "</b></td>";
         student_rows += "<td class='results total_mark Grade_col hide_col' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
         student_rows += "<td class='results total_mark UMS_col hide_col' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
         for (var i = 0; i < inputs.length; i++) {
@@ -771,7 +791,7 @@ function changeTotal(value, row) {
         var stuid = result_array["stuid"];
         updateCompletionStatus(stuid, row);
         updateValues(id_string, stuid);
-        getQuestionAverages(id_string);
+        getQuestionAverages();
     } else {
         resetQuestion("total_input_" + row);
     }
@@ -958,12 +978,22 @@ function saveGroupWorksheet() {
                 console.log(json["message"]);
             } else {
                 clearGWChanges();
+                updateTitle();
             }
         },
         error: function(json){
             console.log("Error updating group worksheet");
         }
     });
+}
+
+function updateTitle() {
+    if ($("#displayName").val() !== "") {
+        $("#title2").html("<h1>" + $("#displayName").val() + "</h1>");
+    } else {
+        var details = JSON.parse(sessionStorage.getItem("details"));
+        $("#title2").html("<h1>" + details["WName"] + "</h1>");
+    }
 }
 
 function getGradeBoundariesFromTable() {
@@ -993,6 +1023,7 @@ function changeDateDueMain(){
 
 function changeGWValue() {
     sessionStorage.setItem("update_gw", "true");
+    saveGroupWorksheet();
 }
 
 function clearGWChanges() {

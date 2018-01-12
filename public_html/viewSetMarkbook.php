@@ -75,7 +75,7 @@ if($respArray["success"]){
 } else {
     $success = FALSE;
     $message = "There was an error loading the markbook.";
-    $type = "ERROR";       
+    $type = "ERROR"; 
 }
 
 logEvent($userid, "VIEW_MARKBOOK", $setId);
@@ -165,7 +165,7 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
                             <th class="blank_cell" ></th>
                             <?php
                                 foreach($worksheets as $worksheet){
-                                    $name = $worksheet['WName'];
+                                    $name = $worksheet["DisplayName"] <> "" ? $worksheet["DisplayName"] : $worksheet['WName'];
                                     $gwid = $worksheet['GWID'];
                                     echo "<th style='text-align: center' class='rotate'><div title='$name' onclick='viewWorksheet($gwid);'><span title='$name'>$name</span></div></th>";
                                 }

@@ -800,7 +800,7 @@ function setUpWorksheetList() {
             var sheet = list[key];
             var worksheet = {};
             if (!sheet["Results"]) continue;
-            worksheet["name"] = sheet["WName"];
+            worksheet["name"] = (sheet["DisplayName"] && sheet["DisplayName"] !== "") ? sheet["DisplayName"] : sheet["WName"];
             var date_due = moment(sheet["DateDue"], "DD/MM/YYYY");
             var date_string = date_due.format("DD/MM/YY");
             var short_date_string = date_due.format("DD/MM");
@@ -816,6 +816,7 @@ function setUpWorksheetList() {
             var stu_perc = sheet["StuAVG"] ? Math.round(100 * sheet["StuAVG"]) : 0;
             stu_score = parseInt(stu_perc) === 0 ? 0.1 : parseInt(stu_perc);
             var stuMark = sheet["StuMark"] ? sheet["StuMark"] : 0;
+            stuMark = parseFloat(stuMark) === parseInt(stuMark) ? parseInt(stuMark) : Math.round(10 * parseFloat(stuMark)) / 10;
             var stuMarks = sheet["StuMarks"] ? sheet["StuMarks"] : 0;
             var display_marks = stuMark + "/" + stuMarks;
             var set_score = sheet["AVG"] ? Math.round(100 * sheet["AVG"]) : 0;
@@ -966,9 +967,11 @@ function setWorksheetSummary(type) {
             order_display = "Marks";
             for (var i = 0; i < summary_info.length; i++) {
                 var row = summary_info[i];
+                var mark = row["Mark"];
+                mark = parseFloat(mark) === parseInt(mark) ? parseInt(mark) : Math.round(10 * parseFloat(mark)) / 10;
                 parse_array.push({
                     main: "Q. " + row["Number"],
-                    main_display: row["Mark"] + "/" + row["Marks"],
+                    main_display: mark + "/" + row["Marks"],
                     width: parseFloat(row["Mark"])/parseFloat(row["Marks"]),
                     option_tags: row["tag_string"]
                 });
@@ -981,12 +984,14 @@ function setWorksheetSummary(type) {
             order_display = "Questions";
             for (var i = 0; i < summary_info.length; i++) {
                 var row = summary_info[i];
+                var mark = row["Mark"];
+                mark = parseFloat(mark) === parseInt(mark) ? parseInt(mark) : Math.round(10 * parseFloat(mark)) / 10;
                 parse_array.push({
                     main: row["Name"],
                     main_display: row["Count"],
                     width: parseFloat(row["Perc"]),
                     option_1: ["QUESTIONS", row["Count"]],
-                    option_2: ["MARK", row["Mark"] + "/" + row["Marks"]],
+                    option_2: ["MARK", mark + "/" + row["Marks"]],
                     option_3: ["PERC", parseInt(100*parseFloat(row["Perc"])) + "%"]
                 });
             }
