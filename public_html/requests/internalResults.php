@@ -7,6 +7,7 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$date = filter_input(INPUT_POST,'date',FILTER_SANITIZE_STRING);
 $course_id = filter_input(INPUT_POST,'course',FILTER_SANITIZE_NUMBER_INT);
 $vid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
 $cwid = filter_input(INPUT_POST,'cwid',FILTER_SANITIZE_NUMBER_INT);
@@ -28,6 +29,9 @@ switch ($request_type){
         break;
     case "ADDNEWWORKSHEET":
         addNewWorksheet($course_id, $vid, $existing_results);
+        break;
+    case "UPDATEWORKSHEET":
+        updateWorksheet($cwid, $date);
         break;
     case "REMOVEWORKSHEET":
         removeWorksheet($cwid);
@@ -69,7 +73,7 @@ function getCourseDetails($course_id) {
                             JOIN `TUSERGROUPS` UG ON G.`Group ID` = UG.`Group ID`
                             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                             WHERE GC.`CourseID` = $course_id
-                            AND U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER'";
+                            AND (U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER')";
     try {
         $set_details = db_select_exception($set_details_query);
         foreach ($set_details as $key => $set) {
@@ -107,7 +111,7 @@ function getCourseOverview($course_id) {
                             JOIN `TUSERGROUPS` UG ON G.`Group ID` = UG.`Group ID`
                             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                             WHERE GC.`CourseID` = $course_id
-                            AND U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER'";
+                            AND (U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER')";
     try {
         $set_details = db_select_exception($set_details_query);
     } catch (Exception $ex) {
@@ -218,6 +222,20 @@ function getExistingResults($course_id, $vid) {
     );
     
     succeedRequest($return);
+}
+
+function updateWorksheet($cwid, $date) {
+    db_begin_transaction();
+    $update_query = "UPDATE `TCOURSEWORKSHEET` SET `Date` = STR_TO_DATE('$date', '%d/%m/%Y') WHERE `ID` = $cwid;";
+    try {
+        db_query_exception($update_query);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        //failRequest("There was an error creating the updating the worksheet: " . $ex->getMessage());
+        failRequest($update_query);
+    }
+    db_commit_transaction();
+    succeedRequest(null);
 }
 
 function addNewWorksheet($course_id, $vid, $existing_results) {

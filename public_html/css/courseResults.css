@@ -249,6 +249,7 @@ td.blank_cell {
 
 .current_worksheet_row > .date {
     width: 200px;
+    height: 100%;
     text-align: center;
 }
 
@@ -536,4 +537,17 @@ td.blank_cell {
 
 #add_worksheet_buttons:hover {
     background: #a4ef76;
+}
+
+input[type="text"].datepicker {
+    display: inline-block;
+    float: left;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    border: none;
+    text-align: center;
+    line-height: 32px;
 }

@@ -6,7 +6,6 @@ $(document).ready(function(){
     sessionStorage.setItem("active_tab", isNaN(parseInt(getParameterByName("tab"))) ? 0 : parseInt(getParameterByName("tab")));
     sessionStorage.setItem("search_results", "no_results");
     sessionStorage.setItem("course_id", getParameterByName("cid"));
-    getResultsRequest(sessionStorage.getItem("course_id"));
     getWorksheets();
 });
 
@@ -117,6 +116,7 @@ function getWorksheets() {
 function getWorksheetsSuccess(json) {
     if(json["success"]) {
         sessionStorage.setItem("worksheets", JSON.stringify(json["worksheets"]));
+        getResultsRequest(sessionStorage.getItem("course_id"));
     } else {
         console.log("There was an error getting the worksheets.");
         console.log(json["message"]);
@@ -200,7 +200,7 @@ function courseWorksheetsTab(worksheets) {
             if (i === worksheets.length - 1) class_text += " bottom";
             worksheets_html += "<div class='" + class_text + "'>";
             worksheets_html += "<div class='name'>" + name + "</div>";
-            worksheets_html += "<div class='date'>" + long_date + "</div>";
+            worksheets_html += "<div class='date'><input type='text' class='datepicker' id='datepicker_" + cwid + "' value='" + long_date + "' onblur='changeDate(" + cwid + ")'/></div>";
             worksheets_html += "<div class='button' onclick='removeWorksheet(" + cwid + ")'>Remove</div></div>";
         }
     } else {
@@ -441,7 +441,8 @@ function parseResults(results_array, worksheets) {
         for (var j = 0; j < worksheets.length; j++) {
             var result = results_array[i][worksheets[j]["ID"]];
             if (result) {
-                table_html += "<td class='marks'>" + result["Mark"] + "</td>";
+                var mark = parseInt(result["Mark"]) === parseFloat(result["Mark"]) ? parseInt(result["Mark"]) : Math.round(10*parseFloat(result["Mark"])) / 10;
+                table_html += "<td class='marks'>" + mark + "</td>";
             } else {
                 table_html += "<td class='marks'></td>";
             }
@@ -693,6 +694,33 @@ function searchSuccess(json, searchTerm) {
     } else {
         console.log("There was an error searching the worksheets.");
         console.log(json["message"]);
+    }
+}
+
+function changeDate(id) {
+    var date = moment($("#datepicker_" + id).val(), "DD/MM/YYYY");
+    if (date.isValid()) {
+        var infoArray = {
+            type: "UPDATEWORKSHEET",
+            cwid: id,
+            date: $("#datepicker_" + id).val(),
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/internalResults.php",
+            dataType: "json",
+            success: function(json){
+                
+            },
+            error: function() {
+                console.log("There was an error updating the worksheet.");
+            }
+        });
+    } else {
+        console.log("Not Valid");
     }
 }
 

@@ -72,5 +72,3 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	
