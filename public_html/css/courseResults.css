@@ -199,13 +199,14 @@ td.blank_cell {
 
 
 #current_worksheets {
-    width: calc(100% - 2px);
+    width: calc(100% - 12px);
     min-height: 32px;
     line-height: 32px;
     float: left;
     display: inline-block;
     margin: 0;
     padding: 0;
+    padding-left: 10px;
     border: 1px solid #323232;
 }
 

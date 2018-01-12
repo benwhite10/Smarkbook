@@ -8,7 +8,9 @@ include_once $include_path . '/public_html/requests/core.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $date = filter_input(INPUT_POST,'date',FILTER_SANITIZE_STRING);
+$course_name = filter_input(INPUT_POST,'name',FILTER_SANITIZE_STRING);
 $course_id = filter_input(INPUT_POST,'course',FILTER_SANITIZE_NUMBER_INT);
+$set_id = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $vid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
 $cwid = filter_input(INPUT_POST,'cwid',FILTER_SANITIZE_NUMBER_INT);
 $existing_results = json_decode(filter_input(INPUT_POST,'results', FILTER_SANITIZE_STRING));
@@ -41,6 +43,12 @@ switch ($request_type){
         break;
     case "GETCOURSEDETAILS":
         getCourseDetails($course_id);
+        break;
+    case "NEWCOURSE":
+        addNewCourse($course_name);
+        break;
+    case "ADDSET":
+        addSet($course_id, $set_id);
         break;
     default:
         break;
@@ -437,6 +445,35 @@ function getSetFromID($set_id, $sets) {
     }
     return null;
 }
+
+function addNewCourse($course_name) {
+    db_begin_transaction();
+    $query = "INSERT INTO `TCOURSE`(`Title`, `SubjectID`, `Deleted`) 
+                VALUES ('$course_name',1,0)";
+    try {
+        db_insert_query_exception($query);
+        db_commit_transaction();
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest($ex->getMessage());
+    }
+    succeedRequest(null);
+}
+
+function addSet($course_id, $set_id) {
+    db_begin_transaction();
+    $query = "INSERT INTO `TGROUPCOURSE`(`GroupID`, `CourseID`) "
+            . "VALUES ($set_id,$course_id)";
+    try {
+        db_insert_query_exception($query);
+        db_commit_transaction();
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest($ex->getMessage());
+    }
+    succeedRequest(null);
+}
+
 function succeedRequest($result){
     $response = array(
         "success" => TRUE,

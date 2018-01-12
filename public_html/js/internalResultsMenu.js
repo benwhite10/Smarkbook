@@ -66,7 +66,11 @@ function courseDetailsSuccess(json) {
         var course_details = json["result"]["course_details"];
         var set_details = json["result"]["set_details"];
         $("#course_details_title").html(course_details[0]["Title"]);
-        $("#sets_table").html("");
+        if (set_details.length > 0) {
+            $("#sets_table").html("");
+        } else {
+            $("#sets_table").html("<div id='sets_table_no_results'><i>No Sets</i></div>");
+        }
         for (var i = 0; i < set_details.length; i++) {
             var class_string = i + 1 === set_details.length ? "set_row bottom" : "set_row";
             var html_string = "<div class='" + class_string + "'>";
@@ -83,4 +87,61 @@ function courseDetailsSuccess(json) {
     } else {
         console.log(json);
     }
+}
+
+function addCourse() {
+    var course_name = $("#add_courses_input").val();
+    if (course_name === "") return;
+    var infoArray = {
+        type: "NEWCOURSE",
+        name: course_name,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "requests/internalResults.php",
+        dataType: "json",
+        success: function(json) {
+            if (json["success"]) {
+                window.location.reload();
+            } else {
+                console.log("There was an error adding the course.");
+                console.log(json);
+            }
+        },
+        error: function(response){
+            console.log("There was an error adding the course.");
+            console.log(response);
+        }
+    });
+}
+
+function addSet(course_id, set_id) {
+    var infoArray = {
+        type: "ADDSET",
+        course: course_id,
+        set: set_id,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "requests/internalResults.php",
+        dataType: "json",
+        success: function(json) {
+            if (json["success"]) {
+                window.location.reload();
+            } else {
+                console.log("There was an error adding the set.");
+                console.log(json);
+            }
+        },
+        error: function(response){
+            console.log("There was an error adding the set.");
+            console.log(response);
+        }
+    });
 }
