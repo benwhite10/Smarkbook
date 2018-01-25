@@ -31,7 +31,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php pageHeader("Revision Checklist", $info_version); ?>
+    <?php pageHeader("Internal Results", $info_version); ?>
     <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
     <script src='js/internalResultsMenu.js?<?php echo $info_version; ?>'></script>
     <link rel='stylesheet' type='text/css' href='css/internalResultsMenu.css?<?php echo $info_version; ?>' />
