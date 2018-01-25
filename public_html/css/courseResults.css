@@ -44,7 +44,7 @@ td.name, td.set, td.initials {
 td.set, td.initials {
     min-width: 50px;
     max-width: 120px;
-    text-align: center; 
+    text-align: center;
     padding: 0 5px;
 }
 
@@ -80,7 +80,7 @@ td.checkbox.selected, .existing_checkbox.selected {
 }
 
 td.date {
-    text-align: center; 
+    text-align: center;
     padding-left: 0px;
 }
 
@@ -89,7 +89,7 @@ td.date:hover {
 }
 
 td.total_marks {
-    text-align: center; 
+    text-align: center;
     padding-left: 0px;
 }
 
@@ -101,7 +101,7 @@ th.rotate {
 }
 
 th.rotate > div {
-  transform: 
+  transform:
     translate(0px, -2px)
     rotate(315deg);
   width: 250px;
@@ -206,7 +206,6 @@ td.blank_cell {
     display: inline-block;
     margin: 0;
     padding: 0;
-    padding-left: 10px;
     border: 1px solid #323232;
 }
 
@@ -482,8 +481,8 @@ td.blank_cell {
     background: #a4ef76;
 }
 
-.existing_worksheet_row > .existing_checkbox, 
-.existing_worksheet_row > .group, 
+.existing_worksheet_row > .existing_checkbox,
+.existing_worksheet_row > .group,
 .existing_worksheet_row > .date,
 .existing_worksheet_row > .count {
     display: inline-block;
@@ -500,15 +499,15 @@ td.blank_cell {
 
 .existing_worksheet_row > .group {
     text-align: left;
-    width: calc(100% - 212px); 
+    width: calc(100% - 212px);
 }
 
 .existing_worksheet_row > .date {
-    width: 80px; 
+    width: 80px;
 }
 
 .existing_worksheet_row > .count {
-    width: 100px; 
+    width: 100px;
 }
 
 #add_worksheet_description {
