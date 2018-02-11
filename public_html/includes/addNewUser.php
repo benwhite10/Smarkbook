@@ -7,7 +7,7 @@ include_once $include_path . '/public_html/includes/errorReporting.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
-if(isset($_SESSION['user'])){ 
+if(isset($_SESSION['user'])){
     $user = $_SESSION['user'];
     $userRole = $user->getRole();
     if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
@@ -23,14 +23,11 @@ $prefname = filter_input(INPUT_POST, 'prefferedname', FILTER_SANITIZE_STRING);
 $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_STRING);
 $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_STRING);
 $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING);
-$intials = filter_input(INPUT_POST, 'initials', FILTER_SANITIZE_STRING);
-$classroom = filter_input(INPUT_POST, 'classroom', FILTER_SANITIZE_STRING);
-$number = filter_input(INPUT_POST, 'number', FILTER_SANITIZE_STRING);
-$dob = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
+$initials = filter_input(INPUT_POST, 'initials', FILTER_SANITIZE_STRING);
 $message = "";
 
 if(isset($role)){
-    if(isset($pwd, $fname, $sname, $email)){    
+    if(isset($pwd, $fname, $sname, $email)){
         if (strlen($pwd) != 128) {
             // The hashed pwd should be 128 characters long.
             // If it's not, something really odd has happened
@@ -39,10 +36,11 @@ if(isset($role)){
         }
 
         $random_salt = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
-        // Create salted password 
+        // Create salted password
         $pwd = hash('sha512', $pwd . $random_salt);
-        $query = "INSERT INTO TUSERS (`First Name`, `Surname`, `Username`, `Email`, `Password`, `Salt`, `Role`)
-                  VALUES('$fname','$sname','$email','$email','$pwd','$random_salt','$role')";
+        $validation = generateRandomString(5);
+        $query = "INSERT INTO TUSERS (`First Name`, `Surname`, `Username`, `Email`, `Password`, `Salt`, `Role`, `Preferred Name`, `Title`, `Initials`, `Validation`)
+                  VALUES('$fname','$sname','$email','$email','$pwd','$random_salt','$role', '$prefname', '$title', '$initials', '$validation')";
         try{
             $resultArray = db_insert_query_exception($query);
         } catch (Exception $ex) {
@@ -60,37 +58,14 @@ if(isset($role)){
                 $desc = "Something went wrong while saving the new user.";
                 $message .= seriousError($desc);
                 returnToPageError($message);
-            } 
+            }
         }
     }else{
         //Not enough info to proceed
         $message .= "You have not entered all of the fields required to create a user.";
         returnToPageError($message);
     }
-    
-    $userid = $resultArray[1];
-    if($role === 'STUDENT'){
-        //Student user
-        $query2 = "INSERT INTO TSTUDENTS (`User ID`, `Preferred Name`, `DOB`)
-                  VALUES($userid, '$prefName', '$dob');";
-    }else{
-        //Staff user
-        $query2 = "INSERT INTO TSTAFF (`User ID`, `Title`, `Initials`, `Classroom`, `Phone Number`)
-                   VALUES($userid, '$title', '$initials', '$classroom', '$number');";
-    }
-    
-    try{
-        $resultArray1 = db_insert_query_exception($query2);
-    } catch (Exception $ex) {
-        if($ex->getMessage() !== null){
-            $desc = $ex->getMessage();
-        }else{
-            $desc = "Something went wrong while saving the new user.";
-        }
-        $message .= seriousError($desc);
-        returnToPageError($message);
-    }
-    
+
     $message = "User '$fname $sname' successfully added.";
     returnToPageSuccess($message);
 }else{
@@ -99,10 +74,20 @@ if(isset($role)){
     returnToPageError($message);
 }
 
+function generateRandomString($length) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
 function returnToPageError($message){
     $type = 'ERROR';
     if(!isset($message)){
-        $message = 'Something has gone wrong';   
+        $message = 'Something has gone wrong';
     }
     infoLog($message);
     $_SESSION['message'] = new Message($type, $message);
@@ -117,4 +102,3 @@ function returnToPageSuccess($message){
     header("Location: ../createUser.php");
     exit;
 }
-

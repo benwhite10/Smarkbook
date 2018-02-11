@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
 	$user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -92,7 +92,7 @@ if(isset($_SESSION['message'])){
                 <ul class="menu navbar">
                 </ul>
             </div>
-            
+
             <?php
                 if(isset($message)){
                     $type = $message->getType();
@@ -106,12 +106,12 @@ if(isset($_SESSION['message'])){
                     $div = 'style="display:none;"';
                 }
             ?>
-            
+
             <div id="message" <?php echo $div; ?>>
                 <div id="messageText"><p><?php if(isset($string)){echo $string;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>   
-            
+            </div>
+
             <form id="editForm" class="editWorksheet" action="includes/updateUser.php" method="POST">
                 <div id="main_content">
                     <!--
@@ -120,7 +120,7 @@ if(isset($_SESSION['message'])){
                         <option value="STAFF">Staff</option>
                         <option value="STUDENT">Student</option>
                         <option value="SUPER_USER">Super User</option>
-                    </select> 
+                    </select>
                     -->
                     <input type="hidden" name="role" value="<?php if(isset($role)){echo $role;}?>"/>
                     <input type="hidden" name="userid" value="<?php if(isset($userid)){echo $userid;}?>"/>
@@ -166,10 +166,8 @@ if(isset($_SESSION['message'])){
                         <li><a href="portalhome.php">Cancel</a></li>
                     </ul>
                 </div>
-            </form> 
+            </form>
     	</div>
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	

@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -67,7 +67,7 @@ if(isset($_SESSION['message'])){
                 <ul class="menu navbar">
                 </ul>
             </div>
-            
+
             <?php
                 if(isset($message)){
                     $type = $message->getType();
@@ -81,21 +81,21 @@ if(isset($_SESSION['message'])){
                     $div = 'style="display:none;"';
                 }
             ?>
-            
+
             <div id="message" <?php echo $div; ?>>
                 <div id="messageText"><p><?php if(isset($string)){echo $string;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>   
-            
+            </div>
+
             <form id="editForm" class="editWorksheet" action="includes/addNewUser.php" method="POST">
                 <div id="main_content">
-                    
+
                     <label for="role">User Type:
                     </label><select name="role" id="role">
                         <option value="STAFF">Staff</option>
                         <option value="STUDENT">Student</option>
                         <option value="SUPER_USER">Super User</option>
-                    </select> 
+                    </select>
                     <!--<div>
                     <label for="username">Username *:
                     </label><input type="text" name="username" placeholder="Username"></input>
@@ -123,15 +123,6 @@ if(isset($_SESSION['message'])){
                     </div><div class="staff">
                     <label for="initials">Initials:
                     </label><input type="text" name="initials" placeholder="Initials"></input>
-                    </div><div class="staff">
-                    <label for="classroom">Classroom:
-                    </label><input type="text" name="classroom" placeholder="Classroom"></input>
-                    </div><div class="staff">
-                    <label for="number">Number:
-                    </label><input type="text" name="number" placeholder="Phone Number" id="number"></input>
-                    </div><div class="student" style="display:none;">
-                    <label for="dob">DOB:
-                    </label><input type="text" name="date" placeholder="DD/MM/YYYY"></input>
                     </div>
                     <input type="submit" value="Save"/>
                 </div><div id="side_bar">
@@ -140,10 +131,8 @@ if(isset($_SESSION['message'])){
                         <li><a href="/viewAllWorksheets.php">Cancel</a></li>
                     </ul>
                 </div>
-            </form> 
+            </form>
     	</div>
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	
