@@ -7,7 +7,10 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
+$date = filter_input(INPUT_POST,'date',FILTER_SANITIZE_STRING);
+$course_name = filter_input(INPUT_POST,'name',FILTER_SANITIZE_STRING);
 $course_id = filter_input(INPUT_POST,'course',FILTER_SANITIZE_NUMBER_INT);
+$set_id = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $vid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
 $cwid = filter_input(INPUT_POST,'cwid',FILTER_SANITIZE_NUMBER_INT);
 $existing_results = json_decode(filter_input(INPUT_POST,'results', FILTER_SANITIZE_STRING));
@@ -29,6 +32,9 @@ switch ($request_type){
     case "ADDNEWWORKSHEET":
         addNewWorksheet($course_id, $vid, $existing_results);
         break;
+    case "UPDATEWORKSHEET":
+        updateWorksheet($cwid, $date);
+        break;
     case "REMOVEWORKSHEET":
         removeWorksheet($cwid);
         break;
@@ -37,6 +43,12 @@ switch ($request_type){
         break;
     case "GETCOURSEDETAILS":
         getCourseDetails($course_id);
+        break;
+    case "NEWCOURSE":
+        addNewCourse($course_name);
+        break;
+    case "ADDSET":
+        addSet($course_id, $set_id);
         break;
     default:
         break;
@@ -62,31 +74,32 @@ function getCourseDetails($course_id) {
     } catch (Exception $ex) {
         failRequest("There was an error getting the course details: " . $ex->getMessage());
     }
-    
-    $set_details_query = "SELECT G.`Group ID`, G.`Name`, U.`User ID` 
-                            FROM `TGROUPCOURSE` GC 
+
+    $set_details_query = "SELECT G.`Group ID`, G.`Name`, U.`User ID`
+                            FROM `TGROUPCOURSE` GC
                             JOIN `TGROUPS` G ON GC.`GroupID` = G.`Group ID`
                             JOIN `TUSERGROUPS` UG ON G.`Group ID` = UG.`Group ID`
                             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                             WHERE GC.`CourseID` = $course_id
-                            AND U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER'";
+                            AND (U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER')
+                            AND UG.`Archived` = 0";
     try {
         $set_details = db_select_exception($set_details_query);
         foreach ($set_details as $key => $set) {
             $userid = $set["User ID"];
             $query = "SELECT `Initials` FROM TSTAFF WHERE `User ID` = $userid";
             $result = db_select_exception($query);
-            $set_details[$key]["Initials"] = $result[0]["Initials"]; 
+            $set_details[$key]["Initials"] = $result[0]["Initials"];
         }
     } catch (Exception $ex) {
         failRequest("There was an error getting the set details: " . $ex->getMessage());
     }
-    
+
     $return = array(
         "course_details" => $course_details,
         "set_details" => $set_details
     );
-    
+
     succeedRequest($return);
 }
 
@@ -99,43 +112,45 @@ function getCourseOverview($course_id) {
     } catch (Exception $ex) {
         failRequest("There was an error getting the course details: " . $ex->getMessage());
     }
-    
+
     // Get set details
-    $set_details_query = "SELECT G.`Group ID`, G.`Name`, U.`User ID` 
-                            FROM `TGROUPCOURSE` GC 
+    $set_details_query = "SELECT G.`Group ID`, G.`Name`, U.`User ID`
+                            FROM `TGROUPCOURSE` GC
                             JOIN `TGROUPS` G ON GC.`GroupID` = G.`Group ID`
                             JOIN `TUSERGROUPS` UG ON G.`Group ID` = UG.`Group ID`
                             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                             WHERE GC.`CourseID` = $course_id
-                            AND U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER'";
+                            AND (U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER')
+                            AND UG.`Archived` = 0";
     try {
         $set_details = db_select_exception($set_details_query);
     } catch (Exception $ex) {
         failRequest("There was an error getting the set details: " . $ex->getMessage());
     }
-    
+
     $summary_array = addSetDetailsToSummary($set_details);
-    
+
     // Get students and add (with set details) to a results table
     $students_query = "SELECT G.`Group ID`, U.`User ID`
-                    FROM `TGROUPCOURSE` GC 
+                    FROM `TGROUPCOURSE` GC
                     JOIN `TGROUPS` G ON GC.`GroupID` = G.`Group ID`
                     JOIN `TUSERGROUPS` UG ON G.`Group ID` = UG.`Group ID`
                     JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                     WHERE GC.`CourseID` = $course_id
                     AND U.`ROLE` = 'STUDENT'
+                    AND UG.`Archived` = 0
                     ORDER BY G.`Name`, U.`Surname`, U.`First Name`";
-    
+
     try {
         $students = db_select_exception($students_query);
     } catch (Exception $ex) {
         failRequest("There was an error getting the set details: " . $ex->getMessage());
     }
-    
+
     $results_array = addStudentDetailsToResults($students, $set_details);
-    
+
     // Get worksheets
-    $worksheets_query = "SELECT CW.`ID`, CW.`CourseID`, DATE_FORMAT(CW.`Date`, '%d/%m/%Y') LongDate, DATE_FORMAT(CW.`Date`, '%d/%m') ShortDate, WV.`Version ID`, WV.`WName` , SUM(SQ.`Marks`) Marks 
+    $worksheets_query = "SELECT CW.`ID`, CW.`CourseID`, DATE_FORMAT(CW.`Date`, '%d/%m/%Y') LongDate, DATE_FORMAT(CW.`Date`, '%d/%m') ShortDate, WV.`Version ID`, WV.`WName` , SUM(SQ.`Marks`) Marks
                         FROM `TCOURSEWORKSHEET` CW
                         JOIN `TWORKSHEETVERSION` WV ON CW.`WorksheetID` = WV.`Version ID`
                         JOIN `TSTOREDQUESTIONS` SQ ON WV.`Version ID` = SQ.`Version ID`
@@ -150,16 +165,16 @@ function getCourseOverview($course_id) {
     } catch (Exception $ex) {
         failRequest("There was an error getting the worksheet details: " . $ex->getMessage());
     }
-    
+
     // Populate results into results table
     foreach ($worksheets as $worksheet) {
         $cwid = $worksheet["ID"];
         $wvid = $worksheet["Version ID"];
         $results_query = "SELECT A.`Student ID`, SUM(A.`Mark`) Mark FROM (
                             SELECT CQ.`Student ID`, CQ.`Mark`
-                            FROM `TCOMPLETEDQUESTIONS` CQ 
+                            FROM `TCOMPLETEDQUESTIONS` CQ
                             WHERE CQ.`Group Worksheet ID` IN (
-                            SELECT GW.`Group Worksheet ID` 
+                            SELECT GW.`Group Worksheet ID`
                             FROM `TGROUPWORKSHEETS` GW
                             WHERE GW.`CourseWorksheetID` = $cwid AND GW.`Version ID` = $wvid)
                             AND CQ.`Deleted` = 0
@@ -173,7 +188,7 @@ function getCourseOverview($course_id) {
         $results_array = addResultsToResultsArray($results_array, $results, $cwid);
         $summary_array = addResultsToSummaryArray($summary_array, $results, $cwid, $students, $worksheets);
     }
-    
+
     // Return results table, course details and worksheet details
     $return = array(
         "course_details" => $course_details,
@@ -181,20 +196,20 @@ function getCourseOverview($course_id) {
         "summary_array" => $summary_array,
         "worksheets" => $worksheets
     );
-    
+
     succeedRequest($return);
 }
 
 function getExistingResults($course_id, $vid) {
     $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Group ID` GID, G.`Name`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, S.`Initials`, S.`User ID` UID
                 FROM `TGROUPWORKSHEETS` GW
-                JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID` 
+                JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
                 JOIN `TSTAFF` S ON GW.`Primary Staff ID` = S.`User ID`
                 WHERE GW.`Group ID` IN (
-                SELECT `GroupID` FROM `TGROUPCOURSE` 
+                SELECT `GroupID` FROM `TGROUPCOURSE`
                 WHERE `CourseID` = $course_id
-                ) AND GW.`Version ID` = $vid 
-                AND GW.`Deleted` = 0 
+                ) AND GW.`Version ID` = $vid
+                AND GW.`Deleted` = 0
                 AND GW.`CourseWorksheetID` IS NULL
                 GROUP BY GW.`Group Worksheet ID`
                 ORDER BY GW.`Group ID`, Date DESC";
@@ -202,7 +217,7 @@ function getExistingResults($course_id, $vid) {
         $results = db_select_exception($query);
         foreach($results as $key => $result) {
             $gwid = $result["GWID"];
-            $count_query = "SELECT COUNT(*) Count FROM `TCOMPLETEDWORKSHEETS` 
+            $count_query = "SELECT COUNT(*) Count FROM `TCOMPLETEDWORKSHEETS`
                             WHERE `Group Worksheet ID` = $gwid
                             GROUP BY `Group Worksheet ID`";
             $count_result = db_select_exception($count_query);
@@ -212,12 +227,26 @@ function getExistingResults($course_id, $vid) {
     } catch (Exception $ex) {
         failRequest("There was an error getting the existing results: " . $ex->getMessage());
     }
-    
+
     $return = array(
         "existing_results" => $results
     );
-    
+
     succeedRequest($return);
+}
+
+function updateWorksheet($cwid, $date) {
+    db_begin_transaction();
+    $update_query = "UPDATE `TCOURSEWORKSHEET` SET `Date` = STR_TO_DATE('$date', '%d/%m/%Y') WHERE `ID` = $cwid;";
+    try {
+        db_query_exception($update_query);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        //failRequest("There was an error creating the updating the worksheet: " . $ex->getMessage());
+        failRequest($update_query);
+    }
+    db_commit_transaction();
+    succeedRequest(null);
 }
 
 function addNewWorksheet($course_id, $vid, $existing_results) {
@@ -232,21 +261,22 @@ function addNewWorksheet($course_id, $vid, $existing_results) {
         db_rollback_transaction();
         failRequest("There was an error creating the course worksheet: " . $ex->getMessage());
     }
-    
+
     // Get groups
-    $groups_query = "SELECT GC.`GroupID`, U.`User ID` 
+    $groups_query = "SELECT GC.`GroupID`, U.`User ID`
                     FROM `TGROUPCOURSE` GC
-                    JOIN `TUSERGROUPS` UG ON GC.`GroupID` = UG.`Group ID` 
+                    JOIN `TUSERGROUPS` UG ON GC.`GroupID` = UG.`Group ID`
                     JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
-                    WHERE GC.`CourseID` = $course_id 
-                    AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')";
+                    WHERE GC.`CourseID` = $course_id
+                    AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')
+                    AND UG.`Archived` = 0 ";
     try {
         $groups = db_select_exception($groups_query);
     } catch (Exception $ex) {
         db_rollback_transaction();
         failRequest("There was an error getting the groups for the course: " . $ex->getMessage());
     }
-        
+
     foreach ($groups as $group) {
         $group_id = $group["GroupID"];
         $user_id = $group["User ID"];
@@ -254,7 +284,7 @@ function addNewWorksheet($course_id, $vid, $existing_results) {
             $updated = FALSE;
             if ($group_id == $result[1]) {
                 $gwid = $result[0];
-                $update_query = "UPDATE `TGROUPWORKSHEETS` 
+                $update_query = "UPDATE `TGROUPWORKSHEETS`
                             SET `CourseWorksheetID` = $cwid
                             WHERE `Group Worksheet ID` = $gwid;";
                 try {
@@ -287,7 +317,7 @@ function addNewWorksheet($course_id, $vid, $existing_results) {
 function removeWorksheet($cwid) {
     db_begin_transaction();
     $remove_query = "UPDATE `TCOURSEWORKSHEET` SET `Deleted`=1 WHERE `ID` = $cwid;";
-    $remove_gw_query = "UPDATE `TGROUPWORKSHEETS` SET `CourseWorksheetID`= NULL 
+    $remove_gw_query = "UPDATE `TGROUPWORKSHEETS` SET `CourseWorksheetID`= NULL
                     WHERE `CourseWorksheetID` = $cwid";
     try {
         db_query_exception($remove_query);
@@ -310,7 +340,7 @@ function addStudentDetailsToResults($students, $sets) {
         $set["Staff Initials"] = $staff_user->getInitials();
         array_push($sets_details, $set);
     }
-    
+
     foreach ($students as $student) {
         $student_user = Student::createStudentFromId($student["User ID"]);
         $set = getSetFromID($student["Group ID"], $sets_details);
@@ -326,13 +356,13 @@ function addStudentDetailsToResults($students, $sets) {
             "Student" => $student
         ));
     }
-    
+
     return $results_array;
 }
 
 function addSetDetailsToSummary($set_details) {
     $summary_array = [];
-    
+
     foreach ($set_details as $set) {
         $staff_user = Teacher::createTeacherFromId($set["User ID"]);
         $set["Staff Name"] = $staff_user->getTitle() . " " . $staff_user->getSurname();
@@ -341,11 +371,11 @@ function addSetDetailsToSummary($set_details) {
             "Details" => $set
         ));
     }
-    
+
     array_push($summary_array, array(
         "Details" => "Total"
     ));
-    
+
     return $summary_array;
 }
 
@@ -368,13 +398,13 @@ function addResultsToResultsArray($results_array, $results, $cwid) {
 
 function addResultsToSummaryArray($summary_array, $results, $cwid, $students, $worksheets) {
     $marks = getMarksForWorksheet($cwid, $worksheets);
-    
+
     foreach ($results as $key=>$result) {
         $group_id = getSetFromStudent($result["Student ID"], $students);
         $result["Group ID"] = $group_id;
         $results[$key] = $result;
     }
-    
+
     foreach ($summary_array as $key=>$set) {
         $group_id = $set["Details"] !== "Total" ? $set["Details"]["Group ID"] : "Total";
         $total_mark = $total_marks = $count = 0;
@@ -395,7 +425,7 @@ function addResultsToSummaryArray($summary_array, $results, $cwid, $students, $w
             "Marks" => $marks
         );
     }
-    
+
     return $summary_array;
 }
 
@@ -419,6 +449,35 @@ function getSetFromID($set_id, $sets) {
     }
     return null;
 }
+
+function addNewCourse($course_name) {
+    db_begin_transaction();
+    $query = "INSERT INTO `TCOURSE`(`Title`, `SubjectID`, `Deleted`)
+                VALUES ('$course_name',1,0)";
+    try {
+        db_insert_query_exception($query);
+        db_commit_transaction();
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest($ex->getMessage());
+    }
+    succeedRequest(null);
+}
+
+function addSet($course_id, $set_id) {
+    db_begin_transaction();
+    $query = "INSERT INTO `TGROUPCOURSE`(`GroupID`, `CourseID`) "
+            . "VALUES ($set_id,$course_id)";
+    try {
+        db_insert_query_exception($query);
+        db_commit_transaction();
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest($ex->getMessage());
+    }
+    succeedRequest(null);
+}
+
 function succeedRequest($result){
     $response = array(
         "success" => TRUE,

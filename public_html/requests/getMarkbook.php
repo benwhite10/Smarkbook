@@ -47,7 +47,9 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 WHERE G.`Group ID` = $setid
                 AND G.`Archived` <> 1
                 ORDER BY U.Surname;";
-    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks 
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, 
+                DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks, 
+                GW.`DisplayName` DisplayName
                 FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`                

@@ -508,8 +508,8 @@ function groupResultsByTag(){
 function getSetWorksheets(){
     global $returns, $setWorksheets;
 
-    $query = "select GW.`Group Worksheet ID` GWID, GW.`Version ID` VID, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DateDue, GW.`Additional Notes Student` StuNotes,
-                GW.`Additional Notes Staff` StaffNotes, WV.`WName` WName, WV.`VName` VName from TGROUPWORKSHEETS GW
+    $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Version ID` VID, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DateDue, GW.`Additional Notes Student` StuNotes,
+                GW.`Additional Notes Staff` StaffNotes, WV.`WName` WName, WV.`VName` VName, GW.`DisplayName` DisplayName from TGROUPWORKSHEETS GW
                JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                JOIN TSTOREDQUESTIONS SQ ON SQ.`Version ID` = GW.`Version ID`
                JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID` ";
@@ -584,7 +584,7 @@ function getSetWorksheets(){
 function getStudentWorksheets(){
     global $returns, $studentWorksheets;
 
-    $query = "select CW.`Group Worksheet ID` GWID from TCOMPLETEDWORKSHEETS CW
+    $query = "SELECT CW.`Group Worksheet ID` GWID from TCOMPLETEDWORKSHEETS CW
                 JOIN TGROUPWORKSHEETS GW ON CW.`Group Worksheet ID` = GW.`Group Worksheet ID`
                 JOIN TSTOREDQUESTIONS SQ ON SQ.`Version ID` = GW.`Version ID`
                 JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID`

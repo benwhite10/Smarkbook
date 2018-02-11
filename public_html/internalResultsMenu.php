@@ -65,6 +65,10 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                 <div class="half_content left">
                     <div id="courses_title">Courses</div>
                     <div id="courses_table"></div>
+                    <div id="add_courses">
+                        <div id="add_courses_input_div"><input type="text" id="add_courses_input" placeholder="Add Course"/></div>
+                        <div id="add_courses_button" onclick="addCourse()">Add</div>
+                    </div>
                 </div>
                 <div id="course_details" class="half_content">
                     <div id="course_details_title"></div>

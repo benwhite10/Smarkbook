@@ -6,7 +6,6 @@ $(document).ready(function(){
     sessionStorage.setItem("active_tab", isNaN(parseInt(getParameterByName("tab"))) ? 0 : parseInt(getParameterByName("tab")));
     sessionStorage.setItem("search_results", "no_results");
     sessionStorage.setItem("course_id", getParameterByName("cid"));
-    getResultsRequest(sessionStorage.getItem("course_id"));
     getWorksheets();
 });
 
@@ -27,7 +26,7 @@ function getColour(num, av) {
         [158, 158, 158],
         [156, 204, 101]
     ];
-    
+
     num = Math.min(num, (colours.length - 1));
     var colour = colours[num];
     return "rgba(" + colour[0] + "," + colour[1] + "," + colour[2] + ",1)";
@@ -43,7 +42,7 @@ function createTabs(tabs, selected) {
         $("#main_content").append("<div id='tab_option_" + i + "' class='tab_option'>");
         if (i === tabs.length - 1) $("#tab_" + i).addClass("last");
     }
- 
+
     for (var i = 0; i < tabs.length; i++) {
         switch (tabs[i]) {
             case "TABLE":
@@ -62,7 +61,7 @@ function createTabs(tabs, selected) {
                 break;
         }
     }
-    
+
     if (!selected || selected >= tabs.length) {
         selected = 0;
     }
@@ -90,7 +89,7 @@ function getResultsRequest(course_id) {
         }
     });
 }
-    
+
 function getWorksheets() {
     var type = "ALLWORKSHEETS";
     var infoArray = {
@@ -117,6 +116,7 @@ function getWorksheets() {
 function getWorksheetsSuccess(json) {
     if(json["success"]) {
         sessionStorage.setItem("worksheets", JSON.stringify(json["worksheets"]));
+        getResultsRequest(sessionStorage.getItem("course_id"));
     } else {
         console.log("There was an error getting the worksheets.");
         console.log(json["message"]);
@@ -127,7 +127,7 @@ function getDetailsSuccess(json) {
     if (json["success"]) {
         var results = json["result"];
         sessionStorage.setItem("details", JSON.stringify(results));
-        parseTitle(results["course_details"][0]);        
+        parseTitle(results["course_details"][0]);
         createTabs(["TABLE", "SUMMARY", "WORKSHEETS"], sessionStorage.getItem("active_tab"));
     } else {
         console.log(json["message"]);
@@ -151,7 +151,7 @@ function parseTable(tab_id) {
         table_html += parseResults(details["results_array"], details["worksheets"]);
         $("#results_table").html(table_html);
     }
-    
+
 }
 
 function parseSummaryTable(tab_id) {
@@ -172,7 +172,7 @@ function parseGroupsTab(tab_id) {
     $("#tab_" + tab_id).html("Groups");
     var details = getResults();
     if (details) {
-        
+
     }
 }
 
@@ -200,7 +200,7 @@ function courseWorksheetsTab(worksheets) {
             if (i === worksheets.length - 1) class_text += " bottom";
             worksheets_html += "<div class='" + class_text + "'>";
             worksheets_html += "<div class='name'>" + name + "</div>";
-            worksheets_html += "<div class='date'>" + long_date + "</div>";
+            worksheets_html += "<div class='date'><input type='text' class='datepicker' id='datepicker_" + cwid + "' value='" + long_date + "' onblur='changeDate(" + cwid + ")'/></div>";
             worksheets_html += "<div class='button' onclick='removeWorksheet(" + cwid + ")'>Remove</div></div>";
         }
     } else {
@@ -234,7 +234,7 @@ function refreshNewWorksheetsTable() {
     } else {
         sheets = JSON.parse(search_results);
     }
-    
+
     var table_html = "";
     for (var key in sheets) {
         table_html += "<div class='worksheet_row' onclick='clickWorksheet(" + sheets[key][id_key] + ")'>";
@@ -387,7 +387,7 @@ function parseWorksheetTitles(worksheets, starting_blank_cols) {
     var worksheet_text = "<thead><tr class='no_hover'>";
     var min_cols = 10;
     var blank_cols = min_cols - worksheets.length;
-    
+
     for (var i = 0; i < starting_blank_cols; i++) {
         worksheet_text += "<th class='blank_cell'></th>";
     }
@@ -398,7 +398,7 @@ function parseWorksheetTitles(worksheets, starting_blank_cols) {
     for (var i = 0; i < blank_cols; i++) {
         worksheet_text += "<th style='text-align: center' class='rotate'><div><span>&nbsp</span></div></th>";
     }
-    
+
     worksheet_text += "</tr><tr class='no_hover blank_cell'>";
     for (var i = 0; i < starting_blank_cols; i++) {
         worksheet_text += "<td class='blank_cell'></td>";
@@ -411,7 +411,7 @@ function parseWorksheetTitles(worksheets, starting_blank_cols) {
     for (var i = 0; i < blank_cols; i++) {
         worksheet_text += "<td class='date'></td>";
     }
-    
+
     worksheet_text += "</tr><tr class='no_hover blank_cell'>";
     for (var i = 0; i < starting_blank_cols; i++) {
         worksheet_text += "<td class='blank_cell'></td>";
@@ -423,8 +423,8 @@ function parseWorksheetTitles(worksheets, starting_blank_cols) {
     for (var i = 0; i < blank_cols; i++) {
         worksheet_text += "<td class='date'></td>";
     }
-    
-    worksheet_text += "</tr></thead>";       
+
+    worksheet_text += "</tr></thead>";
     return worksheet_text;
 }
 
@@ -437,15 +437,16 @@ function parseResults(results_array, worksheets) {
         table_html += "<tr>";
         table_html += "<td class='name' onclick=''>" + student["Name"] + "</td>";
         table_html += "<td class='set' onclick=''>" + student["Group Name"] + "</td>";
-        table_html += "<td class='initials' onclick=''>" + student["Staff Initials"] + "</td>";       
+        table_html += "<td class='initials' onclick=''>" + student["Staff Initials"] + "</td>";
         for (var j = 0; j < worksheets.length; j++) {
             var result = results_array[i][worksheets[j]["ID"]];
             if (result) {
-                table_html += "<td class='marks'>" + result["Mark"] + "</td>";
+                var mark = parseInt(result["Mark"]) === parseFloat(result["Mark"]) ? parseInt(result["Mark"]) : Math.round(10*parseFloat(result["Mark"])) / 10;
+                table_html += "<td class='marks'>" + mark + "</td>";
             } else {
                 table_html += "<td class='marks'></td>";
             }
-            
+
         }
         for (var k = 0; k < blank_cols; k++) {
             table_html += "<td class='marks'></td>";
@@ -469,13 +470,13 @@ function parseSummary(summary_array, worksheets) {
         } else {
             table_html += "<td class='set' onclick=''>" + set["Name"] + "</td>";
             table_html += "<td class='initials' onclick=''>" + set["Staff Initials"] + "</td>";
-        }      
+        }
         for (var j = 0; j < worksheets.length; j++) {
             var result = summary_array[i][worksheets[j]["ID"]];
             var display_result = (result && result["Av Mark"] !== "") ? Math.round(result["Av Mark"],0) : "";
             table_html += "<td class='marks'>";
             table_html += set === "Total" ? "<b>" + display_result + "</b>" : display_result;
-            table_html += "</td>";            
+            table_html += "</td>";
         }
         for (var k = 0; k < blank_cols; k++) {
             table_html += "<td class='marks'></td>";
@@ -495,7 +496,7 @@ function createSummaryChart(summary_array, worksheets) {
     labels.push("");
     var max_perc = 0;
     var min_perc = 1;
-    
+
     for (var j = 0; j < summary_array.length; j++) {
         var chart_data = [null];
         var set_name = "";
@@ -504,7 +505,7 @@ function createSummaryChart(summary_array, worksheets) {
         var border_dash = "";
         var group_id = summary_array[j]["Details"] === "Total" ? "average" : summary_array[j]["Details"]["Group ID"];
         if (!$("#set_" + group_id).hasClass("selected")) continue;
-        
+
         if (summary_array[j]["Details"] === "Total") {
             set_name = "Average";
             border_colour = getColour(0,true);
@@ -516,7 +517,7 @@ function createSummaryChart(summary_array, worksheets) {
             border_width = 2;
             border_dash = [10,0];
         }
-        
+
         for (var i = 0; i < worksheets.length; i++) {
             var cwid = worksheets[i]["ID"];
             if (summary_array[j][cwid]) {
@@ -525,6 +526,8 @@ function createSummaryChart(summary_array, worksheets) {
                     chart_data.push(perc);
                     min_perc = Math.min(min_perc, perc);
                     max_perc = Math.max(max_perc, perc);
+                } else {
+                    chart_data.push(null);
                 }
             } else {
                 chart_data.push(null);
@@ -542,10 +545,10 @@ function createSummaryChart(summary_array, worksheets) {
             spanGaps: false
         });
     }
-    
+
     min_perc = Math.max(Math.floor(10*(min_perc - 0.05))/10, 0);
     max_perc = Math.min(Math.ceil(10*(max_perc + 0.05))/10, 1);
-    
+
     var ctx = document.getElementById("myChart").getContext('2d');
     var myChart = new Chart(ctx, {
         type: 'line',
@@ -571,7 +574,7 @@ function createSummaryChart(summary_array, worksheets) {
                         autoSkip: false
                     }
                 }]
-            }, 
+            },
             tooltips: {
                 callbacks: {
                     label: function(tooltipItem, data) {
@@ -595,13 +598,13 @@ function createSummaryChart(summary_array, worksheets) {
 function makeChart(json) {
     var data_1 = json["result"]["3001"];
     var data_2 = json["result"]["Set"];
-    
+
     var labels_1 = [];
     for (var i = 0; i < data_2.length; i++) {
         var data = data_2[i];
         labels_1.push("Q" + data_2[i]["Number"]);
     }
-    
+
     var chart_data_1 = [];
     for (var i = 0; i < data_2.length; i++) {
         var flag = true;
@@ -614,7 +617,7 @@ function makeChart(json) {
         }
         if (flag) chart_data_1.push(NaN);
     }
-    
+
     var chart_data_2 = [];
     for (var i = 0; i < data_2.length; i++) {
         var flag = true;
@@ -693,6 +696,33 @@ function searchSuccess(json, searchTerm) {
     } else {
         console.log("There was an error searching the worksheets.");
         console.log(json["message"]);
+    }
+}
+
+function changeDate(id) {
+    var date = moment($("#datepicker_" + id).val(), "DD/MM/YYYY");
+    if (date.isValid()) {
+        var infoArray = {
+            type: "UPDATEWORKSHEET",
+            cwid: id,
+            date: $("#datepicker_" + id).val(),
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/internalResults.php",
+            dataType: "json",
+            success: function(json){
+
+            },
+            error: function() {
+                console.log("There was an error updating the worksheet.");
+            }
+        });
+    } else {
+        console.log("Not Valid");
     }
 }
 

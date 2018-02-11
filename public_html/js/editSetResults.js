@@ -32,7 +32,6 @@ $(document).ready(function(){
 });
 
 function pressKeyInDiv(div, e) {
-    //console.log(e.keyCode);
     switch(e.keyCode) {
         case 9:
         case 39:
@@ -99,12 +98,17 @@ function moveLeft(id) {
             }
         }
     } else {
-        // In inputs section
-        var pos = id.split("_");
-        new_id = stepLeftInputs(pos[0], pos[1]);
-        if (!new_id) {
-            // Go to end of row
-            new_id = maxResult(getRow(row_student_array, pos[1]));
+        if (id.includes("total_input")) {
+            var pos = id.split("_");
+            new_id = "total_input_" + (parseInt(pos[2]) - 1);
+        } else {
+            // In inputs section
+            var pos = id.split("_");
+            new_id = stepLeftInputs(pos[0], pos[1]);
+            if (!new_id) {
+                // Go to end of row
+                new_id = maxResult(getRow(row_student_array, pos[1]));
+            }
         }
     }
 
@@ -127,11 +131,16 @@ function moveRight(id) {
             }
         }
     } else {
-        // In inputs section
-        var pos = id.split("_");
-        new_id = stepRightInputs(pos[0], pos[1]);
-        if (!new_id) {
-            new_id = newRow(getRow(row_student_array, pos[1]));
+        if (id.includes("total_input")) {
+            var pos = id.split("_");
+            new_id = "total_input_" + (parseInt(pos[2]) + 1);
+        } else {
+            // In inputs section
+            var pos = id.split("_");
+            new_id = stepRightInputs(pos[0], pos[1]);
+            if (!new_id) {
+                new_id = newRow(getRow(row_student_array, pos[1]));
+            }
         }
     }
 
@@ -148,14 +157,20 @@ function moveUpDown(id, up) {
         pos[0] = up ? parseInt(pos[0]) - 1 : parseInt(pos[0]) + 1;
         new_id = pos[0] + "-" + pos[1];
     } else {
-        // In inputs section
-        var pos = id.split("_");
-        var row = up ? parseInt(getRow(row_student_array, pos[1])) - 1 : parseInt(getRow(row_student_array, pos[1])) + 1;
-        var student = getStudentId(row_student_array, row);
-        if (!student) return;
-        new_id = pos[0] + "_" + student;
+        if (id.includes("total_input")) {
+            var pos = id.split("_");
+            new_id = "total_input_";
+            new_id += up ? (parseInt(pos[2]) - 1) : (parseInt(pos[2]) + 1);
+        } else {
+            // In inputs section
+            var pos = id.split("_");
+            var row = up ? parseInt(getRow(row_student_array, pos[1])) - 1 : parseInt(getRow(row_student_array, pos[1])) + 1;
+            var student = getStudentId(row_student_array, row);
+            if (!student) return;
+            new_id = pos[0] + "_" + student;
+        }
+        
     }
-
     $("#" + new_id).focus();
     $("#" + new_id).select();
 }
@@ -267,6 +282,7 @@ function requestWorksheetSuccess(json) {
         parseMainTable();
         getQuestionAverages();
         updateInputTypes();
+        toggleEnterTotals();
     } else {
         console.log("There was an error getting the worksheet: " + json["message"]);
     }
@@ -475,15 +491,16 @@ function setUpWorksheetInfo() {
     var details = JSON.parse(sessionStorage.getItem("details"));
     var dateDue = moment(details["DateDue"]);
     var dateString = dateDue.format("DD/MM/YYYY");
-    // Worksheet Name
-    $("#title2").html("<h1>" + details["WName"] + "</h1>");
+    var name = (details["DisplayName"] && details["DisplayName"] !== "") ? details["DisplayName"] : details["WName"];
+    $("#title2").html("<h1>" + name + "</h1>");
     $("#gwid").val(getParameterByName("gwid"));
     $("#summaryBoxShowDetailsTextMain").text(details["SetName"] + " - " + dateString);
     $("#dateDueMain").val(dateString);
     setUpStaffInput("staff1", details["StaffID1"],"Teacher");
     setUpStaffInput("staff2", details["StaffID2"],"Extra Teacher");
     setUpStaffInput("staff3", details["StaffID3"],"Extra Teacher");
-    $("#staffNotes").text(details["StaffNotes"] ? details["StaffNotes"] : "");
+    //$("#staffNotes").text(details["StaffNotes"] ? details["StaffNotes"] : "");
+    $("#displayName").val(details["DisplayName"] ? details["DisplayName"] : "");
     parseGradeBoundaries();
     var show = details["Hidden"] !== "1";
     document.getElementById("hide_checkbox").checked = show;
@@ -491,6 +508,9 @@ function setUpWorksheetInfo() {
     var student = details["StudentInput"] === "1";
     document.getElementById("student_checkbox").checked = student;
     sessionStorage.setItem("student_selected", student);
+    var enter_totals = details["EnterTotals"] === "1";
+    document.getElementById("totals_checkbox").checked = enter_totals;
+    sessionStorage.setItem("totals_selected", enter_totals);
 }
 
 function parseGradeBoundaries() {
@@ -533,18 +553,22 @@ function parseMainTable() {
     var average_row_3 = "<tr class='averages'><td class='averages'>Average (%)</td>";
 
     var col = 0;
+    var total_marks = 0;
     for (var key in worksheet) {
         var question = worksheet[key];
+        total_marks += parseInt(question["Marks"]);
         row_head_1 += "<th class='results results_header questions_col'>" + question["Number"] + "</th>";
         row_head_2 += "<th class='results results_header'>/ " + question["Marks"] + "</th>";
         average_row_1 += "<td class='averages display' style='text-align: center; padding-left: 0px;'>" + question["Number"] + "</ts>";
         average_row_2 += "<td class='averages display' style='padding:0px;' id='average-" + col + "'></td>";
         average_row_3 += "<td class='averages display' style='padding:0px;' id='averagePerc-" + col + "'> %</td>";
         col++;
-
     }
+    row_head_1 += "<th class='results results_header total_input_col'>Total</th>";
+    row_head_2 += "<th class='results results_header total_input_col' style='min-width: 60px;'>/" + total_marks + "</th>";
+    
     row_head_1 += "<th class='results results_header total_col'></th>";
-    row_head_2 += "<th class='results results_header' style='min-width: 100px;'>Total</th>";
+    row_head_2 += "<th class='results results_header total_col' style='min-width: 100px;'>Total</th>";
 
     var count = 0;
     row_head_2 += "<th class='results results_header Grade_col hide_col'>Grade</th>";
@@ -575,9 +599,9 @@ function parseMainTable() {
     row_head_1 += "<th class='results results_header notes_col'></th>";
     count++;
 
-    average_row_1 += "<td class='averages'></td><td class='averages' colspan='" + count + "'></td></tr>";
-    average_row_2 += "<td class='averages display' id='average-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
-    average_row_3 += "<td class='averages display' id='averagePerc-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
+    average_row_1 += "<td class='averages total_input_col'></td><td class='averages total_col'></td><td class='averages' colspan='" + count + "'></td></tr>";
+    average_row_2 += "<td class='averages total_input_col'></td><td class='averages display total_col' id='average-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
+    average_row_3 += "<td class='averages total_input_col'></td><td class='averages display total_col' id='averagePerc-ALL'></td><td class='averages' colspan='" + count + "'></td></tr>";
 
     /* Students */
     var student_rows = "";
@@ -593,7 +617,7 @@ function parseMainTable() {
         var col = 0;
         row_student_array.push([row, stuid]);
         student_rows += "<tr class='results'><td class='results student_name' id='stu" + stuid + "'>" + student["Name"] + "</td>";
-        var totalMark = 0;
+        var totalMark = "";
         var totalMarks = 0;
         for (var key2 in worksheet) {
             var question = worksheet[key2];
@@ -604,7 +628,9 @@ function parseMainTable() {
             if(results_array[sqid]){
                 cqid = results_array[sqid]["CQID"];
                 if (results_array[sqid]["Deleted"] === "0") {
+                    if (totalMark === "") totalMark = 0;
                     mark = results_array[sqid]["Mark"];
+                    mark = parseInt(mark) === parseFloat(mark) ? parseInt(mark) : parseFloat(mark);
                     totalMark += parseFloat(mark);
                     totalMarks += parseFloat(marks);
                 }
@@ -614,7 +640,13 @@ function parseMainTable() {
             student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")' onkeydown='return pressKeyInDiv(this, event)'></td>";
             col++;
         }
-        student_rows += "<td class='results total_mark'><b class='totalMarks' id='total" + row + "'>" + totalMark + " / " + totalMarks + "</b></td>";
+        var display_total = "0 / 0";
+        if (totalMark !== "") {
+            totalMark = Math.round(10 * parseFloat(totalMark)) / 10;
+            display_total = totalMark + " / " + totalMarks;
+        }
+        student_rows += "<td class='results total_mark total_input_col'><input type='text' class='totalMarkInput' value='" + totalMark + "' id='total_input_" + row + "' onBlur='changeTotal(this.value," + row + ")' onkeydown='return pressKeyInDiv(this, event)'></td>";
+        student_rows += "<td class='results total_mark total_col'><b class='totalMarks' id='total" + row + "'>" + display_total + "</b></td>";
         student_rows += "<td class='results total_mark Grade_col hide_col' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
         student_rows += "<td class='results total_mark UMS_col hide_col' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
         for (var i = 0; i < inputs.length; i++) {
@@ -703,6 +735,14 @@ function studentInputButton() {
     changeGWValue();
 }
 
+function enterTotalsButton() {
+    var val = sessionStorage.getItem("totals_selected") === "true" ? false : true;
+    document.getElementById("totals_checkbox").checked = val;
+    sessionStorage.setItem("totals_selected", val);
+    changeGWValue();
+    toggleEnterTotals();
+}
+
 function deleteButton() {
     if(confirm("Are you sure you want to delete this group worksheet? This process is irreversible and you will lose any data entered.")){
         log_event("DELETE_GROUP_WORKSHEET", $('#userid').val(), getParameterByName("gwid"));
@@ -720,6 +760,40 @@ function changeResult(value, id_string, row){
         getQuestionAverages(id_string);
     } else {
         resetQuestion(id_string);
+    }
+}
+
+function changeTotal(value, row) {
+    var total_marks = 0;
+    var worksheet = JSON.parse(sessionStorage.getItem("worksheet"));
+    for (var key in worksheet) {
+        total_marks += parseFloat(worksheet[key]["Marks"]);
+    }
+    if (validateResult(value, total_marks, "total_input_" + row)) {
+        var i = 0;
+        var running_total = 0;
+        var running_mark = 0;
+        for (var key in worksheet) {
+            var display_mark = "";
+            if (value !== "" && !isNaN(parseFloat(value))) {
+                var mark = parseFloat(worksheet[key]["Marks"]);
+                var desired_mark = Math.round(10 * (running_total + mark) * parseFloat(value) / total_marks) / 10;
+                display_mark = Math.round(10 * (desired_mark - running_mark)) / 10;
+                running_total += mark;
+                running_mark += display_mark;
+            }
+            var id_string = row + "-" + i;
+            $("#" + id_string).val(display_mark);
+            updateSaveChangesArray(display_mark, id_string);
+            i++;
+        }
+        var result_array = returnQuestionInfo(id_string);
+        var stuid = result_array["stuid"];
+        updateCompletionStatus(stuid, row);
+        updateValues(id_string, stuid);
+        getQuestionAverages();
+    } else {
+        resetQuestion("total_input_" + row);
     }
 }
 
@@ -866,9 +940,11 @@ function saveGroupWorksheet() {
     var staff1 = $("#staff1").val();
     var staff2 = $("#staff2").val();
     var staff3 = $("#staff3").val();
-    var notes = $("#staffNotes").val();
+    //var notes = $("#staffNotes").val();
+    var display = $("#displayName").val();
     var hide = document.getElementById('hide_checkbox').checked;
     var student = document.getElementById('student_checkbox').checked;
+    var enter_totals = document.getElementById('totals_checkbox').checked;
 
     var worksheet_details = {
         gwid: gwid,
@@ -876,9 +952,10 @@ function saveGroupWorksheet() {
         staff1: staff1,
         staff2: staff2,
         staff3: staff3,
-        staffNotes: notes,
+        displayName: display,
         hide: hide,
-        student: student
+        student: student,
+        enter_totals: enter_totals
     };
 
     var grade_boundaries = getGradeBoundariesFromTable();
@@ -901,12 +978,22 @@ function saveGroupWorksheet() {
                 console.log(json["message"]);
             } else {
                 clearGWChanges();
+                updateTitle();
             }
         },
         error: function(json){
             console.log("Error updating group worksheet");
         }
     });
+}
+
+function updateTitle() {
+    if ($("#displayName").val() !== "") {
+        $("#title2").html("<h1>" + $("#displayName").val() + "</h1>");
+    } else {
+        var details = JSON.parse(sessionStorage.getItem("details"));
+        $("#title2").html("<h1>" + details["WName"] + "</h1>");
+    }
 }
 
 function getGradeBoundariesFromTable() {
@@ -936,6 +1023,7 @@ function changeDateDueMain(){
 
 function changeGWValue() {
     sessionStorage.setItem("update_gw", "true");
+    saveGroupWorksheet();
 }
 
 function clearGWChanges() {
@@ -1295,12 +1383,11 @@ function validateResult(value, marks, id_string){
         incorrectInput("You have entered a value that is not a number.", id_string);
         return false;
     }
-    var value = parseFloat(value);
-    if(value < 0) {
+    if(parseFloat(value) < 0) {
         incorrectInput("You have entered a negative number of marks.", id_string);
         return false;
     }
-    if(marks < value){
+    if(marks < parseFloat(value)){
         incorrectInput("You have entered too many marks for the question.", id_string);
         return false;
     }
@@ -1379,7 +1466,7 @@ function updateTotal(row) {
                 }
             }
         } else {
-            $("#total" + row).text(totalMark + " / " + totalMarks);
+            $("#total" + row).text(parseInt(totalMark) + " / " + parseInt(totalMarks));
             break;
         }
     }
@@ -1520,7 +1607,7 @@ function parseAverageArrayForCol(col) {
             break;
         }
     }
-    var rounded = "-"
+    var rounded = "-";
     var percentage = "-";
     if (totalCount !== 0) {
         var average = totalMark / totalCount;
@@ -1613,11 +1700,11 @@ function getStudentMarks(stuID, row) {
                 }
             }
         } else {
-            return(totalMark + " / " + totalMarks);
+            return(parseInt(totalMark) + " / " + parseInt(totalMarks));
             break;
         }
     }
-    return(totalMark + " / " + totalMarks);
+    return(parseInt(totalMark) + " / " + parseInt(totalMarks));
 }
 
 function completionStatusChange(completion_status) {
@@ -2086,4 +2173,31 @@ function change_input(id) {
         }
     }
     updateInputs(id, show_input);
+}
+
+function toggleEnterTotals() {
+    var selected = sessionStorage.getItem("totals_selected") === "true" ? true : false;
+    var input_divs = document.getElementsByClassName("markInput");
+    for (var i = 0; i < input_divs.length; i++) {
+        $("#" + input_divs[i].id).prop("disabled", selected);
+        if (selected) {
+            $("#" + input_divs[i].id).addClass("disabled");
+        } else {
+            $("#" + input_divs[i].id).removeClass("disabled");
+        }
+    }
+    var total_divs = document.getElementsByClassName("totalMarkInput");
+    for (var i = 0; i < total_divs.length; i++) {
+        $("#" + total_divs[i].id).prop("disabled", !selected);
+    }
+    // Hide col
+    var total_divs = document.getElementsByClassName("total_input_col");
+    for (var i = 0; i < total_divs.length; i++) {
+        total_divs[i].style.display = selected ? "table-cell" : "none";
+    }
+    
+    var total_divs = document.getElementsByClassName("total_col");
+    for (var i = 0; i < total_divs.length; i++) {
+        total_divs[i].style.display = selected ? "none" : "table-cell";
+    }
 }

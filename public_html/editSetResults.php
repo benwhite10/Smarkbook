@@ -207,8 +207,8 @@ if(isset($_SESSION['message'])){
                             </tr>
                             <tr class="form">
                                 <td class="form">
-                                    <label for="staffNotes">Notes</label>
-                                    <textarea name="staffNotes" id="staffNotes" onchange="changeGWValue()"></textarea>
+                                    <label for="displayName">Display Name:</label><!--
+                                    --><input type="text" id="displayName" onchange="changeGWValue()"/>
                                 </td>
                                 <td class="form">
                                     <div class="detail_button" onclick="hideButton()">
@@ -218,9 +218,13 @@ if(isset($_SESSION['message'])){
                                     <div class="detail_button delete" onclick="deleteButton()">
                                         <h3>Delete Worksheet</h3>
                                     </div>
-                                    <div class="detail_button student" onclick="studentInputButton()">
-                                        <label>Allow student input</label>
-                                        <input type="checkbox" name="student_checkbox" id="student_checkbox" onchange="changeGWValue()"
+                                    <div class="detail_button" onclick="studentInputButton()">
+                                        <label>Allow Student Input</label>
+                                        <input type="checkbox" name="student_checkbox" id="student_checkbox" onchange="changeGWValue()"/>
+                                    </div>
+                                    <div class="detail_button" onclick="enterTotalsButton()">
+                                        <label>Enter Totals</label>
+                                        <input type="checkbox" name="totals_checkbox" id="totals_checkbox" onchange="changeGWValue()"/>
                                     </div>
                                 </td>
                             </tr>

@@ -24,7 +24,7 @@
     padding: 0;
 }
 
-#courses_table, #sets_table {
+#courses_table, #sets_table, #add_courses {
     width: calc(100% - 22px);
     display: inline-block;
     float: left;
@@ -32,6 +32,51 @@
     margin: 0 10px;
     padding: 0;
     border: 1px solid #323232;
+}
+
+#sets_table_no_results {
+    width: calc(100% - 10px);
+    display: inline-block;
+    float: left;
+    height: 32px;
+    line-height: 32px;
+    font-size: 0.9rem;
+    padding-left: 10px
+}
+
+#add_courses {
+    height: 32px;
+    line-height: 32px;
+    margin-top: 10px;
+}
+
+#add_courses_input_div, #add_courses_input, #add_courses_button {
+    height: 100%;
+    display: inline-block;
+    float: left;
+}
+
+#add_courses_input_div {
+    width: calc(100% - 101px);
+}
+#add_courses_button {
+    width: 100px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 32px;
+    background: transparent;
+    text-align: center;
+    border-left: 1px solid #CCC;
+}
+
+#add_courses_button:hover {
+    background: #a4ef76;
+}
+
+#add_courses_input {
+    background: transparent;
+    margin: 0;
+    border: none;
 }
 
 .course_row, .set_row {
@@ -61,8 +106,8 @@
     width: calc(100% - 22px);
     display: inline-block;
     float: left;
-    height: 40px;
-    line-height: 40px;
+    height: 32px;
+    line-height: 32px;
     font-size: 1.0rem;
     text-align: center;
     margin: 10px;
