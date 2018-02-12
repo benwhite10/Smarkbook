@@ -33,10 +33,10 @@ switch ($requestType){
         break;
 }
 
-function getIndividualWorksheetSummary($version_id, $staff_ids) {    
+function getIndividualWorksheetSummary($version_id, $staff_ids) {
     // Get group worksheets
     $gw_query = "SELECT `Group Worksheet ID` FROM TGROUPWORKSHEETS GW
-                WHERE `Version ID` = $version_id 
+                WHERE `Version ID` = $version_id
                 AND `Deleted` = 0 ";
     if (count($staff_ids) > 0) {
         $gw_query .= "AND (";
@@ -45,29 +45,28 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
             $gw_query .= $i === count($staff_ids) - 1 ? " `Primary Staff ID` = $staff_id) " : " `Primary Staff ID` = $staff_id OR ";
         }
     }
-    
+
     // Get breakdown of questions
     $ques_info_query = "SELECT `Stored Question ID`, `Number`, `Marks` FROM `TSTOREDQUESTIONS`
                     WHERE `Version ID` = $version_id
                     AND `Deleted` = 0
                     ORDER BY `Question Order`";
-    
+
     $worksheet_query = "SELECT `WName` FROM TWORKSHEETVERSION WHERE `Version ID` = $version_id;";
-    
-    // Get list of students 
-    
+
+    // Get list of students
+
     try {
         $gw_ids = db_select_exception($gw_query);
         $ques_info = db_select_exception($ques_info_query);
         $worksheet_results = db_select_exception($worksheet_query);
         $worksheet_name = $worksheet_results[0]["WName"];
-        
+
         // Get list of students
-        $stu_query = "SELECT U.`User ID`, S.`Preferred Name`, U.`First Name`, U.`Surname`, UG.`Group ID`, G.`Name` FROM `TUSERGROUPS` UG
+        $stu_query = "SELECT U.`User ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, UG.`Group ID`, G.`Name` FROM `TUSERGROUPS` UG
                 JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
-                JOIN `TSTUDENTS` S ON U.`User ID` = S.`User ID`
                 JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
-                WHERE UG.`Group ID` IN (SELECT GW.`Group ID` 
+                WHERE UG.`Group ID` IN (SELECT GW.`Group ID`
                 FROM `TGROUPWORKSHEETS` GW
                 WHERE UG.`Archived` = 0 ";
         if (count($gw_ids) > 0) {
@@ -84,7 +83,7 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
             $stu_id = $stu_ques_array[$i]["User ID"];
             $stu_ques_query = "SELECT CQ.`Stored Question ID`, CQ.`Mark` FROM `TCOMPLETEDQUESTIONS` CQ
                 WHERE CQ.`Deleted` = 0
-                AND `Student ID` = $stu_id 
+                AND `Student ID` = $stu_id
                 AND (";
             for ($j = 0; $j < count($ques_info); $j++) {
                 $sqid = $ques_info[$j]["Stored Question ID"];
@@ -94,48 +93,48 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
             $stu_first_name = $stu_ques_array[$i]["Preferred Name"] === "" ? $stu_ques_array[$i]["First Name"] : $stu_ques_array[$i]["Preferred Name"];
             $stu_ques_array[$i]["Full Name"] = $stu_first_name . " " . $stu_ques_array[$i]["Surname"];
         }
-        
+
         /*$set_query = "SELECT CQ.`Stored Question ID`, SUM(CQ.`Mark`) Total, COUNT(CQ.`Mark`) Count, GW.`Group ID`, G.`Name`
-                FROM `TCOMPLETEDQUESTIONS` CQ 
+                FROM `TCOMPLETEDQUESTIONS` CQ
                 JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
                 JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
-                WHERE CQ.`Deleted` = 0 
+                WHERE CQ.`Deleted` = 0
                 AND (";
         for ($j = 0; $j < count($ques_info); $j++) {
             $sqid = $ques_info[$j]["Stored Question ID"];
             $set_query .= $j === count($ques_info) - 1 ? " CQ.`Stored Question ID` = $sqid) " : " CQ.`Stored Question ID` = $sqid OR ";
         }
         $set_query .= "GROUP BY GW.`Group ID`, CQ.`Stored Question ID` ORDER BY G.`Name`";
-        
+
         $set_array = db_select_exception($set_query);*/
         //$set_results = filterBySet($set_array);
-        
+
     } catch (Exception $ex) {
         //echo $stu_ques_query;
         failRequest($ex->getMessage());
     }
-    
+
     $file_name = rand(111111, 999999);
     $objPHPExcel = new PHPExcel();
     $objPHPExcel->getProperties()->setCreator("Smarkbook")
                                 ->setLastModifiedBy("Ben White")
                                 ->setTitle($worksheet_name);
-    
+
     try {
         $objPHPExcel = outputExcelResults2($stu_ques_array, $ques_info, $objPHPExcel, $worksheet_name);
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-    
+
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
     $objWriter->save("../downloads/$file_name.xlsx");
-    
+
     $response = array (
         "success" => TRUE,
         "url" => "/downloads/$file_name.xlsx",
         "title" => $worksheet_name
     );
-    
+
     echo json_encode($response);
 
 }
@@ -155,7 +154,7 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
                 "Questions" => array()
             ));
         }
-        
+
         array_push($set_results_array[arrayContains($set_results_array, "Group ID", $group_id)]["Questions"], array(
             "Stored Question ID" => $row["Stored Question ID"],
             "Total" => $row["Total"],
@@ -187,7 +186,7 @@ function decrementColumn($letter, $amount) {
     for ($j = 0; $j < 1000; $j++) {
         $test_letter = $start_test_letter;
         for ($i = 0; $i < $amount; $i++) $test_letter++;
-        
+
         if ($cap_letter === $test_letter){
             return $start_test_letter;
         } else {
@@ -200,24 +199,24 @@ function decrementColumn($letter, $amount) {
 function outputExcelResults2($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name) {
     $sheet_index = 0;
     if ($sheet_index !== 0 ) { $objPHPExcel->createSheet($sheet_index); }
-    
+
     $objPHPExcel = setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, "Data", $sheet_index);
-    
+
     // Sort results array alphabetically
     usort($stu_ques_array, function($a, $b)
     {
         return strcmp($a["Full Name"], $b["Full Name"]);
     });
-    
+
     $sheet_index++;
     $objPHPExcel->createSheet($sheet_index);
-    
+
     $array = setUpHiddenDataSheet($stu_ques_array, $ques_info, $objPHPExcel, "DataHidden", $sheet_index);
     $objPHPExcel = $array[0];
-    
+
     $sheet_index++;
     $objPHPExcel->createSheet($sheet_index);
-    
+
     $col_info = array(
         "Data First Row" => 3,
         "Data Last Row" => 49,
@@ -225,10 +224,10 @@ function outputExcelResults2($stu_ques_array, $ques_info, $objPHPExcel, $sheet_n
         "Data Last Col" => "E"
     );
     $objPHPExcel = setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, "Summary", $sheet_index, $array[1], $array[2]);
-    
+
     $objPHPExcel->setActiveSheetIndex(0);
     $objPHPExcel->getSheet(1)->setSheetState(PHPExcel_Worksheet::SHEETSTATE_HIDDEN);
-    
+
     return $objPHPExcel;
 }
 
@@ -283,13 +282,13 @@ function getSetSummary($stu_ques_array, $ques_info) {
         array_push($set_array["Questions"], $total_array);
         array_push($summary, $set_array);
     }
-    
+
     // Sort results array alphabetically
     usort($summary, function($a, $b)
     {
         return strcmp($a["Name"], $b["Name"]);
     });
-    
+
     $set_array = array(
         "Name" => "Overall",
         "Questions" => array()
@@ -332,7 +331,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     // Title Data sheet
     $objPHPExcel->setActiveSheetIndex($sheet_index);
     $objPHPExcel->getActiveSheet()->setTitle($sheet_name);
-    
+
     $summary = getSetSummary($stu_ques_array, $ques_info);
 
     // Set up all sets summary
@@ -340,11 +339,11 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $first_set = $sets[0];
     $all_sets_first_row = 1;
     $first_col = "A";
-    
+
     $summary_table_range = "$first_col";
     $summary_sets_range = "$first_col";
     $summary_sets_data_range = "$first_col";
-    
+
     $row = $all_sets_first_row;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Question");
@@ -355,7 +354,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Total");
     $summary_table_range .= $row;
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Mark");
@@ -368,7 +367,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "/$total");
     $objPHPExcel->getActiveSheet()->getStyle("$first_col$all_sets_first_row:$col$row")->getFont()->setBold(true);
-    
+
     $summary_sets_range .= ($row + 1);
     $summary_sets_data_range .= ($row + 1);
     foreach ($summary as $summary_row) {
@@ -378,7 +377,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
         foreach ($summary_row["Questions"] as $ques) {
             $col++;
             $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "=ROUND(" . $ques["Set Average"] . "/" . $ques["Marks"] . ",2)");
-            $objPHPExcel->getActiveSheet()->getStyle("$col$row")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE);               
+            $objPHPExcel->getActiveSheet()->getStyle("$col$row")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE);
         }
     }
     $overall_row = $row;
@@ -386,11 +385,11 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $summary_sets_data_range .= ":" . $col . $row;
     $summary_table_range .= ":" . $col . $row;
     $final_col = $col;
-    
+
     // Add summary
     $individual_set_first_row = $row + 2;
     $individual_set_table_range = "$first_col";
-    
+
     $row = $individual_set_first_row;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Question");
@@ -401,7 +400,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Total");
     $individual_set_table_range .= $row;
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Mark");
@@ -414,7 +413,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "/$total");
     $objPHPExcel->getActiveSheet()->getStyle("$first_col$individual_set_first_row:$col$row")->getFont()->setBold(true);
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->getCell("$col$row")->getDataValidation()
@@ -434,7 +433,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "=VLOOKUP($first_col$row,$summary_sets_data_range,$col_val)");
     $objPHPExcel->getActiveSheet()->getStyle("$col$row")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE);
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Overall");
@@ -449,7 +448,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "=$col$overall_row");
     $objPHPExcel->getActiveSheet()->getStyle("$col$row")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE);
     $individual_set_table_range .= ":$col$row";
-    
+
     // Set up styling
     $objPHPExcel->getActiveSheet()->getColumnDimension($first_col)->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension($final_col)->setAutoSize(true);
@@ -459,13 +458,13 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
         $objPHPExcel->getActiveSheet()->getColumnDimension($ques_col)->setWidth(5.00);
         $objPHPExcel->getActiveSheet()->getStyle($ques_col . "1:$ques_col" . "1000")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
     }
-    
+
     $objPHPExcel->getActiveSheet()->getStyle("$first_col" . 1 . ":$first_col" . 1000)->getFont()->setBold(true);
-    
+
     // Add individual student summary
     $individual_student_first_row = $row + 2;
     $individual_student_table_range = "$first_col";
-    
+
     $row = $individual_student_first_row;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Question");
@@ -476,7 +475,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Total");
     $individual_student_table_range .= $row;
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Mark");
@@ -489,7 +488,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "/$total");
     $objPHPExcel->getActiveSheet()->getStyle("$first_col$individual_student_first_row:$col$row")->getFont()->setBold(true);
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->getCell("$col$row")->getDataValidation()
@@ -509,7 +508,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "=VLOOKUP($first_col$row,$students_data_range,$col_val)");
     $objPHPExcel->getActiveSheet()->getStyle("$col$row")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE);
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "=VLOOKUP($col" . ($row - 1) . ",$students_data_range,2)");
@@ -523,7 +522,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "=VLOOKUP($first_col$row,$summary_sets_data_range,$col_val)");
     $objPHPExcel->getActiveSheet()->getStyle("$col$row")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE);
-    
+
     $row++;
     $col = $first_col;
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "Overall");
@@ -538,7 +537,7 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
     $objPHPExcel->getActiveSheet()->setCellValue("$col$row", "=$col$overall_row");
     $objPHPExcel->getActiveSheet()->getStyle("$col$row")->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE);
     $individual_student_table_range .= ":" . $col . $row;
-    
+
     $styleArray = array(
         'borders' => array(
             'allborders' => array(
@@ -546,18 +545,18 @@ function setUpSummarySheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_nam
             )
         )
     );
-    
+
     $objPHPExcel->getActiveSheet()->getStyle($summary_table_range)->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle($individual_set_table_range)->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle($individual_student_table_range)->applyFromArray($styleArray);
-    
+
     return $objPHPExcel;
 }
 function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, $sheet_index) {
     // Title Data sheet
     $objPHPExcel->setActiveSheetIndex($sheet_index);
     $objPHPExcel->getActiveSheet()->setTitle($sheet_name);
-    
+
     // Add header columns
     $objPHPExcel->getActiveSheet()
             ->setCellValue('A1', '')
@@ -566,7 +565,7 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
             ->setCellValue('B2', '')
             ->setCellValue("A2", "Name")
             ->setCellValue("B2", "Set");
-    
+
     $first_ques_col = "C";
     $header_row = "2";
     for ($i = 0; $i < count($ques_info); $i++) {
@@ -574,17 +573,17 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
         $objPHPExcel->getActiveSheet()
                 ->setCellValue(incrementColumn($first_ques_col, $i) . "1", $question["Number"])
                 ->setCellValue(incrementColumn($first_ques_col, $i) . "2", $question["Marks"]);
-        
-    } 
+
+    }
     $last_ques_col = incrementColumn($first_ques_col, $i - 1);
-    
+
     // Add total columns
     $objPHPExcel->getActiveSheet()
             ->setCellValue(incrementColumn($last_ques_col, 1) . "1","Total")
             ->setCellValue(incrementColumn($last_ques_col, 2) . "1","%")
             ->setCellValue(incrementColumn($last_ques_col, 1) . "2","=SUM($first_ques_col" . "2:$last_ques_col" . "2)")
             ->setCellValue(incrementColumn($last_ques_col, 2) . "2","100");
-    
+
     // Add data
     $row = $header_row + 1;
     foreach($stu_ques_array as $student) {
@@ -592,7 +591,7 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
         $objPHPExcel->getActiveSheet()
                 ->setCellValue("A" . $row, $student["Full Name"])
                 ->setCellValue("B" . $row, $student["Name"]);
-        
+
         if (count($student["Questions"]) > 0) {
             // Add in marks
             $col = "C";
@@ -611,14 +610,14 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
         $row++;
     }
     $last_data_row = $row - 1;
-    
+
     // Add data summary rows
     $objPHPExcel->getActiveSheet()
             ->setCellValue("B" . ($last_data_row + 2), "Question")
             ->setCellValue("B" . ($last_data_row + 3), "Marks")
             ->setCellValue("B" . ($last_data_row + 4), "Average")
             ->setCellValue("B" . ($last_data_row + 5), "Percentage");
-    
+
     $final_col = incrementColumn($last_ques_col, 2);
     for ($col = $first_ques_col; $col <= $final_col; $col++) {
         $objPHPExcel->getActiveSheet()
@@ -627,12 +626,12 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
                 ->setCellValue($col . ($last_data_row + 4), "=ROUND(SUBTOTAL(1, $col" . ($header_row + 1) . ":$col$last_data_row),1)")
                 ->setCellValue($col . ($last_data_row + 5), "=100*ROUND(" . $col . ($last_data_row + 4) . "/" . $col . $header_row . ",2)");
     }
-    
+
     // Add filters
     $objPHPExcel->getActiveSheet()->setAutoFilter("A$header_row:$last_ques_col$last_data_row");
-    
+
     // Format Data sheet
-    
+
     // Set column widths
     $col_width = 5.00;
     $objPHPExcel->getActiveSheet()->getColumnDimension("A")->setAutoSize(true);
@@ -642,7 +641,7 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
     for ($col = $first_ques_col; $col <= $last_ques_col; $col++) {
         $objPHPExcel->getActiveSheet()->getColumnDimension($col)->setWidth($col_width);
     }
-    
+
     // Set bold font and center text
     $objPHPExcel->getActiveSheet()->getStyle("A1:" . incrementColumn($last_ques_col, 2) . "$header_row")->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle("A1:" . decrementColumn($first_ques_col, 1) . $last_data_row)->getFont()->setBold(true);
@@ -658,7 +657,7 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
             )
         )
     );
-    
+
     $objPHPExcel->getActiveSheet()->getStyle($first_ques_col . ($header_row - 1) . ":" . incrementColumn($last_ques_col, 2) . ($header_row - 1))->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle("A" . $header_row . ":" . incrementColumn($last_ques_col, 2) . $last_data_row)->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle("B" . ($last_data_row + 2) . ":" . incrementColumn($last_ques_col, 2) . ($last_data_row + 5))->applyFromArray($styleArray);
@@ -667,11 +666,11 @@ function setUpDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, 
 }
 
 function setUpHiddenDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name, $sheet_index) {
-    
+
     // Set up Data sheet
     $objPHPExcel->setActiveSheetIndex($sheet_index);
     $objPHPExcel->getActiveSheet()->setTitle($sheet_name);
-    
+
     // Add header columns
     $objPHPExcel->getActiveSheet()
             ->setCellValue('A1', '')
@@ -680,7 +679,7 @@ function setUpHiddenDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_
             ->setCellValue('B2', '')
             ->setCellValue("A2", "Name")
             ->setCellValue("B2", "Set");
-    
+
     $first_ques_col = "C";
     $header_row = "2";
     for ($i = 0; $i < count($ques_info); $i++) {
@@ -688,20 +687,20 @@ function setUpHiddenDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_
         $objPHPExcel->getActiveSheet()
                 ->setCellValue(incrementColumn($first_ques_col, $i) . "1", $question["Number"])
                 ->setCellValue(incrementColumn($first_ques_col, $i) . "2", $question["Marks"]);
-        
+
     }
 
     $last_ques_col = incrementColumn($first_ques_col, $i - 1);
     $total_col = incrementColumn($last_ques_col, 1);
-    
+
     $students_data_range = "DataHidden!A" . ($header_row + 1) . ":$total_col";
     $students_names_range = "DataHidden!A" . ($header_row + 1) . ":A";
-    
+
     // Add total columns
     $objPHPExcel->getActiveSheet()
             ->setCellValue($total_col . "1","%")
             ->setCellValue($total_col . "2","=SUM($first_ques_col" . "2:$last_ques_col" . "2)");
-    
+
     // Add data
     $row = $header_row + 1;
     foreach($stu_ques_array as $student) {
@@ -709,7 +708,7 @@ function setUpHiddenDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_
         $objPHPExcel->getActiveSheet()
                 ->setCellValue("A" . $row, $student["Full Name"])
                 ->setCellValue("B" . $row, $student["Name"]);
-        
+
         // Add in marks
         $col = "C";
         $total_val = 0;
@@ -723,34 +722,34 @@ function setUpHiddenDataSheet($stu_ques_array, $ques_info, $objPHPExcel, $sheet_
             $objPHPExcel->getActiveSheet()
                     ->setCellValue($ques_col . $row, $formula);
         }
-        
+
         // Add total columns
         $objPHPExcel->getActiveSheet()
                 ->setCellValue($total_col . $row,"=ROUND($total_val/" . incrementColumn($last_ques_col, 1) . $header_row . ",2)");
         $row++;
     }
-    
+
     $students_data_range .= ($row - 1);
     $students_names_range .= ($row - 1);
-    
+
     return [$objPHPExcel, $students_data_range, $students_names_range];
 }
 
 function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_name) {
     $sheet_index = 0;
     if ($sheet_index !== 0 ) { $objPHPExcel->createSheet($sheet_index); }
-    
+
     //Set first 2 columnds
     $objPHPExcel->setActiveSheetIndex($sheet_index)
             ->setCellValue('A1', '')
             ->setCellValue('B1', '')
             ->setCellValue('A2', '')
             ->setCellValue('B2', '');
-    
+
     $objPHPExcel->getActiveSheet()
                 ->setCellValue("A2", "Name")
                 ->setCellValue("B2", "Set");
-    
+
     $col = "B";
     for ($i = 0; $i < count($ques_info); $i++) {
         $question = $ques_info[$i];
@@ -758,13 +757,13 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
         $objPHPExcel->getActiveSheet()
                 ->setCellValue($col . "1", $question["Number"])
                 ->setCellValue($col . "2", $question["Marks"]);
-        
+
     }
     $old_col = $col;
     $col++;
     $objPHPExcel->getActiveSheet()->setCellValue($col . "1","Total");
     $objPHPExcel->getActiveSheet()->setCellValue($col . "2","=SUM(C2:$old_col" . "2)");
-    
+
     $row = 3;
     foreach($stu_ques_array as $student) {
         $objPHPExcel->getActiveSheet()
@@ -783,12 +782,12 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
         $objPHPExcel->getActiveSheet()->setCellValue($col . $row,"=SUM(C$row:$old_col$row)");
         $row++;
     }
-    
+
     //Styling
     $width = 5.00;
     //$rotation = 45;
     $row--;
-    
+
     //$objPHPExcel->getActiveSheet()->getColumnDimension("A")->setVisible(false);
     $objPHPExcel->getActiveSheet()->getColumnDimension("A")->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension("B")->setAutoSize(true);
@@ -798,7 +797,7 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
     }
     //$objPHPExcel->getActiveSheet()->getColumnDimension($col)->setWidth($width);
     //$objPHPExcel->getActiveSheet()->getStyle($col . "1")->getAlignment()->setTextRotation($rotation);
-    
+
     $objPHPExcel->getActiveSheet()->getStyle("A1:$col" . "2")->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle("A1:B$row")->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle("C:$col")->getAlignment()->setHorizontal('center');
@@ -815,7 +814,7 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
     $sheet_name = str_replace($invalidCharacters, '', $sheet_name);
     $sheet_name = substr($sheet_name, 0, 31);
     $objPHPExcel->getActiveSheet()->setTitle($sheet_name);
-    
+
     $sum_row = $row + 2;
     $objPHPExcel->getActiveSheet()
             ->setCellValue("B$sum_row","Question")
@@ -843,7 +842,7 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
         $old_old_col = $old_col;
         $old_col = $it_col;
     }
-    
+
     $objPHPExcel->getActiveSheet()
             ->setCellValue("$old_col$sum_row","Total")
             ->setCellValue("$old_col" . ($sum_row + 7),"Total");
@@ -855,7 +854,7 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
     $new_row = $sum_row + 8;
     $objPHPExcel->getActiveSheet()
         ->setCellValue("$old_col$new_row","=SUM(C$new_row:$old_old_col$new_row)");
-    
+
     $i = 8;
     $group_names = array();
     foreach($stu_ques_array as $student) {
@@ -870,29 +869,29 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
             }
             $objPHPExcel->getActiveSheet()
                         ->setCellValue("$it_col" . ($sum_row + $i), "=SUM(C" . ($sum_row + $i) .":$old_old_col" . ($sum_row + $i) .")");
-        } 
+        }
     }
-    
+
     $objPHPExcel->getActiveSheet()->getStyle("B" . $sum_row . ":$col" . ($sum_row + 5))->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle("B" . $sum_row . ":$col" . ($sum_row + 5))->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle("B" . ($sum_row + 7) . ":$col" . ($sum_row + $i))->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle("B" . ($sum_row + 7) . ":$col" . ($sum_row + $i))->getFont()->setBold(true);
-    
-    $last_starting_row = $sum_row + $i; 
-    
+
+    $last_starting_row = $sum_row + $i;
+
     $i += 2;
     $j = 0;
     $objPHPExcel->getActiveSheet()
         ->setCellValue("B" . ($sum_row + $i),"Question")
         ->setCellValue("$old_col" . ($sum_row + $i),"Total");
-    
+
     for ($it_col = "C"; $it_col < $col; $it_col++) {
         $question = $ques_info[$j];
         $objPHPExcel->getActiveSheet()
                 ->setCellValue("$it_col" . ($sum_row + $i), $question["Number"]);
         $j++;
     }
-    
+
     foreach($group_names as $name) {
         $i++;
         $objPHPExcel->getActiveSheet()->setCellValue("B" . ($sum_row + $i), $name["Name"]);
@@ -903,11 +902,11 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
         $objPHPExcel->getActiveSheet()
                         ->setCellValue("$it_col" . ($sum_row + $i), "=ROUND(100 * $it_col" . $name["Row"] . "/ " . $it_col . "2, 0)");
     }
-    
+
     $objPHPExcel->getActiveSheet()->setAutoFilter("A2:B$row");
     $objPHPExcel->getActiveSheet()->getStyle("B" . ($last_starting_row + 2) . ":$col" . ($sum_row + $i))->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle("B" . ($last_starting_row + 2) . ":$col" . ($sum_row + $i))->getFont()->setBold(true);
-    
+
     $objPHPExcel->getActiveSheet()->setCellValue("B" . ($sum_row + $i + 2), "Question");
     $objValidation2 = $objPHPExcel->getActiveSheet()->getCell("B" . ($sum_row + $i + 3))->getDataValidation();
     $objValidation2->setType(PHPExcel_Cell_DataValidation::TYPE_LIST);
@@ -921,7 +920,7 @@ function outputExcelResults($stu_ques_array, $ques_info, $objPHPExcel, $sheet_na
     //$objValidation2->setError('Value is not in list');
     $objValidation2->setFormula1("B" . ($last_starting_row + 3) . ":B" . ($sum_row + $i));
     $objPHPExcel->getActiveSheet()->setCellValue("B" . ($sum_row + $i + 4), "Overall");
-    
+
     return $objPHPExcel;
 }
 

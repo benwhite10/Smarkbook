@@ -32,15 +32,12 @@ try{
 if($role == 'STUDENT'){
     $user = Student::createStudentFromId($userid);
     $prefName = $user->getPrefferedName();
-    $dob = $user->getDateOfBirth();
     $hideStaff = 'style="display:none;"';
     $hideStudents = '';
 }else{
     $user = Teacher::createTeacherFromId($userid);
     $title = $user->getTitle();
     $initials = $user->getInitials();
-    $classroom = $user->getClassroom();
-    $number = $user->getPhoneNumber();
     $hideStaff = '';
     $hideStudents = 'style="display:none;"';
 }
@@ -150,15 +147,6 @@ if(isset($_SESSION['message'])){
                     </div><div <?php echo $hideStaff; ?>>
                     <label for="initials">Initials:
                     </label><input type="text" name="initials" placeholder="Initials" value="<?php if(isset($initials)){echo $initials;}?>"></input>
-                    </div><div <?php echo $hideStaff; ?>>
-                    <label for="classroom">Classroom:
-                    </label><input type="text" name="classroom" placeholder="Classroom" value="<?php if(isset($classroom)){echo $classroom;}?>"></input>
-                    </div><div <?php echo $hideStaff; ?>>
-                    <label for="number">Number:
-                    </label><input type="text" name="number" placeholder="Phone Number" id="number" value="<?php if(isset($number)){echo $number;}?>"></input>
-                    </div><div <?php echo $hideStudents; ?>>
-                    <label for="dob">DOB:
-                    </label><input type="text" name="date" placeholder="DD/MM/YYYY" value="<?php if(isset($dob)){echo $dob;}?>"></input>
                     </div>
                 </div><div id="side_bar">
                     <ul class="menu sidebar">

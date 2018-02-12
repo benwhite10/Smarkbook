@@ -61,11 +61,11 @@ function getWorksheetForGWID($gwid){
                 WHERE `Group Worksheet ID` = $gwid  AND C.`Deleted` = 0;";
 
     //Details for the worksheet, date due, notes etc
-    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, 
-                GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3, 
-                GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded, 
-                GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden, 
-                GW.`Deleted` Deleted, GW.`StudentInput` StudentInput, GW.`EnterTotals` EnterTotals, GW.`DisplayName` DisplayName  
+    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName,
+                GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3,
+                GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded,
+                GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden,
+                GW.`Deleted` Deleted, GW.`StudentInput` StudentInput, GW.`EnterTotals` EnterTotals, GW.`DisplayName` DisplayName
                 FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                 JOIN TGROUPS G ON G.`Group ID` = GW.`Group ID`
@@ -85,8 +85,8 @@ function getWorksheetForGWID($gwid){
     $query5 = "SELECT * FROM TNOTES WHERE `Group Worksheet ID` = $gwid;";
 
     // Students
-    $query6 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name
-                FROM TUSERS U JOIN TSTUDENTS S ON U.`User ID` = S.`User ID`
+    $query6 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name
+                FROM TUSERS U
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
                 WHERE GW.`Group Worksheet ID` = $gwid
@@ -151,8 +151,8 @@ function downloadGWID($gwid) {
                 WHERE `Group Worksheet ID` = $gwid;";
 
     // Students
-    $query4 = "SELECT U.`User ID` ID, CONCAT(S.`Preferred Name`,' ',U.Surname) Name
-                FROM TUSERS U JOIN TSTUDENTS S ON U.`User ID` = S.`User ID`
+    $query4 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name
+                FROM TUSERS U 
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
                 WHERE GW.`Group Worksheet ID` = $gwid

@@ -35,15 +35,14 @@ function getSetTagReport($staffId, $setId, $tags) {
     $tag_array = convertTagNamesToArray(explode(",", $tags));
     // Get students
     $query = "SELECT * FROM TUSERGROUPS UG "
-            . "JOIN TUSERS U ON UG.`User ID` = U.`User ID` "
-            . "JOIN TSTUDENTS S ON S.`User ID` = U.`User ID` " . 
+            . "JOIN TUSERS U ON UG.`User ID` = U.`User ID` " . 
             "WHERE UG.`Group ID` = $setId AND U.`Role` = 'STUDENT';";
     try {
         $students = db_select_exception($query);
     } catch (Exception $ex) {
         failRequestWithException("Error getting students", $ex);
     }
-    
+
     $stu_string = "AND (";
     foreach($students as $student) {
         $id = $student["User ID"];
@@ -55,7 +54,7 @@ function getSetTagReport($staffId, $setId, $tags) {
     } else {
         $stu_string = "";
     }
-    
+
     $tag_string = "AND QT.`Tag ID` IN (";
     foreach($tag_array as $tag) {
         $id = $tag["ID"];
@@ -67,9 +66,9 @@ function getSetTagReport($staffId, $setId, $tags) {
     } else {
         $tag_string = "";
     }
-    
+
     // Get all completed questions for each student
-    $query2 = "SELECT CQ.`Completed Question ID` CQID, CQ.`Mark` Mark, SQ.`Marks` Marks, CQ.`Student ID` StuID, QT.`Tag ID` TagID FROM TCOMPLETEDQUESTIONS CQ 
+    $query2 = "SELECT CQ.`Completed Question ID` CQID, CQ.`Mark` Mark, SQ.`Marks` Marks, CQ.`Student ID` StuID, QT.`Tag ID` TagID FROM TCOMPLETEDQUESTIONS CQ
                 JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
                 JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
                 JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID`
@@ -77,19 +76,19 @@ function getSetTagReport($staffId, $setId, $tags) {
                 AND GW.`Deleted` <> 1
                 AND GW.`Primary Staff ID` = $staffId
                 AND GW.`Group ID` = $setId $stu_string $tag_string";
-    
+
     try {
         $results = db_select_exception($query2);
     } catch (Exception $ex) {
         failRequestWithException("Error getting results", $ex);
     }
-    
+
     $final_table = convertResultsToTable($results, $students, $tag_array);
     succeedRequest($final_table);
 }
 
 function convertTagNamesToArray($tag_name_array) {
-    $tag_array = array(); 
+    $tag_array = array();
     foreach ($tag_name_array as $tag_name) {
         if(strlen($tag_name) > 0 && $tag_name !== " ") {
             $name = trim($tag_name);

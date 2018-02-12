@@ -36,21 +36,20 @@ switch ($requestType){
         break;
 }
 
-function getStudentsForSet($setid, $orderby, $desc){  
-    $query = "select U.`User ID` ID, U.`First Name` FName, U.`Surname` SName, S.`Preferred Name` PName from TUSERGROUPS UG
-                join TSTUDENTS S ON S.`User ID` = UG.`User ID`
-                join TUSERS U ON U.`User ID` = S.`User ID`";
-    
+function getStudentsForSet($setid, $orderby, $desc){
+    $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName, U.`Preferred Name` PName from TUSERGROUPS UG
+                JOIN TUSERS U ON UG.`User ID` = U.`User ID`";
+
     $query .= filterBy(["UG.`Group ID`", "UG.`Archived`"], [$setid,"0"]);
     $query .= orderBy([$orderby], [$desc]);
-    
+
     try{
         $students = db_select_exception($query);
     } catch (Exception $ex) {
         $message = "There was an error loading the students";
         returnToPageError($ex, $message);
     }
-    
+
     $response = array(
         "success" => TRUE,
         "students" => $students);
@@ -58,17 +57,17 @@ function getStudentsForSet($setid, $orderby, $desc){
 }
 
 function getAllStudents($orderby, $desc){
-    $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName FROM TUSERS U "
-            . "JOIN TSTUDENTS S ON S.`User ID` = U.`User ID` ";
+    $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName FROM TUSERS U ";
+    $query .= filterBy(["U.`Archived`", "U.`Role`"], ["0", "STUDENT"]);
     $query .= orderBy([$orderby], [$desc]);
-    
+
     try{
         $users = db_select_exception($query);
     } catch (Exception $ex) {
         $message = "There was an error loading the students";
         returnToPageError($ex, $message);
     }
-    
+
     $response = array(
         "success" => TRUE,
         "users" => $users);

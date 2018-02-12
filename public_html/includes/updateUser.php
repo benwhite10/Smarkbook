@@ -7,7 +7,7 @@ include_once 'errorReporting.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 
 sec_session_start();
-if(isset($_SESSION['user'])){ 
+if(isset($_SESSION['user'])){
     $user = $_SESSION['user'];
     $userRole = $user->getRole();
     if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
@@ -25,9 +25,6 @@ $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_STRING);
 $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_STRING);
 $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING);
 $initials = filter_input(INPUT_POST, 'initials', FILTER_SANITIZE_STRING);
-$classroom = filter_input(INPUT_POST, 'classroom', FILTER_SANITIZE_STRING);
-$number = filter_input(INPUT_POST, 'number', FILTER_SANITIZE_STRING);
-$dob = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
 $message = "";
 
 if(isset($role, $userid)){
@@ -38,10 +35,10 @@ if(isset($role, $userid)){
             $message = "Invalid password configuration.";
             returnToPageError($message, $userid);
         }
-        
+
         $random_salt = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
-        
-        // Create salted password 
+
+        // Create salted password
         $pwd = hash('sha512', $pwd . $random_salt);
         $query = "UPDATE TUSERS SET `Password` = '$pwd', `Salt` = '$random_salt' WHERE `User ID` = $userid;";
         try{
@@ -51,32 +48,31 @@ if(isset($role, $userid)){
                 $desc = $ex->getMessage();
             }else{
                 $desc = "Something went wrong while saving the users details.";
-            } 
+            }
             $message .= seriousError($desc);
             returnToPageError($message, $userid);
         }
     }
-    
-    if(isset($fname, $sname, $email)){    
-        $query1 = "UPDATE TUSERS SET `First Name` = '$fname', `Surname` = '$sname', `Username` = '$email', `Email` = '$email' WHERE `User ID` = $userid;";
-        
-        if($role === 'STUDENT'){
-            //Student user
-            $query2 = "UPDATE TSTUDENTS SET `Preferred Name` = '$prefname', `DOB` = '$dob' WHERE `User ID` = $userid;";
-        }else{
-            //Staff user
-            $query2 = "UPDATE TSTAFF SET `Title` = '$title', `Initials` = '$initials', `Classroom` = '$classroom', `Phone Number` = '$number' WHERE `User ID` = $userid;";
-        }
-        
+
+    if(isset($fname, $sname, $email)){
+        $query1 = "UPDATE TUSERS
+            SET `First Name` = '$fname',
+              `Surname` = '$sname',
+              `Username` = '$email',
+              `Email` = '$email',
+              `Preferred Name` = '$prefname',
+              `Title` = '$title',
+              `Initials` = '$initials'
+            WHERE `User ID` = $userid;";
+
         try{
             $result1 = db_query_exception($query1);
-            $result2 = db_query_exception($query2);
         } catch (Exception $ex) {
             if($ex->getMessage() !== null){
                 $desc = $ex->getMessage();
             }else{
                 $desc = "Something went wrong while saving the users details.";
-            } 
+            }
             $message .= seriousError($desc);
             returnToPageError($message, $userid);
         }
@@ -85,7 +81,7 @@ if(isset($role, $userid)){
         $message .= "You have not entered all of the required fields.";
         returnToPageError($message, $userid);
     }
-    
+
     $message = "User '$fname $sname' successfully updated.";
     updateCurrentUser();
     returnToPageSuccess($message, $userid);
@@ -98,7 +94,7 @@ if(isset($role, $userid)){
 function returnToPageError($message, $userid){
     $type = 'ERROR';
     if(!isset($message)){
-        $message = 'Something has gone wrong';   
+        $message = 'Something has gone wrong';
     }
     infoLog($message);
     $_SESSION['message'] = new Message($type, $message);

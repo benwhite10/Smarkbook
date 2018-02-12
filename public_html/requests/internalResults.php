@@ -87,7 +87,7 @@ function getCourseDetails($course_id) {
         $set_details = db_select_exception($set_details_query);
         foreach ($set_details as $key => $set) {
             $userid = $set["User ID"];
-            $query = "SELECT `Initials` FROM TSTAFF WHERE `User ID` = $userid";
+            $query = "SELECT `Initials` FROM TUSERS WHERE `User ID` = $userid";
             $result = db_select_exception($query);
             $set_details[$key]["Initials"] = $result[0]["Initials"];
         }
@@ -201,13 +201,13 @@ function getCourseOverview($course_id) {
 }
 
 function getExistingResults($course_id, $vid) {
-    $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Group ID` GID, G.`Name`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, S.`Initials`, S.`User ID` UID
+    $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Group ID` GID, G.`Name`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, U.`Initials`, U.`User ID` UID
                 FROM `TGROUPWORKSHEETS` GW
                 JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
-                JOIN `TSTAFF` S ON GW.`Primary Staff ID` = S.`User ID`
+                JOIN `TUSERS` U ON GW.`Primary Staff ID` = U.`User ID`
                 WHERE GW.`Group ID` IN (
-                SELECT `GroupID` FROM `TGROUPCOURSE`
-                WHERE `CourseID` = $course_id
+                  SELECT `GroupID` FROM `TGROUPCOURSE`
+                  WHERE `CourseID` = $course_id
                 ) AND GW.`Version ID` = $vid
                 AND GW.`Deleted` = 0
                 AND GW.`CourseWorksheetID` IS NULL

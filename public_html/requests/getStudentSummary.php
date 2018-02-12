@@ -816,8 +816,7 @@ function getStudentSets($studentId) {
             WHERE `Student ID` = $studentId AND G.`Type ID` = 3 AND GW.`Deleted` = 0 AND UG.`Archived` = 0
             GROUP BY GW.`Group ID`
             ORDER BY G.`Name`;";
-    $student_query = "SELECT U.`First Name` FName, U.`Surname` Surname, S.`Preferred Name` PName, U.`User ID` UserID FROM TUSERS U "
-            . "JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` "
+    $student_query = "SELECT U.`First Name` FName, U.`Surname` Surname, U.`Preferred Name` PName, U.`User ID` UserID FROM TUSERS U "
             . "WHERE U.`User ID` = $studentId";
     try {
         $sets = db_select_exception($set_query);
@@ -825,10 +824,9 @@ function getStudentSets($studentId) {
         $staff_details = [];
         foreach($sets as $set) {
             $group_id = $set["Group ID"];
-            $staff_query = "SELECT U.`User ID` UserID, GW.`Group ID` GroupID, S.`Title` Title, U.`Surname` Surname FROM `TGROUPWORKSHEETS` GW
+            $staff_query = "SELECT U.`User ID` UserID, GW.`Group ID` GroupID, U.`Title` Title, U.`Surname` Surname FROM `TGROUPWORKSHEETS` GW
                             JOIN TUSERS U ON GW.`Primary Staff ID` = U.`User ID`
-                            JOIN TSTAFF S ON S.`User ID` = U.`User ID`
-                            WHERE GW.`Group ID` = $group_id AND GW.`Deleted` = 0
+                            WHERE GW.`Group ID` = $group_id AND GW.`Deleted` = 0 AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')
                             GROUP BY U.`User ID`
                             ORDER BY U.`Surname`;";
             $staff = db_select_exception($staff_query);
