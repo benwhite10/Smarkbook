@@ -37,11 +37,14 @@ switch ($requestType){
 }
 
 function getStudentsForSet($setid, $orderby, $desc){
-    $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName, U.`Preferred Name` PName from TUSERGROUPS UG
-                JOIN TUSERS U ON UG.`User ID` = U.`User ID`";
-
-    $query .= filterBy(["UG.`Group ID`", "UG.`Archived`"], [$setid,"0"]);
-    $query .= orderBy([$orderby], [$desc]);
+    $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName, U.`Preferred Name` PName
+                FROM TUSERGROUPS UG
+                JOIN TUSERS U ON UG.`User ID` = U.`User ID`
+                WHERE UG.`Group ID` = $setid
+                AND UG.`Archived` = '0'
+                AND U.`Role` = 'STUDENT'
+                ORDER BY $orderby ";
+    if ($desc) $query .= "DESC";
 
     try{
         $students = db_select_exception($query);
