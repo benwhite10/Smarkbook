@@ -25,9 +25,12 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
     exit();
 }
 
-$query = "SELECT U.`First Name` FName, U.`Surname` Surname, U.`User ID` ID FROM TUSERS U WHERE U.`First Name` <> '' ORDER BY U.`First Name`;";
+$staff_query = "SELECT U.`First Name` FName, U.`Surname` Surname, U.`User ID` ID FROM TUSERS U WHERE U.`First Name` <> '' AND `Archived` = 0 AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER') ORDER BY U.`First Name`;";
+$student_query = "SELECT U.`First Name` FName, U.`Surname` Surname, U.`User ID` ID FROM TUSERS U WHERE U.`First Name` <> '' AND `Archived` = 0 AND U.`Role` = 'STUDENT' ORDER BY U.`First Name`;";
+
 try{
-    $staff = db_select_exception($query);
+    $staff = db_select_exception($staff_query);
+    $students = db_select_exception($student_query);
 } catch (Exception $ex) {
     $msg = $ex->getMessage();
     failWithMessage("There was an error loading all of the users.", $msg);
@@ -54,7 +57,6 @@ function failWithMessage($msg, $error){
     <?php pageHeader("Smarkbook", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
     <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
-    <script src="js/tagsList.js?<?php echo $info_version; ?>"></script>
 </head>
 <body style="height: 100%;">
     <div id="main">
@@ -101,14 +103,27 @@ function failWithMessage($msg, $error){
 
             <form id="editForm" class="editWorksheet" action="includes/switch_user.php" method="POST">
                 <div id="main_content">
-                    <label for="userid">User:
+                    <label for="userid">Staff:
                     </label><select name="userid" id="author">
-                        <option value=0>User:</option>
+                        <option value=0>No Staff</option>
                         <?php
                             if(isset($staff)){
                                 foreach($staff as $teacher){
                                     $name = $teacher["FName"] . " " . $teacher["Surname"];
                                     $id = $teacher["ID"];
+                                    echo "<option value='$id'>$name</option>";
+                                }
+                            }
+                        ?>
+                    </select>
+                    <label for="stuid">Student:
+                    </label><select name="stuid" id="student">
+                        <option value=0>No Student</option>
+                        <?php
+                            if(isset($students)){
+                                foreach($students as $student){
+                                    $name = $student["FName"] . " " . $student["Surname"];
+                                    $id = $student["ID"];
                                     echo "<option value='$id'>$name</option>";
                                 }
                             }
@@ -123,5 +138,4 @@ function failWithMessage($msg, $error){
     	</div>
         <?php pageFooter($info_version) ?>
     </div>
-    <script src="js/tagsList.js"></script>
 </body>

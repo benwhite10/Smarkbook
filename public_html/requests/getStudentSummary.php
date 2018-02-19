@@ -23,9 +23,6 @@ $role = validateRequest($userid, $userval, "");
 if(!$role){
     failRequest("There was a problem validating your request");
 }
-/*if ($role === "STUDENT" & $studentId !== $userid){
-    failRequest("You are not authorised to complete that request");
-}*/
 
 $questions = [];
 $setWorksheets = [];
@@ -824,8 +821,9 @@ function getStudentSets($studentId) {
         $staff_details = [];
         foreach($sets as $set) {
             $group_id = $set["Group ID"];
-            $staff_query = "SELECT U.`User ID` UserID, GW.`Group ID` GroupID, U.`Title` Title, U.`Surname` Surname FROM `TGROUPWORKSHEETS` GW
+            $staff_query = "SELECT U.`User ID` UserID, GW.`Group ID` GroupID, U.`Initials` Initials, G.`Name` GroupName FROM `TGROUPWORKSHEETS` GW
                             JOIN TUSERS U ON GW.`Primary Staff ID` = U.`User ID`
+                            JOIN TGROUPS G ON GW.`Group ID` = G.`Group ID`
                             WHERE GW.`Group ID` = $group_id AND GW.`Deleted` = 0 AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')
                             GROUP BY U.`User ID`
                             ORDER BY U.`Surname`;";
