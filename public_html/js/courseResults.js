@@ -289,6 +289,7 @@ function showExistingResults(vid, results) {
             var group = results[i]["Name"];
             var initials = results[i]["Initials"];
             var date = results[i]["Date"];
+            var ts = moment(date, "DD/MM/YYYY").unix();
             var gwid = results[i]["GWID"];
             var count = results[i]["Count"];
             html += "<div class='existing_worksheet_row";
@@ -297,6 +298,7 @@ function showExistingResults(vid, results) {
             html += "<div class='existing_checkbox selected' id='result_" + gwid + "'></div>";
             html += "<input type='hidden' id='result_" + gwid + "_gwid' value='" + gwid + "'>";
             html += "<input type='hidden' id='result_" + gwid + "_group' value='" + results[i]["GID"] + "'>";
+            html += "<input type='hidden' id='result_" + gwid + "_date' value='" + ts + "'>";
             html += "<div class='group'>" + group + " (" + initials + ")</div>";
             html += "<div class='count'>" + count + " result(s)</div>";
             html += "<div class='date'>" + date + "</div>";
@@ -310,10 +312,17 @@ function showExistingResults(vid, results) {
 }
 
 function addWorksheet(vid) {
+    var existing_sheets = getExistingWorksheets();
+    var date_string = "";
+    if (existing_sheets[1] > 0) {
+        var date = moment.unix(existing_sheets[1]);
+        date_string = date.isValid() ? date.format("DD/MM/YYYY") : "";
+    }
     var infoArray = {
         type: "ADDNEWWORKSHEET",
         course: sessionStorage.getItem("course_id"),
-        results: JSON.stringify(getExistingWorksheets()),
+        results: JSON.stringify(existing_sheets[0]),
+        date: date_string,
         vid: vid,
         userid: $('#userid').val(),
         userval: $('#userval').val()
@@ -329,6 +338,8 @@ function addWorksheet(vid) {
                 var active_tab = sessionStorage.getItem("active_tab");
                 url += url.indexOf('?') > -1 ? "&tab=" + active_tab : url += "?tab=" + active_tab;
                 window.location.href = url;
+            } else {
+                console.log(json);
             }
         },
         error: function() {
@@ -340,6 +351,8 @@ function addWorksheet(vid) {
 function getExistingWorksheets() {
     var divs = document.getElementsByClassName("existing_checkbox");
     var worksheets = [];
+    var dates = 0;
+    var count = 0;
     for (var i = 0;i < divs.length; i++) {
         var id = divs[i].id;
         if($("#" + id).hasClass("selected")) {
@@ -347,10 +360,13 @@ function getExistingWorksheets() {
                 parseInt($("#" + id + "_gwid").val()),
                 parseInt($("#" + id + "_group").val())
             ];
+            dates += parseInt($("#" + id + "_date").val());
+            count++;
             worksheets.push(array);
         }
     }
-    return worksheets;
+    var av_date = count > 0 ? parseInt(dates/count) : -1;
+    return [worksheets, av_date];
 }
 
 function removeWorksheet(cwid) {

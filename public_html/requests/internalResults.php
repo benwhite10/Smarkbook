@@ -30,7 +30,7 @@ switch ($request_type){
         getExistingResults($course_id, $vid);
         break;
     case "ADDNEWWORKSHEET":
-        addNewWorksheet($course_id, $vid, $existing_results);
+        addNewWorksheet($course_id, $vid, $existing_results, $date);
         break;
     case "UPDATEWORKSHEET":
         updateWorksheet($cwid, $date);
@@ -249,11 +249,12 @@ function updateWorksheet($cwid, $date) {
     succeedRequest(null);
 }
 
-function addNewWorksheet($course_id, $vid, $existing_results) {
+function addNewWorksheet($course_id, $vid, $existing_results,$date) {
     // Create course worksheet
     db_begin_transaction();
+    $str_date = $date !== "" ? "STR_TO_DATE('$date', '%d/%m/%Y')" : "NOW()";
     $create_query = "INSERT INTO `TCOURSEWORKSHEET`(`CourseID`, `WorksheetID`, `Date`, `Deleted`) "
-            . "VALUES ($course_id,$vid,NOW(),0)";
+            . "VALUES ($course_id,$vid,$str_date,0)";
     try {
         $return = db_insert_query_exception($create_query);
         $cwid = $return[1];

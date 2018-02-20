@@ -362,7 +362,7 @@ function updateSetsSuccess(json){
     }
 }
 
-function (json){
+function updateStudentsSuccess(json){
     if(json["success"]){
         var students = json["students"];
         var htmlValue = students.length === 0 ? "<option value='0'>No Students</option>" : "";
