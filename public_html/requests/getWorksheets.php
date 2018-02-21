@@ -76,9 +76,9 @@ function getAllWorksheetNames($orderby, $desc){
 }
 
 function getAllWorksheets($orderby, $desc){
-    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, S.`Initials` Author "
+    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, U.`Initials` Author "
             . "FROM TWORKSHEETVERSION WV "
-            . "JOIN TSTAFF S ON S.`User ID` = WV.`Author ID` "
+            . "JOIN TUSERS U ON U.`User ID` = WV.`Author ID` "
             . "WHERE WV.`Deleted` = 0";
     if(isset($orderby)){
         $query .= " ORDER BY $orderby";
@@ -104,9 +104,9 @@ function getAllWorksheets($orderby, $desc){
 }
 
 function getAllDeletedWorksheets($orderby, $desc){
-    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, S.`Initials` Author "
+    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, U.`Initials` Author "
             . "FROM TWORKSHEETVERSION WV "
-            . "JOIN TSTAFF S ON S.`User ID` = WV.`Author ID` "
+            . "JOIN TUSERS U ON U.`User ID` = WV.`Author ID` "
             . "WHERE WV.`Deleted` = 1";
     if(isset($orderby)){
         $query .= " ORDER BY $orderby";
@@ -154,9 +154,9 @@ function getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc){
 }
 
 function getAllEditableWorksheetsForGroup($groupid, $orderby, $desc) {
-    $query = "SELECT GW.`Group Worksheet ID` GWID, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, WV.`WName` WName, S.`Initials` Initials FROM `TGROUPWORKSHEETS` GW
+    $query = "SELECT GW.`Group Worksheet ID` GWID, DATE_FORMAT(GW.`Date Due`, '%d/%m/%y') Date, WV.`WName` WName, U.`Initials` Initials FROM `TGROUPWORKSHEETS` GW
             JOIN `TWORKSHEETVERSION` WV ON GW.`Version ID` = WV.`Version ID`
-            JOIN `TSTAFF` S ON GW.`Primary Staff ID` = S.`User ID`
+            JOIN `TUSERS` U ON GW.`Primary Staff ID` = U.`User ID`
             WHERE GW.`Group ID` = $groupid
             AND GW.`StudentInput` = 1
             AND GW.`Deleted` = 0";

@@ -1,7 +1,7 @@
 
 $(document).ready(function(){
     requestAllStaff();
-    
+
     $(function() {
         $( "#datepicker" ).datepicker({ dateFormat: 'dd/mm/yy' });
     });
@@ -111,7 +111,7 @@ function validate(){
     if(document.getElementById("author") && document.getElementById("author").value === "0"){
         return "Please enter an author for your worksheet.";
     }
-    
+
     //Number of questions
     if(document.getElementById("questions")){
         var questions = document.getElementById("questions").value;
@@ -119,7 +119,7 @@ function validate(){
             return "Please enter a valid number of questions for your worksheet, every worksheet must have at least 1 question.";
         }
     }
-        
+
     return true;
 }
 

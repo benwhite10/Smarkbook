@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -31,10 +31,16 @@ if($_GET['id'])
     $groupid = $_GET['id'];
 }
 
-$query = "SELECT U.`First Name`, S.`Preferred Name`, U.Surname, U.`User ID` ID FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID` JOIN TSTUDENTS S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $groupid AND G.`Archived` = 0;";
+$query = "SELECT U.`First Name`, U.`Preferred Name`, U.`Surname`, U.`User ID` ID
+        FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID`
+        WHERE G.`Group ID` = $groupid
+        AND G.`Archived` = 0
+        AND U.`Role` = 'STUDENT';";
 $students = db_select($query);
 
-$query2 = "SELECT  S.`Title`, U.`First Name`, U.Surname, U.Email FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID` JOIN TSTAFF S ON U.`User ID` = S.`User ID` WHERE G.`Group ID` = $groupid AND G.`Archived` = 0;";
+$query2 = "SELECT  U.`Title`, U.`First Name`, U.`Surname`, U.`Email`
+            FROM TUSERS U JOIN TUSERGROUPS G ON U.`User ID` = G.`User ID`
+            WHERE G.`Group ID` = $groupid AND G.`Archived` = 0;";
 $staff = db_select($query2);
 
 $query3 = "SELECT Name FROM TGROUPS WHERE `Group ID` = $groupid;";
@@ -84,7 +90,7 @@ $groupName = $groupNameResult[0]['Name'];
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
+                        <?php
                             foreach ($students as $key=>$student){
                                 $firstName = $student['First Name'];
                                 $prefName = $student['Preferred Name'];
@@ -98,7 +104,7 @@ $groupName = $groupNameResult[0]['Name'];
                                 $fullName = $frstName . ' ' . $surname;
                                 echo "<tr><td style='height: 40px;'><div class='row_left'>$fullName</div><div class='row_right' onClick='removeStudentPrompt($groupid,$id, &quot;$firstName $surname&quot;, &quot;$groupName&quot;);'>Remove</div></td></tr>";
                             }
-                        ?> 
+                        ?>
                     </tbody>
                 </table>
                 <div id="add_student">
@@ -125,5 +131,3 @@ $groupName = $groupNameResult[0]['Name'];
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	

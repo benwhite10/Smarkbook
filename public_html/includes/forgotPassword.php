@@ -84,7 +84,7 @@ if(isset($type, $email)){
                 header("Location: ../forgottenPassword.php?code=$code");
                 exit;
             }
-            
+
             if($code === $resetCode && strtotime($resetTime) + 15*60 > time()){
                 //Check the password
                 if (strlen($pwd) != 128) {
@@ -96,7 +96,7 @@ if(isset($type, $email)){
 
                 $random_salt = hash('sha512', uniqid(mt_rand(1, mt_getrandmax()), true));
 
-                // Create salted password 
+                // Create salted password
                 $pwd = hash('sha512', $pwd . $random_salt);
                 $query = "UPDATE TUSERS SET `Password` = '$pwd', `Salt` = '$random_salt', `Reset Code` = NULL, `Reset Time` = NULL WHERE `User ID` = $userid;";
                 try{
@@ -107,7 +107,7 @@ if(isset($type, $email)){
                         $desc .= " Please refresh and try again.";
                     }else{
                         $desc = "Something went wrong while resetting your password. Please refresh and try again.";
-                    } 
+                    }
                     returnToPageError($desc);
                 }
                 $type = "SUCCESS";
@@ -126,8 +126,8 @@ if(isset($type, $email)){
                 header("Location: ../forgottenPassword.php?code=$code");
                 exit;
             }
-            
-            
+
+
         }else{
             $desc = "Something went wrong while resetting your password. Please refresh and try again.";
             returnToPageError($desc);
@@ -145,7 +145,7 @@ if(isset($type, $email)){
 function returnToPageError($message){
     $type = 'ERROR';
     if(!isset($message)){
-        $message = 'Something has gone wrong';   
+        $message = 'Something has gone wrong';
     }
     infoLog($message);
     $_SESSION['message'] = new Message($type, $message);

@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
 	$user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -32,15 +32,12 @@ try{
 if($role == 'STUDENT'){
     $user = Student::createStudentFromId($userid);
     $prefName = $user->getPrefferedName();
-    $dob = $user->getDateOfBirth();
     $hideStaff = 'style="display:none;"';
     $hideStudents = '';
 }else{
     $user = Teacher::createTeacherFromId($userid);
     $title = $user->getTitle();
     $initials = $user->getInitials();
-    $classroom = $user->getClassroom();
-    $number = $user->getPhoneNumber();
     $hideStaff = '';
     $hideStudents = 'style="display:none;"';
 }
@@ -92,7 +89,7 @@ if(isset($_SESSION['message'])){
                 <ul class="menu navbar">
                 </ul>
             </div>
-            
+
             <?php
                 if(isset($message)){
                     $type = $message->getType();
@@ -106,12 +103,12 @@ if(isset($_SESSION['message'])){
                     $div = 'style="display:none;"';
                 }
             ?>
-            
+
             <div id="message" <?php echo $div; ?>>
                 <div id="messageText"><p><?php if(isset($string)){echo $string;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>   
-            
+            </div>
+
             <form id="editForm" class="editWorksheet" action="includes/updateUser.php" method="POST">
                 <div id="main_content">
                     <!--
@@ -120,7 +117,7 @@ if(isset($_SESSION['message'])){
                         <option value="STAFF">Staff</option>
                         <option value="STUDENT">Student</option>
                         <option value="SUPER_USER">Super User</option>
-                    </select> 
+                    </select>
                     -->
                     <input type="hidden" name="role" value="<?php if(isset($role)){echo $role;}?>"/>
                     <input type="hidden" name="userid" value="<?php if(isset($userid)){echo $userid;}?>"/>
@@ -150,15 +147,6 @@ if(isset($_SESSION['message'])){
                     </div><div <?php echo $hideStaff; ?>>
                     <label for="initials">Initials:
                     </label><input type="text" name="initials" placeholder="Initials" value="<?php if(isset($initials)){echo $initials;}?>"></input>
-                    </div><div <?php echo $hideStaff; ?>>
-                    <label for="classroom">Classroom:
-                    </label><input type="text" name="classroom" placeholder="Classroom" value="<?php if(isset($classroom)){echo $classroom;}?>"></input>
-                    </div><div <?php echo $hideStaff; ?>>
-                    <label for="number">Number:
-                    </label><input type="text" name="number" placeholder="Phone Number" id="number" value="<?php if(isset($number)){echo $number;}?>"></input>
-                    </div><div <?php echo $hideStudents; ?>>
-                    <label for="dob">DOB:
-                    </label><input type="text" name="date" placeholder="DD/MM/YYYY" value="<?php if(isset($dob)){echo $dob;}?>"></input>
                     </div>
                 </div><div id="side_bar">
                     <ul class="menu sidebar">
@@ -166,10 +154,8 @@ if(isset($_SESSION['message'])){
                         <li><a href="portalhome.php">Cancel</a></li>
                     </ul>
                 </div>
-            </form> 
+            </form>
     	</div>
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	

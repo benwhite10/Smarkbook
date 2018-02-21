@@ -55,11 +55,10 @@ function addNote($studentId, $staffId, $setId, $note) {
 
 function getNotesForStaff($staffId) {
     try {
-        $query = "SELECT R.ID, S.`Preferred Name`, U.`First Name`, U.`Surname`, G.`Name`, R.`Note`, R.`Date`, DATE_FORMAT(R.`Date`, '%b %D %Y %k:%i') date_format FROM `TREPORTNOTES` R
+        $query = "SELECT R.`ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, G.`Name`, R.`Note`, R.`Date`, DATE_FORMAT(R.`Date`, '%b %D %Y %k:%i') date_format FROM `TREPORTNOTES` R
             LEFT JOIN TUSERS U ON U.`User ID` = R.`StudentID`
-            LEFT JOIN TSTUDENTS S ON S.`User ID` = R.`StudentID`
-            LEFT JOIN TGROUPS G ON G.`Group ID` = R.GroupID
-            WHERE StaffID = $staffId ";      
+            LEFT JOIN TGROUPS G ON G.`Group ID` = R.`GroupID`
+            WHERE StaffID = $staffId ";
         $query .= "ORDER BY G.Name, U.Surname, R.Date DESC;";
         succeedRequest(db_select_exception($query));
     } catch (Exception $ex) {

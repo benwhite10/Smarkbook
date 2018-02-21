@@ -116,17 +116,17 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
                         <table class="form">
                             <tbody class="form">
                                 <tr class="form">
-                                    <td class="form">
+                                    <td class="form" id="staff_col">
                                         <select name="staff" id="staff" onchange="updateSets()">
                                             <option value="0">No Teachers</option>
                                         </select>
                                     </td>
-                                    <td class="form">
+                                    <td class="form" id="set_col">
                                         <select name="set" id="set" onchange="updateStudents()">
                                             <option value="0">No Sets</option>
                                         </select>
                                     </td>
-                                    <td class="form">
+                                    <td class="form" id="student_col">
                                         <select name="student" id="student" onchange="studentChange()">
                                             <option value="0">No Students</option>
                                         </select>

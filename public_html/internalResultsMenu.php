@@ -74,6 +74,10 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                     <div id="course_details_title"></div>
                     <div id="sets_table"></div>
                     <div id="course_button"></div>
+                    <div id="add_sets_div">
+                        <select id="add_sets_select"></select>
+                        <div id="add_sets_button">Add</div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -327,7 +327,7 @@ function getStaffSuccess(json){
         $('#staff').html(htmlValue);
         for (var key in staff) {
             $('#staff').append($('<option/>', {
-                value: staff[key]["Staff ID"],
+                value: staff[key]["User ID"],
                 text : staff[key]["Initials"]
             }));
         }

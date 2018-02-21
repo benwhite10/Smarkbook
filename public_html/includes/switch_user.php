@@ -7,7 +7,7 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once 'errorReporting.php';
 
 sec_session_start();
-if(isset($_SESSION['user'])){ 
+if(isset($_SESSION['user'])){
     $user = $_SESSION['user'];
     $userRole = $user->getRole();
     if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
@@ -17,6 +17,7 @@ if(isset($_SESSION['user'])){
 }
 
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$stuid = filter_input(INPUT_POST,'stuid',FILTER_SANITIZE_NUMBER_INT);
 
 if(isset($userid) && $userid != 0){
     $user = User::createUserLoginDetails($userid);
@@ -28,7 +29,17 @@ if(isset($userid) && $userid != 0){
     unset($_SESSION['url']);
     unset($_SESSION['urlid']);
     returnToPageSuccess($user->getUserId());
-}else{
+} else if(isset($stuid) && $stuid != 0) {
+    $user = User::createUserLoginDetails($stuid);
+    if($user->getRole() === 'STUDENT'){
+        $_SESSION['user'] = Student::createStudentFromId($stuid);
+    }else{
+        $_SESSION['user'] = Teacher::createTeacherFromId($stuid);
+    }
+    unset($_SESSION['url']);
+    unset($_SESSION['urlid']);
+    returnToPageSuccess($user->getUserId());
+} else {
     $message = "You are unable to switch users at this time.";
     returnToPageError($message);
 }

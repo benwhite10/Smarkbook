@@ -21,7 +21,8 @@ if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
     failRequest("You are not authorised to complete that request");
 }
 
-$query1 = "SELECT * FROM TSTAFF";
+$query1 = "SELECT * FROM TUSERS
+  WHERE (`Role` = 'STAFF' OR `Role` = 'SUPER_USER') AND `Archived` = 0 AND `Initials` <> '' ";
 if(isset($orderby)){
     $query2 = $query1 . " ORDER BY `$orderby`";
     if(isset($desc) && $desc === "TRUE"){
