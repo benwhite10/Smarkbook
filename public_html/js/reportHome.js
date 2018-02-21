@@ -1,5 +1,6 @@
 var displayed_gwid = "";
 var student_report_view = false;
+var set_staff_link = [];
 
 $(document).ready(function(){
     $("#variablesInputBoxShowHideButton").click(function(){
@@ -33,6 +34,7 @@ function setUpVariableInputs(){
     if (set_student) {
         student_report_view = true;
         setStudent(set_student);
+        $("#staff_col").css("display", "none");
     } else {
         getStaff();
     }
@@ -61,7 +63,6 @@ function setVariableInputs(json) {
     if(json["success"]){
         var results = json["result"];
         var student_details = results["student"];
-        var set_details = results["sets"];
         var staff_details = results["staff"];
 
         var first_name = student_details["PName"] ? student_details["PName"] : student_details["FName"];
@@ -73,22 +74,22 @@ function setVariableInputs(json) {
         }));
 
         //Set up staff
-        var htmlValue = staff_details.length === 0 ? "<option value='0'>No Teachers</option>" : "";
-        $('#staff').html(htmlValue);
+        var htmlValue = staff_details.length === 0 ? "<option value='0'>-</option>" : "";
+        $("#staff").html(htmlValue);
+        $('#set').html(htmlValue);
         for (var key in staff_details) {
+            $('#set').append($('<option/>', {
+                value: staff_details[key]["GroupID"],
+                text : staff_details[key]["GroupName"] + " (" + staff_details[key]["Initials"] + ")"
+            }));
             $('#staff').append($('<option/>', {
                 value: staff_details[key]["UserID"],
-                text : staff_details[key]["Title"] + " " + staff_details[key]["Surname"]
+                text : staff_details[key]["Initials"]
             }));
-        }
-        //Set up sets
-        htmlValue = set_details.length === 0 ? "<option value='0'>No Sets</option>" : "";
-        $('#set').html(htmlValue);
-        for (var key in set_details) {
-            $('#set').append($('<option/>', {
-                value: set_details[key]["Group ID"],
-                text : set_details[key]["Name"]
-            }));
+            set_staff_link.push({
+                "SetID": staff_details[key]["GroupID"],
+                "StaffID": staff_details[key]["UserID"]
+            });
         }
 
         var initial_set_val = $('#setid').val();
@@ -228,6 +229,9 @@ function updateStudents(){
                 updateStudentsSuccess(json);
             }
         });
+    } else {
+        $("#staff").val(getStaffForSet($("#set").val()));
+        generateReport();
     }
 }
 
@@ -295,16 +299,6 @@ function sendReportRequest(){
         userval: $('#userval').val()
     };
     localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
-//    infoArray["type"] = "STUDENTREPORT";
-//    $.ajax({
-//        type: "POST",
-//        data: infoArray,
-//        url: "/requests/getStudentSummary.php",
-//        dataType: "json",
-//        success: function(json){
-//            reportRequestSuccess(json);
-//        }
-//    });
     infoArray["type"] = "NEWSTUDENTREPORT";
     $.ajax({
         type: "POST",
@@ -316,6 +310,16 @@ function sendReportRequest(){
         }
     });
     sendSummaryRequest(infoArray);
+}
+
+function getStaffForSet(set) {
+    var links = set_staff_link;
+    for (var i = 0; i < links.length; i++) {
+        if (links[i]["SetID"] == set){
+            return links[i]["StaffID"];
+        }
+    }
+    return 0;
 }
 
 /* Responses */
