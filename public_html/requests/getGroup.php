@@ -32,6 +32,12 @@ switch ($requestType){
         }
         getSetsForUser($enduserid, $orderby, $desc);
         break;
+    case "ALLSETS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getAllSets();
+        break;
     default:
         failRequest("There was a problem with your request, please try again.");
         break;
@@ -58,10 +64,34 @@ function getSetsForUser($staffid, $orderby, $desc){
     echo json_encode($response);
 }
 
+function getAllSets() {
+    $query = "SELECT G.`Group ID` ID, G.`Name` Name, U.`Initials` Initials FROM TGROUPS G
+                JOIN TUSERGROUPS UG on G.`Group ID` = UG.`Group ID`
+                JOIN TUSERS U ON UG.`User ID` = U.`User ID` 
+                WHERE G.`Type ID` = 3
+                AND UG.`Archived` = 0 
+                AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER') 
+                GROUP BY G.`Group ID`
+                ORDER BY G.`Name` ";
+    try{
+        $sets = db_select_exception($query);
+    } catch (Exception $ex) {
+        $message = "Error loading the worksheets: " . $ex->getMessage();
+        errorLog($message);
+        failRequest($message);
+    }
+
+    $response = array(
+        "success" => TRUE,
+        "sets" => $sets);
+    echo json_encode($response);
+}
+
 function failRequest($message){
     errorLog("There was an error in the get group request: " . $message);
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message);
     echo json_encode($response);
     exit();
 }

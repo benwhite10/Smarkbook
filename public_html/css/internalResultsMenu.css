@@ -102,6 +102,25 @@
     background: #a4ef76;
 }
 
+.set_title {
+    display: inline-block;
+    float: left;
+    width: calc(100% - 100px);
+    height: 100%;
+}
+
+.set_button {
+    display: inline-block;
+    float: left;
+    width: 100px;
+    height: 100%;
+    text-align: center;
+}
+
+.set_button:hover {
+    background: #FF8282;
+}
+
 #course_button {
     width: calc(100% - 22px);
     display: inline-block;
@@ -122,6 +141,49 @@
     background: #a4ef76;
 }
 
+#add_sets_div {
+    width: calc(100% - 22px);
+    display: inline-block;
+    float: left;
+    height: 32px;
+    line-height: 32px;
+    font-size: 1.0rem;
+    margin: 10px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid #323232;
+}
+
+#add_sets_select {
+    width: calc(100% - 101px);
+    display: inline-block;
+    float: left;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    line-height: 32px;
+    font-size: 0.9rem;
+    background: transparent;
+    outline: none;
+    border: none
+}
+
+#add_sets_button {
+    width: 100px;
+    display: inline-block;
+    float: left;
+    height: 32px;
+    line-height: 32px;
+    font-size: 1.0rem;
+    text-align: center;
+    cursor: pointer;
+    background: transparent;
+    border-left: 1px solid #CCC;
+}
+
+#add_sets_button:hover {
+    background: #a4ef76;
+}
 #course_details {
     display: none;
 }

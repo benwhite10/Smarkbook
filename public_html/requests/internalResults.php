@@ -50,6 +50,9 @@ switch ($request_type){
     case "ADDSET":
         addSet($course_id, $set_id);
         break;
+    case "REMOVESET":
+        removeSet($course_id, $set_id);
+        break;
     default:
         break;
 }
@@ -82,7 +85,8 @@ function getCourseDetails($course_id) {
                             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                             WHERE GC.`CourseID` = $course_id
                             AND (U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER')
-                            AND UG.`Archived` = 0";
+                            AND UG.`Archived` = 0 
+                            AND GC.`Archived` = 0";
     try {
         $set_details = db_select_exception($set_details_query);
         foreach ($set_details as $key => $set) {
@@ -121,7 +125,8 @@ function getCourseOverview($course_id) {
                             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                             WHERE GC.`CourseID` = $course_id
                             AND (U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER')
-                            AND UG.`Archived` = 0";
+                            AND UG.`Archived` = 0
+                            AND GC.`Archived` = 0";
     try {
         $set_details = db_select_exception($set_details_query);
     } catch (Exception $ex) {
@@ -139,6 +144,7 @@ function getCourseOverview($course_id) {
                     WHERE GC.`CourseID` = $course_id
                     AND U.`ROLE` = 'STUDENT'
                     AND UG.`Archived` = 0
+                    AND GC.`Archived` = 0 
                     ORDER BY G.`Name`, U.`Surname`, U.`First Name`";
 
     try {
@@ -207,7 +213,8 @@ function getExistingResults($course_id, $vid) {
                 JOIN `TUSERS` U ON GW.`Primary Staff ID` = U.`User ID`
                 WHERE GW.`Group ID` IN (
                   SELECT `GroupID` FROM `TGROUPCOURSE`
-                  WHERE `CourseID` = $course_id
+                  WHERE `CourseID` = $course_id 
+                  AND `Archived` = 0 
                 ) AND GW.`Version ID` = $vid
                 AND GW.`Deleted` = 0
                 AND GW.`CourseWorksheetID` IS NULL
@@ -270,7 +277,8 @@ function addNewWorksheet($course_id, $vid, $existing_results,$date) {
                     JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                     WHERE GC.`CourseID` = $course_id
                     AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')
-                    AND UG.`Archived` = 0 ";
+                    AND UG.`Archived` = 0
+                    AND GC.`Archived` = 0 ";
     try {
         $groups = db_select_exception($groups_query);
     } catch (Exception $ex) {
@@ -467,10 +475,51 @@ function addNewCourse($course_name) {
 
 function addSet($course_id, $set_id) {
     db_begin_transaction();
-    $query = "INSERT INTO `TGROUPCOURSE`(`GroupID`, `CourseID`) "
-            . "VALUES ($set_id,$course_id)";
+    // Check for exisiting groups
+    $query = "SELECT `ID` FROM `TGROUPCOURSE` "
+            . "WHERE `GroupID` = $set_id "
+            . "AND `CourseID` = $course_id;";
     try {
-        db_insert_query_exception($query);
+        $courses = db_select_exception($query);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest($ex->getMessage());
+    }
+    if (count($courses) > 0) {
+        foreach ($courses as $course) {
+            $course_id = $course["ID"];
+            $query = "UPDATE `TGROUPCOURSE` "
+                    . "SET `Archived` = 0 "
+                    . "WHERE `ID` = $course_id ";
+            try {
+                db_query_exception($query);
+            } catch (Exception $ex) {
+                db_rollback_transaction();
+                failRequest($ex->getMessage());
+            }
+        }
+    } else {
+        $query = "INSERT INTO `TGROUPCOURSE`(`GroupID`, `CourseID`) "
+            . "VALUES ($set_id,$course_id)";
+        try {
+            db_insert_query_exception($query);
+        } catch (Exception $ex) {
+            db_rollback_transaction();
+            failRequest($ex->getMessage());
+        }
+    }
+    db_commit_transaction();    
+    succeedRequest(null);
+}
+
+function removeSet($course_id, $set_id) {
+    db_begin_transaction();
+    $query = "UPDATE `TGROUPCOURSE` "
+            . "SET `Archived` = 1 "
+            . "WHERE `GroupID` = $set_id "
+            . "AND `CourseID` = $course_id;";
+    try {
+        db_query_exception($query);
         db_commit_transaction();
     } catch (Exception $ex) {
         db_rollback_transaction();
