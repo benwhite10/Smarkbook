@@ -9,7 +9,7 @@ function startQuiz() {
     $("#start_button").css("display", "none");
     $("#main_quiz").css("display", "block");
     pickNextQuestion();
-    startTimer(30);
+    startTimer(60);
 }
 
 function requestQuiz() {

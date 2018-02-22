@@ -606,8 +606,6 @@ function parseMainTable() {
     /* Students */
     var student_rows = "";
     var row = 0;
-    var student_count = students.length;
-    var worksheet_count = Object.keys(worksheet).length;
     var local_results_data_array = new Object();
     var row_student_array = [];
     for (var key in students) {
