@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Quiz</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/quiz.css">
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+              tex2jax: {
+                  inlineMath: [['$','$'], ['\\(','\\)']]
+              },
+              "HTML-CSS": { availableFonts: ["Gyre Pagella"] }
+            });
+        </script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+        <script src="js/jquery.js"></script>
+        <script src="js/quiz.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    </head>
+    <body>
+        <div id="start_button" onclick="startQuiz()">Start</div>
+        <div id="main_quiz">
+            <div id="top_div">
+                <span id="score">0</span>
+                <span id="timer"></span>
+            </div>
+            <div id="question_div_0" class="question_div">
+                <span id="question_0" class="question"></span>
+            </div>
+            <div id="options_div_0" class="options_div">
+                <div>
+                    <span id="option_0_0" class="option top left" onclick="clickOption(0)"></span>
+                </div>
+                <div>
+                    <span id="option_0_1" class="option top" onclick="clickOption(1)"></span>
+                </div>
+                <div>
+                    <span id="option_0_2" class="option left" onclick="clickOption(2)"></span>
+                </div>
+                <div>
+                    <span id="option_0_3" class="option" onclick="clickOption(3)"></span>
+                </div>
+            </div>
+        </div>
+        <div id="final_score_div">
+            <div id="title">Score</div>
+            <div id="final_score"></div>
+        </div>
+    </body>
+</html>

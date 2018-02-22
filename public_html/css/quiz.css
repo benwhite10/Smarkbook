@@ -1,0 +1,122 @@
+html {
+    font-family: 'Montserrat', sans-serif;
+    background: #dff7f2;
+    color: #1C94C4;
+}
+
+#start_button {
+    width: 90%;
+    max-width: 400px;
+    margin: auto;
+    height: 80px;
+    line-height: 80px;
+    font-size: 50px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 100px;
+    background: #FFF;
+    border: 5px solid #1c94c4;
+    border-radius: 10px;
+}
+
+#start_button:hover {
+    background: #1c94c4;
+    border-color: #FFF;
+    color: #FFF;
+}
+
+#main_quiz {
+    width: 90%;
+    display: none;
+    max-width: 1000px;
+    margin: auto;
+    height: 100%;
+}
+
+#top_div {
+    width: 100%;
+    height: 120px;
+    line-height: 120px;
+    text-align: center;
+    font-size: 80px;
+    margin-top: 40px;
+}
+
+#top_div > span {
+    width: 50%;
+    height: 100%;
+    display: inline-block;
+    float: left;
+}
+
+.question_div {
+    width: 100%;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    font-size: 60px;
+    background: #FFF;
+    border: 5px solid #1c94c4;
+    border-radius: 10px 10px 0 0;
+}
+
+.options_div {
+    width: 100%;
+    height: 200px;
+    border: 5px solid #1c94c4;;
+    border-radius: 0 0 10px 10px;
+    border-top: none;
+    background: #FFF;
+}
+
+.option {
+    display: inline-block;
+    float: left;
+    width: calc(50% - 1px);
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    font-size: 40px;
+    overflow: hidden;
+}
+
+.option:hover {
+    background: rgba(28, 148, 196, 0.3);
+    color: #FFF;
+}
+
+#final_score_div {
+    width: 90%;
+    display: none;
+    max-width: 500px;
+    height: 200px;
+    margin: auto;
+    margin-top: 100px;
+}
+
+#title, #final_score {
+    width: 100%;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+}
+
+#title {
+    font-size: 50px;
+}
+
+#final_score {
+    font-size: 80px;
+}
+
+.top {
+    border-bottom: 1px solid #1c94c4;
+}
+
+.left {
+    border-right: 1px solid #1c94c4;
+}
