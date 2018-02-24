@@ -5,7 +5,7 @@ $(document).ready(function(){
     getWorksheetDetails(sessionStorage.getItem("gwid"));
 
     setAutoSave(5000);
-    checkSaveButton();
+    setUpSaveButton();
 });
 
 function getStudentResults(stuid, gwid) {
@@ -131,7 +131,6 @@ function blurInput(id, value, sqid, marks) {
         }
         return;
     }
-    checkSaveButton();
 }
 
 function saveChanges(sqid, cqid, value) {
@@ -160,7 +159,6 @@ function saveChanges(sqid, cqid, value) {
     }
     updateCompletedWorksheet(sqid, cqid);
     sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
-    checkSaveButton();
 }
 
 function updateCompletedWorksheet(sqid, cqid) {
@@ -231,7 +229,6 @@ function sendSaveChangesRequest() {
             success: function(json){
                 getStudentResults(stuid, gwid);
                 sendSaveChangesSuccess(json);
-                checkSaveButton();
             },
             error: function(json){
                 console.log(json);
@@ -267,19 +264,11 @@ function sendSaveChangesRequest() {
         }
     } else {
         getStudentResults(stuid, gwid);
-        checkSaveButton();
     }
 }
 
-function checkSaveButton() {
-    var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
-    if (save_changes_array.length > 0) {
-        $("#save_button").removeClass("disabled");
-        $("#save_button").attr("onclick", "sendSaveChangesRequest()");
-    } else {
-        $("#save_button").addClass("disabled");
-        $("#save_button").attr("onclick", "");
-    }
+function setUpSaveButton() {
+    $("#save_button").attr("onclick", "sendSaveChangesRequest()");
 }
 
 function sendSaveChangesSuccess(json) {

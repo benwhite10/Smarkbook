@@ -41,7 +41,7 @@ function setsSuccess(json, firstTime){
         for(var i = 0; i < sets.length; i++){
             var set = sets[i];
             var id = set["ID"];
-            var name = set["Name"]
+            var name = set["Name"] + " (" + set["Initials"] + ")";
             if(id === setid){
                 str += "<option value=" + id + " selected>" + name + "</option>";
             } else{

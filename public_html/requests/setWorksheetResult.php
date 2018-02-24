@@ -205,7 +205,6 @@ function updateResult($change) {
     } else {
         $query = "UPDATE `TCOMPLETEDQUESTIONS` SET `Mark` = $value, `Deleted` = 0 WHERE `Completed Question ID` = $cqid;";
     }
-
     try {
         db_query_exception($query);
         return true;
@@ -218,14 +217,23 @@ function addNewResult($change, $gwid) {
     $value = $change["new_value"];
     $stuid = $change["stuid"];
     $sqid = $change["sqid"];
-    if ($value == "") {
-        $query = "INSERT INTO `TCOMPLETEDQUESTIONS`(`Stored Question ID`, `Mark`, `Student ID`, `Date Added`, `Deleted`, `Group Worksheet ID`) VALUES ($sqid,0,$stuid,NOW(),1,$gwid)";
-    } else {
-        $query = "INSERT INTO `TCOMPLETEDQUESTIONS`(`Stored Question ID`, `Mark`, `Student ID`, `Date Added`, `Deleted`, `Group Worksheet ID`) VALUES ($sqid,$value,$stuid,NOW(),0,$gwid)";
-    }
+    
+    $select_query = "SELECT `Completed Question ID` ID FROM `TCOMPLETEDQUESTIONS` "
+            . "WHERE `Stored Question ID` = $sqid "
+            . "AND `Student ID` = $stuid "
+            . "AND `Group Worksheet ID` = $gwid;";
     try {
-        $result = db_insert_query_exception($query);
-        return $result;
+        $comp_qs = db_select_exception($select_query);
+        if (count($comp_qs) > 0) {
+            $change["cqid"] = $comp_qs[0]["ID"];
+            return [updateResult($change), $comp_qs[0]["ID"]];
+        }
+        
+        $deleted = $value === "" ? 1 :0;
+        $value = $value === "" ? 0 :$value;
+        
+        $query = "INSERT INTO `TCOMPLETEDQUESTIONS`(`Stored Question ID`, `Mark`, `Student ID`, `Date Added`, `Deleted`, `Group Worksheet ID`) VALUES ($sqid,$value,$stuid,NOW(),$deleted,$gwid)";
+        return db_insert_query_exception($query);
     } catch (Exception $ex) {
         return null;
     }
