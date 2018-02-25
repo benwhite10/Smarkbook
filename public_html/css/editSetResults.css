@@ -111,6 +111,7 @@ td.form
   font-weight: normal;
   color: #323232;
   vertical-align: top;
+  user-select: none;
 }
 
 td.form > h1 {
