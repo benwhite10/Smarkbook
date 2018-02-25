@@ -47,7 +47,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     </head>
     <body>
-        <div id="quiz_title">Quiz Title</div>
+        <div id="quiz_title"></div>
         <div id="start_button" onclick="startQuiz()">Start</div>
         <div id="main_quiz">
             <div id="top_div">
@@ -73,8 +73,22 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
             </div>
         </div>
         <div id="final_score_div">
-            <div id="title">Score</div>
-            <div id="final_score"></div>
+            <div id="top_container">
+                <div class="col">
+                    <div class="col_title">Score</div>
+                    <div id="main_score" class="col_main"></div>
+                </div>
+                <div class="col">
+                    <div id="award_logo" class="award_logo"></div>
+                </div>
+                <div class="col">
+                    <div class="retry_button" onclick="replayQuiz()"></div>
+                    <div class="retry_text" onclick="replayQuiz()">Try Again</div>
+                </div>
+            </div>
+            <div id="results_container">
+                
+            </div>
         </div>
     </body>
 </html>

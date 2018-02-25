@@ -597,6 +597,7 @@ td.date_completion:hover {
     margin: 0px;
     padding: 0px;
     vertical-align: top;
+    user-select: none;
 }
 
 #summaryBoxDetails h2
@@ -616,6 +617,7 @@ td.date_completion:hover {
     margin: 0px;
     padding: 0px;
     vertical-align: top;
+    user-select: none;
 }
 
 #summaryBoxShowDetailsText

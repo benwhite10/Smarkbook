@@ -1,10 +1,10 @@
 var stored_questions = [];
 var correct_answer = 0;
 var quiz_record = [];
+var details = [];
 
 $(document).ready(function(){
-    var quiz_id = getParameterByName("qid");
-    requestQuiz(quiz_id);
+    requestQuiz(getParameterByName("qid"));
 });
 
 function startQuiz() {
@@ -12,7 +12,7 @@ function startQuiz() {
     $("#main_quiz").css("display", "block");
     quiz_record = [];
     pickNextQuestion();
-    startTimer(60);
+    startTimer();
 }
 
 function requestQuiz(quiz_id) {
@@ -36,18 +36,20 @@ function requestQuiz(quiz_id) {
 
 function quizSuccess(json) {
     if (json["success"]) {
-        parseQuizDetails(json["result"]["Details"][0]);
+        details = json["result"]["Details"][0];
         stored_questions = json["result"]["Questions"];
+        parseQuizDetails();
     } else {
         console.log(json);
     }
 }
 
-function parseQuizDetails(details) {
+function parseQuizDetails() {
     $("#quiz_title").html(details["Name"]);
 }
 
-function startTimer(time) {
+function startTimer() {
+    time = details["Time"];
     $("#timer").html(time + " s");
     var counter=setInterval(timer, 1000);
 
@@ -73,15 +75,17 @@ function clickOption(opt, val) {
 }
 
 function success() {
-    score = parseInt($("#score").html()) + 1;
+    score = parseInt($("#score").html()) + parseInt(details["ScoreUp"]);
     $("#score").html(score);
+    // Show green
     markCompleted();
     pickNextQuestion(); 
 }
 
 function failure() {
-    score = Math.max(parseInt($("#score").html()) - 1, 0);
+    score = Math.max(parseInt($("#score").html()) - parseInt(details["ScoreDown"]), 0);
     $("#score").html(score);
+    // Show red
     markCompleted();
     pickNextQuestion();
 }
@@ -96,8 +100,6 @@ function markCompleted() {
 }
 
 function pickNextQuestion() {
-    //$("#question_0").css("opacity", 0);
-    //$(".option").css("opacity", 0);
     for (var i = 0; i < stored_questions.length; i++) {
         if (parseInt(stored_questions[i]["Completed"]) === 0) {
             parseQuestion(stored_questions[i]);
@@ -139,10 +141,30 @@ function getOptionClass(opt) {
 }
 
 function finishQuiz() {
-    $("#final_score").html($("#score").html());
+    score = parseInt($("#score").html());
+    $("#main_score").html(score);
     $("#main_quiz").css("display", "none");
+    $("#award_logo").addClass(getAwardClass(score));
     $("#final_score_div").css("display", "block");
-    console.log(quiz_record);
+    //console.log(quiz_record);
+}
+
+function getAwardClass(score) {
+    if (score < parseInt(details["Pass"])) {
+        return "fail";
+    } else if (score < parseInt(details["Bronze"])) {
+        return "pass";
+    } else if (score < parseInt(details["Silver"])) {
+        return "bronze";
+    } else if (score < parseInt(details["Gold"])) {
+        return "silver";
+    } else {
+        return "gold";
+    } 
+}
+
+function replayQuiz() {
+    location.reload();
 }
 
 function shuffle(array) {

@@ -92,7 +92,7 @@ html {
 #final_score_div {
     width: 90%;
     display: none;
-    max-width: 500px;
+    max-width: 800px;
     height: 200px;
     margin: auto;
     margin-top: 20px;
@@ -192,4 +192,83 @@ html {
     font-size: 40px;
     text-align: center;
     margin: auto;
+}
+
+.col {
+    display: inline-block;
+    float: left;
+    width: 33.33333%;
+    height: 200px;
+    margin: 0;
+    padding: 0;
+}
+
+.col_title {
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    font-size: 50px;
+}
+
+.col_main {
+    width: 100%;
+    height: 140px;
+    text-align: center;
+    font-size: 120px;
+    line-height: 140px;
+}
+
+.award_logo {
+    width: 180px;
+    height: 180px;
+    margin: 10px auto;
+    background-size: cover;
+}
+
+.fail {
+    background-image: url("/images/close-button.png");
+}
+
+.pass {
+    background-image: url("/images/bold-check-button.png");
+}
+
+.bronze {
+    background-image: url("/images/bronze.png");
+}
+
+.silver {
+    background-image: url("/images/silver.png");
+}
+
+.gold {
+    background-image: url("/images/gold.png");
+}
+
+.retry_button {
+    width: 100px;
+    height: 100px;
+    margin: 20px auto;
+    background-size: cover;
+    background-image: url("/images/refresh-button.png");
+    cursor: pointer;
+}
+
+.retry_text {
+    width: 80%;
+    height: 50px;
+    line-height: 50px;
+    font-size: 30px;
+    text-align: center;
+    cursor: pointer;
+    background: #FFF;
+    border: 5px solid #1c94c4;
+    border-radius: 10px;
+    margin: auto;
+}
+
+.retry_text:hover {
+    background: #1c94c4;
+    border-color: #FFF;
+    color: #FFF;
 }
