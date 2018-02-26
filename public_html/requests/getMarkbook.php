@@ -45,7 +45,8 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
     $query1 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name FROM TUSERGROUPS G
                 JOIN TUSERS U ON G.`User ID` = U.`User ID`
                 WHERE G.`Group ID` = $setid
-                AND G.`Archived` <> 1
+                AND G.`Archived` <> 1 
+                AND U.`Role` = 'STUDENT'
                 ORDER BY U.Surname;";
     $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName,
                 DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks,
