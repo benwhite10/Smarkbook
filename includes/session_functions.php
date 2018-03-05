@@ -53,11 +53,9 @@ function checkUserLoginStatus($url){
         if(isset($timeout)){
             if($timeout + 12*60*60 < time()){
                 //Session timed out so save the users url and log them out
-                $msg = "User $userid has been timed out.";
-                infoLog($msg);
-                if(isset($url)){
+                infoLog("User $userid has been timed out.");
+                if(isset($url)) {
                     $_SESSION['url'] = $url;
-                    $_SESSION['urlid'] = $userid;
                 }
                 logout();
                 $url = "Location: ../login.php?email=$username";
@@ -65,15 +63,21 @@ function checkUserLoginStatus($url){
             }else{
                 //All good so carry on!
                 $_SESSION['timeout'] = time();
-                $url = '';
+                $url = $_SESSION['url'];
                 $bool = true;
             }
         }else{
             //No timeout information so log out
+            if(isset($url)) {
+                $_SESSION['url'] = $url;
+            }
             $url = "Location: ../login.php?email=$username";
             $bool = false;
         }
     }else{
+        if(isset($url)) {
+            $_SESSION['url'] = $url;
+        }
         //Not logged in user so go to homepage
         $url = "Location: ../login.php";
         $bool = false;

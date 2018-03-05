@@ -44,10 +44,9 @@ if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
         clearFailedLogins($userid);
         $_SESSION['timeout'] = time();
         $message = "User $userid has been successfully logged in.";
-        if(isset($_SESSION['url']) && isset($_SESSION['urlid']) && $userid == $_SESSION['urlid']){
+        if(isset($_SESSION['url'])){
             $url = $_SESSION['url'];
             unset($_SESSION['url']);
-            unset($_SESSION['urlid']);
         }else{
             $url = '../portalhome.php';
         }

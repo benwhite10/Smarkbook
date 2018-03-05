@@ -965,6 +965,7 @@ function saveGroupWorksheet() {
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
+    
     $.ajax({
         type: "POST",
         data: infoArray,

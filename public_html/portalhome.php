@@ -158,6 +158,14 @@ if($resultArray[0]){
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
                 }
+                if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
+                    $count++;
+                    echo "<div class='menuobject' id='menuobject$count' >";
+                    echo "<a href='quiz_menu.php' class='title'>Quiz</a>";
+                    echo "<input type='hidden' id='menuObjectLink$count' value='quiz_menu.php'>";
+                    echo "<input type='hidden' id='menuObjectIcon$count' value='home-quiz.png'>";
+                    echo "</div>";
+                }
                 echo "<input type='hidden' id='menuCount' value=$count />";
                 ?>
             </div>

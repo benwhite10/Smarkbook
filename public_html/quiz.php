@@ -47,8 +47,27 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     </head>
     <body>
+        <?php setUpRequestAuthorisation($userid, $userval); ?>
         <div id="quiz_title"></div>
-        <div id="start_button" onclick="startQuiz()">Start</div>
+        <div id="start_menu">
+            <div id="start_button" onclick="startQuiz()">Start Quiz</div>
+            <div id="leaderboard_container">
+                <div class="leaderboard_row leaderboard_row_header">
+                    <div class="leaderboard_row_col num">1</div>
+                    <div class="leaderboard_row_col name">Mr White</div>
+                    <div class="leaderboard_row_col score">8</div>
+                    <div class="leaderboard_row_col score_acc">4/4</div>
+                    <div class="leaderboard_row_col award">SILVER</div>
+                </div>
+                <div class="leaderboard_row bottom">
+                    <div class="leaderboard_row_col num">1</div>
+                    <div class="leaderboard_row_col name">Mr White</div>
+                    <div class="leaderboard_row_col score">8</div>
+                    <div class="leaderboard_row_col score_acc">4/4</div>
+                    <div class="leaderboard_row_col award">SILVER</div>
+                </div>
+            </div>
+        </div>
         <div id="main_quiz">
             <div id="top_div">
                 <span id="score">0</span>
@@ -75,20 +94,24 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <div id="final_score_div">
             <div id="top_container">
                 <div class="col">
-                    <div class="col_title">Score</div>
-                    <div id="main_score" class="col_main"></div>
-                </div>
-                <div class="col">
                     <div id="award_logo" class="award_logo"></div>
+                    <div id="award_title" class="award_title"></div>
                 </div>
                 <div class="col">
-                    <div class="retry_button" onclick="replayQuiz()"></div>
+                    <div class="col_table">
+                        <div class="col_table_row">
+                            <div class="col_1">Score</div>
+                            <div class="col_2" id="score_row"></div>
+                        </div>
+                        <div class="col_table_row bottom">
+                            <div class="col_1">Questions</div>
+                            <div class="col_2" id="questions_row"></div>
+                        </div>
+                    </div>
                     <div class="retry_text" onclick="replayQuiz()">Try Again</div>
                 </div>
             </div>
-            <div id="results_container">
-                
-            </div>
+            <div id="results_container"></div>
         </div>
     </body>
 </html>

@@ -8,14 +8,14 @@ html {
     width: 90%;
     max-width: 400px;
     margin: auto;
-    height: 80px;
-    line-height: 80px;
-    font-size: 50px;
+    height: 60px;
+    line-height: 60px;
+    font-size: 40px;
     cursor: pointer;
     text-align: center;
     margin-top: 20px;
     background: #FFF;
-    border: 5px solid #1c94c4;
+    border: 2px solid #1c94c4;
     border-radius: 10px;
 }
 
@@ -185,8 +185,7 @@ html {
 }
 
 #quiz_title {
-    width: 90%;
-    max-width: 800px;
+    width: 100%;
     height: 80px;
     line-height: 80px;
     font-size: 40px;
@@ -194,11 +193,81 @@ html {
     margin: auto;
 }
 
+#start_menu {
+    width: 90%;
+    max-width: 800px;
+    margin: auto;
+}
+
+#leaderboard_container {
+    width: 100%;
+    border: 2px #1C94C4 solid;
+    border-radius: 5px;
+    margin: auto;
+    font-size: 20px;
+    text-align: center;
+    display: inline-block;
+    float: left;
+    margin-top: 20px;
+}
+
+.leaderboard_row {
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    display: inline-block;
+    float: left;
+    border-bottom: 1px solid #1C94C4;
+}
+
+.leaderboard_row_header {
+    font-weight: bold;
+    border-bottom: 2px solid #1C94C4;
+}
+
+.leaderboard_row.bottom {
+    border-bottom: none;
+}
+
+.leaderboard_row_col {
+    display: inline-block;
+    float: left;
+}
+
+.leaderboard_row_col.num {
+    width: 80px;
+    border-right: 1px solid #1C94C4;
+}
+
+.leaderboard_row_col.name {
+    width: calc(100% - 424px);
+    border-right: 1px solid #1C94C4;
+}
+
+.leaderboard_row_col.score {
+    width: 100px;
+    border-right: 1px solid #1C94C4;
+}
+
+.leaderboard_row_col.score_acc {
+    width: 100px;
+    border-right: 1px solid #1C94C4;
+}
+
+.leaderboard_row_col.award {
+    width: 140px;
+}
+
+.leaderboard_row_col.score_head {
+    width: 201px;
+    border-right: 1px solid #1C94C4;
+}
+
 .col {
     display: inline-block;
     float: left;
-    width: 33.33333%;
-    height: 200px;
+    width: 50%;
+    height: 208px;
     margin: 0;
     padding: 0;
 }
@@ -219,32 +288,102 @@ html {
 }
 
 .award_logo {
-    width: 180px;
-    height: 180px;
+    width: 128px;
+    height: 128px;
     margin: 10px auto;
     background-size: cover;
 }
 
-.fail {
+.award_logo.fail {
     background-image: url("/images/close-button.png");
 }
 
-.pass {
+.award_logo.pass {
     background-image: url("/images/bold-check-button.png");
 }
 
-.bronze {
+.award_logo.bronze {
     background-image: url("/images/bronze.png");
 }
 
-.silver {
+.award_logo.silver {
     background-image: url("/images/silver.png");
 }
 
-.gold {
+.award_logo.gold {
     background-image: url("/images/gold.png");
 }
 
+.fail {
+    color: #D80027;
+}
+
+.pass {
+    color: #91DC59;
+}
+
+.bronze {
+    color: #9B7600;
+}
+
+.silver {
+    color: #D7D5D5;
+}
+
+.gold {
+    color: #EFC75E;
+}
+
+.award_title {
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    font-size: 50px;
+    margin: 0;
+}
+
+.col_table {
+    width: 90%;
+    margin: 10px 5%;
+    height: auto;
+    border: 2px solid #1c94c4;
+    border-radius: 5px;
+}
+
+.col_table_row {
+    width: 100%;
+    height: 50px;
+    border-bottom: 1px solid #1c94c4;
+    background: transparent;
+    line-height: 50px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.col_table_row.bottom {
+    border-bottom: none;
+}
+
+.col_table_row:hover {
+    background: rgba(28, 148, 196, 0.3);
+}
+
+.col_table_row > .col_1 {
+    width: calc(50% - 1px);
+    border-right: 1px solid #1c94c4;
+    display: inline-block;
+    float: left;
+    height: 50px;
+}
+
+.col_table_row > .col_1 {
+    width: 50%;
+    display: inline-block;
+    float: left;
+    height: 50px;
+}
+
+/*
 .retry_button {
     width: 100px;
     height: 100px;
@@ -252,23 +391,89 @@ html {
     background-size: cover;
     background-image: url("/images/refresh-button.png");
     cursor: pointer;
-}
+}*/
 
 .retry_text {
-    width: 80%;
+    width: 90%;
     height: 50px;
     line-height: 50px;
     font-size: 30px;
     text-align: center;
     cursor: pointer;
     background: #FFF;
-    border: 5px solid #1c94c4;
-    border-radius: 10px;
+    border: 2px solid #1c94c4;
+    border-radius: 5px;
     margin: auto;
+    margin-top: 30px;
 }
 
 .retry_text:hover {
-    background: #1c94c4;
-    border-color: #FFF;
-    color: #FFF;
+    background: rgba(28, 148, 196, 0.3);
+}
+
+#top_container {
+    width: 100%;
+    height: 100%;
+}
+
+#results_container {
+    margin: 30px 0;
+    width: 100%;
+    height: auto;
+    border: 2px solid #1c94c4;
+    border-radius: 5px;
+    display: inline-block;
+    float: left;
+    padding: 0;
+}
+
+.results_row {
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    display: inline-block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid #1c94c4;
+}
+
+.results_row_col {
+    height: 100%;
+    display: inline-block;
+    float: left;
+    text-align: center;
+    border-right: 1px solid #1c94c4;
+    background: transparent;
+}
+
+.results_row_col.q_no, .results_row_col.score {
+    width: 100px;
+    font-size: 20px;
+}
+
+.results_row_col.ques, .results_row_col.ans, .results_row_col.correct_ans {
+    width: calc(33.333% - 68px);
+    font-size: 15px;
+}
+
+.results_row_col.score {
+    border-right: none;
+}
+
+.results_row.header {
+    border-top: none;
+}
+
+.results_row.header > .results_row_col {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.results_row_col.ans.correct {
+    color: #91DC59;
+}
+
+.results_row_col.ans.incorrect {
+    color: #D80027;
 }

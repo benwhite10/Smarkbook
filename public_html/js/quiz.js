@@ -1,21 +1,26 @@
 var stored_questions = [];
 var correct_answer = 0;
-var quiz_record = [];
 var details = [];
+var q_levels = [];
+var counter;
+var quiz_id = 0;
 
 $(document).ready(function(){
-    requestQuiz(getParameterByName("qid"));
+    quiz_id = getParameterByName("qid");
+    requestQuiz();
+    requestLeaderboard();
+    startLeaderboard();
 });
 
 function startQuiz() {
-    $("#start_button").css("display", "none");
+    $("#start_menu").css("display", "none");
     $("#main_quiz").css("display", "block");
-    quiz_record = [];
+    stopLeaderboard();
     pickNextQuestion();
     startTimer();
 }
 
-function requestQuiz(quiz_id) {
+function requestQuiz() {
     var infoArray = {
         type: "GETQUIZ",
         qid: quiz_id
@@ -34,13 +39,74 @@ function requestQuiz(quiz_id) {
     });
 }
 
+function requestLeaderboard() {
+    console.log("Run");
+    var infoArray = {
+        type: "LEADERBOARD",
+        qid: quiz_id,
+        days: 1
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/quiz.php",
+        dataType: "json",
+        success: function(json){
+            leaderboardSuccess(json);
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
+}
+
+function leaderboardSuccess(json) {
+    var leaderboard_html = "";
+    if (json["success"]) {
+        var leaderboard = json["result"];
+        
+        if (leaderboard.length > 0) {
+            leaderboard_html = "<div class='leaderboard_row leaderboard_row_header'>";
+            leaderboard_html += "<div class='leaderboard_row_col num'>No.</div>";
+            leaderboard_html += "<div class='leaderboard_row_col name'>Name</div>";
+            leaderboard_html += "<div class='leaderboard_row_col score_head'>Score</div>";
+            leaderboard_html += "<div class='leaderboard_row_col award'>Award</div></div>";
+            
+            for (var i = 0; i < leaderboard.length; i++) {
+                var row = leaderboard[i];
+                var bottom = i + 1 === leaderboard.length ? "bottom" : "";
+                leaderboard_html += "<div class='leaderboard_row leaderboard_row_header " + bottom + "'>";
+                leaderboard_html += "<div class='leaderboard_row_col num'>" + (i + 1) + "</div>";
+                var name = row["Preferred Name"] === "" ? row["Title"] : row["Preferred Name"];
+                name += " " + row["Surname"];
+                leaderboard_html += "<div class='leaderboard_row_col name'>" + name + "</div>";
+                leaderboard_html += "<div class='leaderboard_row_col score'>" + row["Score"] + "</div>";
+                leaderboard_html += "<div class='leaderboard_row_col score_acc'>" + row["Correct"] + "</div>";
+                var award_text = getAward(parseInt(row["Award"]));
+                leaderboard_html += "<div class='leaderboard_row_col award " + award_text + "'>" + award_text.toUpperCase() + "</div></div>";
+            }
+        }
+
+    }
+    $("#leaderboard_container").html(leaderboard_html);
+}
+
 function quizSuccess(json) {
     if (json["success"]) {
         details = json["result"]["Details"][0];
+        setQuizLevels(details);
         stored_questions = json["result"]["Questions"];
         parseQuizDetails();
     } else {
         console.log(json);
+    }
+}
+
+function setQuizLevels(details) {
+    q_levels = [];
+    for (var i = 1; i < 5; i++) {
+        count = parseInt(details["Level" + i + "Questions"]);
+        q_levels.push(count);
     }
 }
 
@@ -51,11 +117,11 @@ function parseQuizDetails() {
 function startTimer() {
     time = details["Time"];
     $("#timer").html(time + " s");
-    var counter=setInterval(timer, 1000);
+    counter=setInterval(timer, 1000);
 
     function timer() {
         time--;
-        if (time < 0) {
+        if (time < 1) {
            clearInterval(counter);
            finishQuiz();
            return;
@@ -64,49 +130,81 @@ function startTimer() {
     }
 }
 
-function clickOption(opt, val) {
-    if (parseInt(opt) === parseInt(correct_answer)) {
-        quiz_record.push([val, true]);
-        success();
+function startLeaderboard() {
+    leaderboard_counter=setInterval(requestLeaderboard, 5000);
+}
+
+function stopLeaderboard() {
+    clearInterval(leaderboard_counter);
+}
+
+function clickOption(id, val) {
+    success = val === "A";
+    if (success) {
+        score = parseInt($("#score").html()) + parseInt(details["ScoreUp"]);
     } else {
-        quiz_record.push([val, false]);
-        failure();
+        score = Math.max(parseInt($("#score").html()) - parseInt(details["ScoreDown"]), 0);
     }
-}
-
-function success() {
-    score = parseInt($("#score").html()) + parseInt(details["ScoreUp"]);
+    addQuizRecord(id, val, success, score);
     $("#score").html(score);
-    // Show green
-    markCompleted();
-    pickNextQuestion(); 
-}
-
-function failure() {
-    score = Math.max(parseInt($("#score").html()) - parseInt(details["ScoreDown"]), 0);
-    $("#score").html(score);
-    // Show red
-    markCompleted();
     pickNextQuestion();
 }
 
-function markCompleted() {
+function addQuizRecord(id, val, success, score) {
+    if (success) updateQuizLevels();
     for (var i = 0; i < stored_questions.length; i++) {
-        if (parseInt(stored_questions[i]["Completed"]) === 0) {
+        if (parseInt(stored_questions[i]["ID"]) === parseInt(id)) {
             stored_questions[i]["Completed"] = 1;
+            stored_questions[i]["Ans"] = val;
+            stored_questions[i]["Score"] = score;
             return;
         }
     }
 }
 
 function pickNextQuestion() {
-    for (var i = 0; i < stored_questions.length; i++) {
-        if (parseInt(stored_questions[i]["Completed"]) === 0) {
-            parseQuestion(stored_questions[i]);
+    level = getNextLevel();
+    for (var j = 0; j < 5; j++) {
+        for (var i = 0; i < stored_questions.length; i++) {
+            if (parseInt(stored_questions[i]["Completed"]) === 0 && parseInt(stored_questions[i]["Level"]) === level) {
+                parseQuestion(stored_questions[i]);
+                return;
+            }
+        }
+        forceUpdateLevels();
+        if (level === getNextLevel()) {
+            finishQuiz();
+        } else {
+            level = getNextLevel();
+        }
+    }
+    
+}
+
+function getNextLevel() {
+    for (var i = 0; i < q_levels.length; i++) {
+        if (q_levels[i] !== 0) {
+            return i + 1;
+        }
+    }
+}
+
+function updateQuizLevels() {
+    for (var i = 0; i < q_levels.length; i++) {
+        if (q_levels[i] > 0) {
+            q_levels[i] = q_levels[i] - 1;
             return;
         }
     }
-    finishQuiz();
+}
+
+function forceUpdateLevels() {
+    for (var i = 0; i < q_levels.length; i++) {
+        if (q_levels[i] > 0) {
+            q_levels[i] = 0;
+            return;
+        }
+    }
 }
 
 function parseQuestion(question) {
@@ -117,7 +215,7 @@ function parseQuestion(question) {
         //$("#option_0_" + i).html(question[array[i]]);
         options_html += "<div>";
         options_html += "<span id='option_0_" + i + "'  class='option " + getOptionClass(i) + "' ";
-        options_html += "onclick='clickOption(" + i + ",\"" + array[i] + "\")' >";
+        options_html += "onclick='clickOption(" + question["ID"] + ",\"" + array[i] + "\")' >";
         options_html += question[array[i]] + "</span></div>";
         if (array[i] === "A") correct_answer = i;
     }
@@ -141,12 +239,107 @@ function getOptionClass(opt) {
 }
 
 function finishQuiz() {
-    score = parseInt($("#score").html());
-    $("#main_score").html(score);
+    clearInterval(counter);
+    var score = parseInt($("#score").html());
+    var award = getAwardClass(score);
+    var details = storeQuizAttempt(award);
+    var correct = parseInt(details["Correct"]);
+    var total = correct + parseInt(details["Incorrect"])
+    $("#score_row").html(score);
+    $("#questions_row").html(correct + "/" + total);
     $("#main_quiz").css("display", "none");
-    $("#award_logo").addClass(getAwardClass(score));
+    $("#award_logo").addClass(award);
+    $("#award_title").addClass(award);
+    $("#award_title").html(award.toUpperCase());
+    parseQuizRecord();
     $("#final_score_div").css("display", "block");
-    //console.log(quiz_record);
+}
+
+function parseQuizRecord() {
+    var html_text = "<div class='results_row header'>";
+    html_text += "<div class='results_row_col q_no'>No.</div>";
+    html_text += "<div class='results_row_col ques'>Question</div>";
+    html_text += "<div class='results_row_col ans'>Your Answer</div>";
+    html_text += "<div class='results_row_col correct_ans'>Correct Answer</div>";
+    html_text += "<div class='results_row_col score'>Score</div></div>";
+    var num = 1;
+    for (var i = 0 ; i < stored_questions.length; i++) {
+        if (stored_questions[i]["Completed"] === 1) {
+            var stored_question = stored_questions[i];
+            var ans = stored_question["Ans"];
+            html_text += "<div class='results_row'>";
+            html_text += "<div class='results_row_col q_no'>" + num + "</div>";
+            html_text += "<div class='results_row_col ques'>" + stored_question["Question"] + "</div>";
+            if (ans === "A") {
+                html_text += "<div class='results_row_col ans correct'>" + stored_question[ans] + "</div>";
+                html_text += "<div class='results_row_col correct_ans'></div>";
+            } else {
+                html_text += "<div class='results_row_col ans incorrect'>" + stored_question[ans] + "</div>";
+                html_text += "<div class='results_row_col correct_ans'>" + stored_question["A"] + "</div>";
+            }
+            html_text += "<div class='results_row_col score'>" + stored_question["Score"] + "</div></div>";
+            num++;
+        }
+    }
+    $("#results_container").html(html_text);
+    MathJax.Hub.Queue(
+        ["Typeset",MathJax.Hub]
+    );
+}
+
+function storeQuizAttempt(award) {
+    var completed_questions = [];
+    var score = 0;
+    var correct = 0;
+    var incorrect = 0;
+    for (var i = 0 ; i < stored_questions.length; i++) {
+        if (stored_questions[i]["Completed"] === 1) {
+            var stored_question = stored_questions[i];
+            var ans = stored_question["Ans"];
+            var question_info = {
+                "QuestionID": stored_question["ID"],
+                "Ans": ans
+            };
+            if (ans === "A") {
+                correct++;
+            } else {
+                incorrect++;
+            }
+            score = stored_question["Score"];
+            completed_questions.push(question_info);
+        }
+    }
+    result = {
+        "Score": score,
+        "Award": award,
+        "Correct": correct,
+        "Incorrect": incorrect,
+        "Questions": completed_questions
+    };
+    sendCompletedQuiz(result);
+    return result;
+}
+
+function sendCompletedQuiz(result) {
+    var infoArray = {
+        userid: $("#userid").val(),
+        type: "STOREQUIZ",
+        qid: details["ID"],
+        result: JSON.stringify(result)
+    };
+    console.log(infoArray);
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/quiz.php",
+        dataType: "json",
+        success: function(json){
+            
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
 }
 
 function getAwardClass(score) {
@@ -161,6 +354,22 @@ function getAwardClass(score) {
     } else {
         return "gold";
     } 
+}
+
+function getAward(level) {
+    switch(level) {
+        default:
+        case 0:
+           return "fail";
+        case 1:
+           return "pass";
+        case 2:
+            return "bronze";
+        case 3:
+            return "silver";
+        case 4:
+            return "gold";
+    }
 }
 
 function replayQuiz() {
