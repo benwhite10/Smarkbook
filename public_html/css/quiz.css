@@ -209,6 +209,7 @@ html {
     display: inline-block;
     float: left;
     margin-top: 20px;
+    margin-bottom: 40px;
 }
 
 .leaderboard_row {

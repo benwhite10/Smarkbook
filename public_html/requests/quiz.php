@@ -107,7 +107,7 @@ function getAwardCode($award) {
 }
 
 function getLeaderBoard($quiz_id, $days) {
-    $leader_query = "SELECT U.`Title`, U.`First Name`, U.`Preferred Name`, U.`Surname`, U.`Role`, D.`Score`, CONCAT(D.`Correct`,'/',D.`Correct`+D.`Incorrect`) Correct, D.`Award`, D.`DateCompleted` FROM (
+    $leader_query = "SELECT U.`Title`, U.`First Name`, U.`Preferred Name`, U.`Surname`, U.`Role`, D.`Score`, CONCAT(D.`Correct`,'/',D.`Correct`+D.`Incorrect`) Correct, D.`Award`, D.`DateCompleted`, D.`Acc` Acc FROM (
                     SELECT *, `Correct`/(`Correct` + `Incorrect`) Acc FROM (
                     SELECT CQ.*
                     FROM `TCOMPLETEDQUIZZES` CQ
@@ -126,11 +126,14 @@ function getLeaderBoard($quiz_id, $days) {
     }
     $leader_query .= ")C ORDER BY C.`Score` DESC, `Acc` DESC) D 
                     JOIN `TUSERS` U ON D.`UserID` = U.`User ID` 
-                    GROUP BY D.`UserID`;";
+                    GROUP BY D.`UserID` 
+                    ORDER BY D.`Score` DESC, D.`Acc` DESC ;";
     
     try {
         $board = db_select_exception($leader_query);
-        succeedRequest($board);
+        succeedRequest(array(
+            "Board" => $board,
+            "Query" => $leader_query));
     } catch (Exception $ex) {
         failRequest("Failed to get leaderboard: " . $ex->getMessage());
     }        

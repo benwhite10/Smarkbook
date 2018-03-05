@@ -9,7 +9,7 @@ $(document).ready(function(){
     quiz_id = getParameterByName("qid");
     requestQuiz();
     requestLeaderboard();
-    startLeaderboard();
+    //startLeaderboard();
 });
 
 function startQuiz() {
@@ -40,7 +40,6 @@ function requestQuiz() {
 }
 
 function requestLeaderboard() {
-    console.log("Run");
     var infoArray = {
         type: "LEADERBOARD",
         qid: quiz_id,
@@ -62,21 +61,32 @@ function requestLeaderboard() {
 
 function leaderboardSuccess(json) {
     var leaderboard_html = "";
+    var max = 10;
+    var cur_score = [];
     if (json["success"]) {
-        var leaderboard = json["result"];
-        
+        var leaderboard = json["result"]["Board"];
         if (leaderboard.length > 0) {
             leaderboard_html = "<div class='leaderboard_row leaderboard_row_header'>";
             leaderboard_html += "<div class='leaderboard_row_col num'>No.</div>";
             leaderboard_html += "<div class='leaderboard_row_col name'>Name</div>";
             leaderboard_html += "<div class='leaderboard_row_col score_head'>Score</div>";
             leaderboard_html += "<div class='leaderboard_row_col award'>Award</div></div>";
-            
+            var cur_score;
+            var num = 1;
+            var bottom = "";
+            max = Math.min(max, leaderboard.length);
             for (var i = 0; i < leaderboard.length; i++) {
                 var row = leaderboard[i];
-                var bottom = i + 1 === leaderboard.length ? "bottom" : "";
+                if (row["Score"] !== cur_score[0] || row["Acc"] !== cur_score[1]) {
+                    num = i + 1;
+                    cur_score[0] = row["Score"];
+                    cur_score[1] = row["Acc"];
+                    if (i + 1 >= max) {
+                        bottom = "bottom";
+                    }
+                }
                 leaderboard_html += "<div class='leaderboard_row leaderboard_row_header " + bottom + "'>";
-                leaderboard_html += "<div class='leaderboard_row_col num'>" + (i + 1) + "</div>";
+                leaderboard_html += "<div class='leaderboard_row_col num'>" + num + "</div>";
                 var name = "";
                 if(row["Role"] !== "STUDENT") {
                     name = row["Title"] + " " + row["Surname"];
@@ -88,6 +98,7 @@ function leaderboardSuccess(json) {
                 leaderboard_html += "<div class='leaderboard_row_col score_acc'>" + row["Correct"] + "</div>";
                 var award_text = getAward(parseInt(row["Award"]));
                 leaderboard_html += "<div class='leaderboard_row_col award " + award_text + "'>" + award_text.toUpperCase() + "</div></div>";
+                if (bottom === "bottom") break;
             }
         }
 
@@ -332,7 +343,6 @@ function sendCompletedQuiz(result) {
         qid: details["ID"],
         result: JSON.stringify(result)
     };
-    console.log(infoArray);
     $.ajax({
         type: "POST",
         data: infoArray,
