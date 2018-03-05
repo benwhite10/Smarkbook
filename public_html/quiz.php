@@ -51,22 +51,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <div id="quiz_title"></div>
         <div id="start_menu">
             <div id="start_button" onclick="startQuiz()">Start Quiz</div>
-            <div id="leaderboard_container">
-                <div class="leaderboard_row leaderboard_row_header">
-                    <div class="leaderboard_row_col num">1</div>
-                    <div class="leaderboard_row_col name">Mr White</div>
-                    <div class="leaderboard_row_col score">8</div>
-                    <div class="leaderboard_row_col score_acc">4/4</div>
-                    <div class="leaderboard_row_col award">SILVER</div>
-                </div>
-                <div class="leaderboard_row bottom">
-                    <div class="leaderboard_row_col num">1</div>
-                    <div class="leaderboard_row_col name">Mr White</div>
-                    <div class="leaderboard_row_col score">8</div>
-                    <div class="leaderboard_row_col score_acc">4/4</div>
-                    <div class="leaderboard_row_col award">SILVER</div>
-                </div>
-            </div>
+            <div id="leaderboard_container"></div>
         </div>
         <div id="main_quiz">
             <div id="top_div">

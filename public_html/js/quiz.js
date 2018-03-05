@@ -77,8 +77,12 @@ function leaderboardSuccess(json) {
                 var bottom = i + 1 === leaderboard.length ? "bottom" : "";
                 leaderboard_html += "<div class='leaderboard_row leaderboard_row_header " + bottom + "'>";
                 leaderboard_html += "<div class='leaderboard_row_col num'>" + (i + 1) + "</div>";
-                var name = row["Preferred Name"] === "" ? row["Title"] : row["Preferred Name"];
-                name += " " + row["Surname"];
+                var name = "";
+                if(row["Role"] !== "STUDENT") {
+                    name = row["Title"] + " " + row["Surname"];
+                } else {
+                    name = row["Preferred Name"] + " " + row["Surname"];
+                }
                 leaderboard_html += "<div class='leaderboard_row_col name'>" + name + "</div>";
                 leaderboard_html += "<div class='leaderboard_row_col score'>" + row["Score"] + "</div>";
                 leaderboard_html += "<div class='leaderboard_row_col score_acc'>" + row["Correct"] + "</div>";
@@ -174,6 +178,7 @@ function pickNextQuestion() {
         forceUpdateLevels();
         if (level === getNextLevel()) {
             finishQuiz();
+            break;
         } else {
             level = getNextLevel();
         }
