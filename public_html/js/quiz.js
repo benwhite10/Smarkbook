@@ -9,7 +9,7 @@ $(document).ready(function(){
     quiz_id = getParameterByName("qid");
     requestQuiz();
     requestLeaderboard();
-    //startLeaderboard();
+    startLeaderboard();
 });
 
 function startQuiz() {
@@ -150,7 +150,9 @@ function startLeaderboard() {
 }
 
 function stopLeaderboard() {
-    clearInterval(leaderboard_counter);
+    if(leaderboard_counter) {
+        clearInterval(leaderboard_counter);
+    }
 }
 
 function clickOption(id, val) {
