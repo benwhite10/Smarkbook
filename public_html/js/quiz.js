@@ -1,5 +1,5 @@
 var stored_questions = [];
-var correct_answer = 0;
+var correct_answer = [];
 var details = [];
 var q_levels = [];
 var counter;
@@ -156,25 +156,27 @@ function stopLeaderboard() {
 }
 
 function clickOption(id, val) {
-    success = val === "A";
-    if (success) {
-        score = parseInt($("#score").html()) + parseInt(details["ScoreUp"]);
-    } else {
-        score = Math.max(parseInt($("#score").html()) - parseInt(details["ScoreDown"]), 0);
-    }
-    addQuizRecord(id, val, success, score);
-    $("#score").html(score);
+    $("#score").html(addQuizRecord(id, val));
     pickNextQuestion();
 }
 
-function addQuizRecord(id, val, success, score) {
+
+function addQuizRecord(id, val) {
+    var success = correct_answer[val] === "A";
     if (success) updateQuizLevels();
+    var score = 0;
     for (var i = 0; i < stored_questions.length; i++) {
+        if (parseInt(stored_questions[i]["Completed"]) === 1) score = parseInt(stored_questions[i]["Score"]);
         if (parseInt(stored_questions[i]["ID"]) === parseInt(id)) {
+            if (success) {
+                score += parseInt(details["ScoreUp"]);
+            } else {
+                score = Math.max(score - parseInt(details["ScoreDown"]), 0);
+            }
             stored_questions[i]["Completed"] = 1;
-            stored_questions[i]["Ans"] = val;
+            stored_questions[i]["Ans"] = correct_answer[val];
             stored_questions[i]["Score"] = score;
-            return;
+            return score;
         }
     }
 }
@@ -227,15 +229,13 @@ function forceUpdateLevels() {
 
 function parseQuestion(question) {
     $("#question_0").html(question["Question"]);
-    var array = shuffle(["A","B","C","D"]);
+    correct_answer = shuffle(["A","B","C","D"]);
     var options_html = "";
-    for (var i = 0; i < array.length; i++) {
-        //$("#option_0_" + i).html(question[array[i]]);
+    for (var i = 0; i < correct_answer.length; i++) {
         options_html += "<div>";
         options_html += "<span id='option_0_" + i + "'  class='option " + getOptionClass(i) + "' ";
-        options_html += "onclick='clickOption(" + question["ID"] + ",\"" + array[i] + "\")' >";
-        options_html += question[array[i]] + "</span></div>";
-        if (array[i] === "A") correct_answer = i;
+        options_html += "onclick='clickOption(" + question["ID"] + "," + i + ")' >";
+        options_html += question[correct_answer[i]] + "</span></div>";
     }
     $("#options_div_0").html(options_html);
     MathJax.Hub.Queue(
@@ -257,13 +257,12 @@ function getOptionClass(opt) {
 }
 
 function finishQuiz() {
-    clearInterval(counter);
-    var score = parseInt($("#score").html());
-    var award = getAwardClass(score);
-    var details = storeQuizAttempt(award);
+    if (counter) clearInterval(counter);
+    var details = storeQuizAttempt();
+    var award = details["Award"];
     var correct = parseInt(details["Correct"]);
-    var total = correct + parseInt(details["Incorrect"])
-    $("#score_row").html(score);
+    var total = correct + parseInt(details["Incorrect"]);
+    $("#score_row").html(details["Score"]);
     $("#questions_row").html(correct + "/" + total);
     $("#main_quiz").css("display", "none");
     $("#award_logo").addClass(award);
@@ -305,7 +304,7 @@ function parseQuizRecord() {
     );
 }
 
-function storeQuizAttempt(award) {
+function storeQuizAttempt() {
     var completed_questions = [];
     var score = 0;
     var correct = 0;
@@ -327,6 +326,7 @@ function storeQuizAttempt(award) {
             completed_questions.push(question_info);
         }
     }
+    var award = getAwardClass(score);
     result = {
         "Score": score,
         "Award": award,
