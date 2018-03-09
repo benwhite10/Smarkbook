@@ -213,8 +213,6 @@ function updateStudents(){
     if (!student_report_view) {
         disableGenerateReportButton();
         var infoArray = {
-            orderby: "SName",
-            desc: "FALSE",
             type: "STUDENTSBYSET",
             set: $('#set').val(),
             userid: $('#userid').val(),

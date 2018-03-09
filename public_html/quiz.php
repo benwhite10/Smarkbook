@@ -51,7 +51,15 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <div id="quiz_title"></div>
         <div id="start_menu">
             <div id="start_button" onclick="startQuiz()">Start Quiz</div>
-            <div id="leaderboard_container"></div>
+            <div id="leaderboard_container">
+                <div id="leaderboard_title">Leaderboard</div>
+                <div id="leaderboard_buttons">
+                    <div id="today_button" class="leaderboard_button selected" onclick="clickLeaderboardButton(0)">Today</div>
+                    <div id="week_button" class="leaderboard_button" onclick="clickLeaderboardButton(1)">This Week</div>
+                    <div id="all_button" class="leaderboard_button last" onclick="clickLeaderboardButton(2)">All Time</div>
+                </div>
+                <div id="leaderboard_main"></div>
+            </div>
         </div>
         <div id="main_quiz">
             <div id="top_div">

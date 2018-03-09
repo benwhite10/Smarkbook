@@ -4,6 +4,7 @@ var details = [];
 var q_levels = [];
 var counter;
 var quiz_id = 0;
+var time = "day";
 
 $(document).ready(function(){
     quiz_id = getParameterByName("qid");
@@ -43,7 +44,7 @@ function requestLeaderboard() {
     var infoArray = {
         type: "LEADERBOARD",
         qid: quiz_id,
-        days: 1
+        time: time
     };
     $.ajax({
         type: "POST",
@@ -61,8 +62,6 @@ function requestLeaderboard() {
 
 function leaderboardSuccess(json) {
     var leaderboard_html = "";
-    var max = 10;
-    var cur_score = [];
     if (json["success"]) {
         var leaderboard = json["result"]["Board"];
         if (leaderboard.length > 0) {
@@ -71,22 +70,11 @@ function leaderboardSuccess(json) {
             leaderboard_html += "<div class='leaderboard_row_col name'>Name</div>";
             leaderboard_html += "<div class='leaderboard_row_col score_head'>Score</div>";
             leaderboard_html += "<div class='leaderboard_row_col award'>Award</div></div>";
-            var cur_score;
-            var num = 1;
-            var bottom = "";
-            max = Math.min(max, leaderboard.length);
             for (var i = 0; i < leaderboard.length; i++) {
                 var row = leaderboard[i];
-                if (row["Score"] !== cur_score[0] || row["Acc"] !== cur_score[1]) {
-                    num = i + 1;
-                    cur_score[0] = row["Score"];
-                    cur_score[1] = row["Acc"];
-                    if (i + 1 >= max) {
-                        bottom = "bottom";
-                    }
-                }
-                leaderboard_html += "<div class='leaderboard_row leaderboard_row_header " + bottom + "'>";
-                leaderboard_html += "<div class='leaderboard_row_col num'>" + num + "</div>";
+                leaderboard_html += "<div class='leaderboard_row ";
+                leaderboard_html += i+1 === leaderboard.length ? "bottom'>" : "'>";
+                leaderboard_html += "<div class='leaderboard_row_col num'>" + row["Num"] + "</div>";
                 var name = "";
                 if(row["Role"] !== "STUDENT") {
                     name = row["Title"] + " " + row["Surname"];
@@ -98,12 +86,13 @@ function leaderboardSuccess(json) {
                 leaderboard_html += "<div class='leaderboard_row_col score_acc'>" + row["Correct"] + "</div>";
                 var award_text = getAward(parseInt(row["Award"]));
                 leaderboard_html += "<div class='leaderboard_row_col award " + award_text + "'>" + award_text.toUpperCase() + "</div></div>";
-                if (bottom === "bottom") break;
             }
+        } else {
+            leaderboard_html = "<div class='leaderboard_row_no'>No Results</div>";
         }
 
     }
-    $("#leaderboard_container").html(leaderboard_html);
+    $("#leaderboard_main").html(leaderboard_html);
 }
 
 function quizSuccess(json) {
@@ -391,6 +380,27 @@ function getAward(level) {
 
 function replayQuiz() {
     location.reload();
+}
+
+function clickLeaderboardButton(val) {
+    $("#today_button").removeClass("selected");
+    $("#week_button").removeClass("selected");
+    $("#all_button").removeClass("selected");
+    switch (val) {
+        case 0:
+            $("#today_button").addClass("selected");
+            time = "day";
+            break;
+        case 1: 
+            $("#week_button").addClass("selected");
+            time = "week";
+            break;
+        case 2:
+            $("#all_button").addClass("selected");
+            time = "all";
+            break;
+    }
+    requestLeaderboard();
 }
 
 function shuffle(array) {

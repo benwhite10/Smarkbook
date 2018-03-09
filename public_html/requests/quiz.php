@@ -6,7 +6,7 @@ include_once $include_path . '/includes/db_functions.php';
 $result = json_decode($_POST['result'], TRUE);
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $quiz_id = filter_input(INPUT_POST,'qid',FILTER_SANITIZE_NUMBER_INT);
-$days = filter_input(INPUT_POST,'days',FILTER_SANITIZE_NUMBER_INT);
+$time = filter_input(INPUT_POST,'time',FILTER_SANITIZE_STRING);
 $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 
 switch ($request_type){
@@ -20,7 +20,7 @@ switch ($request_type){
         storeQuiz($user_id, $quiz_id, $result);
         break;
     case "LEADERBOARD":
-        getLeaderBoard($quiz_id, $days);
+        getLeaderBoard($quiz_id, $time);
         break;
     default:
         break;
@@ -106,37 +106,67 @@ function getAwardCode($award) {
     }
 }
 
-function getLeaderBoard($quiz_id, $days) {
-    $leader_query = "SELECT U.`Title`, U.`First Name`, U.`Preferred Name`, U.`Surname`, U.`Role`, D.`Score`, CONCAT(D.`Correct`,'/',D.`Correct`+D.`Incorrect`) Correct, D.`Award`, D.`DateCompleted`, D.`Acc` Acc FROM (
-                    SELECT *, `Correct`/(`Correct` + `Incorrect`) Acc FROM (
-                    SELECT CQ.*
-                    FROM `TCOMPLETEDQUIZZES` CQ
-                    INNER JOIN (
-                        SELECT `UserID`, MAX(`Score`) Score
-                        FROM `TCOMPLETEDQUIZZES`
-                        WHERE `QuizID` = $quiz_id ";
-    if ($days > 0) {
-        $leader_query .= "AND `DateCompleted` >= NOW() - INTERVAL $days DAY ";
+function getLeaderBoard($quiz_id, $time) {
+    $max = 10;
+    $time_text = "";
+    $all = false;
+    switch ($time) {
+        case "day":
+            $time_text = "DATE_FORMAT(`DateCompleted`, '%Y-%m-%d') = CURDATE()";
+            break;
+        case "week":
+            $time_text = "DATE_FORMAT(`DateCompleted`, '%u') = DATE_FORMAT(NOW(), '%u')";
+            break;
+        default:
+        case "all":
+            $all = true;
+            break;
     }
-    
-    $leader_query .= "GROUP BY `UserID`
-                    ) B ON CQ.`UserID` = B.`UserID` AND CQ.`Score` = B.`Score` ";
-    if ($days > 0) {
-        $leader_query .= "WHERE `DateCompleted` >= NOW() - INTERVAL $days DAY ";
+    $results_query = "SELECT U.`User ID`, U.`Title`, U.`First Name`, U.`Preferred Name`, U.`Surname`, U.`Role`, `Score`, 
+                        CONCAT(`Correct`,'/',`Correct`+`Incorrect`) Correct, `Award`, `DateCompleted`, `Correct`/(`Correct` + `Incorrect`) Acc FROM (
+                            SELECT CQ.*
+                            FROM `TCOMPLETEDQUIZZES` CQ
+                        INNER JOIN (
+                            SELECT `UserID`, MAX(`Score`) Score
+                            FROM `TCOMPLETEDQUIZZES`
+                            WHERE `QuizID` = $quiz_id ";
+    if (!$all) {
+        $results_query .= "AND " . $time_text;
     }
-    $leader_query .= ")C ORDER BY C.`Score` DESC, `Acc` DESC) D 
-                    JOIN `TUSERS` U ON D.`UserID` = U.`User ID` 
-                    GROUP BY D.`UserID` 
-                    ORDER BY D.`Score` DESC, D.`Acc` DESC ;";
-    
+                                
+    $results_query .=  " AND `Award` > 0
+                            GROUP BY `UserID`
+                        ) B ON CQ.`UserID` = B.`UserID` AND CQ.`Score` = B.`Score` ";
+    if (!$all) {
+        $results_query .= "WHERE " . $time_text;
+    }
+    $results_query .= " ) C
+                        JOIN `TUSERS` U ON C.`UserID` = U.`User ID` 
+                    ORDER BY C.`Score` DESC, `Acc` DESC";
     try {
-        $board = db_select_exception($leader_query);
-        succeedRequest(array(
-            "Board" => $board,
-            "Query" => $leader_query));
+        $final_leaderboard = array();
+        $score = -1;
+        $cur_user = -1;
+        $results = db_select_exception($results_query);
+        for($i = 0; $i < count($results); $i++) {
+            $result = $results[$i];
+            if($result["User ID"] !== $cur_user) {
+                if($result["Score"] . "-" . $result["Acc"] !== $score) {
+                    $num = $i + 1;
+                    if (count($final_leaderboard) >= $max) {
+                        break;
+                    }
+                }
+                $result["Num"] = $num;
+                array_push($final_leaderboard, $result);
+                $cur_user = $result["User ID"];
+                $score = $result["Score"] . "-" . $result["Acc"];
+            } 
+        }
+        succeedRequest(array("Board" => $final_leaderboard));
     } catch (Exception $ex) {
         failRequest("Failed to get leaderboard: " . $ex->getMessage());
-    }        
+    }
 }
 
 function succeedRequest($result){
