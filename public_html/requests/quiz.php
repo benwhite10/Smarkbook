@@ -27,6 +27,7 @@ switch ($request_type){
 }
 
 function getQuiz($quiz_id) {
+    sleep(2);
     $details_query = "SELECT * FROM `TQUIZ` WHERE `ID` = $quiz_id";
     try {
         $details = db_select_exception($details_query);
@@ -152,7 +153,7 @@ function getLeaderBoard($quiz_id, $time) {
             $result = $results[$i];
             if($result["User ID"] !== $cur_user) {
                 if($result["Score"] . "-" . $result["Acc"] !== $score) {
-                    $num = $i + 1;
+                    $num = count($final_leaderboard) + 1;
                     if (count($final_leaderboard) >= $max) {
                         break;
                     }
@@ -163,7 +164,9 @@ function getLeaderBoard($quiz_id, $time) {
                 $score = $result["Score"] . "-" . $result["Acc"];
             } 
         }
-        succeedRequest(array("Board" => $final_leaderboard));
+        succeedRequest(array(
+            "Board" => $final_leaderboard,
+            "Time" => $time));
     } catch (Exception $ex) {
         failRequest("Failed to get leaderboard: " . $ex->getMessage());
     }

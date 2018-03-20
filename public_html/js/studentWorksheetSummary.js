@@ -53,10 +53,229 @@ function getStudentResultsSuccess(json) {
             sessionStorage.setItem("comp_worksheet", "[]");
         }
         $("#total_marks").html("<b>" + marks + "</b>");
+        createStudentChart(json["result"]["Summary"]);
     } else {
         console.log("Error");
         console.log(json);
     }
+}
+
+function createStudentChart(summary_array) {
+    //var labels = [""];
+    var datasets = [];
+    var labels = [];
+    /*for (var i = 0; i < worksheets.length; i++) {
+        labels.push(worksheets[i]["WName"]);
+    }
+    labels.push("");*/
+
+    // Student
+    var stu_total = 0;
+    var set_total = 0;
+    var all_total = 0;
+    var total_marks = 0;
+    var stu_data = [];
+    var set_data = [];
+    var all_data = [];
+    for (var i = 0; i < summary_array.length; i++) {
+        var stu_mark = parseFloat(summary_array[i]["StudentMark"]);
+        var set_mark = parseFloat(summary_array[i]["SetMark"]);
+        var all_mark = parseFloat(summary_array[i]["TotalMark"]);
+        var marks = parseFloat(summary_array[i]["Marks"]);
+        stu_total += stu_mark;
+        set_total += set_mark;
+        all_total += all_mark;
+        total_marks += marks;
+        stu_data.push(stu_mark/marks);
+        set_data.push(set_mark/marks);
+        all_data.push(all_mark/marks);
+        //labels.push(summary_array[i]["Number"]);
+        var tags = summary_array[i]["Tags"];
+        var tags_string = "";
+        for (var j = 0; j < tags.length; j++) {
+            tags_string += tags[j];
+            if (j < tags.length - 1) {
+                tags_string += ", ";
+            }
+        }
+        labels.push(summary_array[i]["Number"]);
+    }
+    stu_data.push(stu_total/total_marks);
+    set_data.push(set_total/total_marks);
+    all_data.push(all_total/total_marks);
+    labels.push("Total");
+    datasets.push({
+        label: "Student",
+        data: stu_data,
+        borderColor: "rgba(255,0,0,1)",
+        borderWidth: 2,
+        fill: false,
+        lineTension: 0,
+        spanGaps: false
+    });
+    datasets.push({
+        label: "Set",
+        data: set_data,
+        borderColor: "rgba(0,0,0,1)",
+        borderDash: [10,5],
+        borderWidth: 2,
+        fill: false,
+        lineTension: 0,
+        spanGaps: false
+    });
+    datasets.push({
+        label: "All",
+        data: all_data,
+        borderColor: "rgba(0,0,0,0.5)",
+        borderDash: [10,5],
+        borderWidth: 2,
+        fill: false,
+        lineTension: 0,
+        spanGaps: false
+    });
+
+    var max_perc = 0;
+    var min_perc = 1;
+
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        steps: 10,
+                        max: 1,
+                        min: 0,
+                        callback: function(tick) {
+                            return (Math.round(tick * 100, 0)) + "%";
+                        }
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        autoSkip: false
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    title: function(tooltipItem, data) {
+                        return data['labels'][tooltipItem[0]['index']];
+                    },
+                    label: function(tooltipItem, data) {
+                        var perc_val = Math.round(tooltipItem.yLabel * 100,0);
+                        return perc_val + "%";
+                    }/*
+                    afterLabel: function(tooltipItem, data) {
+                        let value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        return value;
+                    }*/
+                }
+            },
+            animation: {
+                duration: 0, // general animation time
+            },
+            hover: {
+                animationDuration: 0, // duration of animations when hovering an item
+            },
+            responsiveAnimationDuration: 0
+        }
+    });
+
+    /*
+    for (var j = 0; j < summary_array.length; j++) {
+        var chart_data = [null];
+        var set_name = "";
+        var border_colour = "";
+        var border_width = "";
+        var border_dash = "";
+        var group_id = summary_array[j]["Details"] === "Total" ? "average" : summary_array[j]["Details"]["Group ID"];
+        if (!$("#set_" + group_id).hasClass("selected")) continue;
+
+        if (summary_array[j]["Details"] === "Total") {
+            set_name = "Average";
+            border_colour = getColour(0,true);
+            border_width = 3;
+            border_dash = [10,5];
+        } else {
+            set_name = summary_array[j]["Details"]["Name"] + " - " + summary_array[j]["Details"]["Staff Initials"];
+            border_colour = getColour(j,false);
+            border_width = 2;
+            border_dash = [10,0];
+        }
+
+        for (var i = 0; i < worksheets.length; i++) {
+            var cwid = worksheets[i]["ID"];
+            if (summary_array[j][cwid]) {
+                if (summary_array[j][cwid]["Percentage"] !== "") {
+                    var perc = summary_array[j][cwid]["Percentage"];
+                    chart_data.push(perc);
+                    min_perc = Math.min(min_perc, perc);
+                    max_perc = Math.max(max_perc, perc);
+                } else {
+                    chart_data.push(null);
+                }
+            } else {
+                chart_data.push(null);
+            }
+        }
+        chart_data.push(null);
+
+    }
+
+    min_perc = Math.max(Math.floor(10*(min_perc - 0.05))/10, 0);
+    max_perc = Math.min(Math.ceil(10*(max_perc + 0.05))/10, 1);
+
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        steps: 10,
+                        max: max_perc,
+                        min: min_perc,
+                        callback: function(tick) {
+                            return (Math.round(tick * 100, 0)) + "%";
+                        }
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        autoSkip: false
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || 'Other';
+                        var perc_val = Math.round(tooltipItem.yLabel * 100,0);
+                        return datasetLabel + ": " + perc_val + "%";
+                    }
+                }
+            },
+            animation: {
+                duration: 0, // general animation time
+            },
+            hover: {
+                animationDuration: 0, // duration of animations when hovering an item
+            },
+            responsiveAnimationDuration: 0
+        }
+    });*/
 }
 
 function getWorksheetDetails(gwid) {

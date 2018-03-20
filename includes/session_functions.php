@@ -4,7 +4,7 @@ include_once $include_path . '/public_html/includes/errorReporting.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 
 function sec_session_start(){
-    
+
     $session_name = 'sec_session_id';
     $secure = false;
     // This stops Javascript being able to access the session id
@@ -63,7 +63,7 @@ function checkUserLoginStatus($url){
             }else{
                 //All good so carry on!
                 $_SESSION['timeout'] = time();
-                $url = $_SESSION['url'];
+                $url = isset($_SESSION['url']) ? $_SESSION['url'] : "";
                 $bool = true;
             }
         }else{

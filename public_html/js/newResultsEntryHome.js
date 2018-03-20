@@ -31,7 +31,7 @@ function setUpSets(firstTime){
 }
 
 function setsSuccess(json, firstTime){
-    var sets = json["sets"]
+    var sets = json["sets"];
     //var setid = firstTime ? $("#originalGroup").val() : 0;
     var setid = 0;
     var str = "";

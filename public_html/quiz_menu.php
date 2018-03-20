@@ -33,6 +33,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/quiz.css?<?php echo $info_version; ?>">
+        <link rel="shortcut icon" href="branding/quiz_favicon.ico?<?php echo $info_version; ?>">
         <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
         <script src="js/jquery.js"></script>
         <script src="js/quiz_menu.js?<?php echo $info_version; ?>"></script>

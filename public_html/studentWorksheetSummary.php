@@ -34,6 +34,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
     <?php pageHeader("Worksheet Summary", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/studentWorksheetSummary.css?<?php echo $info_version; ?>" />
     <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
     <script src="js/studentWorksheetSummary.js?<?php echo $info_version; ?>"></script>
     <script src="libraries/spin.js?<?php echo $info_version; ?>"></script>
 </head>
@@ -78,6 +79,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                         </tbody>
                     </table>
                 </div>
+                <div id="worksheet_summary_chart"><canvas id='myChart'></canvas></div>
             </div>
             <div id="side_bar">
             <ul class="menu sidebar">

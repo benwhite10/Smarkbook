@@ -33,6 +33,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/quiz.css?<?php echo $info_version; ?>">
+        <link rel="shortcut icon" href="branding/quiz_favicon.ico?<?php echo $info_version; ?>">
         <script type="text/x-mathjax-config">
             MathJax.Hub.Config({
               tex2jax: {
@@ -48,6 +49,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
     </head>
     <body>
         <?php setUpRequestAuthorisation($userid, $userval); ?>
+        <div id="quiz_loading"><img src="images/quiz_loading.gif" alt="Loading"></div>
         <div id="quiz_title"></div>
         <div id="start_menu">
             <div id="start_button" onclick="startQuiz()">Start Quiz</div>

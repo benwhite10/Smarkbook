@@ -9,6 +9,7 @@ var time = "day";
 $(document).ready(function(){
     quiz_id = getParameterByName("qid");
     requestQuiz();
+    setLeaderboardLoading();
     requestLeaderboard();
     startLeaderboard();
 });
@@ -63,6 +64,9 @@ function requestLeaderboard() {
 function leaderboardSuccess(json) {
     var leaderboard_html = "";
     if (json["success"]) {
+        if (json["result"]["Time"] !== time) {
+            return;
+        }
         var leaderboard = json["result"]["Board"];
         if (leaderboard.length > 0) {
             leaderboard_html = "<div class='leaderboard_row leaderboard_row_header'>";
@@ -95,8 +99,15 @@ function leaderboardSuccess(json) {
     $("#leaderboard_main").html(leaderboard_html);
 }
 
+function setLeaderboardLoading() {
+    $("#leaderboard_main").html("<div class='leaderboard_row_no'><img class='loading_gif' src='images/quiz_loading2.gif' alt='Loading'></div>");
+}
+
 function quizSuccess(json) {
     if (json["success"]) {
+        $("#quiz_loading").fadeOut("slow");
+        $("#start_menu").fadeIn("slow");
+        $("#quiz_title").fadeIn("slow");
         details = json["result"]["Details"][0];
         setQuizLevels(details);
         stored_questions = json["result"]["Questions"];
@@ -383,6 +394,7 @@ function replayQuiz() {
 }
 
 function clickLeaderboardButton(val) {
+    setLeaderboardLoading();
     $("#today_button").removeClass("selected");
     $("#week_button").removeClass("selected");
     $("#all_button").removeClass("selected");
