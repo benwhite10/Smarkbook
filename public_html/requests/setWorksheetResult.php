@@ -217,7 +217,7 @@ function addNewResult($change, $gwid) {
     $value = $change["new_value"];
     $stuid = $change["stuid"];
     $sqid = $change["sqid"];
-    
+
     $select_query = "SELECT `Completed Question ID` ID FROM `TCOMPLETEDQUESTIONS` "
             . "WHERE `Stored Question ID` = $sqid "
             . "AND `Student ID` = $stuid "
@@ -228,10 +228,10 @@ function addNewResult($change, $gwid) {
             $change["cqid"] = $comp_qs[0]["ID"];
             return [updateResult($change), $comp_qs[0]["ID"]];
         }
-        
+
         $deleted = $value === "" ? 1 :0;
         $value = $value === "" ? 0 :$value;
-        
+
         $query = "INSERT INTO `TCOMPLETEDQUESTIONS`(`Stored Question ID`, `Mark`, `Student ID`, `Date Added`, `Deleted`, `Group Worksheet ID`) VALUES ($sqid,$value,$stuid,NOW(),$deleted,$gwid)";
         return db_insert_query_exception($query);
     } catch (Exception $ex) {

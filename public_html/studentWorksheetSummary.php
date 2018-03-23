@@ -47,7 +47,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
             </div>
             <ul class="menu topbar">
                 <li>
-                    <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
+                    <a href="portalhome.php"><?php echo $fullName; ?>&#x25BE</a>
                     <ul class="dropdown topdrop">
                         <li><a href="portalhome.php">Home</a></li>
                         <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
@@ -79,7 +79,22 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                         </tbody>
                     </table>
                 </div>
-                <div id="worksheet_summary_chart"><canvas id='myChart'></canvas></div>
+                <div id="worksheet_summary">
+                    <div id='worksheet_summary_chart'>
+                        <canvas id='myChart'></canvas>
+                    </div>
+                    <div id='worksheet_summary_table'>
+                        <div class="summary_row refresh" onclick="getStudentSummary()">Refresh Chart</div>
+                        <div class="summary_row" id="summary_row_score">
+                            <div class="summary_row_title">Score</div>
+                            <div class="summary_row_info" id="summary_score"></div>
+                        </div>
+                        <div class="summary_row" id="summary_row_perc">
+                            <div class="summary_row_title">Perc</div>
+                            <div class="summary_row_info" id="summary_perc"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="side_bar">
             <ul class="menu sidebar">

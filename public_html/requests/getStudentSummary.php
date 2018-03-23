@@ -65,6 +65,12 @@ switch ($requestType){
         }
         getStudentWorksheetSummary($studentId, $gwid, $userid, $role);
         break;
+    case "CALCSTUWORKSHEETSUMMARY":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        studentWorksheetSummary($studentId, $gwid, $userid, $role);
+        break;
     case "WORKSHEETDETAILS":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
@@ -978,7 +984,9 @@ function getStudentWorksheetSummary($studentId, $gwid, $userid, $role) {
     }
 
     db_begin_transaction();
-    $comp_questions_query = "SELECT CQ.`Completed Question ID` CQID, CQ.`Stored Question ID` SQID, CQ.`Mark` Mark, CQ.`Deleted` Deleted FROM `TCOMPLETEDQUESTIONS` CQ
+    $comp_questions_query = "SELECT CQ.`Completed Question ID` CQID, CQ.`Stored Question ID` SQID, CQ.`Mark` Mark, CQ.`Deleted` Deleted, SQ.`Marks` Marks
+        FROM `TCOMPLETEDQUESTIONS` CQ
+        JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
         WHERE CQ.`Group Worksheet ID` = $gwid
         AND CQ.`Student ID` = $studentId;";
 
@@ -989,7 +997,14 @@ function getStudentWorksheetSummary($studentId, $gwid, $userid, $role) {
     try{
         $comp_questions = db_select_exception($comp_questions_query);
         $comp_worksheet = db_select_exception($comp_worksheet_query);
-        $summary = studentWorksheetSummary($studentId, $gwid, $userid, $role);
+        if (count($comp_worksheet)>0) {
+            $cwid = $comp_worksheet[0]["Completed Worksheet ID"];
+            $comp_worksheet_inputs_query = "SELECT IT.`Name`, IT.`ShortName`, CWI.`Value` FROM `TCOMPLETEDWORKSHEETINPUT` CWI
+                JOIN `TINPUTTYPE` IT ON CWI.`Input` = IT.`ID`
+                WHERE CWI.`CompletedWorksheet` = $cwid";
+            $comp_worksheet_inputs = db_select_exception($comp_worksheet_inputs_query);
+            $comp_worksheet[0]["Inputs"] = $comp_worksheet_inputs;
+        }
     } catch (Exception $ex) {
         $message = "There was an error getting the student summary.";
         failRequestWithException($message, $ex);
@@ -998,8 +1013,7 @@ function getStudentWorksheetSummary($studentId, $gwid, $userid, $role) {
     db_commit_transaction();
     succeedRequest(array(
         "Questions" => $comp_questions,
-        "Worksheet" => $comp_worksheet,
-        "Summary" => $summary
+        "Worksheet" => $comp_worksheet
     ));
 }
 
@@ -1062,7 +1076,9 @@ function studentWorksheetSummary($studentId, $gwid, $userid, $role) {
         $message = "There was an error generating the student summary.";
         failRequestWithException($message, $ex);
     }
-    return $questions;
+    succeedRequest(array(
+        "Summary" => $questions
+    ));
 }
 /* Exit page */
 

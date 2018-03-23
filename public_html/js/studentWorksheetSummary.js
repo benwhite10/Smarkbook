@@ -1,11 +1,19 @@
+var timeout;
+var summary_timeout;
+var summary_first = true;
+var questions = [];
+
 $(document).ready(function(){
     sessionStorage.setItem("gwid", getParameterByName("gw"));
     sessionStorage.setItem("stuid", getParameterByName("s"));
     sessionStorage.setItem("save_changes_array", "[]");
+    sessionStorage.setItem("active_request", "");
     getWorksheetDetails(sessionStorage.getItem("gwid"));
 
-    setAutoSave(5000);
+    sendSaveRequestAfter(5000);
     setUpSaveButton();
+    createChart([], [], 0);
+    sendSummaryRequestAfter(1000);
 });
 
 function getStudentResults(stuid, gwid) {
@@ -27,10 +35,43 @@ function getStudentResults(stuid, gwid) {
     });
 }
 
+function getStudentSummary() {
+    var gwid = sessionStorage.getItem("gwid");
+    var stuid = sessionStorage.getItem("stuid");
+    console.log("Summary");
+    clearTimeout(summary_timeout);
+    var infoArray = {
+        type: "CALCSTUWORKSHEETSUMMARY",
+        student: stuid,
+        gwid: gwid,
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getStudentSummary.php",
+        dataType: "json",
+        success: function(json){
+            if(json["success"]) {
+                if (summary_first) {
+                    createStudentChart(json["result"]["Summary"], 2000);
+                    summary_first = false;
+                } else {
+                    createStudentChart(json["result"]["Summary"], 0);
+                }
+            } else {
+                console.log("Error getting the student summary");
+                console.log(json);
+            }
+            sendSummaryRequestAfter(120000);
+        }
+    });
+}
+
 function getStudentResultsSuccess(json) {
     if (json["success"]) {
         var results = json["result"]["Questions"];
-        var marks = 0;
         for (var i = 0; i < results.length; i++) {
             var sqid = results[i]["SQID"];
             var cqid = results[i]["CQID"];
@@ -41,26 +82,25 @@ function getStudentResultsSuccess(json) {
                 if (!$("#mark_" + sqid).is(":focus")) {
                     $("#mark_" + sqid).val(mark);
                 }
-                marks += parseFloat(mark);
             }
         }
         var worksheets = json["result"]["Worksheet"];
         if (worksheets.length > 0) {
             var comp_worksheet = worksheets[0];
-            comp_worksheet["Inputs"] = [];
+            //comp_worksheet["Inputs"] = [];
             sessionStorage.setItem("comp_worksheet", JSON.stringify(comp_worksheet));
         } else {
             sessionStorage.setItem("comp_worksheet", "[]");
         }
-        $("#total_marks").html("<b>" + marks + "</b>");
-        createStudentChart(json["result"]["Summary"]);
+        updateTotalMarks();
+        $("#summary_row_perc").addClass("bottom");
     } else {
         console.log("Error");
         console.log(json);
     }
 }
 
-function createStudentChart(summary_array) {
+function createStudentChart(summary_array, animate) {
     //var labels = [""];
     var datasets = [];
     var labels = [];
@@ -133,7 +173,10 @@ function createStudentChart(summary_array) {
         lineTension: 0,
         spanGaps: false
     });
+    createChart(labels, datasets, animate);
+}
 
+function createChart(labels, datasets, animate) {
     var max_perc = 0;
     var min_perc = 1;
 
@@ -179,7 +222,7 @@ function createStudentChart(summary_array) {
                 }
             },
             animation: {
-                duration: 0, // general animation time
+                duration: animate, // general animation time
             },
             hover: {
                 animationDuration: 0, // duration of animations when hovering an item
@@ -187,95 +230,6 @@ function createStudentChart(summary_array) {
             responsiveAnimationDuration: 0
         }
     });
-
-    /*
-    for (var j = 0; j < summary_array.length; j++) {
-        var chart_data = [null];
-        var set_name = "";
-        var border_colour = "";
-        var border_width = "";
-        var border_dash = "";
-        var group_id = summary_array[j]["Details"] === "Total" ? "average" : summary_array[j]["Details"]["Group ID"];
-        if (!$("#set_" + group_id).hasClass("selected")) continue;
-
-        if (summary_array[j]["Details"] === "Total") {
-            set_name = "Average";
-            border_colour = getColour(0,true);
-            border_width = 3;
-            border_dash = [10,5];
-        } else {
-            set_name = summary_array[j]["Details"]["Name"] + " - " + summary_array[j]["Details"]["Staff Initials"];
-            border_colour = getColour(j,false);
-            border_width = 2;
-            border_dash = [10,0];
-        }
-
-        for (var i = 0; i < worksheets.length; i++) {
-            var cwid = worksheets[i]["ID"];
-            if (summary_array[j][cwid]) {
-                if (summary_array[j][cwid]["Percentage"] !== "") {
-                    var perc = summary_array[j][cwid]["Percentage"];
-                    chart_data.push(perc);
-                    min_perc = Math.min(min_perc, perc);
-                    max_perc = Math.max(max_perc, perc);
-                } else {
-                    chart_data.push(null);
-                }
-            } else {
-                chart_data.push(null);
-            }
-        }
-        chart_data.push(null);
-
-    }
-
-    min_perc = Math.max(Math.floor(10*(min_perc - 0.05))/10, 0);
-    max_perc = Math.min(Math.ceil(10*(max_perc + 0.05))/10, 1);
-
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero:true,
-                        steps: 10,
-                        max: max_perc,
-                        min: min_perc,
-                        callback: function(tick) {
-                            return (Math.round(tick * 100, 0)) + "%";
-                        }
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        autoSkip: false
-                    }
-                }]
-            },
-            tooltips: {
-                callbacks: {
-                    label: function(tooltipItem, data) {
-                        var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || 'Other';
-                        var perc_val = Math.round(tooltipItem.yLabel * 100,0);
-                        return datasetLabel + ": " + perc_val + "%";
-                    }
-                }
-            },
-            animation: {
-                duration: 0, // general animation time
-            },
-            hover: {
-                animationDuration: 0, // duration of animations when hovering an item
-            },
-            responsiveAnimationDuration: 0
-        }
-    });*/
 }
 
 function getWorksheetDetails(gwid) {
@@ -298,7 +252,7 @@ function getWorksheetDetails(gwid) {
 
 function setWorksheetDetails(json) {
     if (json["success"]) {
-        var questions = json["result"]["questions"];
+        questions = json["result"]["questions"];
         var details = json["result"]["worksheet_details"];
         $("#title2").html("<h1>" + details[0]["WName"] + "</h1>");
         var question_string = "<td class='worksheet_marks'><b>Ques</b></td>";
@@ -420,47 +374,36 @@ function updateSaveWorksheetsArray(worksheet, stu_id) {
     setAwatingSaveClassWorksheets(stu_id);
 }
 
-function setAutoSave(interval) {
-    window.setInterval(function(){
-        sendSaveChangesRequest();
+function sendSaveRequestAfter(interval) {
+    timeout = setTimeout(function(){
+        saveChangesRequest();
     }, interval);
 }
 
-function sendSaveChangesRequest() {
-    var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
-    var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
-    var gwid = sessionStorage.getItem("gwid");
-    var stuid = sessionStorage.getItem("stuid");
-    if (save_changes_array.length > 0) {
-        var infoArray = {
-            gwid: gwid,
-            req_id: 0,
-            type: "SAVERESULTSSTUDENT",
-            save_changes_array: save_changes_array,
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
-        };
-        $.ajax({
-            type: "POST",
-            data: infoArray,
-            url: "/requests/setWorksheetResult.php",
-            dataType: "json",
-            success: function(json){
-                getStudentResults(stuid, gwid);
-                sendSaveChangesSuccess(json);
-            },
-            error: function(json){
-                console.log(json);
-            }
-        });
-        if (comp_worksheet["Student ID"]) {
-            comp_worksheet["request_sent"] = true;
-            comp_worksheet["saved"] = false;
+function sendSummaryRequestAfter(interval) {
+    summary_timeout = setTimeout(function(){
+        getStudentSummary();
+    }, interval);
+}
+
+
+function saveChangesRequest() {
+    clearTimeout(timeout);
+    var active_request = sessionStorage.getItem("active_request");
+    var gap = 30; // Time in seconds
+    if (active_request === "" || Date.now() - parseInt(active_request) > gap * 1000) {
+        sessionStorage.setItem("active_request", Date.now());
+        var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+        var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
+        var gwid = sessionStorage.getItem("gwid");
+        var stuid = sessionStorage.getItem("stuid");
+        if (save_changes_array.length > 0 && gwid && stuid) {
+            // Send request
             var infoArray = {
                 gwid: gwid,
                 req_id: 0,
-                type: "SAVEWORKSHEETSSTUDENT",
-                save_worksheets_array: [comp_worksheet],
+                type: "SAVERESULTSSTUDENT",
+                save_changes_array: save_changes_array,
                 userid: $('#userid').val(),
                 userval: $('#userval').val()
             };
@@ -470,48 +413,96 @@ function sendSaveChangesRequest() {
                 url: "/requests/setWorksheetResult.php",
                 dataType: "json",
                 success: function(json){
-                    if(!json["success"]) {
+                    sessionStorage.setItem("active_request","");
+                    if (json["success"]) {
+                        sendSaveChangesSuccess(json);
+                    } else {
+                        sendSaveChangesFail(json["Message"]);
+                    }
+
+                },
+                error: function(response){
+                    sessionStorage.setItem("active_request","");
+                    sendSaveChangesFail(response["statusText"]);
+                }
+            });
+            if (comp_worksheet["Student ID"]) {
+                comp_worksheet["request_sent"] = true;
+                comp_worksheet["saved"] = false;
+                var infoArray = {
+                    gwid: gwid,
+                    req_id: 0,
+                    type: "SAVEWORKSHEETSSTUDENT",
+                    save_worksheets_array: [comp_worksheet],
+                    userid: $('#userid').val(),
+                    userval: $('#userval').val()
+                };
+                $.ajax({
+                    type: "POST",
+                    data: infoArray,
+                    url: "/requests/setWorksheetResult.php",
+                    dataType: "json",
+                    success: function(json){
+                        if(!json["success"]) {
+                            console.log("There was an error saving the worksheet");
+                            console.log(json);
+                        }
+                    },
+                    error: function(json){
                         console.log("There was an error saving the worksheet");
                         console.log(json);
                     }
-                },
-                error: function(){
-                    console.log("There was an error saving the worksheet");
-                    console.log(json);
-                }
-            });
+                });
+            }
+        } else {
+            // Nothing to update
+            sessionStorage.setItem("active_request","");
+            sendSaveRequestAfter(5000);
         }
+
     } else {
-        getStudentResults(stuid, gwid);
+        sendSaveRequestAfter(5000);
     }
 }
 
 function setUpSaveButton() {
-    $("#save_button").attr("onclick", "sendSaveChangesRequest()");
+    $("#save_button").attr("onclick", "saveChangesRequest()");
 }
 
 function sendSaveChangesSuccess(json) {
-    if (json["success"]) {
-        var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
-        var saved_changes = json["saved_changes"];
-        if(saved_changes) {
-            for (var i = 0; i < saved_changes.length; i++) {
-                if (saved_changes[i]["success"]) {
-                    for (var j = 0; j < save_changes_array.length; j++) {
-                        if (parseInt(saved_changes[i]["sqid"]) === parseInt(save_changes_array[j]["sqid"])) {
+    var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+    var saved_changes = json["saved_changes"];
+    if(saved_changes) {
+        for (var i = 0; i < saved_changes.length; i++) {
+            if (saved_changes[i]["success"]) {
+                for (var j = 0; j < save_changes_array.length; j++) {
+                    if (parseInt(saved_changes[i]["sqid"]) === parseInt(save_changes_array[j]["sqid"])) {
+                        if (parseFloat(saved_changes[i]["new_value"]) === parseFloat(save_changes_array[j]["new_value"])) {
                             save_changes_array.splice(j, 1);
-                            break;
+                            removeAwatingSaveClass(saved_changes[i]["sqid"]);
                         }
+                        break;
                     }
-                    removeAwatingSaveClass(saved_changes[i]["sqid"]);
                 }
+            } else {
+                showFailedSave(saved_changes[i]["sqid"]);
             }
-            if (save_changes_array.length === 0) {save_changes_array = [];}
         }
-        sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
-    } else {
-        console.log(json);
+        if (save_changes_array.length === 0) {save_changes_array = [];}
     }
+    sessionStorage.setItem("save_changes_array", JSON.stringify(save_changes_array));
+    getStudentSummary();
+    sendSaveRequestAfter(5000);
+}
+
+function sendSaveChangesFail(message) {
+    console.log("Error saving the results.");
+    console.log(message);
+    var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
+    for (var i = 0; i < save_changes_array.length; i++) {
+        showFailedSave(save_changes_array[i]["sqid"]);
+    }
+    sendSaveRequestAfter(5000);
 }
 
 function removeAwatingSaveClass(sqid) {
@@ -522,13 +513,26 @@ function removeAwatingSaveClass(sqid) {
     }, 1000);
 }
 
+function showFailedSave(sqid) {
+    $("#mark_" + sqid).css({backgroundColor: '#f58e8e'});
+}
+
 function updateTotalMarks() {
     var elems = document.getElementsByClassName("marks_input");
-    var mark = 0;
+    var total_mark = 0;
     for (var i = 0; i < elems.length; i++) {
-        mark += elems[i].value !== "" ? parseFloat(elems[i].value) : 0;
+        total_mark += elems[i].value !== "" ? parseFloat(elems[i].value) : 0;
     }
-    $("#total_marks").html("<b>" + mark + "</b>");
+    $("#total_marks").html("<b>" + total_mark + "</b>");
+
+    var total_marks = 0;
+    for (var i = 0; i < questions.length; i++) {
+        total_marks += parseFloat(questions[i]["Marks"]);
+    }
+    var score = total_mark + "/" + total_marks;
+    var perc = total_marks > 0 ? Math.round(100*total_mark/total_marks) + "%" : "0%";
+    $("#summary_score").html(score);
+    $("#summary_perc").html(perc);
 }
 
 function getParameterByName(name, url) {
