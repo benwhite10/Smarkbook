@@ -254,13 +254,20 @@ function setWorksheetDetails(json) {
     if (json["success"]) {
         questions = json["result"]["questions"];
         var details = json["result"]["worksheet_details"];
+        var input = details[0]["Input"];
         $("#title2").html("<h1>" + details[0]["WName"] + "</h1>");
         var question_string = "<td class='worksheet_marks'><b>Ques</b></td>";
         var marks_string = "<td class='worksheet_marks'><b>Marks</b></td>";
         var mark_string = "<td class='worksheet_marks'><b>Mark</b></td>";
         var total_marks = 0;
         for (var i = 0; i < questions.length; i++) {
-            mark_string += "<td class='worksheet_marks'><input type='text' id='mark_" + questions[i]["SQID"] + "' class='marks_input' onfocus='focusInput(this.id, this.value)' onblur='blurInput(this.id, this.value, " + questions[i]["SQID"] + ", " + questions[i]["Marks"] + ")'><input type='hidden' id='cqid_" + questions[i]["SQID"] + "'></td>";
+            mark_string += "<td class='worksheet_marks'><input type='text' id='mark_" + questions[i]["SQID"] + "' class='marks_input' onfocus='focusInput(this.id, this.value)'";
+            if (input === "1") {
+                mark_string += "onblur='blurInput(this.id, this.value, " + questions[i]["SQID"] + ", " + questions[i]["Marks"] + ")'";
+            } else {
+                mark_string += " disabled";
+            }
+            mark_string += "><input type='hidden' id='cqid_" + questions[i]["SQID"] + "'></td>";
             question_string += "<td class='worksheet_marks'><b>" + questions[i]["Num"] + "</b></td>";
             marks_string += "<td class='worksheet_marks'><b>/" + questions[i]["Marks"] + "</b></td>";
             total_marks += parseFloat(questions[i]["Marks"]);

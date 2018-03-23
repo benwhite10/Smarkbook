@@ -959,7 +959,7 @@ function getWorksheetDetails($gwid, $userid, $role) {
         AND SQ.`Deleted` = 0
         ORDER BY SQ.`Question Order`;";
 
-    $worksheet_details_query = "SELECT GW.`Date Due` Date, WV.`WName` WName FROM `TGROUPWORKSHEETS` GW
+    $worksheet_details_query = "SELECT GW.`Date Due` Date, WV.`WName` WName, GW.`StudentInput` Input FROM `TGROUPWORKSHEETS` GW
         JOIN `TWORKSHEETVERSION` WV ON GW.`Version ID` = WV.`Version ID`
         WHERE GW.`Group Worksheet ID` = $gwid
         AND GW.`Deleted` = 0
