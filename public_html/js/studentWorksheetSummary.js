@@ -38,7 +38,6 @@ function getStudentResults(stuid, gwid) {
 function getStudentSummary() {
     var gwid = sessionStorage.getItem("gwid");
     var stuid = sessionStorage.getItem("stuid");
-    console.log("Summary");
     clearTimeout(summary_timeout);
     var infoArray = {
         type: "CALCSTUWORKSHEETSUMMARY",
@@ -93,7 +92,6 @@ function getStudentResultsSuccess(json) {
             sessionStorage.setItem("comp_worksheet", "[]");
         }
         updateTotalMarks();
-        $("#summary_row_perc").addClass("bottom");
     } else {
         console.log("Error");
         console.log(json);
@@ -104,10 +102,7 @@ function createStudentChart(summary_array, animate) {
     //var labels = [""];
     var datasets = [];
     var labels = [];
-    /*for (var i = 0; i < worksheets.length; i++) {
-        labels.push(worksheets[i]["WName"]);
-    }
-    labels.push("");*/
+    var names = [];
 
     // Student
     var stu_total = 0;
@@ -138,16 +133,18 @@ function createStudentChart(summary_array, animate) {
                 tags_string += ", ";
             }
         }
-        labels.push(summary_array[i]["Number"]);
+        labels.push("Q" + summary_array[i]["Number"]);
+        names.push(tags_string);
     }
     stu_data.push(stu_total/total_marks);
     set_data.push(set_total/total_marks);
     all_data.push(all_total/total_marks);
     labels.push("Total");
+    names.push("Name");
     datasets.push({
         label: "Student",
         data: stu_data,
-        borderColor: "rgba(255,0,0,1)",
+        borderColor: "rgba(102,225,27,1)",
         borderWidth: 2,
         fill: false,
         lineTension: 0,
@@ -173,10 +170,10 @@ function createStudentChart(summary_array, animate) {
         lineTension: 0,
         spanGaps: false
     });
-    createChart(labels, datasets, animate);
+    createChart(labels, datasets, animate, names);
 }
 
-function createChart(labels, datasets, animate) {
+function createChart(labels, datasets, animate, names) {
     var max_perc = 0;
     var min_perc = 1;
 
@@ -185,9 +182,14 @@ function createChart(labels, datasets, animate) {
         type: 'line',
         data: {
             labels: labels,
-            datasets: datasets
+            datasets: datasets,
+            names: names
         },
         options: {
+            legend: {
+                display: true,
+                position: 'bottom'
+            },
             scales: {
                 yAxes: [{
                     ticks: {
@@ -207,18 +209,21 @@ function createChart(labels, datasets, animate) {
                 }]
             },
             tooltips: {
+                custom: function(tooltip) {
+                    if (!tooltip) return;
+                    // disable displaying the color box;
+                    tooltip.displayColors = false;
+                },
                 callbacks: {
                     title: function(tooltipItem, data) {
-                        return data['labels'][tooltipItem[0]['index']];
+                        return tooltipItem[0]["xLabel"] + "-" + data.datasets[tooltipItem[0].datasetIndex].label;
                     },
                     label: function(tooltipItem, data) {
-                        var perc_val = Math.round(tooltipItem.yLabel * 100,0);
-                        return perc_val + "%";
-                    }/*
-                    afterLabel: function(tooltipItem, data) {
-                        let value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        return value;
-                    }*/
+                        return Math.round(tooltipItem.yLabel * 100,0) + "%";
+                    },
+                    afterLabel: function(tooltipItem, data){
+                        return data['names'][tooltipItem.index];
+                    }
                 }
             },
             animation: {
@@ -296,17 +301,21 @@ function blurInput(id, value, sqid, marks) {
     var cqid = $("#cqid_" + sqid).val() !== "" ? parseInt($("#cqid_" + sqid).val()) : 0;
     if(validateResult(value, marks, id)) {
         var current_val = JSON.parse(sessionStorage.getItem("current_val"));
-        updateTotalMarks();
         if (id !== current_val[0]) {
             saveChanges(sqid, cqid, value);
+            updateTotalMarks();
             return;
         }
         if (value === "") {
-            if (current_val[1] !== "") saveChanges(sqid, cqid, value);
+            if (current_val[1] !== "") {
+                saveChanges(sqid, cqid, value);
+                updateTotalMarks();
+            }
             return;
         }
         if (parseFloat(value) !== parseFloat(current_val[1])) {
             saveChanges(sqid, cqid, value);
+            updateTotalMarks();
             return;
         }
         return;
@@ -383,7 +392,7 @@ function updateSaveWorksheetsArray(worksheet, stu_id) {
 
 function sendSaveRequestAfter(interval) {
     timeout = setTimeout(function(){
-        saveChangesRequest();
+        saveChangesRequest(false);
     }, interval);
 }
 
@@ -394,14 +403,13 @@ function sendSummaryRequestAfter(interval) {
 }
 
 
-function saveChangesRequest() {
+function saveChangesRequest(button) {
     clearTimeout(timeout);
     var active_request = sessionStorage.getItem("active_request");
     var gap = 30; // Time in seconds
     if (active_request === "" || Date.now() - parseInt(active_request) > gap * 1000) {
         sessionStorage.setItem("active_request", Date.now());
         var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
-        var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
         var gwid = sessionStorage.getItem("gwid");
         var stuid = sessionStorage.getItem("stuid");
         if (save_changes_array.length > 0 && gwid && stuid) {
@@ -421,6 +429,7 @@ function saveChangesRequest() {
                 dataType: "json",
                 success: function(json){
                     sessionStorage.setItem("active_request","");
+                    sendSaveWorksheetsRequest();
                     if (json["success"]) {
                         sendSaveChangesSuccess(json);
                     } else {
@@ -433,36 +442,14 @@ function saveChangesRequest() {
                     sendSaveChangesFail(response["statusText"]);
                 }
             });
-            if (comp_worksheet["Student ID"]) {
-                comp_worksheet["request_sent"] = true;
-                comp_worksheet["saved"] = false;
-                var infoArray = {
-                    gwid: gwid,
-                    req_id: 0,
-                    type: "SAVEWORKSHEETSSTUDENT",
-                    save_worksheets_array: [comp_worksheet],
-                    userid: $('#userid').val(),
-                    userval: $('#userval').val()
-                };
-                $.ajax({
-                    type: "POST",
-                    data: infoArray,
-                    url: "/requests/setWorksheetResult.php",
-                    dataType: "json",
-                    success: function(json){
-                        if(!json["success"]) {
-                            console.log("There was an error saving the worksheet");
-                            console.log(json);
-                        }
-                    },
-                    error: function(json){
-                        console.log("There was an error saving the worksheet");
-                        console.log(json);
-                    }
-                });
-            }
         } else {
             // Nothing to update
+            if (button) {
+                for (var i = 0; i < questions.length; i++) {
+                    removeAwatingSaveClass(questions[i]["SQID"]);
+                }
+            }
+            // Flash all
             sessionStorage.setItem("active_request","");
             sendSaveRequestAfter(5000);
         }
@@ -473,7 +460,49 @@ function saveChangesRequest() {
 }
 
 function setUpSaveButton() {
-    $("#save_button").attr("onclick", "saveChangesRequest()");
+    $("#save_button").attr("onclick", "saveChangesRequest(true)");
+}
+
+function sendSaveWorksheetsRequest() {
+    var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
+    var gwid = sessionStorage.getItem("gwid");
+    if (comp_worksheet["Student ID"]) {
+        comp_worksheet["request_sent"] = true;
+        comp_worksheet["saved"] = false;
+        var infoArray = {
+            gwid: gwid,
+            req_id: 0,
+            type: "SAVEWORKSHEETSSTUDENT",
+            save_worksheets_array: [comp_worksheet],
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/setWorksheetResult.php",
+            dataType: "json",
+            success: function(json){
+                if(!json["success"]) {
+                    console.log("There was an error saving the worksheet");
+                    console.log(json);
+                } else {
+                    var worksheets = json["worksheets"];
+                    if (worksheets.length > 0) {
+                        var comp_worksheet = worksheets[0];
+                        sessionStorage.setItem("comp_worksheet", JSON.stringify(comp_worksheet));
+                    } else {
+                        sessionStorage.setItem("comp_worksheet", "[]");
+                    }
+                    updateTotalMarks();
+                }
+            },
+            error: function(json){
+                console.log("There was an error saving the worksheet");
+                console.log(json);
+            }
+        });
+    }
 }
 
 function sendSaveChangesSuccess(json) {
@@ -526,7 +555,9 @@ function showFailedSave(sqid) {
 
 function updateTotalMarks() {
     var elems = document.getElementsByClassName("marks_input");
+    var comp_worksheet = JSON.parse(sessionStorage.getItem("comp_worksheet"));
     var total_mark = 0;
+    var inputs = [];
     for (var i = 0; i < elems.length; i++) {
         total_mark += elems[i].value !== "" ? parseFloat(elems[i].value) : 0;
     }
@@ -537,9 +568,28 @@ function updateTotalMarks() {
         total_marks += parseFloat(questions[i]["Marks"]);
     }
     var score = total_mark + "/" + total_marks;
+    inputs.push(["Score", score]);
     var perc = total_marks > 0 ? Math.round(100*total_mark/total_marks) + "%" : "0%";
-    $("#summary_score").html(score);
-    $("#summary_perc").html(perc);
+    inputs.push(["Perc", perc]);
+    if (comp_worksheet["Grade"]) {
+        inputs.push(["Grade", comp_worksheet["Grade"]]);
+    }
+    if (comp_worksheet["UMS"]) {
+        inputs.push(["UMS", comp_worksheet["UMS"]]);
+    }
+    parseTotalTable(inputs)
+}
+
+function parseTotalTable(inputs) {
+    var html = "<div class='summary_row refresh' onclick='getStudentSummary()'>Refresh Chart</div>";
+    for (var i = 0; i < inputs.length; i++) {
+        class_text = i === inputs.length - 1 ? "bottom" : "";
+        html += "<div class='summary_row " + class_text + "'>";
+        html += "<div class='summary_row_title'>" + inputs[i][0] + "</div>";
+        html += "<div class='summary_row_info'>" + inputs[i][1] + "</div>";
+        html += "</div>"
+    }
+    $("#worksheet_summary_table").html(html);
 }
 
 function getParameterByName(name, url) {

@@ -55,13 +55,13 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        saveWorksheets($gwid, $save_worksheets, $req_id);
+        saveWorksheets($gwid, $save_worksheets, $req_id, FALSE);
         break;
     case "SAVEWORKSHEETSSTUDENT":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
         }
-        saveWorksheets($gwid, $save_worksheets, $req_id);
+        saveWorksheets($gwid, $save_worksheets, $req_id, TRUE);
         break;
     case "SAVEGROUPWORKSHEET":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
@@ -100,8 +100,95 @@ function saveResults($gwid, $save_changes, $req_id) {
     echo json_encode($return);
 }
 
-function saveWorksheets($gwid, $worksheets, $req_id) {
+function updateGradeAndUMS($worksheet) {
+    // Check for boundaries
+    $gwid = $worksheet["Group Worksheet ID"];
+    $boundary_query = "SELECT `Grade`, `Boundary`, `UMS`
+                        FROM `TGRADEBOUNDARIES`
+                        WHERE `GroupWorksheet` = $gwid
+                        ORDER BY `BoundaryOrder`;";
+    try {
+        $boundaries = db_select_exception($boundary_query);
+        if (count($boundaries) == 0) {
+            return $worksheet;
+        }
+        $boundaries = orderBoundaries($boundaries);
+        $mark_query = "SELECT SUM(`Mark`) Mark FROM (
+                        SELECT CQ.`Mark` FROM `TCOMPLETEDQUESTIONS` CQ
+                        JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+                        WHERE CQ.`Group Worksheet ID` = 1366
+                        AND CQ.`Student ID` = 3003
+                        AND CQ.`Deleted` = 0
+                        AND SQ.`Deleted` = 0
+                        GROUP BY CQ.`Stored Question ID`) AS A";
+        $mark_result = db_select_exception($mark_query);
+        if (count($mark_result) > 0) {
+            $mark = floatval($mark_result[0]["Mark"]);
+            $result = calculateGradeAndUMS($mark, $boundaries);
+            $worksheet["Grade"] = $result[0];
+            $worksheet["UMS"]= $result[1];
+        }
+        return $worksheet;
+    } catch (Exception $ex) {
+        return $worksheet;
+    }
+}
+
+function orderBoundaries($boundaries) {
+    $last = count($boundaries) - 1;
+    $first_boundary = floatval($boundaries[0]["Boundary"]);
+    $last_boundary = floatval($boundaries[$last]["Boundary"]);
+    $new_boundaries = array();
+    if ($last_boundary < $first_boundary) {
+        for ($i = $last; $i >= 0; $i--) {
+            array_push($new_boundaries, $boundaries[$i]);
+        }
+        return $new_boundaries;
+    }
+    return $boundaries;
+}
+
+function calculateGradeAndUMS($mark, $boundaries) {
+    for ($i = 0; $i < count($boundaries); $i++) {
+        $boundary = $boundaries[$i]["Boundary"] === "" ? "" : floatval($boundaries[$i]["Boundary"]);
+        $ums = $boundaries[$i]["UMS"] === "" ? "" : floatval($boundaries[$i]["UMS"]);
+        $grade_val = "";
+        if ($mark < $boundary) {
+            // Normal boundary
+            $grade_val = $i === 0 ? "" : $boundaries[$i - 1]["Grade"];
+            if ($ums !== "") {
+                $pos_1 = $i === 0 ? $i : $i - 1;
+                $boundary_1 = floatval($boundaries[$pos_1]["Boundary"]);
+                $ums_1 = floatval($boundaries[$pos_1]["UMS"]);
+                $boundary_2 = floatval($boundaries[$pos_1 + 1]["Boundary"]);
+                $ums_2 = floatval($boundaries[$pos_1 + 1]["UMS"]);
+                $ratio = ($ums_2 - $ums_1) / ($boundary_2 - $boundary_1);
+                $ums_val = max(0, round($ums_1 + ($mark - $boundary_1) * $ratio));
+            } else {
+                $ums_val = "";
+            }
+            return [$grade_val, $ums_val];
+        }
+    }
+    // Last boundary
+    $i = count($boundaries) - 1;
+    $boundary = $boundaries[$i]["Boundary"] === "" ? "" : floatval($boundaries[$i]["Boundary"]);
+    $ums = $boundaries[$i]["UMS"] === "" ? "" : floatval($boundaries[$i]["UMS"]);
+    $grade_val = $boundaries[$i]["Grade"];
+    if ($ums !== "") {
+        $boundary_1 = floatval($boundaries[$i - 1]["Boundary"]);
+        $ums_1 = floatval($boundaries[$i - 1]["UMS"]);
+        $ratio = ($ums - $ums_1) / ($boundary - $boundary_1);
+        $ums_val = min(100, round($ums + ($mark - $boundary) * $ratio));
+    }
+    return [$grade_val, $ums_val];
+}
+
+function saveWorksheets($gwid, $worksheets, $req_id, $student_entry) {
     foreach($worksheets as $key => $worksheet) {
+        if ($student_entry) {
+            $worksheet = updateGradeAndUMS($worksheet);
+        }
         $worksheets[$key] = addNewWorksheet($worksheet);
     }
     $return = array(
@@ -118,8 +205,8 @@ function addNewWorksheet($worksheet) {
     $comp_status = $worksheet["Completion Status"];
     $date_status = $worksheet["Date Status"] == "" ? "NULL" : $worksheet["Date Status"];
     $grade = db_escape_string($worksheet["Grade"]);
-    $ums = $worksheet["UMS"] ? intval($worksheet["UMS"]) : "NULL";
-    $inputs = $worksheet["Inputs"];
+    $ums = isset($worksheet["UMS"]) ? intval($worksheet["UMS"]) : "NULL";
+    $inputs = isset($worksheet["Inputs"]) ? $worksheet["Inputs"] : array();
 
     $update = FALSE;
     // Try and get an ID
