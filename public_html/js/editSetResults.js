@@ -169,7 +169,7 @@ function moveUpDown(id, up) {
             if (!student) return;
             new_id = pos[0] + "_" + student;
         }
-        
+
     }
     $("#" + new_id).focus();
     $("#" + new_id).select();
@@ -566,7 +566,7 @@ function parseMainTable() {
     }
     row_head_1 += "<th class='results results_header total_input_col'>Total</th>";
     row_head_2 += "<th class='results results_header total_input_col' style='min-width: 60px;'>/" + total_marks + "</th>";
-    
+
     row_head_1 += "<th class='results results_header total_col'></th>";
     row_head_2 += "<th class='results results_header total_col' style='min-width: 100px;'>Total</th>";
 
@@ -965,7 +965,7 @@ function saveGroupWorksheet() {
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
-    
+
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -1493,7 +1493,7 @@ function getTotal(row) {
 function updateGrade(stu_id, row) {
     grade_boundaries = getGradeBoundariesFromTable();
     length = grade_boundaries.length;
-    if (length > 0) { 
+    if (length > 0) {
         value = parseFloat(getTotal(row));
         if (parseFloat(grade_boundaries[0]["boundary"]) > parseFloat(grade_boundaries[length - 1]["boundary"])) {
             grade_boundaries = reverseGradeBoundaries(grade_boundaries);
@@ -1513,12 +1513,12 @@ function updateGrade(stu_id, row) {
                     ums_2 = parseFloat(grade_boundaries[pos_1 + 1]["ums"]);
                     ratio = (ums_2 - ums_1) / (boundary_2 - boundary_1);
                     ums_val = Math.max(0, Math.round(ums_1 + (value - boundary_1) * ratio));
-                    $("#ums_" + stu_id).val(ums_val); 
+                    $("#ums_" + stu_id).val(ums_val);
                     changeUMS(stu_id, ums_val);
                 }
                 $("#grade_" + stu_id).val(grade_val);
                 changeGrade(stu_id, grade_val);
-                return;                
+                return;
             }
         }
         // Last boundary
@@ -1530,13 +1530,16 @@ function updateGrade(stu_id, row) {
             boundary_1 = parseFloat(grade_boundaries[i - 1]["boundary"]);
             ums_1 = parseFloat(grade_boundaries[i - 1]["ums"]);
             ratio = (ums - ums_1) / (boundary - boundary_1);
+            if (Math.round(ums + (75 - boundary) * ratio) < 100) {
+                ratio = (100 - ums) / (75 - boundary);
+            }
             ums_val = Math.min(100, Math.round(ums + (value - boundary) * ratio));
-            $("#ums_" + stu_id).val(ums_val); 
+            $("#ums_" + stu_id).val(ums_val);
             changeUMS(stu_id, ums_val);
         }
         $("#grade_" + stu_id).val(grade_val);
         changeGrade(stu_id, grade_val);
-        return;  
+        return;
     }
 }
 
@@ -2188,7 +2191,7 @@ function toggleEnterTotals() {
     for (var i = 0; i < total_divs.length; i++) {
         total_divs[i].style.display = selected ? "table-cell" : "none";
     }
-    
+
     var total_divs = document.getElementsByClassName("total_col");
     for (var i = 0; i < total_divs.length; i++) {
         total_divs[i].style.display = selected ? "none" : "table-cell";

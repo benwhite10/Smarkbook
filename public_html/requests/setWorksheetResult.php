@@ -103,6 +103,7 @@ function saveResults($gwid, $save_changes, $req_id) {
 function updateGradeAndUMS($worksheet) {
     // Check for boundaries
     $gwid = $worksheet["Group Worksheet ID"];
+    $stu_id = $worksheet["Student ID"];
     $boundary_query = "SELECT `Grade`, `Boundary`, `UMS`
                         FROM `TGRADEBOUNDARIES`
                         WHERE `GroupWorksheet` = $gwid
@@ -116,8 +117,8 @@ function updateGradeAndUMS($worksheet) {
         $mark_query = "SELECT SUM(`Mark`) Mark FROM (
                         SELECT CQ.`Mark` FROM `TCOMPLETEDQUESTIONS` CQ
                         JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
-                        WHERE CQ.`Group Worksheet ID` = 1366
-                        AND CQ.`Student ID` = 3003
+                        WHERE CQ.`Group Worksheet ID` = $gwid
+                        AND CQ.`Student ID` = $stu_id
                         AND CQ.`Deleted` = 0
                         AND SQ.`Deleted` = 0
                         GROUP BY CQ.`Stored Question ID`) AS A";
@@ -179,6 +180,9 @@ function calculateGradeAndUMS($mark, $boundaries) {
         $boundary_1 = floatval($boundaries[$i - 1]["Boundary"]);
         $ums_1 = floatval($boundaries[$i - 1]["UMS"]);
         $ratio = ($ums - $ums_1) / ($boundary - $boundary_1);
+        if (round($ums + (75 - $boundary) * $ratio) < 100) {
+            $ratio = (100 - $ums) / (75 - $boundary);
+        }
         $ums_val = min(100, round($ums + ($mark - $boundary) * $ratio));
     }
     return [$grade_val, $ums_val];
@@ -186,10 +190,11 @@ function calculateGradeAndUMS($mark, $boundaries) {
 
 function saveWorksheets($gwid, $worksheets, $req_id, $student_entry) {
     foreach($worksheets as $key => $worksheet) {
+        $worksheets[$key] = addNewWorksheet($worksheet);
         if ($student_entry) {
             $worksheet = updateGradeAndUMS($worksheet);
+            $worksheets[$key] = addNewWorksheet($worksheet);
         }
-        $worksheets[$key] = addNewWorksheet($worksheet);
     }
     $return = array(
         "success" => TRUE,
