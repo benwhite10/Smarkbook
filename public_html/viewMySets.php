@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -42,16 +42,7 @@ $sets = db_select($query);
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
             </div>
-            <ul class="menu topbar">
-                <li>
-                    <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
-                    <ul class="dropdown topdrop">
-                        <li><a href="portalhome.php">Home</a></li>
-                        <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
-                        <li><a href="includes/process_logout.php">Log Out</a></li>
-                    </ul>
-                </li>
-            </ul>
+            <?php navbarMenu($fullName, $userid, $userRole) ?>
     	</div>
     	<div id="body">
             <div id="top_bar">
@@ -69,14 +60,14 @@ $sets = db_select($query);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
+                        <?php
                             foreach ($sets as $key=>$set){
                                 $setName = $set['Name'];
                                 $setId = $set['ID'];
                                 $count = $set['Count'];
                                 echo "<tr><td><a href='viewGroup.php?id=$setId'>$setName</a></td><td>$count</td></tr>";
                             }
-                        ?> 
+                        ?>
                     </tbody>
                 </table>
             </div><div id="side_bar" class="menu_bar">
@@ -89,5 +80,3 @@ $sets = db_select($query);
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	

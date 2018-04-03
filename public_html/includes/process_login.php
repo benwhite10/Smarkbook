@@ -16,7 +16,7 @@ $pwd = filter_input(INPUT_POST,'p',FILTER_SANITIZE_STRING);
 if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
     $userid = getDetails($username, 'User ID');
     $user = User::createUserLoginDetails($userid);
-    
+
     //Check if the user is currently locked out
     if($user->getLocked()){
         //$locktime = strtotime($details[0]['Locked Time']);
@@ -44,7 +44,7 @@ if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
         clearFailedLogins($userid);
         $_SESSION['timeout'] = time();
         $message = "User $userid has been successfully logged in.";
-        if(isset($_SESSION['url'])){
+        if(isset($_SESSION['url']) && $_SESSION['url'] !== ""){
             $url = $_SESSION['url'];
             unset($_SESSION['url']);
         }else{

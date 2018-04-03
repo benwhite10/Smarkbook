@@ -43,16 +43,7 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
                 <div id="title">
                     <a href="index.php"><img src="branding/mainlogo.png"/></a>
                 </div>
-                <ul class="menu topbar">
-                    <li>
-                        <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
-                        <ul class="dropdown topdrop">
-                            <li><a href="portalhome.php">Home</a></li>
-                            <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
-                            <li><a href="includes/process_logout.php">Log Out</a></li>
-                        </ul>
-                    </li>
-                </ul>
+                <?php navbarMenu($fullName, $userid, $userRole) ?>
             </div>
             <div id="body">
                 <div id="top_bar">
@@ -67,7 +58,7 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
                     <table style="width:100%" id='note_table'>
                         <tr>
                           <th>Name</th>
-                          <th>Set</th> 
+                          <th>Set</th>
                           <th>Date</th>
                           <th>Note</th>
                         </tr>
@@ -78,5 +69,3 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
         </div>
     </body>
 </html>
-
-

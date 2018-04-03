@@ -3,7 +3,7 @@
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
 
-$result = json_decode($_POST['result'], TRUE);
+$result = isset($_POST['result']) ? json_decode($_POST['result'], TRUE) : [];
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $quiz_id = filter_input(INPUT_POST,'qid',FILTER_SANITIZE_NUMBER_INT);
 $time = filter_input(INPUT_POST,'time',FILTER_SANITIZE_STRING);
@@ -34,20 +34,20 @@ function getQuiz($quiz_id) {
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-    
+
     $query = "SELECT *, 0 Completed "
             . "FROM `TQUIZQUESTIONS` "
             . "WHERE `QuizID` = $quiz_id "
             . "ORDER BY `Level`, RAND() ";
     try {
         $quiz = db_select_exception($query);
-        for ($j = 0; $j < count($quiz); $j++) {
+        /*for ($j = 0; $j < count($quiz); $j++) {
             array_push($final_quiz, $quiz[$j]);
-        }
+        }*/
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-    
+
     succeedRequest(array(
         "Details" => $details,
         "Questions" => $quiz));
@@ -102,7 +102,7 @@ function getAwardCode($award) {
             return 3;
         case "gold":
             return 4;
-        default: 
+        default:
             return 5;
     }
 }
@@ -123,7 +123,7 @@ function getLeaderBoard($quiz_id, $time) {
             $all = true;
             break;
     }
-    $results_query = "SELECT U.`User ID`, U.`Title`, U.`First Name`, U.`Preferred Name`, U.`Surname`, U.`Role`, `Score`, 
+    $results_query = "SELECT U.`User ID`, U.`Title`, U.`First Name`, U.`Preferred Name`, U.`Surname`, U.`Role`, `Score`,
                         CONCAT(`Correct`,'/',`Correct`+`Incorrect`) Correct, `Award`, `DateCompleted`, `Correct`/(`Correct` + `Incorrect`) Acc FROM (
                             SELECT CQ.*
                             FROM `TCOMPLETEDQUIZZES` CQ
@@ -134,7 +134,7 @@ function getLeaderBoard($quiz_id, $time) {
     if (!$all) {
         $results_query .= "AND " . $time_text;
     }
-                                
+
     $results_query .=  " AND `Award` > 0
                             GROUP BY `UserID`
                         ) B ON CQ.`UserID` = B.`UserID` AND CQ.`Score` = B.`Score` ";
@@ -142,7 +142,7 @@ function getLeaderBoard($quiz_id, $time) {
         $results_query .= "WHERE " . $time_text;
     }
     $results_query .= " ) C
-                        JOIN `TUSERS` U ON C.`UserID` = U.`User ID` 
+                        JOIN `TUSERS` U ON C.`UserID` = U.`User ID`
                     ORDER BY C.`Score` DESC, `Acc` DESC";
     try {
         $final_leaderboard = array();
@@ -162,7 +162,7 @@ function getLeaderBoard($quiz_id, $time) {
                 array_push($final_leaderboard, $result);
                 $cur_user = $result["User ID"];
                 $score = $result["Score"] . "-" . $result["Acc"];
-            } 
+            }
         }
         succeedRequest(array(
             "Board" => $final_leaderboard,

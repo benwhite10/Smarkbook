@@ -8,9 +8,9 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
-    $loggedin = true; 
+    $loggedin = true;
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
     $info = Info::getInfo();
@@ -72,7 +72,5 @@ if(isset($_SESSION['url'])){
             <li onclick="logout()"><a>Log Out</a></li>
     	</ul>
     </div>
-    
-</body>
 
-	
+</body>
