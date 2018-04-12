@@ -14,7 +14,7 @@ switch ($request_type){
         getQuiz($quiz_id);
         break;
     case "GETQUIZZES":
-        getQuizzes();
+        getQuizzes($user_id);
         break;
     case "STOREQUIZ":
         storeQuiz($user_id, $quiz_id, $result);
@@ -53,12 +53,47 @@ function getQuiz($quiz_id) {
         "Questions" => $quiz));
 }
 
-function getQuizzes() {
-    $query = "SELECT * FROM `TQUIZ` WHERE `Deleted` = 0";
+function getQuizzes($user_id) {
+    $topics_query = "SELECT `ID`, `Name` FROM `TQUIZTOPIC`
+                WHERE `Deleted` = 0
+                ORDER BY `Name`";
+    $quizzes_query = "SELECT Q.* FROM `TQUIZ` Q
+            JOIN `TQUIZTOPIC` QT ON Q.`Topic` = QT.`ID`
+            WHERE Q.`Deleted` = 0 AND QT.`Deleted` = 0
+            ORDER BY QT.`Name`, Q.`Name`";
     try {
-        succeedRequest(db_select_exception($query));
+        $topics = db_select_exception($topics_query);
+        $quizzes = db_select_exception($quizzes_query);
+        for ($i = 0; $i < count($quizzes); $i++) {
+            $id = $quizzes[$i]["ID"];
+            $result = getBestResult($user_id, $id);
+            if ($result) {
+                $quizzes[$i]["Result"] = $result;
+            }
+        }
+        succeedRequest(array(
+            "Topics" => $topics,
+            "Quizzes" => $quizzes
+        ));
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
+    }
+}
+
+function getBestResult($user, $quiz_id) {
+    $query = "SELECT `Score`, `Award` FROM `TCOMPLETEDQUIZZES` CQ
+        WHERE `UserID` = $user AND `QuizID` = $quiz_id
+        ORDER BY `Award` DESC, `Score` DESC
+        LIMIT 1";
+    try {
+        $result = db_select_exception($query);
+        if (count($result) > 0) {
+            return $result[0];
+        } else {
+            return FALSE;
+        }
+    } catch (Exception $ex) {
+        return FALSE;
     }
 }
 
@@ -72,7 +107,7 @@ function storeQuiz($user_id, $quiz_id, $result) {
             . " VALUES ($quiz_id,$user_id,$score,$correct,$incorrect,NOW(),$award)";
 
     try {
-        db_insert_query_exception($query);
+        $return = db_insert_query_exception($query);
     } catch (Exception $ex) {
         failRequest("Error storing quiz: " . $ex->getMessage());
     }
@@ -82,12 +117,82 @@ function storeQuiz($user_id, $quiz_id, $result) {
         $ans = $question["Ans"];
         $query = "UPDATE `TQUIZQUESTIONS` SET `$ans Ans` = `$ans Ans` + 1 WHERE `ID` = $q_id;";
         try {
-            db_insert_query_exception($query);
+            db_query_exception($query);
         } catch (Exception $ex) {
             failRequest("Error storing question: " . $ex->getMessage());
         }
     }
-    succeedRequest(null);
+    $message = getQuizResult($return[1], $user_id, $quiz_id, $score, $correct, $incorrect);
+    succeedRequest($message);
+}
+
+function getQuizResult($id, $user_id, $quiz_id, $score, $correct, $incorrect) {
+    $perc = $correct / ($correct + $incorrect);
+    $at_query = "SELECT `Score`, `Perc` FROM (
+                SELECT `Score` , `Correct`/(`Correct` + `Incorrect`) Perc FROM `TCOMPLETEDQUIZZES`
+                WHERE `QuizID` = $quiz_id AND `ID` <> $id AND `Score` IN (
+                SELECT MAX(`Score`) FROM `TCOMPLETEDQUIZZES`
+                WHERE `QuizID` = $quiz_id AND `ID` <> $id)) As A
+                ORDER BY `Perc` DESC
+                LIMIT 1";
+    try {
+        $at_result = db_select_exception($at_query);
+        if (count($at_result)>0) {
+            if ($score < $at_result[0]["Score"]) {
+                $at = false;
+            } else if ($score === $at_result[0]["Score"]) {
+                $at = $perc > parseFloat($at_result[0]["Perc"]);
+            } else {
+                $at = true;
+            }
+        } else {
+            $at = true;
+        }
+    } catch (Exception $ex) {
+        return "";
+    }
+
+    if ($at) {
+        return "ALL TIME BEST SCORE!";
+    }
+
+    // Previous personal best
+    $pb_query = "SELECT `Score`, `Perc` FROM (
+                SELECT `Score` , `Correct`/(`Correct` + `Incorrect`) Perc FROM `TCOMPLETEDQUIZZES`
+                WHERE `UserID` = $user_id AND `QuizID` = $quiz_id AND `ID` <> $id AND `Score` IN (
+                SELECT MAX(`Score`) FROM `TCOMPLETEDQUIZZES`
+                WHERE `UserID` = $user_id AND `QuizID` = $quiz_id AND `ID` <> $id)) As A
+                ORDER BY `Perc` DESC
+                LIMIT 1";
+    try {
+        $pb_result = db_select_exception($pb_query);
+        if (count($pb_result)>0) {
+            if ($score < $pb_result[0]["Score"]) {
+                $pb = false;
+            } else if ($score === $pb_result[0]["Score"]) {
+                $pb = $perc > parseFloat($pb_result[0]["Perc"]);
+            } else {
+                $pb = true;
+            }
+        } else {
+            $pb = true;
+        }
+    } catch (Exception $ex) {
+        return "";
+    }
+
+
+    // All time time top score
+
+    // Best score this week
+
+    // Best score today
+    if ($pb) {
+        return "NEW PERSONAL BEST SCORE!";
+    } else {
+        return "";
+    }
+
 }
 
 function getAwardCode($award) {

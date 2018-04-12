@@ -13,6 +13,7 @@ function pageHeader($title, $info_version) {
     echo "<link rel='stylesheet' type='text/css' href='css/branding.css?$info_version' />";
     echo "<link rel='stylesheet' type='text/css' href='css/table.css?$info_version' />";
     echo "<script src='js/jquery.js?$info_version'></script>";
+    echo "<script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>";
     echo "<script src='js/moment.js?$info_version'></script>";
     echo "<script src='js/methods.js?$info_version'></script>";
     echo "<script src='js/jquery.validate.min.js?$info_version'></script>";

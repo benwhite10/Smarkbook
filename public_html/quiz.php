@@ -44,6 +44,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         </script>
         <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
         <script src="js/jquery.js"></script>
+        <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
+        <script src="libraries/circles.js?<?php echo $info_version; ?>"></script>
         <script src="js/quiz.js?<?php echo $info_version; ?>"></script>
         <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     </head>
@@ -65,8 +67,12 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         </div>
         <div id="main_quiz">
             <div id="top_div">
-                <span id="score">0</span>
-                <span id="timer"></span>
+                <div id="refresh_button" onclick="replayQuiz()">
+                    <div id="refresh_image"></div>
+                    <div id="refresh_text">Restart</div>
+                </div>
+                <div class="circle" id="score_circle"></div>
+                <div class="circle" id="timer_circle"></div>
             </div>
             <div id="question_div_0" class="question_div">
                 <span id="question_0" class="question"></span>
@@ -106,6 +112,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                     <div class="retry_text" onclick="replayQuiz()">Try Again</div>
                 </div>
             </div>
+            <div id="message_container"></div>
             <div id="results_container"></div>
         </div>
     </body>

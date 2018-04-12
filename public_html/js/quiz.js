@@ -2,9 +2,16 @@ var stored_questions = [];
 var correct_answer = [];
 var details = [];
 var q_levels = [];
+var boundaries = [];
 var counter;
 var quiz_id = 0;
 var time = "day";
+var timer_time;
+var max_time;
+var timer_circle;
+var score_circle;
+var current_score = 0;
+var bottom_boundary = 0;
 
 $(document).ready(function(){
     quiz_id = getParameterByName("qid");
@@ -17,9 +24,11 @@ $(document).ready(function(){
 function startQuiz() {
     $("#start_menu").css("display", "none");
     $("#main_quiz").css("display", "block");
+    $("#quiz_title").css("display", "none");
     stopLeaderboard();
     pickNextQuestion();
     startTimer();
+    initScoreDisplay();
 }
 
 function requestQuiz() {
@@ -109,6 +118,13 @@ function quizSuccess(json) {
         $("#start_menu").fadeIn("slow");
         $("#quiz_title").fadeIn("slow");
         details = json["result"]["Details"][0];
+        boundaries.push(parseInt(details["Pass"]));
+        boundaries.push(parseInt(details["Bronze"]));
+        boundaries.push(parseInt(details["Silver"]));
+        boundaries.push(parseInt(details["Gold"]));
+        for (var i = 1; i < 5; i++) {
+            boundaries.push(parseInt(details["Gold"]) + 2 * i * (parseInt(details["Gold"]) - parseInt(details["Silver"])));
+        }
         setQuizLevels(details);
         stored_questions = json["result"]["Questions"];
         parseQuizDetails();
@@ -130,19 +146,39 @@ function parseQuizDetails() {
 }
 
 function startTimer() {
-    time = details["Time"];
-    $("#timer").html(time + " s");
+    timer_time = details["Time"];
+    max_time = details["Time"];
+    setTimerCircle(0, timer_time);
     counter=setInterval(timer, 1000);
 
     function timer() {
-        time--;
-        if (time < 1) {
+        timer_time--;
+        if (timer_time < 1) {
            clearInterval(counter);
            finishQuiz();
            return;
         }
-        $("#timer").html(time + " s");
+        timer_circle.update(max_time - timer_time, 0);
     }
+}
+
+function setTimerCircle(time, total_time) {
+    timer_circle = Circles.create({
+      id:           'timer_circle',
+      radius:       80,
+      value:        time,
+      maxValue:     total_time,
+      width:        15,
+      text:         function(){
+                        return this.getMaxValue() - this.getValue();
+                    },
+      colors:       ['rgba(28, 148, 196, 0.2)', 'rgba(28, 148, 196, 1.0)'],
+      duration:     0,
+      wrpClass:     'circles-wrp',
+      textClass:    'circles-text',
+      styleWrapper: true,
+      styleText:    true
+  });
 }
 
 function startLeaderboard() {
@@ -156,10 +192,101 @@ function stopLeaderboard() {
 }
 
 function clickOption(id, val) {
-    $("#score").html(addQuizRecord(id, val));
+    var score = addQuizRecord(id, val);
+    updateScoreDisplay(score[1]);
+    var colour = score[0] ? "#c2f4a4" : "#f8ccd4";
+    $("#score_circle").css({backgroundColor: colour});
+    setTimeout(function(){
+        $("#score_circle").animate({backgroundColor: 'transparent'}, 'slow');
+    }, 200);
     pickNextQuestion();
 }
 
+function initScoreDisplay() {
+    current_score = 0;
+    upper_boundary = boundaries[0];
+    bottom_boundary = 0;
+    colour = getAwardColour(0);
+    createScoreCircle(80, 15, 0, upper_boundary, colour[0], colour[1], 0);
+}
+
+function updateScoreDisplay(score) {
+    var current_lb = 0;
+    var current_ub = 0;
+    for (var i = 0; i < boundaries.length; i++) {
+        current_lb = i === 0 ? 0 : boundaries[i - 1];
+        current_ub = boundaries[i];
+        if (current_score < current_ub) {
+            break;
+        }
+    }
+    if (score < current_lb) {
+        console.log("Go down a level");
+        var new_lb = i > 1 ? boundaries[i - 2] : 0;
+        var new_ub = current_lb;
+        first_time = 1000 * (current_score - new_ub) / (current_score - score);
+        second_time = 1000 * (new_ub - score) / (current_score - score);
+        score_circle.update(0, first_time);
+        current_score = score;
+        setTimeout(function(){
+            bottom_boundary = new_lb;
+            colour = getAwardColour(i - 1);
+            createScoreCircle(80, 15, new_ub - new_lb, new_ub - new_lb, colour[0], colour[1], 0);
+            score_circle.update(score - new_lb, second_time);
+        }, first_time);
+    } else if (score < current_ub) {
+        score_circle.update(score - current_lb, 1000);
+        current_score = score;
+    } else {
+        var new_lb = current_ub;
+        var new_ub = boundaries[i + 1];
+        first_time = 1000 * (new_lb - current_score) / (score - current_score);
+        second_time = 1000 * (score - new_lb) / (score - current_score);
+        score_circle.update(score, first_time);
+        current_score = score;
+        setTimeout(function(){
+            bottom_boundary = new_lb;
+            colour = getAwardColour(i + 1);
+            createScoreCircle(80, 15, score - new_lb, new_ub - new_lb, colour[0], colour[1], second_time);
+        }, first_time);
+    }
+}
+
+function getAwardColour(award) {
+    switch (award) {
+        case 0:
+            return ["#f8ccd4", "#d80027"];
+        case 1:
+            return ["#cff8af", "#85ed36"];
+        case 2:
+            return ["#d8c99a", "#9b7600"];
+        case 3:
+            return ["#f2f2f2", "#dddddd"];
+        case 4:
+        default:
+            return ["#f7d47e", "#f4bb29"];
+    }
+}
+
+function createScoreCircle(radius, width, value, max, color_1, color_2, duration) {
+    score_circle = Circles.create({
+      id:           'score_circle',
+      radius:       radius,
+      value:        value,
+      maxValue:     max,
+      width:        width,
+      text:         function(){
+                        return this.getValue() + bottom_boundary;
+                    },
+      colors:       [color_1, color_2],
+      duration:     duration,
+      wrpClass:     'circles-wrp',
+      textClass:    'circles-text',
+      styleWrapper: true,
+      styleText:    true
+    });
+    $("#score_circle").css("color", color_2);
+}
 
 function addQuizRecord(id, val) {
     var success = correct_answer[val] === "A";
@@ -176,7 +303,7 @@ function addQuizRecord(id, val) {
             stored_questions[i]["Completed"] = 1;
             stored_questions[i]["Ans"] = correct_answer[val];
             stored_questions[i]["Score"] = score;
-            return score;
+            return [success, score];
         }
     }
 }
@@ -198,7 +325,7 @@ function pickNextQuestion() {
             level = getNextLevel();
         }
     }
-    
+
 }
 
 function getNextLevel() {
@@ -265,6 +392,7 @@ function finishQuiz() {
     $("#score_row").html(details["Score"]);
     $("#questions_row").html(correct + "/" + total);
     $("#main_quiz").css("display", "none");
+    $("#quiz_title").css("display", "block");
     $("#award_logo").addClass(award);
     $("#award_title").addClass(award);
     $("#award_title").html(award.toUpperCase());
@@ -351,12 +479,21 @@ function sendCompletedQuiz(result) {
         url: "/requests/quiz.php",
         dataType: "json",
         success: function(json){
-            
+            if (json["success"]) {
+                showMessage(json["result"]);
+            }
         },
         error: function(response){
             console.log("Request failed with status code: " + response.status + " - " + response.statusText);
         }
     });
+}
+
+function showMessage(message) {
+    if (message !== "") {
+        $("#message_container").css("display", "block");
+        $("#message_container").html(message);
+    }
 }
 
 function getAwardClass(score) {
@@ -370,7 +507,7 @@ function getAwardClass(score) {
         return "silver";
     } else {
         return "gold";
-    } 
+    }
 }
 
 function getAward(level) {
@@ -403,7 +540,7 @@ function clickLeaderboardButton(val) {
             $("#today_button").addClass("selected");
             time = "day";
             break;
-        case 1: 
+        case 1:
             $("#week_button").addClass("selected");
             time = "week";
             break;
