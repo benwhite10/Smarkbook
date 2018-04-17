@@ -1,5 +1,7 @@
 #main_content {
     width: 100%;
+    height: auto;
+    margin-top: 0;
 }
 
 #side_bar {
@@ -117,4 +119,64 @@ input[type="text"].awaiting_save {
 
 ul.menu li.disabled {
     color: #999;
+}
+
+#worksheet_summary {
+    width: 100%;
+    height: auto;
+    margin: 20px auto;
+    display: inline-block;
+    float: left;
+}
+
+#worksheet_summary_chart {
+    width: calc(100% - 300px);
+    display: inline-block;
+    float: left;
+}
+
+#worksheet_summary_table {
+    height: auto;
+    width: 276px;
+    margin: 10px 0 0 20px;
+    display: inline-block;
+    float: left;
+    border: 2px solid #000;
+}
+
+.summary_row {
+    width: 100%;
+    height: 40px;
+    border-bottom: 1px solid #999;
+    display: inline-block;
+    float: left;
+    text-align: center;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 20px;
+    line-height: 40px;
+    user-select: none;
+}
+
+.summary_row.bottom {
+    border-bottom: none;
+}
+
+.summary_row.refresh {
+    cursor: pointer;
+}
+
+.summary_row.refresh:hover {
+    background: #c2f4a4;
+}
+
+.summary_row_title, .summary_row_info {
+    width: 50%;
+    height: 40px;
+    display: inline-block;
+    float: left;
+    font-weight: bold;
+}
+
+.summary_row_info {
+    font-weight: lighter;
 }

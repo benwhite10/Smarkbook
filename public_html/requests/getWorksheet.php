@@ -91,6 +91,7 @@ function getWorksheetForGWID($gwid){
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
                 WHERE GW.`Group Worksheet ID` = $gwid
                 AND UG.`Archived` <> 1
+                AND U.`Role` = 'STUDENT' 
                 ORDER BY U.`Surname`;";
 
     // Worksheet inputs

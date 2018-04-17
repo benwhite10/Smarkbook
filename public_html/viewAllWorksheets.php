@@ -8,7 +8,7 @@ include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
 $resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){ 
+if($resultArray[0]){
     $user = $_SESSION['user'];
     $fullName = $user->getFirstName() . ' ' . $user->getSurname();
     $userid = $user->getUserId();
@@ -52,18 +52,9 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
             </div>
-            <ul class="menu topbar">
-                <li>
-                    <a href="portalhome.php"><?php echo $fullName ?> &#x25BE</a>
-                    <ul class="dropdown topdrop">
-                        <li><a href="portalhome.php">Home</a></li>
-                        <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
-                        <li><a href="includes/process_logout.php">Log Out</a></li>
-                    </ul>
-                </li>
-            </ul>
+            <?php navbarMenu($fullName, $userid, $userRole) ?>
     	</div>
-    	<div id="body">            
+    	<div id="body">
             <div id="top_bar">
                 <div id="title2">
                     <h1>Worksheets</h1>
@@ -85,5 +76,3 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	

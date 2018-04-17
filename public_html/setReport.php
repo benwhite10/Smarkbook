@@ -75,16 +75,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                 <div id="title">
                     <a href="index.php"><img src="branding/mainlogo.png"/></a>
                 </div>
-                <ul class="menu topbar">
-                    <li>
-                        <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
-                        <ul class="dropdown topdrop">
-                            <li><a href="portalhome.php">Home</a></li>
-                            <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
-                            <li><a href="includes/process_logout.php">Log Out</a></li>
-                        </ul>
-                    </li>
-                </ul>
+                <?php navbarMenu($fullName, $userid, $userRole) ?>
             </div>
             <div id="body">
                 <?php
@@ -108,7 +99,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
                     </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
                 </div>
 
-                <form id="variablesInput" class="fullSection" style="border: none;" action="" method="POST">      
+                <form id="variablesInput" class="fullSection" style="border: none;" action="" method="POST">
                     <div id="variablesInputBox" class="sectionSummary">
                         <div id="variablesInputBoxDetails" class="sectionSummaryDetails">
                             <div id="variablesInputBoxDetailsText" class="sectionSummaryDetailsText">
@@ -204,5 +195,3 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
 
         </script>
     </body>
-
-

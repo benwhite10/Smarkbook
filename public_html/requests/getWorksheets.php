@@ -158,8 +158,8 @@ function getAllEditableWorksheetsForGroup($groupid, $orderby, $desc) {
             JOIN `TWORKSHEETVERSION` WV ON GW.`Version ID` = WV.`Version ID`
             JOIN `TUSERS` U ON GW.`Primary Staff ID` = U.`User ID`
             WHERE GW.`Group ID` = $groupid
-            AND GW.`StudentInput` = 1
-            AND GW.`Deleted` = 0";
+            AND GW.`Deleted` = 0
+            ORDER BY GW.`Date Due` DESC";
 
     try{
         $worksheets = db_select_exception($query);

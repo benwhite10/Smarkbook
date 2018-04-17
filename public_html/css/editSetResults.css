@@ -111,6 +111,7 @@ td.form
   font-weight: normal;
   color: #323232;
   vertical-align: top;
+  user-select: none;
 }
 
 td.form > h1 {
@@ -596,6 +597,7 @@ td.date_completion:hover {
     margin: 0px;
     padding: 0px;
     vertical-align: top;
+    user-select: none;
 }
 
 #summaryBoxDetails h2
@@ -615,6 +617,7 @@ td.date_completion:hover {
     margin: 0px;
     padding: 0px;
     vertical-align: top;
+    user-select: none;
 }
 
 #summaryBoxShowDetailsText

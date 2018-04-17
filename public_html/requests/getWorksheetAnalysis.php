@@ -68,7 +68,8 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
                 JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
                 WHERE UG.`Group ID` IN (SELECT GW.`Group ID`
                 FROM `TGROUPWORKSHEETS` GW
-                WHERE UG.`Archived` = 0 ";
+                WHERE UG.`Archived` = 0 
+                AND U.`Role` = 'STUDENT' ";
         if (count($gw_ids) > 0) {
             $stu_query .= " AND (";
             for ($i = 0; $i < count($gw_ids); $i++) {

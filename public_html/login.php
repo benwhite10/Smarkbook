@@ -7,7 +7,7 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
 
 sec_session_start();
-$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
+$resultArray = checkUserLoginStatus("");
 if($resultArray[0]){
     if(isset($_SESSION['url'])){
         $url = $_SESSION['url'];

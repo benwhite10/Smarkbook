@@ -65,6 +65,12 @@ switch ($requestType){
         }
         getStudentWorksheetSummary($studentId, $gwid, $userid, $role);
         break;
+    case "CALCSTUWORKSHEETSUMMARY":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        studentWorksheetSummary($studentId, $gwid, $userid, $role);
+        break;
     case "WORKSHEETDETAILS":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
@@ -953,7 +959,7 @@ function getWorksheetDetails($gwid, $userid, $role) {
         AND SQ.`Deleted` = 0
         ORDER BY SQ.`Question Order`;";
 
-    $worksheet_details_query = "SELECT GW.`Date Due` Date, WV.`WName` WName FROM `TGROUPWORKSHEETS` GW
+    $worksheet_details_query = "SELECT GW.`Date Due` Date, WV.`WName` WName, GW.`StudentInput` Input FROM `TGROUPWORKSHEETS` GW
         JOIN `TWORKSHEETVERSION` WV ON GW.`Version ID` = WV.`Version ID`
         WHERE GW.`Group Worksheet ID` = $gwid
         AND GW.`Deleted` = 0
@@ -973,13 +979,14 @@ function getWorksheetDetails($gwid, $userid, $role) {
 }
 
 function getStudentWorksheetSummary($studentId, $gwid, $userid, $role) {
-    if ($role == "STUDENT") {
-        if ($studentId !== $userid) {
-            failRequest("You do not have permission to complete this request.");
-        }
+    if ($role == "STUDENT" && $studentId !== $userid) {
+        failRequest("You do not have permission to complete this request.");
     }
 
-    $comp_questions_query = "SELECT CQ.`Completed Question ID` CQID, CQ.`Stored Question ID` SQID, CQ.`Mark` Mark, CQ.`Deleted` Deleted FROM `TCOMPLETEDQUESTIONS` CQ
+    db_begin_transaction();
+    $comp_questions_query = "SELECT CQ.`Completed Question ID` CQID, CQ.`Stored Question ID` SQID, CQ.`Mark` Mark, CQ.`Deleted` Deleted, SQ.`Marks` Marks
+        FROM `TCOMPLETEDQUESTIONS` CQ
+        JOIN `TSTOREDQUESTIONS` SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
         WHERE CQ.`Group Worksheet ID` = $gwid
         AND CQ.`Student ID` = $studentId;";
 
@@ -990,16 +997,89 @@ function getStudentWorksheetSummary($studentId, $gwid, $userid, $role) {
     try{
         $comp_questions = db_select_exception($comp_questions_query);
         $comp_worksheet = db_select_exception($comp_worksheet_query);
+        if (count($comp_worksheet)>0) {
+            $cwid = $comp_worksheet[0]["Completed Worksheet ID"];
+            $comp_worksheet_inputs_query = "SELECT IT.`Name`, IT.`ShortName`, CWI.`Value` FROM `TCOMPLETEDWORKSHEETINPUT` CWI
+                JOIN `TINPUTTYPE` IT ON CWI.`Input` = IT.`ID`
+                WHERE CWI.`CompletedWorksheet` = $cwid";
+            $comp_worksheet_inputs = db_select_exception($comp_worksheet_inputs_query);
+            $comp_worksheet[0]["Inputs"] = $comp_worksheet_inputs;
+        }
     } catch (Exception $ex) {
-        $message = "There was an error generating the report.";
+        $message = "There was an error getting the student summary.";
         failRequestWithException($message, $ex);
+        db_rollback_transaction();
     }
+    db_commit_transaction();
     succeedRequest(array(
         "Questions" => $comp_questions,
         "Worksheet" => $comp_worksheet
     ));
 }
 
+function studentWorksheetSummary($studentId, $gwid, $userid, $role) {
+    $questions_query = "SELECT SQ.`Stored Question ID` SQID, SQ.`Number`, SQ.`Marks` FROM `TSTOREDQUESTIONS` SQ
+                        JOIN `TGROUPWORKSHEETS` GW ON GW.`Version ID` = SQ.`Version ID`
+                        WHERE GW.`Group Worksheet ID` = $gwid
+                        AND SQ.`Deleted` = 0
+                        ORDER BY SQ.`Question Order`";
+    try{
+        $questions = db_select_exception($questions_query);
+        foreach ($questions as $key => $question) {
+            $sqid = $question["SQID"];
+            // Get tags
+            $tags_query = "SELECT T.`Name` FROM `TQUESTIONTAGS` QT
+                            JOIN `TTAGS` T ON QT.`Tag ID` = T.`Tag ID`
+                            WHERE QT.`Stored Question ID` = $sqid
+                            AND QT.`Deleted` = 0
+                            ORDER BY T.`Type`, T.`Name`";
+            $tags_result = db_select_exception($tags_query);
+            $tags = array();
+            foreach ($tags_result as $tag) {
+                array_push($tags, $tag["Name"]);
+            }
+            $question["Tags"] = $tags;
+
+            // Get student info
+            $student_mark_query = "SELECT CQ.`Mark` FROM `TCOMPLETEDQUESTIONS` CQ
+                                    WHERE CQ.`Stored Question ID` = $sqid
+                                    AND CQ.`Group Worksheet ID` = $gwid
+                                    AND CQ.`Student ID` = $studentId
+                                    AND CQ.`Deleted` = 0
+                                    LIMIT 1";
+            $student_mark_result = db_select_exception($student_mark_query);
+            $student_mark = count($student_mark_result) > 0 ? $student_mark_result[0]["Mark"] : "";
+            // Get set result
+            $set_mark_query = "SELECT AVG(CQ.`Mark`) Mark, COUNT(*) Count FROM `TCOMPLETEDQUESTIONS` CQ
+                                    WHERE CQ.`Stored Question ID` = $sqid
+                                    AND CQ.`Group Worksheet ID` = $gwid
+                                    AND CQ.`Deleted` = 0";
+            $set_mark_result = db_select_exception($set_mark_query);
+            $set_mark = count($set_mark_result) > 0 ? $set_mark_result[0]["Mark"] : "";
+            $set_count = count($set_mark_result) > 0 ? $set_mark_result[0]["Count"] : "";
+            // Get total result
+            $total_mark_query = "SELECT AVG(CQ.`Mark`) Mark, COUNT(*) Count FROM `TCOMPLETEDQUESTIONS` CQ
+                                    WHERE CQ.`Stored Question ID` = $sqid
+                                    AND CQ.`Deleted` = 0";
+            $total_mark_result = db_select_exception($total_mark_query);
+            $total_mark = count($total_mark_result) > 0 ? $total_mark_result[0]["Mark"] : "";
+            $total_count = count($total_mark_result) > 0 ? $total_mark_result[0]["Count"] : "";
+
+            $question["StudentMark"] = $student_mark;
+            $question["SetMark"] = $set_mark;
+            $question["SetCount"] = $set_count;
+            $question["TotalMark"] = $total_mark;
+            $question["TotalCount"] = $total_count;
+            $questions[$key] = $question;
+        }
+    } catch (Exception $ex) {
+        $message = "There was an error generating the student summary.";
+        failRequestWithException($message, $ex);
+    }
+    succeedRequest(array(
+        "Summary" => $questions
+    ));
+}
 /* Exit page */
 
 function failRequestWithException($message, $ex){

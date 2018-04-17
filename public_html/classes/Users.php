@@ -154,7 +154,6 @@ class Teacher extends User
         $teacher->setFirstName($user[0]['First Name']);
         $teacher->setSurname($user[0]['Surname']);
         $teacher->setTitle($user[0]['Title']);
-        $teacher->setStaffId($user[0]['Staff ID']);
         $teacher->setEmail($user[0]['Email']);
         $teacher->setRole($user[0]['Role']);
         $teacher->setInitials($user[0]['Initials']);
@@ -200,7 +199,6 @@ class Student extends User
         $student->setFirstName($user[0]['First Name']);
         $student->setSurname($user[0]['Surname']);
         $student->setPrefferedName($user[0]['Preferred Name']);
-        $student->setStudentId($user[0]['Student ID']);
         $student->setEmail($user[0]['Email']);
         $student->setRole($user[0]['Role']);
         $student->setValidation($user[0]['Validation']);

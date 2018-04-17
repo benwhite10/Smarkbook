@@ -51,6 +51,16 @@ function getSetsForUser($staffid, $orderby, $desc){
 
     try{
         $sets = db_select_exception($query);
+        foreach ($sets as $key=>$set) {
+            $group_id = $set["ID"];
+            $query_1 = "SELECT U.`Initials` FROM TUSERGROUPS UG "
+                    . "JOIN TUSERS U ON U.`User ID` = UG.`User ID` "
+                    . "WHERE UG.`Archived` = 0 "
+                    . "AND UG.`Group ID` = $group_id "
+                    . "AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER');";
+            $result = db_select_exception($query_1);
+            $sets[$key]["Initials"] = $result[0]["Initials"];
+        }
     } catch (Exception $ex) {
         errorLog("Error loading the worksheets: " . $ex->getMessage());
         $response = array(

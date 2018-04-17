@@ -68,16 +68,7 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
                 <div id="title">
                     <a href="index.php"><img src="branding/mainlogo.png"/></a>
                 </div>
-                <ul class="menu topbar">
-                    <li>
-                        <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
-                        <ul class="dropdown topdrop">
-                            <li><a href="portalhome.php">Home</a></li>
-                            <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
-                            <li><a href="includes/process_logout.php">Log Out</a></li>
-                        </ul>
-                    </li>
-                </ul>
+                <?php navbarMenu($fullName, $userid, $userRole) ?>
             </div>
             <div id="body">
                 <?php
@@ -101,7 +92,7 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
                     </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
                 </div>
 
-                <form id="variablesInput" class="fullSection" style="border: none;" action="" method="POST">      
+                <form id="variablesInput" class="fullSection" style="border: none;" action="" method="POST">
                     <div id="variablesInputBox" class="sectionSummary">
                         <div id="variablesInputBoxDetails" class="sectionSummaryDetails">
                             <div id="variablesInputBoxDetailsText" class="sectionSummaryDetailsText">
@@ -236,7 +227,7 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="new_tags_report" class="fullSection">
                     <div id="new_tags_report_spinner" class="spinnerBox">
                     </div>
@@ -289,7 +280,7 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="report_notes" class="fullSection">
                     <div id="report_notes_spinner" class="spinnerBox">
                     </div>
@@ -300,7 +291,7 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
                         <div id="report_notes_notes"></div>
                     </div>
                 </div>
-                
+
                 <div id="tagsReport" class="fullSection" style="display:none">
                     <div id="tagsReportSpinner" class="spinnerBox">
                     </div>
@@ -354,7 +345,7 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
                         </table>
                     </div>
                 </div>
-                
+
                 <div id="questionsReport" class="sectionWrapper" style="display:none">
                     <div id="questionsReportSpinner" class="spinnerBox" style="display:none;">
                     </div>
@@ -381,5 +372,3 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
             <?php pageFooter($info_version) ?>
         </div>
     </body>
-
-

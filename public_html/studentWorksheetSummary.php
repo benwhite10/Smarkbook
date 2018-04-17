@@ -34,6 +34,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
     <?php pageHeader("Worksheet Summary", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/studentWorksheetSummary.css?<?php echo $info_version; ?>" />
     <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
     <script src="js/studentWorksheetSummary.js?<?php echo $info_version; ?>"></script>
     <script src="libraries/spin.js?<?php echo $info_version; ?>"></script>
 </head>
@@ -44,16 +45,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
             </div>
-            <ul class="menu topbar">
-                <li>
-                    <a href="portalhome.php"><?php echo $fullName; ?> &#x25BE</a>
-                    <ul class="dropdown topdrop">
-                        <li><a href="portalhome.php">Home</a></li>
-                        <li><a <?php echo "href='editUser.php?userid=$userid'"; ?>>My Account</a></li>
-                        <li><a href="includes/process_logout.php">Log Out</a></li>
-                    </ul>
-                </li>
-            </ul>
+            <?php navbarMenu($fullName, $userid, $userRole) ?>
     	</div>
     	<div id="body">
             <div id="top_bar">
@@ -77,6 +69,22 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                             <tr class="worksheet_marks" id="worksheet_marks_mark"></tr>
                         </tbody>
                     </table>
+                </div>
+                <div id="worksheet_summary">
+                    <div id='worksheet_summary_chart'>
+                        <canvas id='myChart'></canvas>
+                    </div>
+                    <div id='worksheet_summary_table'>
+                        <div class="summary_row refresh" onclick="getStudentSummary()">Refresh Chart</div>
+                        <div class="summary_row" id="summary_row_score">
+                            <div class="summary_row_title">Score</div>
+                            <div class="summary_row_info" id="summary_score"></div>
+                        </div>
+                        <div class="summary_row" id="summary_row_perc">
+                            <div class="summary_row_title">Perc</div>
+                            <div class="summary_row_info" id="summary_perc"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="side_bar">

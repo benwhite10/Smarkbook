@@ -169,7 +169,7 @@ function moveUpDown(id, up) {
             if (!student) return;
             new_id = pos[0] + "_" + student;
         }
-        
+
     }
     $("#" + new_id).focus();
     $("#" + new_id).select();
@@ -566,7 +566,7 @@ function parseMainTable() {
     }
     row_head_1 += "<th class='results results_header total_input_col'>Total</th>";
     row_head_2 += "<th class='results results_header total_input_col' style='min-width: 60px;'>/" + total_marks + "</th>";
-    
+
     row_head_1 += "<th class='results results_header total_col'></th>";
     row_head_2 += "<th class='results results_header total_col' style='min-width: 100px;'>Total</th>";
 
@@ -606,8 +606,6 @@ function parseMainTable() {
     /* Students */
     var student_rows = "";
     var row = 0;
-    var student_count = students.length;
-    var worksheet_count = Object.keys(worksheet).length;
     var local_results_data_array = new Object();
     var row_student_array = [];
     for (var key in students) {
@@ -967,6 +965,7 @@ function saveGroupWorksheet() {
         userid: $('#userid').val(),
         userval: $('#userval').val()
     };
+
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -1435,7 +1434,7 @@ function updateMarkIfNew(id_string, new_mark) {
 function updateStatusIfNew(id_string, new_value) {
     var element = document.getElementById(id_string);
     var old_value = element.dataset.old_value;
-    if (((old_value === "null" || old_value === undefined || old_value === "undefined")  && new_value === "") || new_value === old_value) {
+    if (((old_value === "null" || old_value === undefined || old_value === "undefined")  && new_value === "") || new_value == old_value) {
         return false;
     } else {
         element.dataset.old_value = new_value;
@@ -1492,55 +1491,51 @@ function getTotal(row) {
 }
 
 function updateGrade(stu_id, row) {
-    var grade_boundaries = getGradeBoundariesFromTable();
-    if (grade_boundaries.length > 0) {
-        var length = grade_boundaries.length;
-        var first_boundary = parseFloat(grade_boundaries[0]["boundary"]);
-        var last_boundary = parseFloat(grade_boundaries[length - 1]["boundary"]);
-        var value = parseFloat(getTotal(row));
-        var desc = first_boundary > last_boundary;
-        var grade_val = "";
-        for (var i = 0; i < length; i++) {
-            var boundary = grade_boundaries[i]["boundary"] === "" ? "" : parseFloat(grade_boundaries[i]["boundary"]);
-            var ums = grade_boundaries[i]["ums"] === "" ? "" : parseFloat(grade_boundaries[i]["ums"]);
-            if (desc) {
-                if (value >= boundary) {
-                    grade_val = grade_boundaries[i]["grade"];
-                    if (ums !== "") {
-                        var previous_boundary = i === 0 ? getTotalMarks() : parseFloat(grade_boundaries[i - 1]["boundary"]);
-                        var previous_ums = i === 0 ? 100 : parseFloat(grade_boundaries[i - 1]["ums"]);
-                        $("#ums_" + stu_id).val(calculateUMS(boundary, previous_boundary, ums, previous_ums, value));
-                    }
-                    $("#grade_" + stu_id).val(grade_val);
-                    changeGrade(stu_id, grade_val);
-                    return;
+    grade_boundaries = getGradeBoundariesFromTable();
+    length = grade_boundaries.length;
+    if (length > 0) {
+        value = parseFloat(getTotal(row));
+        if (parseFloat(grade_boundaries[0]["boundary"]) > parseFloat(grade_boundaries[length - 1]["boundary"])) {
+            grade_boundaries = reverseGradeBoundaries(grade_boundaries);
+        }
+        for (i = 0; i < grade_boundaries.length; i++) {
+            boundary = grade_boundaries[i]["boundary"] === "" ? "" : parseFloat(grade_boundaries[i]["boundary"]);
+            ums = grade_boundaries[i]["ums"] === "" ? "" : parseFloat(grade_boundaries[i]["ums"]);
+            grade_val = "";
+            if (value < boundary) {
+                // Normal boundary
+                grade_val = i === 0 ? "" : grade_boundaries[i - 1]["grade"];
+                if (ums !== "") {
+                    pos_1 = i === 0 ? i : i - 1;
+                    boundary_1 = parseFloat(grade_boundaries[pos_1]["boundary"]);
+                    ums_1 = parseFloat(grade_boundaries[pos_1]["ums"]);
+                    boundary_2 = parseFloat(grade_boundaries[pos_1 + 1]["boundary"]);
+                    ums_2 = parseFloat(grade_boundaries[pos_1 + 1]["ums"]);
+                    ratio = (ums_2 - ums_1) / (boundary_2 - boundary_1);
+                    ums_val = Math.max(0, Math.round(ums_1 + (value - boundary_1) * ratio));
+                    $("#ums_" + stu_id).val(ums_val);
+                    changeUMS(stu_id, ums_val);
                 }
-            } else {
-                if (value < boundary) {
-                    grade_val = i === 0 ? "-" : grade_boundaries[i - 1]["grade"];
-                    if (ums !== "") {
-                        var previous_boundary = i === 0 ? 0 : parseFloat(grade_boundaries[i - 1]["boundary"]);
-                        var previous_ums = i === 0 ? 0 : parseFloat(grade_boundaries[i - 1]["ums"]);
-                        $("#ums_" + stu_id).val(calculateUMS(previous_boundary, boundary, previous_ums, ums, value));
-                    }
-                    $("#grade_" + stu_id).val(grade_val);
-                    changeGrade(stu_id, grade_val);
-                    return;
-                }
+                $("#grade_" + stu_id).val(grade_val);
+                changeGrade(stu_id, grade_val);
+                return;
             }
         }
-        if (desc) {
-            grade_val = "-";
-            if (ums !== "") {
-                $("#ums_" + stu_id).val(calculateUMS(0, boundary, 0, ums, value));
+        // Last boundary
+        i = length - 1;
+        boundary = grade_boundaries[i]["boundary"] === "" ? "" : parseFloat(grade_boundaries[i]["boundary"]);
+        ums = grade_boundaries[i]["ums"] === "" ? "" : parseFloat(grade_boundaries[i]["ums"]);
+        grade_val = grade_boundaries[i]["grade"];
+        if (ums !== "") {
+            boundary_1 = parseFloat(grade_boundaries[i - 1]["boundary"]);
+            ums_1 = parseFloat(grade_boundaries[i - 1]["ums"]);
+            ratio = (ums - ums_1) / (boundary - boundary_1);
+            if (Math.round(ums + (75 - boundary) * ratio) < 100) {
+                ratio = (100 - ums) / (75 - boundary);
             }
-        } else {
-            grade_val = grade_boundaries[i - 1]["grade"];
-            var previous_boundary = parseFloat(grade_boundaries[i - 1]["boundary"]);
-            var previous_ums = parseFloat(grade_boundaries[i - 1]["ums"]);
-            if (ums !== "") {
-                $("#ums_" + stu_id).val(calculateUMS(previous_boundary, getTotalMarks(), previous_ums, 100, value));
-            }
+            ums_val = Math.min(100, Math.round(ums + (value - boundary) * ratio));
+            $("#ums_" + stu_id).val(ums_val);
+            changeUMS(stu_id, ums_val);
         }
         $("#grade_" + stu_id).val(grade_val);
         changeGrade(stu_id, grade_val);
@@ -1548,11 +1543,12 @@ function updateGrade(stu_id, row) {
     }
 }
 
-function calculateUMS(lower_boundary, upper_boundary, lower_ums, upper_ums, value) {
-    var ums_width = Math.abs(upper_ums - lower_ums);
-    var grade_width = Math.abs(upper_boundary - lower_boundary);
-    if (ums_width === 0 || grade_width === 0) return "";
-    return parseInt(lower_ums + (value - lower_boundary) * (ums_width/grade_width));
+function reverseGradeBoundaries(boundaries) {
+    var new_boundaries = [];
+    for (var i = boundaries.length - 1; i >= 0; i--) {
+        new_boundaries.push(boundaries[i]);
+    }
+    return new_boundaries;
 }
 
 function getTotalMarks() {
@@ -2029,13 +2025,13 @@ function setNoteStatus(student, note_class) {
 }
 
 function parseDaysLate(daysLate){
-    if(daysLate < 0){
+    if(parseInt(daysLate) < 0){
         $("#daysLateText").text("Not late");
         $("#daysLateText").addClass("notLate");
-    }else if(daysLate == 0){
+    }else if(parseInt(daysLate) === 0){
         $("#daysLateText").text("On Time");
         $("#daysLateText").addClass("notLate");
-    }else if(daysLate == 1){
+    }else if(parseInt(daysLate) === 1){
         $("#daysLateText").text(daysLate + " day late");
         $("#daysLateText").removeClass("notLate");
     } else {
@@ -2195,7 +2191,7 @@ function toggleEnterTotals() {
     for (var i = 0; i < total_divs.length; i++) {
         total_divs[i].style.display = selected ? "table-cell" : "none";
     }
-    
+
     var total_divs = document.getElementsByClassName("total_col");
     for (var i = 0; i < total_divs.length; i++) {
         total_divs[i].style.display = selected ? "none" : "table-cell";

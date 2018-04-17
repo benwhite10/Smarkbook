@@ -24,7 +24,7 @@ switch ($requestType){
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }
-        getStudentsForSet($setid, $orderby, $desc);
+        getStudentsForSet($setid);
         break;
     case "ALLSTUDENTS":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
@@ -36,15 +36,14 @@ switch ($requestType){
         break;
 }
 
-function getStudentsForSet($setid, $orderby, $desc){
+function getStudentsForSet($setid){
     $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName, U.`Preferred Name` PName
                 FROM TUSERGROUPS UG
                 JOIN TUSERS U ON UG.`User ID` = U.`User ID`
                 WHERE UG.`Group ID` = $setid
                 AND UG.`Archived` = '0'
                 AND U.`Role` = 'STUDENT'
-                ORDER BY $orderby ";
-    if ($desc) $query .= "DESC";
+                ORDER BY `Surname` ";
 
     try{
         $students = db_select_exception($query);

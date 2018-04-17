@@ -263,11 +263,13 @@ label {
   height: 100%;
   overflow: hidden; }
 
-#title2 h1
-{ line-height: 60px;
-  height: 100%;
-  padding-left: 20px;
-  color: #323232; }
+#title2 h1 { 
+    line-height: 60px;
+    height: 100%;
+    padding-left: 20px;
+    color: #323232;
+    user-select: none;
+}
 
 ul.menu {
   text-align: center;
