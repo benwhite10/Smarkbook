@@ -93,7 +93,7 @@ html {
     height: 100px;
     line-height: 100px;
     text-align: center;
-    font-size: 60px;
+    font-size: 50px;
     background: #FFF;
     border: 5px solid #1c94c4;
     border-radius: 10px 10px 0 0;
@@ -164,6 +164,7 @@ html {
     height: 100px;
     width: 100%;
     display: inline-block;
+    float: left;
 }
 
 .question.bottom {
@@ -306,6 +307,7 @@ html {
     height: 40px;
     user-select: none;
     cursor: pointer;
+    overflow: hidden;
 }
 
 .leaderboard_button.selected {
@@ -328,6 +330,7 @@ html {
     display: inline-block;
     float: left;
     border-bottom: 1px solid #1C94C4;
+    overflow: hidden;
 }
 
 .leaderboard_row_no {
@@ -532,7 +535,9 @@ html {
 
 #top_container {
     width: 100%;
-    height: 100%;
+    height: 208px;
+    display: inline-block;
+    float: left;
 }
 
 #results_container {
@@ -548,8 +553,7 @@ html {
 
 #message_container {
     width: 100%;
-    height: 80px;
-    line-height: 80px;
+    line-height: 60px;
     font-size: 40px;
     display: none;
     margin-top: 30px;
@@ -574,6 +578,7 @@ html {
     text-align: center;
     border-right: 1px solid #1c94c4;
     background: transparent;
+    overflow: hidden;
 }
 
 .results_row_col.q_no, .results_row_col.score {
@@ -611,4 +616,59 @@ html {
     width: 60px;
     height: 60px;
     margin-top: -10px;
+}
+
+@media only screen and (max-width: 667px) {
+    .col {
+        width: 100%;
+    }
+
+    .results_row_col.score {
+        width: 80px;
+    }
+
+    .results_row_col.ques,
+    .results_row_col.ans {
+        width: calc(50% - 41px);
+    }
+
+    .results_row_col.correct_ans,
+    .results_row_col.q_no {
+        display: none;
+    }
+
+    .leaderboard_row_col.num,
+    .leaderboard_row_col.score_head,
+    .leaderboard_row_col.score {
+        width: 60px;
+    }
+
+    .leaderboard_row_col.score_head,
+    .leaderboard_row_col.score {
+        border-right: none;
+    }
+
+    .leaderboard_row_col.name {
+        width: calc(100% - 122px);
+    }
+
+
+    .leaderboard_row_col.score_acc,
+    .leaderboard_row_col.award
+    {
+        display: none;
+    }
+
+    #leaderboard_buttons {
+        font-size: 16px;
+    }
+
+    #top_container {
+        height: 416px;
+    }
+
+    #message_container {
+        line-height: 50px;
+        font-size: 30px;
+    }
 }

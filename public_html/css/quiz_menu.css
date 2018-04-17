@@ -18,11 +18,13 @@ html {
 #quizzes_div {
     width: 50%;
     height: 100%;
+    margin: auto;
 }
 
 #stats_div {
     width: 50%;
     height: 200px;
+    display: none;
 }
 
 #quizzes_title {
@@ -143,4 +145,22 @@ html {
 
 .quiz_info.gold {
     color: #EFC75E;
+}
+
+@media only screen and (max-width: 667px) {
+    #quizzes_div {
+        width: 95%;
+    }
+
+    .quiz_title {
+        width: calc(100% - 60px);
+    }
+
+    .quiz_info {
+        width: 60px;
+    }
+
+    .quiz_info.topic {
+        margin: 4px 14px;
+    }
 }

@@ -21,6 +21,11 @@ $(document).ready(function(){
     startLeaderboard();
 });
 
+$(window).resize(function () {
+    updateTitleSize();
+    updateCircles();
+});
+
 function startQuiz() {
     $("#start_menu").css("display", "none");
     $("#main_quiz").css("display", "block");
@@ -29,6 +34,8 @@ function startQuiz() {
     pickNextQuestion();
     startTimer();
     initScoreDisplay();
+    updateCircles();
+    updateQuiz();
 }
 
 function requestQuiz() {
@@ -85,6 +92,7 @@ function leaderboardSuccess(json) {
             leaderboard_html += "<div class='leaderboard_row_col award'>Award</div></div>";
             for (var i = 0; i < leaderboard.length; i++) {
                 var row = leaderboard[i];
+                var award_text = getAward(parseInt(row["Award"]));
                 leaderboard_html += "<div class='leaderboard_row ";
                 leaderboard_html += i+1 === leaderboard.length ? "bottom'>" : "'>";
                 leaderboard_html += "<div class='leaderboard_row_col num'>" + row["Num"] + "</div>";
@@ -95,9 +103,10 @@ function leaderboardSuccess(json) {
                     name = row["Preferred Name"] + " " + row["Surname"];
                 }
                 leaderboard_html += "<div class='leaderboard_row_col name'>" + name + "</div>";
-                leaderboard_html += "<div class='leaderboard_row_col score'>" + row["Score"] + "</div>";
+                leaderboard_html += "<div class='leaderboard_row_col score ";
+                if ($(window).width() < 667) leaderboard_html += award_text;
+                leaderboard_html += "'>" + row["Score"] + "</div>";
                 leaderboard_html += "<div class='leaderboard_row_col score_acc'>" + row["Correct"] + "</div>";
-                var award_text = getAward(parseInt(row["Award"]));
                 leaderboard_html += "<div class='leaderboard_row_col award " + award_text + "'>" + award_text.toUpperCase() + "</div></div>";
             }
         } else {
@@ -143,6 +152,84 @@ function setQuizLevels(details) {
 
 function parseQuizDetails() {
     $("#quiz_title").html(details["Name"]);
+    updateTitleSize();
+}
+
+function updateTitleSize() {
+    var name = $("#quiz_title").html();
+    var div_width = $("#quiz_title").width();
+    var div_height = 80;
+    for (var font = 40; font > 10; font-= 2) {
+        var text_width = textWidth(name, font + "px 'Montserrat'");
+        if ($(window).width() < 668) {
+            if (text_width < div_width) {
+                break;
+            } else if (text_width < div_width * 2) {
+                div_height = 160;
+                break;
+            }
+        } else {
+            if (text_width < div_width) {
+                break;
+            }
+        }
+    }
+    $("#quiz_title").css("height", div_height + "px");
+    $("#quiz_title").css("font-size", font + "px");
+}
+
+function updateCircles() {
+    if ($(window).width() < 668) {
+        $("#refresh_button").css("display", "none");
+        if ($(window).width() < 400) {
+            $("#score_circle").css("margin", "0px calc(25% - 60px)");
+            $("#timer_circle").css("margin", "0px calc(25% - 60px)");
+            $("#score_circle").css("width", "120px");
+            $("#timer_circle").css("width", "120px");
+            $("#score_circle").css("height", "120px");
+            $("#timer_circle").css("height", "120px");
+            if(timer_circle) timer_circle.updateRadius(60);
+            if(score_circle) score_circle.updateRadius(60);
+            $("#top_div").css("height", "120px");
+        } else {
+            $("#score_circle").css("margin", "0px calc(25% - 80px)");
+            $("#timer_circle").css("margin", "0px calc(25% - 80px)");
+            $("#score_circle").css("width", "160px");
+            $("#timer_circle").css("width", "160px");
+            $("#score_circle").css("height", "160px");
+            $("#timer_circle").css("height", "160px");
+            if(timer_circle) timer_circle.updateRadius(80);
+            if(score_circle) score_circle.updateRadius(80);
+            $("#top_div").css("height", "160px");
+        }
+    } else {
+        $("#refresh_button").css("display", "inline-block");
+        $("#score_circle").css("width", "160px");
+        $("#timer_circle").css("width", "160px");
+        $("#score_circle").css("height", "160px");
+        $("#timer_circle").css("height", "160px");
+        $("#score_circle").css("margin", "0px calc(16.6% - 80px)");
+        $("#timer_circle").css("margin", "0px calc(16.6% - 80px)");
+    }
+}
+
+function updateQuiz() {
+    if ($(window).width() < 668) {
+        $(".option").css("width", "100%");
+        $("#option_0_0").attr("class", "option top");
+        $("#option_0_1").attr("class", "option top");
+        $("#option_0_2").attr("class", "option top");
+        $("#option_0_3").attr("class", "option");
+        $("#options_div_0").css("height", "400px");
+    } else {
+        $(".option").css("width", "calc(50% - 1px)");
+        $("#options_div_0").css("height", "200px");
+        $("#option_0_0").attr("class", "option top left");
+        $("#option_0_1").attr("class", "option top");
+        $("#option_0_2").attr("class", "option left");
+        $("#option_0_3").attr("class", "option");
+    }
+
 }
 
 function startTimer() {
@@ -220,6 +307,7 @@ function updateScoreDisplay(score) {
             break;
         }
     }
+    var circle_width = $(window).width() < 400 ? 60 : 80;
     if (score < current_lb) {
         console.log("Go down a level");
         var new_lb = i > 1 ? boundaries[i - 2] : 0;
@@ -231,7 +319,7 @@ function updateScoreDisplay(score) {
         setTimeout(function(){
             bottom_boundary = new_lb;
             colour = getAwardColour(i - 1);
-            createScoreCircle(80, 15, new_ub - new_lb, new_ub - new_lb, colour[0], colour[1], 0);
+            createScoreCircle(circle_width, 15, new_ub - new_lb, new_ub - new_lb, colour[0], colour[1], 0);
             score_circle.update(score - new_lb, second_time);
         }, first_time);
     } else if (score < current_ub) {
@@ -247,7 +335,7 @@ function updateScoreDisplay(score) {
         setTimeout(function(){
             bottom_boundary = new_lb;
             colour = getAwardColour(i + 1);
-            createScoreCircle(80, 15, score - new_lb, new_ub - new_lb, colour[0], colour[1], second_time);
+            createScoreCircle(circle_width, 15, score - new_lb, new_ub - new_lb, colour[0], colour[1], second_time);
         }, first_time);
     }
 }
@@ -314,6 +402,7 @@ function pickNextQuestion() {
         for (var i = 0; i < stored_questions.length; i++) {
             if (parseInt(stored_questions[i]["Completed"]) === 0 && parseInt(stored_questions[i]["Level"]) === level) {
                 parseQuestion(stored_questions[i]);
+                updateQuiz();
                 return;
             }
         }
@@ -355,6 +444,7 @@ function forceUpdateLevels() {
 }
 
 function parseQuestion(question) {
+    $("#question_0").css("font-size", "50px");
     $("#question_0").html(question["Question"]);
     correct_answer = shuffle(["A","B","C","D"]);
     var options_html = "";
@@ -368,6 +458,31 @@ function parseQuestion(question) {
     MathJax.Hub.Queue(
         ["Typeset",MathJax.Hub]
     );
+    MathJax.Hub.Queue(function(){
+        var ids = ["question_0", "option_0_0", "option_0_1", "option_0_2", "option_0_3"];
+        var font_sizes = [50, 40, 40, 40, 40];
+        for (var j = 0; j < ids.length; j++) {
+            var id = ids[j];
+            var font_size = font_sizes[j];
+            var math = document.getElementById(id);
+            var div_width = $("#" + id).width();
+            for (var i = 0; i < 5; i++) {
+                math.style.display = "inline";
+                math.style.float = "none";
+                var w = math.offsetWidth;
+                if (w > div_width) {
+                    font_size = Math.floor(div_width/w * font_size * 0.9);
+                    $("#" + id).css("font-size", font_size + "px");
+                } else {
+                    $("#" + id).css("font-size", font_size + "px");
+                    math.style.display = "";
+                    math.style.float = "left";
+                    break;
+                }
+            }
+        }
+    });
+
 }
 
 function getOptionClass(opt) {
@@ -404,7 +519,7 @@ function parseQuizRecord() {
     var html_text = "<div class='results_row header'>";
     html_text += "<div class='results_row_col q_no'>No.</div>";
     html_text += "<div class='results_row_col ques'>Question</div>";
-    html_text += "<div class='results_row_col ans'>Your Answer</div>";
+    html_text += "<div class='results_row_col ans'>Answer</div>";
     html_text += "<div class='results_row_col correct_ans'>Correct Answer</div>";
     html_text += "<div class='results_row_col score'>Score</div></div>";
     var num = 1;
@@ -491,7 +606,7 @@ function sendCompletedQuiz(result) {
 
 function showMessage(message) {
     if (message !== "") {
-        $("#message_container").css("display", "block");
+        $("#message_container").css("display", "inline-block");
         $("#message_container").html(message);
     }
 }
@@ -581,4 +696,21 @@ function getParameterByName(name, url) {
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function textWidth(text, fontProp) {
+    var tag = document.createElement("div");
+    tag.style.position = "absolute";
+    tag.style.left = "-999em";
+    tag.style.whiteSpace = "nowrap";
+    tag.style.font = fontProp;
+    tag.innerHTML = text;
+
+    document.body.appendChild(tag);
+
+    var result = tag.clientWidth;
+
+    document.body.removeChild(tag);
+
+    return result;
 }
