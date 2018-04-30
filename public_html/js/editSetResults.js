@@ -546,11 +546,11 @@ function parseMainTable() {
     var inputs = JSON.parse(sessionStorage.getItem("inputs"));
 
     /*First header*/
-    var row_head_1 = "<th class='results results_header names_col'></th>";
-    var row_head_2 = "<th class='results results_header'  style='text-align: left; padding-left: 10px; padding-bottom: 5px;'>Students</th>";
-    var average_row_1 = "<tr class='averages'><td class='averages'>Question</td>";
-    var average_row_2 = "<tr class='averages'><td class='averages'>Average</td>";
-    var average_row_3 = "<tr class='averages'><td class='averages'>Average (%)</td>";
+    var row_head_1 = "<th class='results results_header names_col'></th><th class='results results_header baseline_col'></th>";
+    var row_head_2 = "<th class='results results_header' style='text-align: left; padding-left: 10px; padding-bottom: 5px;' colspan='2'>Students</th>";
+    var average_row_1 = "<tr class='averages'><td class='averages' colspan='2'>Question</td>";
+    var average_row_2 = "<tr class='averages'><td class='averages' colspan='2'>Average</td>";
+    var average_row_3 = "<tr class='averages'><td class='averages' colspan='2'>Average (%)</td>";
 
     var col = 0;
     var total_marks = 0;
@@ -613,8 +613,15 @@ function parseMainTable() {
         var stuid = student["ID"];
         var results_array = results[stuid];
         var col = 0;
+        var baseline = student["Baseline"] !== null;
+        baseline = false;
         row_student_array.push([row, stuid]);
-        student_rows += "<tr class='results'><td class='results student_name' id='stu" + stuid + "'>" + student["Name"] + "</td>";
+        student_rows += "<tr class='results'><td class='results student_name ";
+        student_rows += baseline ? "" : "no_baseline";
+        student_rows += "' id='stu" + stuid + "'>" + student["Name"] + "</td>";
+        student_rows += "<td class='results baseline_col' >";
+        student_rows += baseline ? student["Baseline"] : "";
+        student_rows += "</td>";
         var totalMark = "";
         var totalMarks = 0;
         for (var key2 in worksheet) {

@@ -85,14 +85,16 @@ function getWorksheetForGWID($gwid){
     $query5 = "SELECT * FROM TNOTES WHERE `Group Worksheet ID` = $gwid;";
 
     // Students
-    $query6 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name
+    $query6 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name, B.`Baseline`
                 FROM TUSERS U
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
-                WHERE GW.`Group Worksheet ID` = $gwid
+                LEFT OUTER JOIN TBASELINES B ON U.`User ID` = B.`UserID` AND B.`Deleted` = 0
+                WHERE GW.`Group Worksheet ID` = $gwid 
                 AND UG.`Archived` <> 1
-                AND U.`Role` = 'STUDENT' 
-                ORDER BY U.`Surname`;";
+                AND U.`Role` = 'STUDENT'
+                GROUP BY U.`User ID`
+                ORDER BY U.`Surname`";
 
     // Worksheet inputs
     $query7 = "SELECT * FROM `TGROUPWORKSHEETINPUT`
@@ -153,7 +155,7 @@ function downloadGWID($gwid) {
 
     // Students
     $query4 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name
-                FROM TUSERS U 
+                FROM TUSERS U
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
                 WHERE GW.`Group Worksheet ID` = $gwid
