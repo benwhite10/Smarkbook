@@ -464,19 +464,33 @@ function parseQuestion(question) {
         for (var j = 0; j < ids.length; j++) {
             var id = ids[j];
             var font_size = font_sizes[j];
-            var math = document.getElementById(id);
+            var math_container = document.getElementById(id);
+            var children = math_container.children;
+            var math = false;
+            for (var k = 0; k < children.length; k++) {
+                if (children[k].classList.contains("MathJax_CHTML")) {
+                    math = children[k];
+                    break;
+                }
+            }
+            if (math === false) break;
             var div_width = $("#" + id).width();
+            var div_height = $("#" + id).height();
             for (var i = 0; i < 5; i++) {
-                math.style.display = "inline";
-                math.style.float = "none";
+                //math.style.display = "inline";
+                //math.style.float = "none";
                 var w = math.offsetWidth;
+                var h = math.offsetHeight;
                 if (w > div_width) {
                     font_size = Math.floor(div_width/w * font_size * 0.9);
                     $("#" + id).css("font-size", font_size + "px");
+                } if (h > div_height) {
+                    font_size = Math.floor(div_height/h * font_size * 0.9);
+                    $("#" + id).css("font-size", font_size + "px");
                 } else {
                     $("#" + id).css("font-size", font_size + "px");
-                    math.style.display = "";
-                    math.style.float = "left";
+                    //math.style.display = "";
+                    //math.style.float = "left";
                     break;
                 }
             }
