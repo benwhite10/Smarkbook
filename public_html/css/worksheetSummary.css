@@ -93,3 +93,55 @@ td.checkbox.selected, .existing_checkbox.selected {
     width: 100%;
     height: 100%;
 }
+
+#breakdown_table {
+    width: calc(100% - 2px);
+    border: 1px solid #323232;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    display: inline-block;
+    float: left;
+    margin: 10px 0;
+}
+
+#breakdown_table > .row {
+    width: 100%;
+    height: 35px;
+    line-height: 35px;
+    display: inline-block;
+    float: left;
+    user-select: none;
+    cursor: pointer;
+    background: transparent;
+}
+
+#breakdown_table > .row.even {
+    background: #DDD;
+}
+
+#breakdown_table > .row:hover {
+    background: #c2f4a4;
+}
+
+#breakdown_table > .row > .col {
+    width: calc(100% - 240px);
+    display: inline-block;
+    float: left;
+    text-align: left;
+}
+
+#breakdown_table > .row > .col.fixed {
+    width: 80px;
+    text-align: center;
+}
+
+#breakdown_table > .row.header {
+    background: #323232;
+    color: #66E11B;
+    font-size: 18px;
+}
+
+#breakdown_table > .row.header > .col {
+    font-weight: 300;
+}

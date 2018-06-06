@@ -5,6 +5,9 @@ var worksheet_details;
 var selected_set;
 var active_tab;
 var breakdown_chart;
+var breakdown_table_array;
+var breakdown_table_order = "RelPerc";
+var breakdown_table_desc = false;
 
 $(document).ready(function(){
     //sessionStorage.setItem("details", "[]");
@@ -88,6 +91,7 @@ function parseBreakdownTab(tab_id) {
 function changeBreakdownSelect() {
     selected_set = $("#breakdown_tab_select").val();
     setUpBreakdownChart();
+    setUpBreakdownTable();
 }
 
 function setUpBreakdownOptions() {
@@ -254,6 +258,7 @@ function setUpBreakdownTable() {
     var sets = results_analysis["Sets"];
     var display_set = [];
     var total_set = [];
+    breakdown_table_array = [];
 
     for (var i = 0; i < sets.length; i++) {
         if (sets[i]["SetID"] === selected_set) {
@@ -264,12 +269,79 @@ function setUpBreakdownTable() {
             total_set = convertObjectToArray(sets[i]["Questions"]);
         }
     }
+    var ques_info = results_analysis["Questions"];
+    for (var i = 0; i < ques_info.length; i++) {
+        var sqid = ques_info[i]["SQID"];
+        if (sqid === "Total") continue;
+        var marks = ques_info[i]["Marks"];
+        var tags = ques_info[i]["Tags"];
+        var tags_string = "";
+        if (tags !== undefined) {
+            for (var j = 0; j < tags.length; j++) {
+                tags_string += tags[j]["Name"];
+                if (j < tags.length - 1) tags_string += ", ";
+            }
+        }
+        var question_array = {
+            "SQID": sqid,
+            "Marks": marks,
+            "Number": ques_info[i]["Number"],
+            "Order": ques_info[i]["Order"],
+            "Tags": tags_string
+        }
+        for (var j = 0; j < display_set.length; j++) {
+            if (sqid === display_set[j]["SQID"]) {
+                question_array["SetMark"] = display_set[j]["AvMark"];
+                question_array["SetPerc"] = parseFloat(display_set[j]["AvMark"]) / parseFloat(marks);
+                break;
+            }
+        }
+        for (var j = 0; j < total_set.length; j++) {
+            if (sqid === total_set[j]["SQID"]) {
+                question_array["TotalMark"] = total_set[j]["AvMark"];
+                question_array["TotalPerc"] = parseFloat(total_set[j]["AvMark"]) / parseFloat(marks);
+                question_array["RelPerc"] = question_array["SetPerc"] - question_array["TotalPerc"];
+                break;
+            }
+        }
+        breakdown_table_array.push(question_array);
+    }
+    writeBreakdownTable();
+}
 
-    var html_text = "<div class='row header'><div class='col fixed'>No.</div><div class='col'>Tags</div><div class='col fixed'>Perc</div><div class='col fixed'>Rel</div></div>";
-    for (var i = 0; i < display_set.length; i++) {
-
+function writeBreakdownTable() {
+    breakdown_table_array = orderArrayBy(breakdown_table_array, breakdown_table_order, breakdown_table_desc);
+    var col_1 = breakdown_table_order === "Order" ? breakdown_table_desc ? "No. &darr;" : "No. &uarr;" : "No.";
+    var col_2 = breakdown_table_order === "SetPerc" ? breakdown_table_desc ? "Perc &darr;" : "Perc &uarr;" : "Perc";
+    var col_3 = breakdown_table_order === "RelPerc" ? breakdown_table_desc ? "Rel &darr;" : "Rel &uarr;" : "Rel";
+    var html_text = "<div class='row header'>";
+    html_text += "<div class='col fixed' onclick='clickBreakdownTableHeading(\"Order\")'>" + col_1 + "</div>";
+    html_text += "<div class='col'>Tags</div>";
+    html_text += "<div class='col fixed' onclick='clickBreakdownTableHeading(\"SetPerc\")'>" + col_2 + "</div>";
+    html_text += "<div class='col fixed' onclick='clickBreakdownTableHeading(\"RelPerc\")'>" + col_3 + "</div></div>";
+    for (var i = 0; i < breakdown_table_array.length; i++) {
+        var row = breakdown_table_array[i];
+        var perc = Math.round(row["SetPerc"] * 100);
+        var rel_perc = Math.round(row["RelPerc"] * 100);
+        var colour = getColourForValue(rel_perc, 10, 0, -10, [60, 250, 0], [247, 153, 2], [210, 0, 0]);
+        col_text = "rgb(" + colour[0] + ", " + colour[1] + ", " + colour[2] + ")";
+        html_text += i % 2 === 0 ? "<div class='row even'>" : "<div class='row'>";
+        html_text += "<div class='col fixed'>" + row["Number"] + "</div>";
+        html_text += "<div class='col'>" + row["Tags"] + "</div>";
+        html_text += "<div class='col fixed'>" + perc + "%</div>";
+        html_text += "<div class='col fixed' style='color:" + col_text + "'>" + rel_perc + "%</div></div>";
     }
     $("#breakdown_table").html(html_text);
+}
+
+function clickBreakdownTableHeading(value) {
+    if (value === breakdown_table_order) {
+        breakdown_table_desc = !breakdown_table_desc;
+    } else {
+        breakdown_table_order = value;
+        breakdown_table_desc = false;
+    }
+    writeBreakdownTable();
 }
 
 function parseSummaryTab(tab_id) {
@@ -921,4 +993,20 @@ function convertObjectToArray(object) {
         array.push(object[key]);
     }
     return array;
+}
+
+function getColourForValue(val, max, mid, min, col_1, col_2, col_3) {
+    var r, g, b;
+    if (val > mid) {
+        var perc = Math.min((val - mid)/(max - mid), 1);
+        r = col_2[0] + (col_1[0] - col_2[0]) * perc;
+        g = col_2[1] + (col_1[1] - col_2[1]) * perc;
+        b = col_2[2] + (col_1[2] - col_2[2]) * perc;
+    } else {
+        var perc = Math.min((mid - val)/(mid - min), 1);
+        r = col_2[0] + (col_3[0] - col_2[0]) * perc;
+        g = col_2[1] + (col_3[1] - col_2[1]) * perc;
+        b = col_2[2] + (col_3[2] - col_2[2]) * perc;
+    }
+    return [parseInt(r), parseInt(g), parseInt(b)];
 }
