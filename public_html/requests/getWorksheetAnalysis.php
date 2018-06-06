@@ -7,25 +7,19 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
-//$requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
-$requestType = "INDIVIDUALWORKSHEET";
-//$orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
-//$desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
+$requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $version_id = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
-//$version_id = 393;
 $staff_ids = [];
-//$staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
-//$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-//$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
-
-/*$role = validateRequest($userid, $userval, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}*/
 
 switch ($requestType){
-    case "INDIVIDUALWORKSHEET":
+    case "WORKSHEET":
     default:
+        /*if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
+            failRequest("You are not authorised to complete that request");
+        }*/
+        getWorksheetSummary($version_id, $staff_ids);
+        break;
+    case "INDIVIDUALWORKSHEET":
         /*if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
             failRequest("You are not authorised to complete that request");
         }*/
@@ -68,7 +62,7 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
                 JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
                 WHERE UG.`Group ID` IN (SELECT GW.`Group ID`
                 FROM `TGROUPWORKSHEETS` GW
-                WHERE UG.`Archived` = 0 
+                WHERE UG.`Archived` = 0
                 AND U.`Role` = 'STUDENT' ";
         if (count($gw_ids) > 0) {
             $stu_query .= " AND (";
@@ -138,6 +132,150 @@ function getIndividualWorksheetSummary($version_id, $staff_ids) {
 
     echo json_encode($response);
 
+}
+
+function getWorksheetSummary($version_id, $staff_ids) {
+    // Get breakdown of questions
+    $ques_info_query = "SELECT `Stored Question ID`, `Number`, `Question Order`, `Marks` FROM `TSTOREDQUESTIONS`
+                    WHERE `Version ID` = $version_id
+                    AND `Deleted` = 0
+                    ORDER BY `Question Order`";
+
+    $worksheet_query = "SELECT `WName` FROM TWORKSHEETVERSION WHERE `Version ID` = $version_id;";
+
+    try {
+        $ques_info = db_select_exception($ques_info_query);
+        $questions_array = [];
+        $total = 0;
+        for ($i = 0; $i < count($ques_info); $i++) {
+            $sqid = $ques_info[$i]["Stored Question ID"];
+            $marks = floatval($ques_info[$i]["Marks"]);
+            $total += $marks;
+            $tags_query = "SELECT QT.`Tag ID`, T.`Name` FROM `TQUESTIONTAGS` QT
+                            JOIN `TTAGS` T ON QT.`Tag ID` = T.`Tag ID`
+                            WHERE QT.`Stored Question ID` = $sqid AND QT.`Deleted` = 0
+                            ORDER BY T.`Type`, T.`Name`";
+            $tags = db_select_exception($tags_query);
+            $questions_array[$sqid] = array(
+                "SQID" => $sqid,
+                "Number" => $ques_info[$i]["Number"],
+                "Order" => $ques_info[$i]["Question Order"],
+                "Marks" => $marks,
+                "Tags" => $tags
+            );
+        }
+        $questions_array["Total"] = array(
+            "SQID" => "Total",
+            "Number" => "Total",
+            "Marks" => $total
+        );
+
+        $worksheet_results = db_select_exception($worksheet_query);
+        $worksheet_name = $worksheet_results[0]["WName"];
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+
+    // Get list of students
+    try {
+        // Get group worksheets
+        $gw_query = "SELECT `Group Worksheet ID` FROM TGROUPWORKSHEETS GW
+                    WHERE `Version ID` = $version_id
+                    AND `Deleted` = 0 ";
+
+        $gw_ids = db_select_exception($gw_query);
+
+        $results_query = "SELECT CQ.`Student ID`, CQ.`Stored Question ID`, CQ.`Mark`, CQ.`Group Worksheet ID` FROM `TCOMPLETEDQUESTIONS` CQ
+                            JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
+                            WHERE GW.`Version ID` = $version_id AND CQ.`Deleted` = 0 AND GW.`Deleted` = 0";
+        $results = db_select_exception($results_query);
+
+        $students_query = "SELECT CQ.`Student ID`, CQ.`Group Worksheet ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, GW.`Group ID`, G.`Name`, B.`Baseline`, UU.`Initials` FROM `TCOMPLETEDQUESTIONS` CQ
+                        JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
+                        JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
+                        JOIN `TUSERS` U ON CQ.`Student ID` = U.`User ID`
+                        JOIN `TUSERS` UU ON GW.`Primary Staff ID` = UU.`User ID`
+                        LEFT JOIN `TBASELINES` B ON U.`User ID` = B.`UserID` AND B.`Subject` = 1 AND B.`Deleted` = 0
+                        WHERE GW.`Version ID` = $version_id AND CQ.`Deleted` = 0 AND GW.`Deleted` = 0
+                        GROUP BY CQ.`Student ID`, CQ.`Group Worksheet ID`
+                        ORDER BY G.`Name`, U.`Surname`";
+        $students = db_select_exception($students_query);
+
+        $groups = [];
+        for ($i = 0; $i < count($students); $i++) {
+            $stu_id = $students[$i]["Student ID"];
+            $gw_id = $students[$i]["Group Worksheet ID"];
+            $group_id = $students[$i]["Group ID"];
+            $student_questions_array = [];
+            $total = 0;
+            for ($j = 0; $j < count($results); $j++) {
+                if ($results[$j]["Student ID"] === $stu_id && $results[$j]["Group Worksheet ID"] === $gw_id) {
+                    $mark = floatval($results[$j]["Mark"]);
+                    $sqid = $results[$j]["Stored Question ID"];
+                    $total += $mark;
+                    $student_questions_array[$sqid] = $mark;
+                    $av_mark = $mark;
+                    $av_count = 1;
+                    $av_mark_total = $mark;
+                    $av_count_total = 1;
+                    if (array_key_exists($group_id, $groups)) {
+                        if (array_key_exists($sqid, $groups[$group_id]["Questions"])) {
+                            $av_mark = floatval($groups[$group_id]["Questions"][$sqid]["AvMark"]);
+                            $av_count = intval($groups[$group_id]["Questions"][$sqid]["AvCount"]);
+                            $av_mark = ($av_count * $av_mark + $mark)/($av_count + 1);
+                            $av_count += 1;
+                        }
+                    }
+                    if (array_key_exists("Total", $groups)) {
+                        if (array_key_exists($sqid, $groups["Total"]["Questions"])) {
+                            $av_mark_total = floatval($groups["Total"]["Questions"][$sqid]["AvMark"]);
+                            $av_count_total = intval($groups["Total"]["Questions"][$sqid]["AvCount"]);
+                            $av_mark_total = ($av_count_total * $av_mark_total + $mark)/($av_count_total + 1);
+                            $av_count_total += 1;
+                        }
+                    }
+                    $groups[$group_id]["SetID"] = $group_id;
+                    $groups[$group_id]["Name"] = $students[$i]["Name"];
+                    $groups[$group_id]["LongName"] = $students[$i]["Name"] . " - " . $students[$i]["Initials"];
+                    $groups[$group_id]["Questions"][$sqid]["SQID"] = $sqid;
+                    $groups[$group_id]["Questions"][$sqid]["AvMark"] = $av_mark;
+                    $groups[$group_id]["Questions"][$sqid]["AvCount"] = $av_count;
+                    $groups["Total"]["SetID"] = "Total";
+                    $groups["Total"]["Questions"][$sqid]["SQID"] = $sqid;
+                    $groups["Total"]["Questions"][$sqid]["AvMark"] = $av_mark_total;
+                    $groups["Total"]["Questions"][$sqid]["AvCount"] = $av_count_total;
+                }
+            }
+            $student_questions_array["Total"] = $total;
+            $students[$i]["Questions"] = $student_questions_array;
+        }
+        foreach ($groups as $key => $group) {
+            $total = 0;
+            $count = 0;
+            for ($i = 0; $i < count($students); $i++) {
+                if ($group["SetID"] === "Total" || $students[$i]["Group ID"] === $group["SetID"]) {
+                    $total += floatval($students[$i]["Questions"]["Total"]);
+                    $count++;
+                }
+            }
+            $groups[$key]["Questions"]["Total"]["SQID"] = "Total";
+            $groups[$key]["Questions"]["Total"]["AvMark"] = $total/$count;
+            $groups[$key]["Questions"]["Total"]["AvCount"] = $count;
+        }
+    } catch (Exception $ex) {
+        //echo $stu_ques_query;
+        failRequest($ex->getMessage());
+    }
+
+    $response = array (
+        "success" => TRUE,
+        "stu_ques_array" => $students,
+        "ques_info" => $questions_array,
+        "sets_info" => $groups,
+        "w_name" => $worksheet_name
+    );
+
+    echo json_encode($response);
 }
 
 /*function filterBySet($set_array) {
