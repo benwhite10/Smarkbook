@@ -81,6 +81,7 @@ function parseBreakdownTab(tab_id) {
     if(results_analysis.hasOwnProperty("Sets")) {
         setUpBreakdownOptions();
         setUpBreakdownChart();
+        setUpBreakdownTable();
     }
 }
 
@@ -178,7 +179,7 @@ function setUpBreakdownChart() {
         spanGaps: false
     });
 
-    createChart(labels, datasets, true, names);
+    createChart(labels, datasets, names);
 }
 
 function createChart(labels, datasets, names) {
@@ -248,6 +249,28 @@ function createChart(labels, datasets, names) {
     });
 }
 
+function setUpBreakdownTable() {
+    selected_set = $("#breakdown_tab_select").val();
+    var sets = results_analysis["Sets"];
+    var display_set = [];
+    var total_set = [];
+
+    for (var i = 0; i < sets.length; i++) {
+        if (sets[i]["SetID"] === selected_set) {
+            display_set = convertObjectToArray(sets[i]["Questions"]);
+            set_name = sets[i]["Name"];
+        }
+        if (sets[i]["SetID"] === "Total") {
+            total_set = convertObjectToArray(sets[i]["Questions"]);
+        }
+    }
+
+    var html_text = "<div class='row header'><div class='col fixed'>No.</div><div class='col'>Tags</div><div class='col fixed'>Perc</div><div class='col fixed'>Rel</div></div>";
+    for (var i = 0; i < display_set.length; i++) {
+
+    }
+    $("#breakdown_table").html(html_text);
+}
 
 function parseSummaryTab(tab_id) {
     //$("#tab_option_" + tab_id).html("<table border='1' id='results_table'></table>");
