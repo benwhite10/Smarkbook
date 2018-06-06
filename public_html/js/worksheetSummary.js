@@ -76,7 +76,7 @@ function parseBreakdownTab(tab_id) {
     //$("#tab_option_" + tab_id).html("<table border='1' id='results_table'></table>");
     $("#tab_option_" + tab_id).html("<div id='breakdown_tab_options'><select id='breakdown_tab_select' onchange='changeBreakdownSelect()'></select></div>");
     $("#tab_" + tab_id).html("Breakdown");
-    $("#tab_option_" + tab_id).append("<div id='breakdown_chart'><canvas id='breakdown_chart_canvas'></canvas></div>");
+    $("#tab_option_" + tab_id).append("<div id='breakdown_chart'></div>");
     $("#tab_option_" + tab_id).append("<div id='breakdown_table'></div>");
     if(results_analysis.hasOwnProperty("Sets")) {
         setUpBreakdownOptions();
@@ -179,94 +179,10 @@ function setUpBreakdownChart() {
     });
 
     createChart(labels, datasets, true, names);
-    /*
-    for (var i = 0; i < tracker_options.length; i++) {
-        var option = tracker_options[i];
-        var data_array = {
-            borderWidth: 2,
-            fill: false,
-            lineTension: 0,
-            spanGaps: true,
-            label: option[0]
-        };
-        switch (option[2]) {
-            case "Tracker":
-                data_array["data"] = va_data;
-                data_array["borderColor"] = "#f49712";
-                data_array["pointBackgroundColor"] = "#f49712";
-                data_array["showLine"] = option[1];
-                data_array["pointRadius"] = option[1] ? 2 : 0;
-                data_array["pointHoverRadius"] = option[1] ? 2 : 0;
-                datasets.push(data_array);
-                break;
-            case "TargetVA":
-                data_array["data"] = target_data;
-                data_array["borderColor"] = "#f7d117";
-                data_array["pointBackgroundColor"] = "#f7d117";
-                data_array["showLine"] = option[1];
-                data_array["pointRadius"] = option[1] ? 2 : 0;
-                data_array["pointHoverRadius"] = option[1] ? 2 : 0;
-                datasets.push(data_array);
-                break;
-            case "YearAvg":
-                data_array["data"] = year_data;
-                data_array["borderColor"] = "#353d47";
-                data_array["pointBackgroundColor"] = "#353d47";
-                data_array["showLine"] = option[1];
-                data_array["pointRadius"] = option[1] ? 2 : 0;
-                data_array["pointHoverRadius"] = option[1] ? 2 : 0;
-                datasets.push(data_array);
-                break;
-        }
-    }
-    tracker_chart = new Chart(document.getElementById("student_tracker_canvas"), {
-        type: 'line',
-        data: {
-        labels: labels,
-        datasets: datasets
-        },
-        options: {
-            responsive:true,
-            maintainAspectRatio: false,
-            legend: {
-                position: 'bottom',
-            },
-            scales: {
-                xAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Reporting Cycle'
-                        }
-                    }],
-                yAxes: [{
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'VA'
-                        },
-                        ticks: {
-                            min: min_val,
-                            max: max_val
-                        }
-                    }]
-            },
-            layout: {
-                padding: {
-                    left: 10,
-                    right: 10,
-                    top: 10,
-                    bottom: 10
-                }
-            }
-        }
-    });
-
-    adjustTrackerSize();
-    tracker_chart.render();*/
 }
 
-function createChart(labels, datasets, animate, names) {
+function createChart(labels, datasets, names) {
+    $("#breakdown_chart").html("<canvas id='breakdown_chart_canvas'></canvas>");
     var max_perc = 0;
     var min_perc = 1;
 
@@ -322,12 +238,12 @@ function createChart(labels, datasets, animate, names) {
                 }
             },
             animation: {
-                duration: animate, // general animation time
+                duration: 1000, // general animation time
             },
             hover: {
                 animationDuration: 0, // duration of animations when hovering an item
             },
-            responsiveAnimationDuration: 0
+            responsiveAnimationDuration: 1000
         }
     });
 }

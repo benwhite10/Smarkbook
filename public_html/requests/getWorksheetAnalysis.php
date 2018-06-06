@@ -159,12 +159,13 @@ function getWorksheetSummary($version_id, $staff_ids) {
             $questions_array[$sqid] = array(
                 "SQID" => $sqid,
                 "Number" => $ques_info[$i]["Number"],
-                "Order" => $ques_info[$i]["Question Order"],
+                "Order" => floatval($ques_info[$i]["Question Order"]),
                 "Marks" => $marks,
                 "Tags" => $tags
             );
         }
         $questions_array["Total"] = array(
+            "Order" => 9999,
             "SQID" => "Total",
             "Number" => "Total",
             "Marks" => $total
