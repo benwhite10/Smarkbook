@@ -127,6 +127,8 @@ td.checkbox.selected, .existing_checkbox.selected {
 #breakdown_table > .row > .col {
     width: calc(100% - 240px);
     display: inline-block;
+    height: 35px;
+    overflow: hidden;
     float: left;
     text-align: left;
 }
@@ -187,6 +189,8 @@ td.checkbox.selected, .existing_checkbox.selected {
     width: calc(100% - 170px);
     display: inline-block;
     float: left;
+    height: 35px;
+    overflow: hidden;
     text-align: left;
     padding-left: 10px;
 }
@@ -241,6 +245,8 @@ td.checkbox.selected, .existing_checkbox.selected {
     width: calc(100% - 470px);
     display: inline-block;
     float: left;
+    height: 35px;
+    overflow: hidden;
     text-align: left;
     padding-left: 10px;
 }
