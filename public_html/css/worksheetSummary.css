@@ -145,3 +145,196 @@ td.checkbox.selected, .existing_checkbox.selected {
 #breakdown_table > .row.header > .col {
     font-weight: 300;
 }
+
+#spinner_div {
+    width: 100%;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+}
+
+#summary_table {
+    width: calc(100% - 2px);
+    border: 1px solid #323232;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    display: inline-block;
+    float: left;
+    margin: 10px 0;
+}
+
+#summary_table > .row {
+    width: 100%;
+    height: 35px;
+    line-height: 35px;
+    display: inline-block;
+    float: left;
+    user-select: none;
+    cursor: pointer;
+    background: transparent;
+}
+
+#summary_table > .row.even {
+    background: #DDD;
+}
+
+#summary_table > .row:hover {
+    background: #c2f4a4;
+}
+
+#summary_table > .row > .col {
+    width: calc(100% - 170px);
+    display: inline-block;
+    float: left;
+    text-align: left;
+    padding-left: 10px;
+}
+
+#summary_table > .row > .col.fixed {
+    width: 80px;
+    text-align: center;
+    padding-left: 0;
+}
+
+#summary_table > .row.header {
+    background: #323232;
+    color: #66E11B;
+    font-size: 18px;
+}
+
+#summary_table > .row.header > .col {
+    font-weight: 300;
+}
+
+#all_students_table {
+    width: calc(100% - 2px);
+    border: 1px solid #323232;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    display: inline-block;
+    float: left;
+    margin: 10px 0;
+}
+
+#all_students_table > .row {
+    width: 100%;
+    height: 35px;
+    line-height: 35px;
+    display: inline-block;
+    float: left;
+    user-select: none;
+    cursor: pointer;
+    background: transparent;
+}
+
+#all_students_table > .row.even {
+    background: #DDD;
+}
+
+#all_students_table > .row:hover {
+    background: #c2f4a4;
+}
+
+#all_students_table > .row > .col {
+    width: calc(100% - 470px);
+    display: inline-block;
+    float: left;
+    text-align: left;
+    padding-left: 10px;
+}
+
+#all_students_table > .row > .col.fixed {
+    width: 80px;
+    text-align: center;
+    padding-left: 0;
+}
+
+#all_students_table > .row > .col.fixed.set {
+    width: 100px;
+}
+
+#all_students_table > .row > .col.fixed.initials {
+    width: 70px;
+}
+
+#all_students_table > .row > .col.fixed.number {
+    width: 40px;
+}
+
+#all_students_table > .row > .col.fixed.baseline {
+    width: 90px;
+}
+
+#all_students_table > .row.header {
+    background: #323232;
+    color: #66E11B;
+    font-size: 18px;
+}
+
+#all_students_table > .row.header > .col {
+    font-weight: 300;
+}
+
+#dialog_message_background {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: transparent; /* Fallback color */
+}
+
+#dialog_message_box {
+    width: 400px;
+    height: 110px;
+    margin: auto;
+    margin-top: 200px;
+    background: #FFF;
+    -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.39);
+    -moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.39);
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.39);
+}
+
+#dialog_title {
+    display: inline-block;
+    width: 100%;
+    height: 60px;
+    background: #DDD;
+    margin: 0;
+    padding: 0;
+}
+
+#dialog_title > h1 {
+    color: #FFF;
+    padding-left: 20px;
+    color: #323232;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 60px;
+}
+
+#dialog_text > p {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+}
+
+#top_bar_button {
+    width: 60px;
+    height: 60px;
+    display: inline-block;
+    float: right;
+    cursor: pointer;
+    background: transparent;
+    background-image: url("/images/download.png");
+    background-size: contain;
+}
+
+#top_bar_button:hover {
+    background: #c2f4a4;
+    background-image: url("/images/download.png");
+    background-size: contain;
+}

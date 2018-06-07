@@ -100,16 +100,8 @@ if(isset($_SESSION['message'])){
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
             </div>
 
-            <form id="editForm" class="editWorksheet" action="includes/updateUser.php" method="POST">
+            <form id="editForm" class="editWorksheet" action="includes/updateUser.php" method="POST" autocomplete="off">
                 <div id="main_content">
-                    <!--
-                    <label for="role">User Type:
-                    </label><select name="role" id="role">
-                        <option value="STAFF">Staff</option>
-                        <option value="STUDENT">Student</option>
-                        <option value="SUPER_USER">Super User</option>
-                    </select>
-                    -->
                     <input type="hidden" name="role" value="<?php if(isset($role)){echo $role;}?>"/>
                     <input type="hidden" name="userid" value="<?php if(isset($userid)){echo $userid;}?>"/>
                     <div>
@@ -123,16 +115,13 @@ if(isset($_SESSION['message'])){
                     <div <?php echo $hideStaff; ?>>
                     <label for="title">Title:
                     </label><input type="text" name="title" placeholder="Title" value="<?php if(isset($title)){echo $title;}?>"></input>
-                    </div><div>
+                    </div><div <?php echo $hideStaff; ?>>
                     <label for="firstname">First Name *:
                     </label><input type="text" name="firstname" placeholder="First Name" value="<?php if(isset($firstName)){echo $firstName;}?>"></input>
-                    </div><div <?php echo $hideStudents; ?>>
-                    <label for="prefferedname">Preferred Name:
-                    </label><input type="text" name="prefferedname" placeholder="Preferred Name" value="<?php if(isset($prefName)){echo $prefName;}?>"></input>
-                    </div><div>
+                    </div><div <?php echo $hideStaff; ?>>
                     <label for="surname">Surname *:
                     </label><input type="text" name="surname" placeholder="Surname" value="<?php if(isset($surname)){echo $surname;}?>"></input>
-                    </div><div>
+                    </div><div <?php echo $hideStaff; ?>>
                     <label for="email">Email *:
                     </label><input type="text" name="email" placeholder="Email" value="<?php if(isset($email)){echo $email;}?>"></input>
                     </div><div <?php echo $hideStaff; ?>>
