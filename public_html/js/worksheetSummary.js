@@ -430,7 +430,12 @@ function writeSummaryTable() {
         var perc = Math.round(row["SetPerc"] * 100);
         var rel_perc = Math.round(row["RelPerc"] * 100);
         var colour = getColourForValue(rel_perc, 20, 0, -20, [80, 250, 20], [247, 153, 2], [210, 0, 0]);
-        var baseline = Math.round(row["Baseline"] * 10) / 10;
+        var baseline = row["Baseline"];
+        if (baseline === undefined || baseline === 0) {
+            baseline = "-";
+        } else {
+            baseline = Math.round(row["Baseline"] * 10) / 10;
+        }
         col_text = "rgb(" + colour[0] + ", " + colour[1] + ", " + colour[2] + ")";
         html_text += i % 2 === 0 ? "<div class='row even'>" : "<div class='row'>";
         html_text += "<div class='col'>" + row["LongName"] + "</div>";
@@ -453,21 +458,26 @@ function setUpSummaryChart() {
         if (set_id !== undefined && set_id !== "Total") {
             var set_data_array = [];
             var set_names_array = [];
-            labels.push(sets[i]["Name"]);
             for (var j = 0; j < students.length; j++) {
                 if (students[j]["Group ID"] === set_id) {
-                    set_data_array.push({x: students[j]["Baseline"], y: students[j]["StuPerc"]});
-                    set_names_array.push(students[j]["Preferred Name"] + " " + students[j]["Surname"]);
+                    var baseline = students[j]["Baseline"];
+                    if (baseline !== null && baseline > 0) {
+                        set_data_array.push({x: baseline, y: students[j]["StuPerc"]});
+                        set_names_array.push(students[j]["Preferred Name"] + " " + students[j]["Surname"]);
+                    }
                 }
             }
-            names.push(set_names_array);
-            datasets.push({
-                type: "line",
-                label: sets[i]["Name"],
-                data: set_data_array,
-                borderColor: getColour(i),
-                showLine: false
-            });
+            if (set_data_array.length > 0) {
+                labels.push(sets[i]["Name"]);
+                names.push(set_names_array);
+                datasets.push({
+                    type: "line",
+                    label: sets[i]["Name"],
+                    data: set_data_array,
+                    borderColor: getColour(i),
+                    showLine: false
+                });
+            }
         }
     }
     /*datasets.push({
@@ -481,7 +491,11 @@ function setUpSummaryChart() {
         spanGaps: false,
         showLine: true
     })*/
-    writeSummaryChart(datasets, names);
+    if (datasets.length > 0) {
+        writeSummaryChart(datasets, names);
+    } else {
+        $("#summary_chart").css("display", "none");
+    }
 }
 
 function writeSummaryChart(datasets, names) {
