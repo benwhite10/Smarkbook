@@ -5,6 +5,7 @@ var worksheet_details;
 var selected_set;
 var active_tab;
 var breakdown_chart;
+var summary_chart;
 var breakdown_table_array;
 var breakdown_table_order = "RelPerc";
 var breakdown_table_desc = false;
@@ -377,7 +378,9 @@ function clickTableHeading(table, value) {
 function parseSummaryTab(tab_id) {
     $("#tab_" + tab_id).html("Summary");
     $("#tab_option_" + tab_id).html("<div id='summary_table'></div>");
+    $("#tab_option_" + tab_id).append("<div id='summary_chart'></div>");
     setUpSummaryTable();
+    setUpSummaryChart();
 }
 
 function setUpSummaryTable() {
@@ -416,22 +419,130 @@ function writeSummaryTable() {
     var col_1 = summary_table_order === "LongName" ? summary_table_desc ? "Set &darr;" : "Set &uarr;" : "Set";
     var col_2 = summary_table_order === "SetPerc" ? summary_table_desc ? "Perc &darr;" : "Perc &uarr;" : "Perc";
     var col_3 = summary_table_order === "RelPerc" ? summary_table_desc ? "Rel &darr;" : "Rel &uarr;" : "Rel";
+    var col_4 = summary_table_order === "Baseline" ? summary_table_desc ? "Baseline &darr;" : "Baseline &uarr;" : "Baseline";
     var html_text = "<div class='row header'>";
     html_text += "<div class='col' onclick='clickTableHeading(1,\"LongName\")'>" + col_1 + "</div>";
+    html_text += "<div class='col fixed baseline' onclick='clickTableHeading(1,\"Baseline\")'>" + col_4 + "</div>";
     html_text += "<div class='col fixed' onclick='clickTableHeading(1,\"SetPerc\")'>" + col_2 + "</div>";
     html_text += "<div class='col fixed' onclick='clickTableHeading(1,\"RelPerc\")'>" + col_3 + "</div></div>";
     for (var i = 0; i < summary_table_array.length; i++) {
         var row = summary_table_array[i];
         var perc = Math.round(row["SetPerc"] * 100);
         var rel_perc = Math.round(row["RelPerc"] * 100);
-        var colour = getColourForValue(rel_perc, 10, 0, -10, [60, 250, 0], [247, 153, 2], [210, 0, 0]);
+        var colour = getColourForValue(rel_perc, 20, 0, -20, [80, 250, 20], [247, 153, 2], [210, 0, 0]);
+        var baseline = Math.round(row["Baseline"] * 10) / 10;
         col_text = "rgb(" + colour[0] + ", " + colour[1] + ", " + colour[2] + ")";
         html_text += i % 2 === 0 ? "<div class='row even'>" : "<div class='row'>";
         html_text += "<div class='col'>" + row["LongName"] + "</div>";
+        html_text += "<div class='col fixed baseline'>" + baseline + "</div>";
         html_text += "<div class='col fixed'>" + perc + "%</div>";
         html_text += "<div class='col fixed' style='color:" + col_text + "'>" + rel_perc + "%</div></div>";
     }
     $("#summary_table").html(html_text);
+}
+
+function setUpSummaryChart() {
+    var datasets = [];
+    var names = [];
+    var labels = [];
+    var students = results_analysis["Students"];
+    var sets = results_analysis["Sets"];
+
+    for (var i = 0; i < sets.length; i++) {
+        var set_id = sets[i]["SetID"];
+        if (set_id !== undefined && set_id !== "Total") {
+            var set_data_array = [];
+            var set_names_array = [];
+            labels.push(sets[i]["Name"]);
+            for (var j = 0; j < students.length; j++) {
+                if (students[j]["Group ID"] === set_id) {
+                    set_data_array.push({x: students[j]["Baseline"], y: students[j]["StuPerc"]});
+                    set_names_array.push(students[j]["Preferred Name"] + " " + students[j]["Surname"]);
+                }
+            }
+            names.push(set_names_array);
+            datasets.push({
+                type: "line",
+                label: sets[i]["Name"],
+                data: set_data_array,
+                borderColor: getColour(i),
+                showLine: false
+            });
+        }
+    }
+    /*datasets.push({
+        type: "line",
+        label: "Trend",
+        data: [{x: 5.2, y: 0.2}, {x:8.5, y:0.9}],
+        borderColor: "rgba(0,0,0,1)",
+        borderWidth: 2,
+        fill: false,
+        lineTension: 0,
+        spanGaps: false,
+        showLine: true
+    })*/
+    writeSummaryChart(datasets, names);
+}
+
+function writeSummaryChart(datasets, names) {
+    $("#summary_chart").html("<canvas id='summary_chart_canvas'></canvas>");
+    var ctx = document.getElementById("summary_chart_canvas").getContext('2d');
+    summary_chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            datasets: datasets,
+            names: names
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        steps: 10,
+                        max: 1.0,
+                        min: 0,
+                        callback: function(tick) {
+                            return (Math.round(tick * 100, 0)) + "%";
+                        }
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Score'
+                    }
+                }],
+                xAxes: [{
+                    type: "linear",
+                    ticks: {
+                        autoSkip: false
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Baseline'
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        return data['names'][tooltipItem.datasetIndex][tooltipItem.index];
+                    }
+                }
+            },
+            responsive:true,
+            maintainAspectRatio: false,
+            legend: {
+                display: true,
+                position: 'right'
+            },
+            animation: {
+                duration: 1000, // general animation time
+            },
+            hover: {
+                animationDuration: 0, // duration of animations when hovering an item
+            },
+            responsiveAnimationDuration: 1000
+        }
+    });
 }
 
 function parseAllStudentsTab(tab_id) {
@@ -440,7 +551,7 @@ function parseAllStudentsTab(tab_id) {
     setUpAllStudentsTable();
 }
 
-function setUpAllStudentsTable() {
+function setUpStudentsAnalysis() {
     var students = results_analysis["Students"];
     var sets = results_analysis["Sets"];
     var ques_info = results_analysis["Questions"];
@@ -463,10 +574,14 @@ function setUpAllStudentsTable() {
     for (var i = 0; i < students.length; i++) {
         var student_array = students[i];
         var student_perc = total_marks > 0 ? students[i]["Questions"]["Total"] / total_marks : sets[i]["Questions"]["Total"];
-        student_array["StuPerc"] = student_perc;
-        student_array["RelPerc"] = student_perc - total_perc;
-        students_table_array.push(student_array);
+        students[i]["StuPerc"] = student_perc;
+        students[i]["RelPerc"] = student_perc - total_perc;
     }
+    results_analysis["Students"] = students;
+}
+
+function setUpAllStudentsTable() {
+    students_table_array = results_analysis["Students"];
     writeAllStudentsTable();
 }
 
@@ -565,6 +680,7 @@ function resultsAnalysisSuccess(json) {
         results_analysis["Questions"] = convertObjectToArray(json["ques_info"]);
         results_analysis["Sets"] = convertObjectToArray(json["sets_info"]);
         results_analysis["Students"] = convertObjectToArray(json["stu_ques_array"]);
+        setUpStudentsAnalysis();
         createTabs(["BREAKDOWN", "SUMMARY", "ALLSTUDENTS"], active_tab);
     } else {
         console.log(json);
@@ -727,4 +843,23 @@ function downloadResultsAnalysis() {
 function clearDialogBox() {
     $("#dialog_message_background").css('display', 'none');
     $("#dialog_text").html("<p>Generating results analysis...</p>");
+}
+
+function getColour(num) {
+    var colours = [
+        [244, 67, 54],
+        [63, 81, 181],
+        [76, 175, 80],
+        [249, 105, 14],
+        [141, 110, 99],
+        [156, 39, 176],
+        [3, 169, 244],
+        [255, 152, 0],
+        [158, 158, 158],
+        [156, 204, 101]
+    ];
+
+    num = Math.min(num, (colours.length - 1));
+    var colour = colours[num];
+    return "rgba(" + colour[0] + "," + colour[1] + "," + colour[2] + ",1)";
 }

@@ -209,6 +209,7 @@ function getWorksheetSummary($version_id, $staff_ids) {
             $group_id = $students[$i]["Group ID"];
             $student_questions_array = [];
             $total = 0;
+            $baseline = is_nan(floatval($students[$i]["Baseline"])) ? 0 : floatval($students[$i]["Baseline"]) ;
             for ($j = 0; $j < count($results); $j++) {
                 if ($results[$j]["Student ID"] === $stu_id && $results[$j]["Group Worksheet ID"] === $gw_id) {
                     $mark = floatval($results[$j]["Mark"]);
@@ -235,9 +236,6 @@ function getWorksheetSummary($version_id, $staff_ids) {
                             $av_count_total += 1;
                         }
                     }
-                    $groups[$group_id]["SetID"] = $group_id;
-                    $groups[$group_id]["Name"] = $students[$i]["Name"];
-                    $groups[$group_id]["LongName"] = $students[$i]["Name"] . " - " . $students[$i]["Initials"];
                     $groups[$group_id]["Questions"][$sqid]["SQID"] = $sqid;
                     $groups[$group_id]["Questions"][$sqid]["AvMark"] = $av_mark;
                     $groups[$group_id]["Questions"][$sqid]["AvCount"] = $av_count;
@@ -245,6 +243,22 @@ function getWorksheetSummary($version_id, $staff_ids) {
                     $groups["Total"]["Questions"][$sqid]["SQID"] = $sqid;
                     $groups["Total"]["Questions"][$sqid]["AvMark"] = $av_mark_total;
                     $groups["Total"]["Questions"][$sqid]["AvCount"] = $av_count_total;
+                }
+            }
+            $groups[$group_id]["SetID"] = $group_id;
+            $groups[$group_id]["Name"] = $students[$i]["Name"];
+            $groups[$group_id]["LongName"] = $students[$i]["Name"] . " - " . $students[$i]["Initials"];
+            if ($baseline > 0) {
+                if (array_key_exists("Baseline", $groups[$group_id])) {
+                    $av_baseline = floatval($groups[$group_id]["Baseline"]);
+                    $av_baseline_count = intval($groups[$group_id]["BaselineCount"]);
+                    $av_baseline = ($av_baseline * $av_baseline_count + $baseline)/($av_baseline_count + 1);
+                    $av_baseline_count += 1;
+                    $groups[$group_id]["Baseline"] = $av_baseline;
+                    $groups[$group_id]["BaselineCount"] = $av_baseline_count;
+                } else {
+                    $groups[$group_id]["Baseline"] = $baseline;
+                    $groups[$group_id]["BaselineCount"] = 1;
                 }
             }
             $student_questions_array["Total"] = $total;
