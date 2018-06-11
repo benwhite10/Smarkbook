@@ -52,6 +52,7 @@ $groupName = $groupNameResult[0]['Name'];
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
     <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
     <script src="js/manageGroups.js?<?php echo $info_version; ?>"></script>

@@ -54,6 +54,7 @@ function failWithMessage($msg, $error){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
     <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>

@@ -33,6 +33,7 @@ $sets = db_select($query);
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Sets", $info_version); ?>
     <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
 </head>

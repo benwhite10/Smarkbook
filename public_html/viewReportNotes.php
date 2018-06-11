@@ -32,6 +32,7 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
 <!DOCTYPE html>
 <html>
     <head lang="en">
+        <?php googleAnalytics(); ?>
         <?php pageHeader("Report Notes", $info_version) ?>
         <!--<link rel="stylesheet" type="text/css" href="css/viewReportNotes.css" />-->
         <script src="js/viewReportNotes.js?<?php echo $info_version; ?>"></script>

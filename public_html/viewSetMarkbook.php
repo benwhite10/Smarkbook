@@ -85,6 +85,7 @@ logEvent($userid, "VIEW_MARKBOOK", $setId);
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/viewMarkbook.css?<?php echo $info_version; ?>" />
     <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />

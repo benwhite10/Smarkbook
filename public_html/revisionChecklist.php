@@ -31,6 +31,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Revision Checklist", $info_version); ?>
     <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
     <script src='js/revisionChecklist.js?<?php echo $info_version; ?>'></script>

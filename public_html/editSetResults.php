@@ -38,6 +38,7 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics() ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/editSetResults.css?<?php echo $info_version; ?>" />
     <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />

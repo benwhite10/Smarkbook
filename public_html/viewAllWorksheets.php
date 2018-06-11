@@ -31,6 +31,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Worksheets", $info_version); ?>
     <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
     <script src="js/viewAllWorksheets.js?<?php echo $info_version; ?>"></script>

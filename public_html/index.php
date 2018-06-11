@@ -33,6 +33,7 @@ if(isset($_SESSION['url'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/home.css?<?php echo $info_version; ?>" />
     <script type="text/javascript" src="js/menu.js?<?php echo $info_version; ?>"></script>

@@ -21,6 +21,7 @@ if($resultArray[0]){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
 </head>
 <body>

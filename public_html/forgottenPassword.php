@@ -32,6 +32,7 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Login", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/login.css?<?php echo $info_version; ?>" />
     <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
@@ -45,8 +46,8 @@ if(isset($_SESSION['message'])){
             <div id="title">
                 <a href="index.php"><img src="branding/mainlogo.png"/></a>
             </div>
-    	</div>           
-        
+    	</div>
+
         <div id="body">
             <?php
                 if(isset($message)){
@@ -64,7 +65,7 @@ if(isset($_SESSION['message'])){
             <div id="message" <?php echo $div; ?>>
                 <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
                 </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div> 
+            </div>
 
             <?php if(!$success){?>
             <form id="editForm" action="includes/forgotPassword.php" method="POST" >
@@ -89,5 +90,3 @@ if(isset($_SESSION['message'])){
         <?php pageFooter($info_version) ?>
     </div>
 </body>
-
-	

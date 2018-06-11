@@ -47,6 +47,7 @@ $enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
 <!DOCTYPE html>
 <html>
     <head lang="en">
+        <?php googleAnalytics(); ?>
         <?php pageHeader("Report", $info_version) ?>
         <link rel="stylesheet" type="text/css" href="css/reportHome.css?<?php echo $info_version; ?>" />
         <link rel="stylesheet" type="text/css" href="css/setReport.css?<?php echo $info_version; ?>" />

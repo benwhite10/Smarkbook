@@ -35,6 +35,7 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
 <!DOCTYPE html>
 <html>
     <head lang="en">
+        <?php googleAnalytics(); ?>
         <?php pageHeader("Notes", $info_version) ?>
         <link rel="stylesheet" type="text/css" href="css/reportNotes.css?<?php echo $info_version; ?>" />
         <script src="js/reportNotes.js?<?php echo $info_version; ?>"></script>
@@ -58,9 +59,9 @@ if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])) {
                         <h1>View My Notes</h1>
                     </div>
                 </div>
-                
+
                 <div id="temp_message"></div>
-                
+
                 <div id="form">
                     <label for="staffInput">Staff:</label>
                     <select name="staffInput" id="staffInput" onchange="updateSets()">
