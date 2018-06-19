@@ -44,7 +44,7 @@ if(isset($_SESSION['message'])){
     <link rel="stylesheet" type="text/css" href="css/adminTasks.css?<?php echo $info_version; ?>" />
 </head>
 <body>
-    <?php googleAnalytics() ?>
+    <?php googleAnalytics(); ?>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">

@@ -31,6 +31,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Edit Worksheet", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
     <script src="js/editWorksheet.js?<?php echo $info_version; ?>"></script>

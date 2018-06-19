@@ -689,6 +689,7 @@ function getResultsAnalysis() {
 
 function resultsAnalysisSuccess(json) {
     if (json["success"]) {
+        console.log(json);
         stopSpinnerInDiv("spinner_div");
         $("#main_content").fadeIn();
         results_analysis["Questions"] = convertObjectToArray(json["ques_info"]);
@@ -842,6 +843,7 @@ function downloadResultsAnalysis() {
                 link.click();
                 $("#dialog_text").html("<p>Analysis completed, downloading file.</p>");
             } else {
+                console.log(json);
                 $("#dialog_text").html("<p>There was an error completing the results analysis.</p>");
             }
             setTimeout(clearDialogBox, 1500);

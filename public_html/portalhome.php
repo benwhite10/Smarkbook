@@ -27,7 +27,7 @@ if($resultArray[0]){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <?php googleAnalytics() ?>
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
     <script src='js/portalhome.js?<?php echo $info_version; ?>'></script>
     <link rel='stylesheet' type='text/css' href='css/portalhome.css?<?php echo $info_version; ?>' />

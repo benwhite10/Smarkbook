@@ -56,7 +56,7 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
-	<?php googleAnalytics() ?>
+	<?php googleAnalytics(); ?>
     <?php pageHeader("Edit User", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
     <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />
