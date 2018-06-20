@@ -818,7 +818,7 @@ function setUpDataSheet2($response, $objPHPExcel, $sheet_name, $sheet_index) {
     $last_data_row = $row - 1;
 
     // Add filters
-    $objPHPExcel->getActiveSheet()->setAutoFilter("A$header_row:E$header_row");
+    $objPHPExcel->getActiveSheet()->setAutoFilter("A$header_row:" . incrementColumn($last_ques_col, 1) . "$header_row");
 
     // Format Data sheet
 
@@ -925,7 +925,7 @@ function setUpSummarySheet2($response, $objPHPExcel, $sheet_name, $sheet_index) 
     $last_data_row = $row - 1;
 
     // Add filters
-    $objPHPExcel->getActiveSheet()->setAutoFilter("A$header_row:B$header_row");
+    $objPHPExcel->getActiveSheet()->setAutoFilter("A$header_row:" . incrementColumn($last_ques_col, 1) . "$header_row");
 
     // Format Data sheet
 
