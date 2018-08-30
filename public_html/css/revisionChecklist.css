@@ -45,7 +45,7 @@
 
 .checklist_item_title > h1 {
     line-height: 40px;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .checklist_item:hover .checklist_item_title {
@@ -187,13 +187,26 @@
     background-color: rgba(32, 115, 249, 0.2);
 }
 
-#checklist_title, #checklist_title_description {
+#checklist_title, #checklist_title_description, #checklist_select_container {
     width: 100%;
     display: inline-block;
     float: left;
     margin: 0;
     padding: 0;
     text-align: center;
+}
+
+#checklist_select {
+    width: auto;
+    margin: auto;
+    outline: none;
+    background: transparent;
+    border: none;
+    line-height: 50px;
+    font: normal 100% 'Open Sans', sans-serif;
+    font-size: 2rem;
+    font-weight: 400;
+    cursor: pointer;
 }
 
 #checklist_title > h1 {

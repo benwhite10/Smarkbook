@@ -27,6 +27,12 @@ switch ($requestType){
         }
         getAllSpecificationPoints($courseId, $userid);
         break;
+    case "GETCHECKLISTS":
+        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
+            failRequest("You are not authorised to complete that request");
+        }
+        getChecklists();
+        break;
     case "UPDATESCORE":
         if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
             failRequest("You are not authorised to complete that request");
@@ -44,7 +50,8 @@ switch ($requestType){
 }
 
 function getAllSpecificationPoints($courseId, $userid) {
-    $query = "SELECT `ID`, `Title`, `Subtitle`, `Description` 
+    $details_query = "SELECT * FROM `TREVISIONCOURSE` WHERE `ID` = $courseId;";
+    $query = "SELECT `ID`, `Subject`, `Title`, `Subtitle`, `Description` 
                 FROM `TREVISIONCHECKLIST` 
                 WHERE `CourseID` = $courseId 
                 ORDER BY `Order`;";
@@ -70,13 +77,28 @@ function getAllSpecificationPoints($courseId, $userid) {
             $point["Links"] = $links;
             $spec_points[$key] = $point;
         }
+        $details = db_select_exception($details_query);
     } catch (Exception $ex) {
         failRequestWithException("There was an error getting the specification points", $ex);
     }
     succeedRequest(array(
+        "details" => $details[0],
         "spec_points" => $spec_points
     ));
 }
+
+function getChecklists() {
+    $checklists_query = "SELECT * FROM `TREVISIONCOURSE` ORDER BY `Order`";
+    try {
+        $checklists = db_select_exception($checklists_query);
+        succeedRequest(array(
+            "checklists" => $checklists
+        ));
+    } catch (Exception $ex) {
+        failRequestWithException("There was an error getting the specification points", $ex);
+    }
+}
+
 
 function updateScore($checklistId, $userid, $score) {
     $query = "SELECT `ID`, `Score`, `Date Added` FROM (
