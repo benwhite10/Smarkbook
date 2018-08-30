@@ -75,7 +75,7 @@ if($resultArray[0]){
                 if(authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
                     $count++;
                     echo "<div class='menuobject' id='menuobject$count' >";
-                    echo "<a href='revisionChecklist.php?course=1' class='title'>Revision</a>";
+                    echo "<a href='revisionChecklist.php?course=1' class='title'>Checklists</a>";
                     echo "<input type='hidden' id='menuObjectLink$count' value='revisionChecklist.php?course=1'>";
                     echo "<input type='hidden' id='menuObjectIcon$count' value='home-worksheets.png'>";
                     echo "</div>";
