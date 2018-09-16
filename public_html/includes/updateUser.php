@@ -20,7 +20,6 @@ $userid = filter_input(INPUT_POST, 'userid', FILTER_SANITIZE_STRING);
 $pwd = filter_input(INPUT_POST, 'p', FILTER_SANITIZE_STRING);
 $fname = filter_input(INPUT_POST, 'firstname', FILTER_SANITIZE_STRING);
 $sname = filter_input(INPUT_POST, 'surname', FILTER_SANITIZE_STRING);
-$prefname = filter_input(INPUT_POST, 'prefferedname', FILTER_SANITIZE_STRING);
 $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_STRING);
 $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_STRING);
 $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING);
@@ -60,7 +59,6 @@ if(isset($role, $userid)){
               `Surname` = '$sname',
               `Username` = '$email',
               `Email` = '$email',
-              `Preferred Name` = '$prefname',
               `Title` = '$title',
               `Initials` = '$initials'
             WHERE `User ID` = $userid;";
