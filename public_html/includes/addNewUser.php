@@ -39,8 +39,8 @@ if(isset($role)){
         // Create salted password
         $pwd = hash('sha512', $pwd . $random_salt);
         $validation = generateRandomString(5);
-        $query = "INSERT INTO TUSERS (`First Name`, `Surname`, `Username`, `Email`, `Password`, `Salt`, `Role`, `Preferred Name`, `Title`, `Initials`, `Validation`)
-                  VALUES('$fname','$sname','$email','$email','$pwd','$random_salt','$role', '$prefname', '$title', '$initials', '$validation')";
+        $query = "INSERT INTO TUSERS (`First Name`, `Surname`, `Email`, `Password`, `Salt`, `Role`, `Preferred Name`, `Title`, `Initials`, `Validation`)
+                  VALUES('$fname','$sname','$email','$pwd','$random_salt','$role', '$prefname', '$title', '$initials', '$validation')";
         try{
             $resultArray = db_insert_query_exception($query);
         } catch (Exception $ex) {

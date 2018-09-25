@@ -6,11 +6,10 @@
 
 $(document).ready(function(){
     $('#login_form').submit(function(){
-        $username = $('#username').val();
-        $password = $('#password').val();
-        if($username == '' || $password == ''){
+        var username = $('#username').val();
+        var password = $('#password').val();
+        if(username === '' || password === ''){
             //Failure
-
             return false;
         }
 

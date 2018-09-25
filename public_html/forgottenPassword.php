@@ -71,7 +71,7 @@ if(isset($_SESSION['message'])){
             <form id="editForm" action="includes/forgotPassword.php" method="POST" >
                 <p style="text-align: center;">
                 <?php if($type == "RESET") { ?>
-                    Enter your e-mail address and password to reset your password.
+                    Enter your a new password to reset your password.
                 <?php }else{ ?>
                     Enter your e-mail address and a link will be sent to you to reset your password.
                 <?php } ?>

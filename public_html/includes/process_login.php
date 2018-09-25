@@ -9,12 +9,12 @@ include_once 'errorReporting.php';
 
 sec_session_start();
 
-$username = filter_input(INPUT_POST,'username',FILTER_SANITIZE_STRING);
+$email = filter_input(INPUT_POST,'username',FILTER_SANITIZE_STRING);
 $password = filter_input(INPUT_POST,'password',FILTER_SANITIZE_STRING);
 $pwd = filter_input(INPUT_POST,'p',FILTER_SANITIZE_STRING);
 
-if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
-    $userid = getDetails($username, 'User ID');
+if(isset($email, $pwd) && $email <> '' && $pwd <> ''){
+    $userid = getDetails($email, 'User ID');
     $user = User::createUserLoginDetails($userid);
 
     //Check if the user is currently locked out
@@ -24,9 +24,9 @@ if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
         if($locktime + 15*60 > time()){
             //Still locked out so display message
             $message = "You have entered incorrect details too many times and have been temporarily locked out. Please come back soon and try again.";
-            $desc = "The account for '$username' has been locked due to too many login attempts.";
+            $desc = "The account for '$email' has been locked due to too many login attempts.";
             infoLog($desc);
-            returnToPageError($message, $username);
+            returnToPageError($message, $email);
         }else{
             unlockUser($userid);
             clearFailedLogins($userid);
@@ -71,7 +71,7 @@ if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
             resetFailedLogins($user->getUserId());
             $errorMessage = 'Incorrect username/password, please try again.';
         }
-        returnToPageError($errorMessage, $username);
+        returnToPageError($errorMessage, $email);
     }
 }else{
     // The correct POST variable were not sent to this page
@@ -83,7 +83,7 @@ if(isset($username, $pwd) && $username <> '' && $pwd <> ''){
 
 
 function getDetails($email, $name){
-    $query = "SELECT `User ID` FROM `TUSERS` WHERE `Email` = '$email'";
+    $query = "SELECT `User ID` FROM `TUSERS` WHERE LOWER(`Email`) = LOWER('$email') OR LOWER(`Email`) = LOWER('$email@wellingtoncollege.org.uk')";
     try{
         return db_select_single_exception($query, $name);
     } catch (Exception $ex) {
@@ -159,14 +159,14 @@ function incrementFailedLogins($userid, $attempts){
     }
 }
 
-function returnToPageError($message, $username){
+function returnToPageError($message, $email){
     $type = 'ERROR';
     if(!isset($message)){
         $message = 'Something has gone wrong';
         infoLog('Something has gone wrong while logging in the user');
     }
     $_SESSION['message'] = new Message($type, $message);
-    header("Location: ../login.php?email=$username");
+    header("Location: ../login.php?email=$email");
     exit;
 }
 

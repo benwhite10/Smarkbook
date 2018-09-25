@@ -57,7 +57,6 @@ if(isset($role, $userid)){
         $query1 = "UPDATE TUSERS
             SET `First Name` = '$fname',
               `Surname` = '$sname',
-              `Username` = '$email',
               `Email` = '$email',
               `Title` = '$title',
               `Initials` = '$initials'

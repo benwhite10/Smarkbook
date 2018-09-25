@@ -16,7 +16,7 @@ $message = "";
 
 if(isset($type, $email)){
     if($type === "FORGOTTEN"){
-        $query = "SELECT `User ID`, `First name`, `Surname` FROM TUSERS WHERE `Email` = '$email';";
+        $query = "SELECT `User ID`, `First name`, `Surname` FROM TUSERS WHERE LOWER(`Email`) = LOWER('$email');";
         try{
             $result = db_select_exception($query);
             if(count($result) === 0){
@@ -66,7 +66,7 @@ if(isset($type, $email)){
     }else if($type === "RESET"){
         if(isset($pwd, $code)){
             //Check the details match up for the right time
-            $query2 = "SELECT `User ID`, `Reset Code`, `Reset Time` FROM TUSERS WHERE `Email` = '$email'";
+            $query2 = "SELECT `User ID`, `Reset Code`, `Reset Time` FROM TUSERS WHERE LOWER(`Email`) = LOWER('$email');";
             try{
                 $result2 = db_select_exception($query2);
                 if(count($result2) == 0){
@@ -98,7 +98,7 @@ if(isset($type, $email)){
 
                 // Create salted password
                 $pwd = hash('sha512', $pwd . $random_salt);
-                $query = "UPDATE TUSERS SET `Password` = '$pwd', `Salt` = '$random_salt', `Reset Code` = NULL, `Reset Time` = NULL WHERE `User ID` = $userid;";
+                $query = "UPDATE TUSERS SET `Password` = '$pwd', `Salt` = '$random_salt' WHERE `User ID` = $userid;";
                 try{
                     $result = db_query_exception($query);
                 } catch (Exception $ex) {
@@ -126,8 +126,6 @@ if(isset($type, $email)){
                 header("Location: ../forgottenPassword.php?code=$code");
                 exit;
             }
-
-
         }else{
             $desc = "Something went wrong while resetting your password. Please refresh and try again.";
             returnToPageError($desc);
