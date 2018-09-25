@@ -42,7 +42,7 @@ if(isset($type, $email)){
             returnToPageError($desc);
         }
         $origin = $_SERVER["SERVER_NAME"];
-        $url = "http://$origin/forgottenPassword.php?code=$code";
+        $url = "http://$origin/forgottenPassword.php?code=$code&email=$email";
         $subject = "Forgotten password";
         $name = "$firstName $surname";
         $body = "<html>
