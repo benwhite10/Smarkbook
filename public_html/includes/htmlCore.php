@@ -4,7 +4,7 @@ function pageHeader($title, $info_version) {
     echo "<meta charset='UTF-8'>";
     echo "<title>$title</title>";
     echo "<meta name='description' content='Smarkbook' />";
-    //echo "<meta name='google' content='notranslate'>";
+    echo "<meta name='google' content='notranslate'>";
     echo "<meta http-equiv='Content-Language' content='en'>";
     echo "<meta name='keywords' content='Intelligent, personalised feedback through smart data analysis' />";
     echo "<meta http-equiv='content-type' content='text/html; charset=utf-8' />";
@@ -42,4 +42,15 @@ function setUpRequestAuthorisation($userid, $userval) {
 
 function pageFooter($info_version) {
     echo "<div id='footer'><p>Copyright &copy " . date("Y") . " Ben White - v$info_version</p></div>";
+}
+
+function googleAnalytics() {
+    echo "<!-- Global site tag (gtag.js) - Google Analytics -->";
+    echo "<script async src='https://www.googletagmanager.com/gtag/js?id=UA-73558730-1'></script>";
+    echo "<script>";
+    echo "window.dataLayer = window.dataLayer || [];";
+    echo "function gtag(){dataLayer.push(arguments);}";
+    echo "gtag('js', new Date());";
+    echo "gtag('config', 'UA-73558730-1');";
+    echo "</script>";
 }

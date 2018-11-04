@@ -231,10 +231,15 @@ tr.averages:nth-child(even):hover, tr.averages:hover
 }
 
 td.student_name{
-    min-width: 180px;
+    min-width: 140px;
     padding-left: 10px;
     cursor: default;
     user-select: none;
+    border-right: none;
+}
+
+td.student_name.no_baseline {
+    border-right: none;
 }
 
 td.total_mark {
@@ -719,6 +724,17 @@ td.awaiting_save {
 th.names_col {
     width: 100%;
     min-width: 150px;
+}
+
+th.baseline_col {
+    max-width: 40px;
+    min-width: 40px;
+}
+
+.baseline_col {
+    text-align: center;
+    border-left: none;
+    color: transparent;
 }
 
 th.questions_col {

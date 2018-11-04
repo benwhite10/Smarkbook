@@ -38,6 +38,7 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Tags", $info_version); ?>
     <script src="js/sorttable.js?<?php echo $info_version; ?>"></script>
     <script src="js/viewAllTags.js?<?php echo $info_version; ?>"></script>

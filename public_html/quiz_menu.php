@@ -29,6 +29,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
 <!DOCTYPE html>
 <html>
     <head>
+        <?php googleAnalytics(); ?>
         <title>Quiz</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">

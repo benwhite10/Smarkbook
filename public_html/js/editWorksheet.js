@@ -6,8 +6,6 @@ $(document).ready(function(){
     requestAllTags();
     startSpinnerInDiv('spinner');
 
-    $("#dialog_message_background").css("display", "none");
-
     sessionStorage.setItem("save_requests", "[]");
 
     // Get the modal
@@ -1141,44 +1139,9 @@ function deleteWorksheet(){
     }
 }
 
-function getResultsAnalysis() {
+function clickResultsAnalysis() {
     var wid = sessionStorage.getItem("worksheet_id");
-    $("#dialog_message_background").css("display", "");
-    var infoArray = {
-        type: "INDIVIDUALWORKSHEET",
-        vid: wid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getWorksheetAnalysis.php",
-        dataType: "json",
-        success: function(json){
-            if (json["success"]) {
-                var link = document.createElement("a");
-                link.setAttribute("href", json["url"]);
-                link.setAttribute("download", json["title"]);
-                document.body.appendChild(link);
-                link.click();
-                $("#dialog_text").html("<p>Analysis completed, downloading file.</p>");
-            } else {
-                $("#dialog_text").html("<p>There was an error completing the results analysis.</p>");
-            }
-            setTimeout(clearDialogBox, 1500);
-        },
-        error: function(response){
-            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
-            $("#dialog_text").html("<p>There was an error completing the results analysis.</p>");
-            setTimeout(clearDialogBox, 1500);
-        }
-    });
-}
-
-function clearDialogBox() {
-    $("#dialog_message_background").css('display', 'none');
-    $("#dialog_text").html("<p>Generating results analysis...</p>");
+    window.location.href = "/worksheetSummary.php?wid=" + wid;
 }
 
 function deleteWorksheetSuccess(json) {

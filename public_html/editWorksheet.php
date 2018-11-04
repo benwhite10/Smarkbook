@@ -31,6 +31,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Edit Worksheet", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
     <script src="js/editWorksheet.js?<?php echo $info_version; ?>"></script>
@@ -40,16 +41,6 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
 </head>
 <body>
     <?php setUpRequestAuthorisation($userid, $userval); ?>
-    <div id="dialog_message_background">
-        <div id="dialog_message_box">
-            <div id="dialog_title">
-                <h1>Results Analysis</h1>
-            </div>
-            <div id="dialog_text">
-                <p>Generating results analysis...</p>
-            </div>
-        </div>
-    </div>
     <div id="main">
     	<div id="header">
             <div id="title">
@@ -115,7 +106,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                 <li><div id="add_question_button" onclick="addNewQuestion()">Add Question</div></li>
                 <li><div id="delete_question_button" onclick="deleteWorksheet()">Delete Worksheet</div></li>
                 <li><div id="add_results_button" onclick="addResults()">Add Results</div></li>
-                <li><div id="results_analysis_button" onclick="getResultsAnalysis()">Results Analysis</div></li>
+                <li><div id="results_analysis_button" onclick="clickResultsAnalysis()">Results Analysis</div></li>
                 <li><div id="back_button" onclick="backToWorksheets()">Back To All Worksheets</div></li>
             </ul>
         </div>

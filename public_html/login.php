@@ -34,6 +34,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Login", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/login.css?<?php echo $info_version; ?>" />
     <script src="js/sha512.js?<?php echo $info_version; ?>"></script>
@@ -63,7 +64,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
                 </form>
 
                 <div id="forgot">
-                    <a href="forgottenPassword.php">Forgot your password?</a>
+                    <a href="forgottenPassword.php<?php if(isset($email)){echo "?email=" . $email;} ?>">Forgot your password?</a>
                 </div>
             </div>
         </div>

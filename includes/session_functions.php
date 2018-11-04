@@ -48,7 +48,7 @@ function checkUserLoginStatus($url){
     if(isset($_SESSION['user'])){
         $user = $_SESSION['user'];
         $userid = $user->getUserId();
-        $username = $user->getEmail();
+        $email = $user->getEmail();
         $timeout = $_SESSION['timeout'];
         if(isset($timeout)){
             if($timeout + 12*60*60 < time()){
@@ -58,7 +58,7 @@ function checkUserLoginStatus($url){
                     $_SESSION['url'] = $url;
                 }
                 logout();
-                $url = "Location: ../login.php?email=$username";
+                $url = "Location: ../login.php?email=$email";
                 $bool = false;
             }else{
                 //All good so carry on!
@@ -71,7 +71,7 @@ function checkUserLoginStatus($url){
             if(isset($url)) {
                 $_SESSION['url'] = $url;
             }
-            $url = "Location: ../login.php?email=$username";
+            $url = "Location: ../login.php?email=$email";
             $bool = false;
         }
     }else{

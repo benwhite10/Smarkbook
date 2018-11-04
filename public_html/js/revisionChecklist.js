@@ -1,10 +1,48 @@
 $(document).ready(function(){
-    getSpecificationPoints(getParameterByName("course"));
+    getChecklists();
 });
 
 function setContentHeight() {
     var height = $("#checklist_div").height();
     $("#main_content").height(height + 250);
+}
+
+function getChecklists() {
+    var infoArray = {
+        type: "GETCHECKLISTS",
+        userid: $('#userid').val(),
+        userval: $('#userval').val()
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "requests/revisionChecklist.php",
+        dataType: "json",
+        success: getChecklistsSuccess,
+        error: function(response){
+            console.log("There was an error getting the course details.");
+            console.log(response);
+        }
+    });
+}
+
+function getChecklistsSuccess(json) {
+    if (json["success"]) {
+        var checklists = json["result"]["checklists"];
+        var html_text = "";
+        for (var i = 0; i < checklists.length; i++) {
+            html_text += "<option value='" + checklists[i]["ID"] + "'>" + checklists[i]["Title"] + "</option>";
+        }
+        $("#checklist_select").html(html_text);
+        getSpecificationPoints(checklists[0]["ID"]);
+    } else {
+        console.log("There was an error getting the specification points.");
+        console.log(json["message"]);
+    } 
+}
+
+function changeChecklist() {
+    getSpecificationPoints($("#checklist_select").val());
 }
 
 function getSpecificationPoints(id) {
@@ -29,6 +67,7 @@ function getSpecificationPoints(id) {
 
 function specificationPointsSuccess(json) {
     if (json["success"]) {
+        writeTitle(json["result"]["details"]);
         var spec_points = json["result"]["spec_points"];
         sessionStorage.setItem("spec_points", JSON.stringify(spec_points));
         $("#checklist_div").html("");
@@ -43,8 +82,13 @@ function specificationPointsSuccess(json) {
     }  
 }
 
+function writeTitle(details) {
+    $("#checklist_title_description").html("<p>" + details["Description"] + "</p>");
+}
+
 function writeChecklistItem(spec_point) {
     var id = spec_point["ID"];
+    var subject = spec_point["Subject"];
     var title = spec_point["Title"];
     var subtitle = spec_point["Subtitle"];
     var description = spec_point["Description"];
@@ -52,7 +96,10 @@ function writeChecklistItem(spec_point) {
     
     var final_text = "<div id='checklist_item_" + id + "' class='checklist_item'>";
     final_text += "<div class='checklist_item_title' onclick='clickTitle(" + id + ")'>";
-    final_text += "<h1>" + title + " - " + subtitle + "</h1></div>";
+    final_text += "<h1>" + subject;
+    if(title !== "") final_text += ": " + title;
+    if(subtitle !== "") final_text += " - " + subtitle;
+    final_text += "</h1></div>";
     final_text += "<div id='checklist_item_buttons_" + id + "'class='checklist_item_buttons'>";
     final_text += "<div id='checklist_button_" + id + "_5' class='checklist_button five' onclick='clickChecklistButton(" + id + ",5)'><p>5</p></div>";
     final_text += "<div id='checklist_button_" + id + "_4' class='checklist_button four' onclick='clickChecklistButton(" + id + ",4)'><p>4</p></div>";
@@ -61,8 +108,7 @@ function writeChecklistItem(spec_point) {
     final_text += "<div id='checklist_button_" + id + "_1' class='checklist_button one' onclick='clickChecklistButton(" + id + ",1)'><p>1</p></div>";
     final_text += "<div id='checklist_button_" + id + "_single' class='checklist_button single'></div></div></div>";
     final_text += "<div id='checklist_item_detail_" + id + "' class='checklist_item_detail'>";
-    final_text += "<div class='checklist_item_description'>";
-    final_text += "<p>" + description + "</p></div>";
+    if(description !== null && description !== "") final_text += "<div class='checklist_item_description'><p>" + description + "</p></div>";
     final_text += "<div class='checklist_item_links'>";
     for (var i = 0; i < links.length; i++) {
         var title = links[i]["Title"];
@@ -132,7 +178,7 @@ function updateScore(spec_id, score) {
         url: "requests/revisionChecklist.php",
         dataType: "json",
         success: function(json) {
-            console.log(json);
+            //console.log(json);
         },
         error: function(response){
             console.log("There was an error getting the specification points.");

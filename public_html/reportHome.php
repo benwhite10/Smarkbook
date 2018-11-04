@@ -42,6 +42,7 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
 <!DOCTYPE html>
 <html>
     <head lang="en">
+        <?php googleAnalytics(); ?>
         <?php pageHeader("Report", $info_version) ?>
         <link rel="stylesheet" type="text/css" href="css/reportHome.css?<?php echo $info_version; ?>" />
         <link rel="stylesheet" type="text/css" href="pickadate/themes/default.css?<?php echo $info_version; ?>"/>

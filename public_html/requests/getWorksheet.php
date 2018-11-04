@@ -61,7 +61,7 @@ function getWorksheetForGWID($gwid){
                 WHERE `Group Worksheet ID` = $gwid  AND C.`Deleted` = 0;";
 
     //Details for the worksheet, date due, notes etc
-    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName,
+    $query3 = "SELECT WV.`WName` WName, WV.`VName` VName, GW.`Group ID` SetID, G.`Name` SetName, G.`BaselineSubject`, G.`BaselineType`, 
                 GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3,
                 GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded,
                 GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden,
@@ -85,14 +85,15 @@ function getWorksheetForGWID($gwid){
     $query5 = "SELECT * FROM TNOTES WHERE `Group Worksheet ID` = $gwid;";
 
     // Students
-    $query6 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name
+    $query6 = "SELECT U.`User ID` ID, U.`Preferred Name` PName, U.`Surname`, U.`First Name` FName
                 FROM TUSERS U
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
-                WHERE GW.`Group Worksheet ID` = $gwid
+                WHERE GW.`Group Worksheet ID` = $gwid 
                 AND UG.`Archived` <> 1
-                AND U.`Role` = 'STUDENT' 
-                ORDER BY U.`Surname`;";
+                AND U.`Role` = 'STUDENT'
+                GROUP BY U.`User ID`
+                ORDER BY U.`Surname`";
 
     // Worksheet inputs
     $query7 = "SELECT * FROM `TGROUPWORKSHEETINPUT`
@@ -102,11 +103,22 @@ function getWorksheetForGWID($gwid){
         $worksheetDetails = optimiseArray(db_select_exception($query1), "SQID");
         $results = db_select_exception($query2);
         $details = db_select_exception($query3);
+        $baselineSubject = $details[0]["BaselineSubject"];
+        $baselineType = $details[0]["BaselineType"];
         $boundaries = db_select_exception($query3a);
         $completedWorksheets = optimiseArray(db_select_exception($query4), "Student ID");
         $completedWorksheetsInputs = db_select_exception($query4a);
         $notes = optimiseArray(db_select_exception($query5), "Student ID");
         $students = db_select_exception($query6);
+        for ($i = 0; $i < count($students); $i++) {
+            $pref_name = $students[$i]["PName"];
+            $first_name = $students[$i]["FName"];
+            $surname = $students[$i]["Surname"];
+            $name = $pref_name <> "" ? $pref_name : $first_name;
+            $name .= " $surname";
+            $students[$i]["Name"] = $name;
+            $students[$i]["Baseline"] = getBaseline($students[$i]["ID"], $baselineSubject, $baselineType);
+        }
         $worksheetInputs = db_select_exception($query7);
         $finalResults = groupResultsByStudent($results, $students);
     } catch (Exception $ex) {
@@ -133,6 +145,24 @@ function getWorksheetForGWID($gwid){
     echo json_encode($test);
 }
 
+function getBaseline($stu_id, $baseline_subject, $baseline_type) {
+    if (intval($baseline_subject)) {
+        $baseline_query = "SELECT `Baseline` FROM `TBASELINES`
+            WHERE `Deleted` = 0 
+            AND `Subject` = $baseline_subject 
+            AND `Type` = '$baseline_type'
+            AND `UserID` = $stu_id";
+        try {
+            $baseline_result = db_select_exception($baseline_query);
+            return count($baseline_result) > 0 ? $baseline_result[0]["Baseline"] : null;
+        } catch (Exception $ex) {
+            return null;
+        }
+    } else {
+        return null;
+    }   
+}
+
 function downloadGWID($gwid) {
     // List of questions and their marks
     $query1 = "SELECT SQ.`Stored Question ID` SQID, SQ.`Number` Number, SQ.`Marks` Marks FROM TSTOREDQUESTIONS SQ
@@ -153,7 +183,7 @@ function downloadGWID($gwid) {
 
     // Students
     $query4 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name
-                FROM TUSERS U 
+                FROM TUSERS U
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
                 WHERE GW.`Group Worksheet ID` = $gwid

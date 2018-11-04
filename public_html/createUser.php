@@ -35,6 +35,7 @@ if(isset($_SESSION['message'])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("New User", $info_version); ?>
     <link href="css/autocomplete.css?<?php echo $info_version; ?>" rel="stylesheet" />
     <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>

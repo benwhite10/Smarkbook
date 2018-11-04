@@ -31,6 +31,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
 <!DOCTYPE html>
 <html>
 <head lang="en">
+    <?php googleAnalytics(); ?>
     <?php pageHeader("Revision Checklist", $info_version); ?>
     <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
     <script src='js/revisionChecklist.js?<?php echo $info_version; ?>'></script>
@@ -47,37 +48,36 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
     	</div>
     	<div id="body">
             <div id="main_content">
+                <div id="checklist_select_container">
+                    <select id="checklist_select" onchange="changeChecklist()"></select>
+                </div>
                 <div id="checklist_title">
-                    <div id="checklist_title_main">
-                        <h1>GCSE Revision Checklist</h1>
-                    </div>
-                    <div id="checklist_title_description">
-                        <p>All of the topics you need to know for your GCSE are listed below. Rate each topic from 1-5 based on how confident you feel about answering questions on the topic right now. You should then focus your revision on the topics you have rated the lowest. Clicking on each topic reveals a description and links to useful resources and questions on that topic. As you work on the topic you should update your ratings.</p>
-                    </div>
+                    <div id="checklist_title_main"></div>
+                    <div id="checklist_title_description"></div>
                     <div id="checklist_title_info">
                         <div class="checklist_title_info_section five">
                             <div class="checklist_title_info_number">5</div>
-                            <div class="checklist_title_info_description">Bring on the exam!</div>
+                            <div class="checklist_title_info_description">Completely confident</div>
                             <div class="checklist_title_info_colour five"></div>
                         </div>
                         <div class="checklist_title_info_section four">
                             <div class="checklist_title_info_number">4</div>
-                            <div class="checklist_title_info_description">I've got this.</div>
+                            <div class="checklist_title_info_description">Almost there</div>
                             <div class="checklist_title_info_colour four"></div>
                         </div>
                         <div class="checklist_title_info_section three">
                             <div class="checklist_title_info_number">3</div>
-                            <div class="checklist_title_info_description">I need more practice.</div>
+                            <div class="checklist_title_info_description">OK</div>
                             <div class="checklist_title_info_colour three"></div>
                         </div>
                         <div class="checklist_title_info_section two">
                             <div class="checklist_title_info_number">2</div>
-                            <div class="checklist_title_info_description">Not great.</div>
+                            <div class="checklist_title_info_description">Not great</div>
                             <div class="checklist_title_info_colour two"></div>
                         </div>
                         <div class="checklist_title_info_section one">
                             <div class="checklist_title_info_number">1</div>
-                            <div class="checklist_title_info_description">I've no idea!</div>
+                            <div class="checklist_title_info_description">No idea</div>
                             <div class="checklist_title_info_colour one"></div>
                         </div>
                     </div>
