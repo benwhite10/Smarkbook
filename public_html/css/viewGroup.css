@@ -7,11 +7,18 @@ body {
     height: auto;
 }
 
-#add_student {
+#main_content {
+    width: 100%;
+}
+
+#set_details {
     width: calc(100% - 2px);
-    height: 100px;
+    height: auto;
     margin: 10px 0px;
     border: 1px solid #000;
+    display: inline-block;
+    float: left;
+    padding-bottom: 10px;
 }
 
 #students_input {
@@ -43,4 +50,105 @@ body {
 
 #main_content > table {
     border: 1px solid #000;
+}
+
+.set_details_input_div, .set_details_header {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+}
+
+.set_details_header > h1 {
+    font-size: 25px;
+    display: inline-block;
+    float: left;
+    line-height: 40px;
+    margin-left: 10px;
+}
+
+.set_details_header_button {
+    display: inline-block;
+    float: right;
+    width: 150px;
+    height: 40px;
+    text-align: center;
+    line-height: 38px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #DDD;
+}
+
+.set_details_header_button:hover {
+    background: #66E11B;
+}
+
+
+.set_details_input_title {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0;
+    margin-left: 10px;
+    width: 240px;
+    line-height: 40px;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+.set_details_input {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 0;
+    width: calc(100% - 250px);
+}
+
+input[type="text"].set_details_input {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 3px 0;
+    padding-left: 10px;
+    width: calc(100% - 270px);
+    max-width: 400px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+}
+
+#students_input {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    margin: 3px 0;
+    padding-left: 10px;
+    width: calc(100% - 270px);
+    max-width: 400px;
+    height: 32px;
+    line-height: 32px;
+}
+
+select.set_details_input {
+    padding: 0;
+    margin: 4px 0;
+    padding-left: 10px;
+    width: calc(100% - 270px);
+    max-width: 412px;
+    height: 32px;
+    line-height: 32px;
+    outline: none;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.set_details_header_button.delete {
+    background: #FF8282;
+}
+
+.set_details_header_button.delete:hover {
+    background: #f92601;
 }

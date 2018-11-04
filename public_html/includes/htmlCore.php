@@ -4,7 +4,7 @@ function pageHeader($title, $info_version) {
     echo "<meta charset='UTF-8'>";
     echo "<title>$title</title>";
     echo "<meta name='description' content='Smarkbook' />";
-    //echo "<meta name='google' content='notranslate'>";
+    echo "<meta name='google' content='notranslate'>";
     echo "<meta http-equiv='Content-Language' content='en'>";
     echo "<meta name='keywords' content='Intelligent, personalised feedback through smart data analysis' />";
     echo "<meta http-equiv='content-type' content='text/html; charset=utf-8' />";

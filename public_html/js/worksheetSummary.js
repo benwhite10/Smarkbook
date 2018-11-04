@@ -689,7 +689,7 @@ function getResultsAnalysis() {
 
 function resultsAnalysisSuccess(json) {
     if (json["success"]) {
-        console.log(json);
+        console.log(json["log"]);
         stopSpinnerInDiv("spinner_div");
         $("#main_content").fadeIn();
         results_analysis["Questions"] = convertObjectToArray(json["ques_info"]);

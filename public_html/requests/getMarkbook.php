@@ -42,7 +42,7 @@ switch ($requestType){
 }
 
 function getMarkbookForSetAndTeacher($setid, $staffid){
-    $query1 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name FROM TUSERGROUPS G
+    $query1 = "SELECT U.`User ID` ID, U.`Preferred Name` PName, U.`Surname`, U.`First Name` FName FROM TUSERGROUPS G
                 JOIN TUSERS U ON G.`User ID` = U.`User ID`
                 WHERE G.`Group ID` = $setid
                 AND G.`Archived` <> 1 
@@ -61,6 +61,14 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
 
     try{
         $students = db_select_exception($query1);
+        for ($i = 0; $i < count($students); $i++) {
+            $pref_name = $students[$i]["PName"];
+            $first_name = $students[$i]["FName"];
+            $surname = $students[$i]["Surname"];
+            $name = $pref_name <> "" ? $pref_name : $first_name;
+            $name .= " $surname";
+            $students[$i]["Name"] = $name;
+        }
         $worksheets = db_select_exception($query2);
     } catch (Exception $ex) {
         $message = "There was an error retrieving the markbook";

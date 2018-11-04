@@ -111,9 +111,13 @@ function moveLeft(id) {
             }
         }
     }
-
-    $("#" + new_id).focus();
-    $("#" + new_id).select();
+    if (new_id) {
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else {
+        $("#" + id).blur();
+        $("#" + id).focus();
+    }
 }
 
 function moveRight(id) {
@@ -143,9 +147,13 @@ function moveRight(id) {
             }
         }
     }
-
-    $("#" + new_id).focus();
-    $("#" + new_id).select();
+    if (new_id) {
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else {
+        $("#" + id).blur();
+        $("#" + id).focus();
+    }
 }
 
 function moveUpDown(id, up) {
@@ -156,32 +164,49 @@ function moveUpDown(id, up) {
         var pos = splitId(id);
         pos[0] = up ? parseInt(pos[0]) - 1 : parseInt(pos[0]) + 1;
         new_id = pos[0] + "-" + pos[1];
+        if(!document.getElementById(new_id)) {
+            new_id = false;
+        }
     } else {
         if (id.includes("total_input")) {
             var pos = id.split("_");
             new_id = "total_input_";
             new_id += up ? (parseInt(pos[2]) - 1) : (parseInt(pos[2]) + 1);
+            if(document.getElementById(new_id)) {
+                return new_id;
+            }
         } else {
             // In inputs section
             var pos = id.split("_");
             var row = up ? parseInt(getRow(row_student_array, pos[1])) - 1 : parseInt(getRow(row_student_array, pos[1])) + 1;
             var student = getStudentId(row_student_array, row);
-            if (!student) return;
-            new_id = pos[0] + "_" + student;
+            //if (!student) return;
+            if (student) {
+                new_id = pos[0] + "_" + student;
+            } else {
+                new_id = false;
+            }  
         }
-
     }
-    $("#" + new_id).focus();
-    $("#" + new_id).select();
+    if (new_id) {
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else {
+        $("#" + id).blur();
+        $("#" + id).focus();
+    }
 }
 
 function maxResult(row) {
-    for (var i = 0; i < 1000; i++) {
+    if(!document.getElementById(row + "-" + 0)){
+        return false;
+    }
+    for (var i = 1; i < 1000; i++) {
         if(!document.getElementById(row + "-" + i)){
             return row + "-" + (i - 1);
         }
     }
-    return 100;
+    return false;
 }
 
 function stepRightInputs(input, student_id) {
@@ -222,7 +247,11 @@ function stepLeftInputs(input, student_id) {
 
 function newRow(row) {
     new_row = parseInt(row) + 1;
-    return new_row + "-0";
+    new_id = new_row + "-0";
+    if(document.getElementById(new_id)) {
+        return new_id;
+    }
+    return false;
 }
 
 function getStudentId(row_student_array, row) {
@@ -613,14 +642,13 @@ function parseMainTable() {
         var stuid = student["ID"];
         var results_array = results[stuid];
         var col = 0;
-        var baseline = student["Baseline"] !== null;
-        baseline = false;
+        var baseline = student["Baseline"] !== null ? student["Baseline"] : "";
         row_student_array.push([row, stuid]);
         student_rows += "<tr class='results'><td class='results student_name ";
         student_rows += baseline ? "" : "no_baseline";
         student_rows += "' id='stu" + stuid + "'>" + student["Name"] + "</td>";
         student_rows += "<td class='results baseline_col' >";
-        student_rows += baseline ? student["Baseline"] : "";
+        student_rows += baseline;
         student_rows += "</td>";
         var totalMark = "";
         var totalMarks = 0;

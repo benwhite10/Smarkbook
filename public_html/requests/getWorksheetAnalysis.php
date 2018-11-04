@@ -31,15 +31,6 @@ switch ($requestType){
 
 function getIndividualWorksheetSummary2($version_id) {
     $response = getWorksheetSummary($version_id, FALSE);
-    /*
-    $response = array (
-        "success" => TRUE,
-        "stu_ques_array" => $students,
-        "ques_info" => $questions_array,
-        "sets_info" => $groups,
-        "w_name" => $worksheet_name
-    );
-    */
     $file_name = rand(111111, 999999);
     $objPHPExcel = new PHPExcel();
     $objPHPExcel->getProperties()->setCreator("Smarkbook")
@@ -64,101 +55,10 @@ function getIndividualWorksheetSummary2($version_id) {
     echo json_encode($final_response);
 }
 
-function getIndividualWorksheetSummary($version_id, $staff_ids) {
-    // Get group worksheets
-    $gw_query = "SELECT `Group Worksheet ID` FROM TGROUPWORKSHEETS GW
-                WHERE `Version ID` = $version_id
-                AND `Deleted` = 0 ";
-    if (count($staff_ids) > 0) {
-        $gw_query .= "AND (";
-        for ($i = 0; $i < count($staff_ids); $i++) {
-            $staff_id = $staff_ids[$i];
-            $gw_query .= $i === count($staff_ids) - 1 ? " `Primary Staff ID` = $staff_id) " : " `Primary Staff ID` = $staff_id OR ";
-        }
-    }
-
-    // Get breakdown of questions
-    $ques_info_query = "SELECT `Stored Question ID`, `Number`, `Marks` FROM `TSTOREDQUESTIONS`
-                    WHERE `Version ID` = $version_id
-                    AND `Deleted` = 0
-                    ORDER BY `Question Order`";
-
-    $worksheet_query = "SELECT `WName` FROM TWORKSHEETVERSION WHERE `Version ID` = $version_id;";
-
-    // Get list of students
-
-    try {
-        $gw_ids = db_select_exception($gw_query);
-        $ques_info = db_select_exception($ques_info_query);
-        $worksheet_results = db_select_exception($worksheet_query);
-        $worksheet_name = $worksheet_results[0]["WName"];
-
-        // Get list of students
-        $stu_query = "SELECT U.`User ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, UG.`Group ID`, G.`Name` FROM `TUSERGROUPS` UG
-                JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
-                JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
-                LEFT JOIN `TBASELINES` B ON U.`User ID` = B.`UserID` AND B.`Subject` = 1 AND B.`Deleted` = 0
-                WHERE UG.`Group ID` IN (SELECT GW.`Group ID`
-                FROM `TGROUPWORKSHEETS` GW
-                WHERE UG.`Archived` = 0
-                AND U.`Role` = 'STUDENT' ";
-        if (count($gw_ids) > 0) {
-            $stu_query .= " AND (";
-            for ($i = 0; $i < count($gw_ids); $i++) {
-                $gw_id = $gw_ids[$i]["Group Worksheet ID"];
-                $stu_query .= $i === count($gw_ids) - 1 ? " GW.`Group Worksheet ID` = $gw_id) " : " GW.`Group Worksheet ID` = $gw_id OR ";
-            }
-        }
-        $stu_query .= ") ORDER BY G.`Name`, U.`Surname`";
-        $stu_results = db_select_exception($stu_query);
-        $stu_ques_array = $stu_results;
-        for ($i = 0; $i < count($stu_ques_array); $i++) {
-            $stu_id = $stu_ques_array[$i]["User ID"];
-            $stu_ques_query = "SELECT CQ.`Stored Question ID`, CQ.`Mark` FROM `TCOMPLETEDQUESTIONS` CQ
-                WHERE CQ.`Deleted` = 0
-                AND `Student ID` = $stu_id
-                AND (";
-            for ($j = 0; $j < count($ques_info); $j++) {
-                $sqid = $ques_info[$j]["Stored Question ID"];
-                $stu_ques_query .= $j === count($ques_info) - 1 ? " CQ.`Stored Question ID` = $sqid) " : " CQ.`Stored Question ID` = $sqid OR ";
-            }
-            $stu_ques_array[$i]["Questions"] = db_select_exception($stu_ques_query);
-            $stu_first_name = $stu_ques_array[$i]["Preferred Name"] === "" ? $stu_ques_array[$i]["First Name"] : $stu_ques_array[$i]["Preferred Name"];
-            $stu_ques_array[$i]["Full Name"] = $stu_first_name . " " . $stu_ques_array[$i]["Surname"];
-        }
-
-    } catch (Exception $ex) {
-        //echo $stu_ques_query;
-        failRequest($ex->getMessage());
-    }
-
-    $file_name = rand(111111, 999999);
-    $objPHPExcel = new PHPExcel();
-    $objPHPExcel->getProperties()->setCreator("Smarkbook")
-                                ->setLastModifiedBy("Ben White")
-                                ->setTitle($worksheet_name);
-
-    try {
-        $objPHPExcel = outputExcelResults2($stu_ques_array, $ques_info, $objPHPExcel, $worksheet_name);
-    } catch (Exception $ex) {
-        failRequest($ex->getMessage());
-    }
-
-    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-    $objWriter->save("../downloads/$file_name.xlsx");
-
-    $response = array (
-        "success" => TRUE,
-        "url" => "/downloads/$file_name.xlsx",
-        "title" => $worksheet_name
-    );
-
-    echo json_encode($response);
-
-}
-
 function getWorksheetSummary($version_id, $return) {
     // Get breakdown of questions
+    $time_1 = microtime(true);
+    $log_text = "";
     $ques_info_query = "SELECT `Stored Question ID`, `Number`, `Question Order`, `Marks` FROM `TSTOREDQUESTIONS`
                     WHERE `Version ID` = $version_id
                     AND `Deleted` = 0
@@ -170,9 +70,9 @@ function getWorksheetSummary($version_id, $return) {
         $ques_info = db_select_exception($ques_info_query);
         $questions_array = [];
         $total = 0;
-        for ($i = 0; $i < count($ques_info); $i++) {
-            $sqid = $ques_info[$i]["Stored Question ID"];
-            $marks = floatval($ques_info[$i]["Marks"]);
+        foreach ($ques_info as $question) {
+            $sqid = $question["Stored Question ID"];
+            $marks = floatval($question["Marks"]);
             $total += $marks;
             $tags_query = "SELECT QT.`Tag ID`, T.`Name` FROM `TQUESTIONTAGS` QT
                             JOIN `TTAGS` T ON QT.`Tag ID` = T.`Tag ID`
@@ -181,8 +81,8 @@ function getWorksheetSummary($version_id, $return) {
             $tags = db_select_exception($tags_query);
             $questions_array[$sqid] = array(
                 "SQID" => $sqid,
-                "Number" => $ques_info[$i]["Number"],
-                "Order" => floatval($ques_info[$i]["Question Order"]),
+                "Number" => $question["Number"],
+                "Order" => floatval($question["Question Order"]),
                 "Marks" => $marks,
                 "Tags" => $tags
             );
@@ -199,7 +99,9 @@ function getWorksheetSummary($version_id, $return) {
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-
+    
+    $time_2 = microtime(true);
+    $log_text .= "Worksheet: " . round($time_2-$time_1,2) . "s, ";
     // Get list of students
     try {
         // Get group worksheets
@@ -208,35 +110,49 @@ function getWorksheetSummary($version_id, $return) {
                     AND `Deleted` = 0 ";
 
         $gw_ids = db_select_exception($gw_query);
-
+        
+        //$time_3 = microtime(true);
+        //$log_text .= "DB Request 1: " . round($time_3-$time_2,2) . "s, ";
+        
+        // 0.18 s
         $results_query = "SELECT CQ.`Student ID`, CQ.`Stored Question ID`, CQ.`Mark`, CQ.`Group Worksheet ID` FROM `TCOMPLETEDQUESTIONS` CQ
                             JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
                             WHERE GW.`Version ID` = $version_id AND CQ.`Deleted` = 0 AND GW.`Deleted` = 0";
         $results = db_select_exception($results_query);
-
+        
+        //$time_3_1 = microtime(true);
+        //$log_text .= "DB Request 2: " . round($time_3_1-$time_3,2) . "s, ";
+        
+        // 2.0 s
         $students_query = "SELECT CQ.`Student ID`, CQ.`Group Worksheet ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, GW.`Group ID`, G.`Name`, B.`Baseline`, UU.`Initials` FROM `TCOMPLETEDQUESTIONS` CQ
                         JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
                         JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
                         JOIN `TUSERS` U ON CQ.`Student ID` = U.`User ID`
                         JOIN `TUSERS` UU ON GW.`Primary Staff ID` = UU.`User ID`
-                        LEFT JOIN `TBASELINES` B ON U.`User ID` = B.`UserID` AND B.`Subject` = 1 AND B.`Deleted` = 0
+                        LEFT JOIN `TBASELINES` B ON U.`User ID` = B.`UserID` AND B.`Subject` = G.`BaselineSubject` AND B.`Type` = G.`BaselineType` AND B.`Deleted` = 0
                         WHERE GW.`Version ID` = $version_id AND CQ.`Deleted` = 0 AND GW.`Deleted` = 0
                         GROUP BY CQ.`Student ID`, CQ.`Group Worksheet ID`
                         ORDER BY G.`Name`, U.`Surname`";
         $students = db_select_exception($students_query);
+        
+        //$time_3_2 = microtime(true);
+        //$log_text .= "DB Request 3: " . round($time_3_2-$time_3_1,2) . "s, ";
+        
+        $time_3 = microtime(true);
+        $log_text .= "DB Requests: " . round($time_3-$time_2,2) . "s, ";
 
         $groups = [];
-        for ($i = 0; $i < count($students); $i++) {
-            $stu_id = $students[$i]["Student ID"];
-            $gw_id = $students[$i]["Group Worksheet ID"];
-            $group_id = $students[$i]["Group ID"];
+        foreach ($students as $i => $student) {
+            $stu_id = $student["Student ID"];
+            $gw_id = $student["Group Worksheet ID"];
+            $group_id = $student["Group ID"];
             $student_questions_array = [];
             $total = 0;
-            $baseline = is_nan(floatval($students[$i]["Baseline"])) ? 0 : floatval($students[$i]["Baseline"]) ;
-            for ($j = 0; $j < count($results); $j++) {
-                if ($results[$j]["Student ID"] === $stu_id && $results[$j]["Group Worksheet ID"] === $gw_id) {
-                    $mark = floatval($results[$j]["Mark"]);
-                    $sqid = $results[$j]["Stored Question ID"];
+            $baseline = is_nan(floatval($student["Baseline"])) ? 0 : floatval($student["Baseline"]) ;
+            foreach ($results as $j => $result) {
+                if ($result["Student ID"] === $stu_id && $result["Group Worksheet ID"] === $gw_id) {
+                    $mark = floatval($result["Mark"]);
+                    $sqid = $result["Stored Question ID"];
                     $total += $mark;
                     $student_questions_array[$sqid] = $mark;
                     $av_mark = $mark;
@@ -269,8 +185,8 @@ function getWorksheetSummary($version_id, $return) {
                 }
             }
             $groups[$group_id]["SetID"] = $group_id;
-            $groups[$group_id]["Name"] = $students[$i]["Name"];
-            $groups[$group_id]["LongName"] = $students[$i]["Name"] . " - " . $students[$i]["Initials"];
+            $groups[$group_id]["Name"] = $student["Name"];
+            $groups[$group_id]["LongName"] = $student["Name"] . " - " . $student["Initials"];
             if ($baseline > 0) {
                 if (array_key_exists("Baseline", $groups[$group_id])) {
                     $av_baseline = floatval($groups[$group_id]["Baseline"]);
@@ -287,6 +203,10 @@ function getWorksheetSummary($version_id, $return) {
             $student_questions_array["Total"] = $total;
             $students[$i]["Questions"] = $student_questions_array;
         }
+        
+        $time_4 = microtime(true);
+        $log_text .= "Update students: " . round($time_4-$time_3,2) . "s, ";
+        
         foreach ($groups as $key => $group) {
             $total = 0;
             $count = 0;
@@ -300,6 +220,10 @@ function getWorksheetSummary($version_id, $return) {
             $groups[$key]["Questions"]["Total"]["AvMark"] = $total/$count;
             $groups[$key]["Questions"]["Total"]["AvCount"] = $count;
         }
+        
+        $time_5 = microtime(true);
+        $log_text .= "Update groups: " . round($time_5-$time_4,2) . "s, ";
+        $log_text .= "Total time: " . round($time_5-$time_1,2) . "s, ";
     } catch (Exception $ex) {
         //echo $stu_ques_query;
         failRequest($ex->getMessage());
@@ -310,7 +234,8 @@ function getWorksheetSummary($version_id, $return) {
         "stu_ques_array" => $students,
         "ques_info" => $questions_array,
         "sets_info" => $groups,
-        "w_name" => $worksheet_name
+        "w_name" => $worksheet_name,
+        "log" => $log_text
     );
 
     if ($return) {

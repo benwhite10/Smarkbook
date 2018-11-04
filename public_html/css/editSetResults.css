@@ -235,6 +235,7 @@ td.student_name{
     padding-left: 10px;
     cursor: default;
     user-select: none;
+    border-right: none;
 }
 
 td.student_name.no_baseline {
@@ -733,6 +734,7 @@ th.baseline_col {
 .baseline_col {
     text-align: center;
     border-left: none;
+    color: transparent;
 }
 
 th.questions_col {
