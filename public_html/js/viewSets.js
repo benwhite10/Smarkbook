@@ -121,6 +121,8 @@ function getSubjectsSuccess(json) {
             subject_text += "<option value='" + id + "'>" + name + "</option>";
         }
         $("#subject_select").html(subject_text);
+    } else {
+        console.log(json["message"]);
     }
 }
 

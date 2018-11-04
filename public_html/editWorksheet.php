@@ -77,8 +77,6 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     </select>
                     <label>Date Added:
                     </label><input type="text" id="worksheet_date" placeholder="DD/MM/YYYY" onchange="saveQuestion('worksheet_details')"/>
-                    <label>Internal Results:
-                    </label><input type="checkbox" id="worksheet_internal" onchange="saveQuestion('worksheet_details')"/>
                 </div>
                 <div id="worksheet_marks_titles" class="section_title">
                     <h2>Marks</h2>
@@ -104,7 +102,8 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
             <ul class="menu sidebar">
                 <li><div id="save_worksheet_button">Save</div></li>
                 <li><div id="add_question_button" onclick="addNewQuestion()">Add Question</div></li>
-                <li><div id="delete_question_button" onclick="deleteWorksheet()">Delete Worksheet</div></li>
+                <li><div id="delete_worksheet_button" onclick="deleteWorksheet()">Delete Worksheet</div></li>
+                <li><div id="copy_worksheet_button" onclick="copyWorksheet()">Copy Worksheet</div></li>
                 <li><div id="add_results_button" onclick="addResults()">Add Results</div></li>
                 <li><div id="results_analysis_button" onclick="clickResultsAnalysis()">Results Analysis</div></li>
                 <li><div id="back_button" onclick="backToWorksheets()">Back To All Worksheets</div></li>

@@ -70,7 +70,7 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
                     </div>
                     <div class="set_details_input_div" id="set_details_subject">
                         <div class="set_details_input_title">Baseline Subject: </div>
-                        <select class="set_details_input" id="subject_input">
+                        <select class="set_details_input" id="subject_input" onchange="changeSubject()">
                             <option value="0">No Subject</option>
                         </select>
                     </div>

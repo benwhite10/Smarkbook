@@ -117,7 +117,7 @@ function getSubjects() {
     try{
         $subjects = db_select_exception($subject_query);
     } catch (Exception $ex) {
-        $message = "There was an error getting the academic years: " . $ex->getMessage();
+        $message = "There was an error getting the subjects: " . $ex->getMessage();
         returnRequest(FALSE, null, $message);
     }
     returnRequest(TRUE, $subjects, null);

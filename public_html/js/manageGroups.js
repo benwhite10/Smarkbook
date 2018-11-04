@@ -336,6 +336,12 @@ function deleteSet() {
     }
 }
 
+function changeSubject() {
+    if ($("#subject_input").val() > 0 && $("#type_input").val() === "") {
+        $("#type_input").val("MidYIS");
+    }
+}
+
 function goBack() {
     window.history.back();
 }

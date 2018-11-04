@@ -35,7 +35,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
 <html>
 <head lang="en">
     <?php googleAnalytics(); ?>
-    <?php pageHeader("Login", $info_version); ?>
+    <?php pageHeader("Smarkbook - Login", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/login.css?<?php echo $info_version; ?>" />
     <script src="js/sha512.js?<?php echo $info_version; ?>"></script>
     <script type="text/javascript" src="js/userFunctions.js?<?php echo $info_version; ?>"></script>
