@@ -288,7 +288,7 @@ function setUpDeleteRestoreButton(worksheet) {
     var deleted = worksheet["details"]["Deleted"];
     var name = worksheet["details"]["WName"];
     if (deleted === "1") {
-        $("#delete_question_button").html("Restore Worksheet");
+        $("#delete_worksheet_button").html("Restore Worksheet");
         $("#title2").html("<h1>" + name + " - DELETED</h1>");
     }
 }
@@ -1117,7 +1117,7 @@ function deleteWorksheet(){
     var message = "Are you sure you want to delete this worksheet? This will also remove any results associated with this worksheet.";
     if(confirm(message)){
         var wid = sessionStorage.getItem("worksheet_id");
-        var type = $("#delete_question_button").html() === "Delete Worksheet" ? "DELETE" : "RESTORE";
+        var type = $("#delete_worksheet_button").html() === "Delete Worksheet" ? "DELETE" : "RESTORE";
         var infoArray = {
             type: type,
             vid: wid,
@@ -1139,9 +1139,46 @@ function deleteWorksheet(){
     }
 }
 
+function copyWorksheet() {
+    var save_worksheet_array = JSON.parse(sessionStorage.getItem("save_requests"));
+    if (save_worksheet_array.length === 0) { 
+        var wid = sessionStorage.getItem("worksheet_id");
+        var infoArray = {
+            type: "COPYWORKSHEET",
+            vid: wid,
+            userid: $('#userid').val(),
+            userval: $('#userval').val()
+        };
+        $.ajax({
+            type: "POST",
+            data: infoArray,
+            url: "/requests/worksheet.php",
+            dataType: "json",
+            success: function(json){
+                copyWorksheetSuccess(json);
+            },
+            error: function(response){
+                console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+            }
+        });
+    } else {
+        alert("Please save your changes before copying the worksheet.");
+    }
+    
+}
+
 function clickResultsAnalysis() {
     var wid = sessionStorage.getItem("worksheet_id");
     window.location.href = "/worksheetSummary.php?wid=" + wid;
+}
+
+function copyWorksheetSuccess(json) {
+    if(json["success"]){
+        window.location.href = "/viewAllWorksheets.php";
+    } else {
+        alert("There was an problem copying the worksheet, it has not been copied.");
+        console.log(json["message"]);
+    }
 }
 
 function deleteWorksheetSuccess(json) {

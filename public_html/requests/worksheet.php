@@ -13,6 +13,7 @@ $user_val = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRI
 $info_array = isset($_POST["array"]) ? $_POST["array"] : [];
 $tags = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
 $div_id = filter_input(INPUT_POST,'div_id',FILTER_SANITIZE_STRING);
+$wid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_STRING);
 $req_id = filter_input(INPUT_POST,'req_id',FILTER_SANITIZE_NUMBER_INT);
 
 $role = validateRequest($user_id, $user_val, "");
@@ -26,6 +27,9 @@ switch ($request_type){
         break;
     case "NEWWORKSHEET":
         newWorksheet($info_array);
+        break;
+    case "COPYWORKSHEET":
+        copyWorksheet($wid);
         break;
     case "SUGGESTEDTAGS":
         getSuggestedTags($tags, $div_id);
@@ -247,6 +251,64 @@ function newWorksheet($details) {
         db_rollback_transaction();
         failRequest("Adding new worksheet failed: " . $ex->getMessage());
     }
+}
+
+function copyWorksheet($wid) {
+    // Get details
+    $name_query = "SELECT `WName` FROM TWORKSHEETVERSION WHERE `Version ID` = $wid;";
+    try {
+        db_begin_transaction();
+        $name_result = db_select_exception($name_query);
+        if (count($name_result) === 0) {
+            db_rollback_transaction();
+            failRequest("Copying worksheet failed: No results for original worksheet.");
+        }
+        $name = db_escape_string($name_result[0]["WName"] . " (Copy)");
+        $copy_query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`,`Date Added`,`Deleted`)
+        (SELECT '$name', `VName`, `Link`, `Author ID`,NOW(),0 
+        FROM TWORKSHEETVERSION WHERE `Version ID` = $wid)";
+        $result = db_insert_query_exception($copy_query);
+        $new_wid = $result[1];
+        $questions_query = "SELECT `Stored Question ID` FROM TSTOREDQUESTIONS WHERE `Version ID` = $wid";
+        $questions = db_select_exception($questions_query);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("Copying worksheet failed (1): " . $ex->getMessage());
+    }
+    
+    try {
+        foreach ($questions as $question) {
+            $sqid = $question["Stored Question ID"];
+            $copy_questions_query = "INSERT INTO `TSTOREDQUESTIONS` 
+                (`Question ID`, `Version ID`, `Number`, `Marks`, `Date Added`, `Question Order`, `Deleted`) 
+                SELECT `Question ID`, $new_wid, `Number`, `Marks`, NOW(), `Question Order`, 0 
+                FROM TSTOREDQUESTIONS WHERE `Stored Question ID` = $sqid";
+            $result = db_insert_query_exception($copy_questions_query);
+            $new_sqid = $result[1];
+            $copy_tags_query = "INSERT INTO `TQUESTIONTAGS` 
+                (`Tag ID`, `Stored Question ID`, `Deleted`) 
+                SELECT `Tag ID`, $new_sqid, 0 FROM `TQUESTIONTAGS` 
+                WHERE `Stored Question ID` = $sqid";
+            $result = db_insert_query_exception($copy_tags_query);
+        }
+        // Worksheet tags 
+        $worksheet_tags_query = "INSERT INTO `TWORKSHEETTAGS`(`Worksheet ID`, `Tag ID`) 
+                SELECT $new_wid, `Tag ID` FROM `TWORKSHEETTAGS`
+                WHERE `Worksheet ID` = $wid";
+        $result = db_insert_query_exception($worksheet_tags_query);
+        //db_rollback_transaction();
+        db_commit_transaction();
+        //logEvent($author, "ADD_WORKSHEET", "ID: " . $vid . ", Title: " . $name);
+        succeedRequest("Worksheet copied.", null);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("Copying worksheet failed (2): " . $ex->getMessage());
+    }
+    // Create new worksheet
+    
+    // Add questions
+    
+    // Add tags
 }
 
 function addQuestion($vid) {
