@@ -105,14 +105,6 @@ if(isset($_SESSION['message'])){
                 <div id="main_content">
                     <input type="hidden" name="role" value="<?php if(isset($role)){echo $role;}?>"/>
                     <input type="hidden" name="userid" value="<?php if(isset($userid)){echo $userid;}?>"/>
-                    <div>
-                    <label for="password">Password *:
-                    </label><input type="password" name="password" placeholder="Password" id="password"></input>
-                    </div><div>
-                    <label for="confPassword">Confirm *:
-                    </label><input type="password" name="confPassword" placeholder="Confirm Your Password" id="conf"></input>
-                    </div>
-                    <p>Leave the password fields blank to leave your password unchanged</p>
                     <div <?php echo $hideStaff; ?>>
                     <label for="title">Title:
                     </label><input type="text" name="title" placeholder="Title" value="<?php if(isset($title)){echo $title;}?>"></input>
@@ -122,9 +114,6 @@ if(isset($_SESSION['message'])){
                     </div><div <?php echo $hideStaff; ?>>
                     <label for="surname">Surname *:
                     </label><input type="text" name="surname" placeholder="Surname" value="<?php if(isset($surname)){echo $surname;}?>"></input>
-                    </div><div <?php echo $hideStaff; ?>>
-                    <label for="email">Email *:
-                    </label><input type="text" name="email" placeholder="Email" value="<?php if(isset($email)){echo $email;}?>"></input>
                     </div><div <?php echo $hideStaff; ?>>
                     <label for="initials">Initials:
                     </label><input type="text" name="initials" placeholder="Initials" value="<?php if(isset($initials)){echo $initials;}?>"></input>

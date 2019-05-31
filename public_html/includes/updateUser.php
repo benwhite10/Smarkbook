@@ -17,17 +17,17 @@ if(isset($_SESSION['user'])){
 }
 
 $userid = filter_input(INPUT_POST, 'userid', FILTER_SANITIZE_STRING);
-$pwd = filter_input(INPUT_POST, 'p', FILTER_SANITIZE_STRING);
+//$pwd = filter_input(INPUT_POST, 'p', FILTER_SANITIZE_STRING);
 $fname = filter_input(INPUT_POST, 'firstname', FILTER_SANITIZE_STRING);
 $sname = filter_input(INPUT_POST, 'surname', FILTER_SANITIZE_STRING);
 $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_STRING);
-$email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_STRING);
+//$email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_STRING);
 $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING);
 $initials = filter_input(INPUT_POST, 'initials', FILTER_SANITIZE_STRING);
 $message = "";
 
 if(isset($role, $userid)){
-    if(isset($pwd)){
+    /*if(isset($pwd)){
         if (strlen($pwd) != 128) {
             // The hashed pwd should be 128 characters long.
             // If it's not, something really odd has happened
@@ -51,13 +51,12 @@ if(isset($role, $userid)){
             $message .= seriousError($desc);
             returnToPageError($message, $userid);
         }
-    }
+    }*/
 
-    if(isset($fname, $sname, $email)){
+    if(isset($fname, $sname)){
         $query1 = "UPDATE TUSERS
             SET `First Name` = '$fname',
               `Surname` = '$sname',
-              `Email` = '$email',
               `Title` = '$title',
               `Initials` = '$initials'
             WHERE `User ID` = $userid;";

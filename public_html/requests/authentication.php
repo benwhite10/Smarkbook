@@ -39,12 +39,12 @@ switch ($request_type){
 
 function logInUser($user_input, $pwd) {
     sec_session_start();
+    $config = parse_ini_file('../../includes/config.ini');
     $user = cleanUserName($user_input);
     $email = $user . "@wellingtoncollege.org.uk";
     $user_id = getDetails($email, 'User ID');
     if ($user_id === FALSE) returnRequest(FALSE, null, "Invalid username.", null);
-    //$response = authenticateCredentials($user, $pwd);
-    $response = authenticateCredentialsCurl($user, $pwd);
+    $response = $config['server'] === 'local' ? [TRUE, ""] :authenticateCredentialsCurl($user, $pwd);
     $url = "portalhome.php";
     if ($response[0]) $url = createSession($user_id);
     returnRequest(TRUE, array(
