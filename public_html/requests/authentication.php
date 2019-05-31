@@ -43,7 +43,7 @@ function logInUser($user_input, $pwd) {
     $user = cleanUserName($user_input);
     $email = $user . "@wellingtoncollege.org.uk";
     $user_id = getDetails($email, 'User ID');
-    if ($user_id === FALSE) returnRequest(FALSE, null, "Invalid username.", null);
+    if ($user_id === FALSE) returnRequest(FALSE, array("success" => FALSE, "message" => "Invalid username/password.", "url" => ""), null, null);
     $response = $config['server'] === 'local' ? [TRUE, ""] :authenticateCredentialsCurl($user, $pwd);
     $url = "portalhome.php";
     if ($response[0]) $url = createSession($user_id);
@@ -143,5 +143,5 @@ function authenticateCredentialsCurl($user, $pwd) {
     $message = "";
     if (!$success && $result_object->success) $message = "Incorrect user.";
     if (!$result_object->success) $message = $result_object->message;
-    return [TRUE, $message];
+    return [$success, $message];
 }
