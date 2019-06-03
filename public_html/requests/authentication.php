@@ -6,6 +6,7 @@ include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/logEvents.php';
+include_once $include_path . '/jwt/JWT.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 
@@ -21,10 +22,10 @@ switch ($request_type){
         returnRequest(TRUE, null);
         break;*/
     case "validateSession":
-        /*$user_code = filter_input(INPUT_POST,'user',FILTER_SANITIZE_STRING);
-        $session_code = filter_input(INPUT_POST,'session',FILTER_SANITIZE_STRING);
-        validateSessionAPI($user_code, $session_code);
-        break;*/
+        $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
+        $user_id = filter_input(INPUT_POST,'user_id',FILTER_SANITIZE_STRING);
+        validateSession($token, $user_id);
+        break;
     case "adminSwitchUser":
         /*$user_code = filter_input(INPUT_POST,'user',FILTER_SANITIZE_STRING);
         $session_code = filter_input(INPUT_POST,'session',FILTER_SANITIZE_STRING);
@@ -46,12 +47,70 @@ function logInUser($user_input, $pwd) {
     if ($user_id === FALSE) returnRequest(FALSE, array("success" => FALSE, "message" => "Invalid username/password.", "url" => ""), null, null);
     $response = $config['server'] === 'local' ? [TRUE, ""] :authenticateCredentialsCurl($user, $pwd);
     $url = "portalhome.php";
-    if ($response[0]) $url = createSession($user_id);
+    if ($response[0]) {
+        $url = createSession($user_id);
+        $user = createUser($user_id);
+        $user->token = createJWT($user_id);
+    }
     returnRequest(TRUE, array(
         "success" => $response[0],
         "message" => $response[1],
-        "url" => $url
+        "url" => $url,
+        "user" => $user
     ));
+}
+
+function createJWT($user_id) {
+    $config = parse_ini_file('../../includes/config.ini');
+    $jwt_key = $config["jwt_key"];
+
+    // create a token
+    $payload_array = array();
+    $payload_array['user_id'] = $user_id;
+    $payload_array['nbf'] = time();
+    $payload_array['exp'] = time() + 12*60*60;
+    
+    $token = JWT::encode($payload_array, $jwt_key);
+    return $token;
+}
+
+function validateSession($token, $user_id) {
+    $response = validateToken($token);
+    $success = FALSE;
+    if ($response[0]) {
+        $success = $response[1] === $user_id;
+        $message = $response[1] === $user_id ? null : "Incorrect user.";
+    } else {
+        $message = $response[1];
+    }
+    returnRequest($success, $message);
+}
+
+function validateToken($token) {
+    $config = parse_ini_file('../../includes/config.ini');
+    $jwt_key = $config["jwt_key"];
+    try {
+        $decoded_array = JWT::decode($token, $jwt_key, array('HS256'));
+        $user_id= $decoded_array->user_id;
+        return [TRUE, $user_id];
+    } catch (BeforeValidException $ex) {
+        return [FALSE, "This token is not yet valid."];
+    } catch (ExpiredException $ex) {
+        return [FALSE, "This token has expired."];
+    } catch (SignatureInvalidException $ex) {
+        return [FALSE, "This token is invalid"];
+    } catch (Exception $ex) {
+        return [FALSE, "This token is invalid"];
+    }
+    return [TRUE, "Valid token"];
+}
+
+function createUser($user_id) {
+    $user = User::createUserLoginDetails($user_id);
+    $return_user = $user->getRole() === 'STUDENT' ? Student::createStudentFromId($user_id) : Teacher::createTeacherFromId($user_id);
+    infoLog("User $user_id has been successfully logged in.");
+    logEvent($user_id, "USER_LOGIN", "");
+    return $return_user;
 }
 
 function createSession($user_id) {

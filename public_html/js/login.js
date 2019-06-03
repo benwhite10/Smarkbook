@@ -57,6 +57,8 @@ function clickLogin() {
         success: function(json) {
             if(json["success"] && json["response"]["success"]){
                 var url = json["response"]["url"];
+                var user = json["response"]["user"];
+                localStorage.setItem("sbk_usr", JSON.stringify(user));
                 window.location = url;
             } else {
                 $("#login_message").html(json["response"]["message"]);

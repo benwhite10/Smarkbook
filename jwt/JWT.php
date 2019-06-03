@@ -1,10 +1,13 @@
 <?php
 
-namespace Firebase\JWT;
 use \DomainException;
 use \InvalidArgumentException;
 use \UnexpectedValueException;
 use \DateTime;
+
+include_once $include_path . '/jwt/BeforeValidException.php';
+include_once $include_path . '/jwt/ExpiredException.php';
+include_once $include_path . '/jwt/SignatureInvalidException.php';
 
 /**
  * JSON Web Token implementation, based on this spec:
