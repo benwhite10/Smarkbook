@@ -10,7 +10,7 @@ sec_session_start();
 if(isset($_SESSION['user'])){
     $user = $_SESSION['user'];
     $userRole = $user->getRole();
-    if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
+    if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
         header("Location: ../unauthorisedAccess.php");
         exit();
     }

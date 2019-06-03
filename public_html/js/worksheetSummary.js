@@ -437,13 +437,18 @@ function writeSummaryTable() {
             baseline = Math.round(row["Baseline"] * 10) / 10;
         }
         col_text = "rgb(" + colour[0] + ", " + colour[1] + ", " + colour[2] + ")";
-        html_text += i % 2 === 0 ? "<div class='row even'>" : "<div class='row'>";
+        html_text += i % 2 === 0 ? "<div class='row even' " : "<div class='row' ";
+        html_text += "onclick='goToGWID(" + row["GWID"] + ")'>";
         html_text += "<div class='col'>" + row["LongName"] + "</div>";
         html_text += "<div class='col fixed baseline'>" + baseline + "</div>";
         html_text += "<div class='col fixed'>" + perc + "%</div>";
         html_text += "<div class='col fixed' style='color:" + col_text + "'>" + rel_perc + "%</div></div>";
     }
     $("#summary_table").html(html_text);
+}
+
+function goToGWID(gwid) {
+    window.location.href = "editSetResults.php?gwid=" + gwid;
 }
 
 function setUpSummaryChart() {

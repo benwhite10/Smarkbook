@@ -185,6 +185,7 @@ function getWorksheetSummary($version_id, $return) {
                 }
             }
             $groups[$group_id]["SetID"] = $group_id;
+            $groups[$group_id]["GWID"] = $gw_id;
             $groups[$group_id]["Name"] = $student["Name"];
             $groups[$group_id]["LongName"] = $student["Name"] . " - " . $student["Initials"];
             if ($baseline > 0) {

@@ -20,7 +20,7 @@ if($resultArray[0]){
     exit();
 }
 
-if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
+if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
     header("Location: unauthorisedAccess.php");
     exit();
 }
