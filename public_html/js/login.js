@@ -5,33 +5,18 @@
  */
 
 $(document).ready(function(){
-    $('#login_form').submit(function(){
-        var username = $('#username').val();
-        var password = $('#password').val();
-        if(username === '' || password === ''){
-            //Failure
-            return false;
-        }
-
-        //Some of determining whether or not we are dealing with a student or a member of staff
-
-        var p = document.createElement("input");
-
-        // Add the new element to our form.
-        form.appendChild(p);
-        p.name = "p";
-        p.type = "hidden";
-        p.value = hex_sha512($('#password').val());
-
-        $('#password').val("");
-
-        return true;
-    });
-    
+    //localStorage.setItem("sbk_usr", "[]");
+    var user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){redirect();});
+    validateAccessToken(user);
     $("#login_password").on("keydown", function (e) {
         if (e.keyCode === 13) clickLogin();
     });
 });
+
+function redirect() {
+    window.location = "/portalhome.php";
+}
 
 function clickLogin() {
     $("#login_message").fadeOut();

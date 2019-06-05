@@ -1,4 +1,12 @@
 $(document).ready(function(){
+    var user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page(user);});
+    validateAccessToken(user);
+});
+
+function init_page(user) {
+    writeNavbar(user);
+    writeHomeGrid(user);
     var blocks = parseInt($("#menuCount").val());
     for(var i = 1; i <= blocks; i++){
         setUpBlockLinkandIcon(i);
@@ -8,7 +16,55 @@ $(document).ready(function(){
         setUpGrid();
     });
     setTimeout(function() { setUpGrid(); }, 1000);
-});
+}
+
+function writeHomeGrid(user) {
+    var user_id = user["userId"];
+    var user_role = user["role"];
+    var grid_options = {};
+    grid_options["view_worksheets"] = {url: "viewAllWorksheets.php?opt=0", title: "Worksheets", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["mark_book"] = {url: "viewSetMarkbook.php?staffId=" + user_id, title: "Mark Book", img: "home-markbook.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["checklists"] = {url: "revisionChecklist.php?course=1", title: "Checklists", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
+    grid_options["enter_results_student"] = {url: "newResultsEntryHome.php", title: "Enter Results", img: "home-enter-results.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
+    grid_options["enter_results_staff"] = {url: "viewAllWorksheets.php?opt=1", title: "Enter Results", img: "home-enter-results.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["reports_student"] = {url: "reportHome.php?student=" + user_id, title: "Reports", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF","STUDENT"]};
+    grid_options["reports_staff"] = {url: "reportHome.php?staff=" + user_id, title: "Reports", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["internal_results"] = {url: "internalResultsMenu.php", title: "Int. Results", img: "home-markbook.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["sets"] = {url: "viewMySets.php?staffId=" + user_id, title: "My Sets", img: "home-sets.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["account"] = {url: "editUser.php?userid=" + user_id, title: "My Account", img: "home-user.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
+    grid_options["tags"] = {url: "viewAllTags.php", title: "Manage Tags", img: "home-modify.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["notes"] = {url: "reportNotes.php?t=" + user_id, title: "Report Notes", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["quiz"] = {url: "quiz_menu.php", title: "Quiz", img: "home-quiz.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
+    
+    var grid_html = "";
+    var staff_grid = ["view_worksheets", "mark_book", "checklists", "enter_results_staff", "reports_staff", "internal_results", "sets", "account", "tags", "notes", "quiz"];
+    var student_grid = ["enter_results_student", "reports_student", "checklists", "quiz", "account"];
+    var final_grid = [];
+    if(user_role === "STAFF" || user_role === "SUPER_USER") {
+        final_grid = staff_grid;
+    } else if (user_role === "STUDENT") {
+        final_grid = student_grid;
+    }
+    var count = 0;
+    for (var i = 0; i< final_grid.length; i++) {
+        var grid_item = grid_options[final_grid[i]];
+        if (checkRole(user_role, grid_item["permissions"])) {
+            count++;
+            grid_html += writeHomeGridItem(grid_item, count);
+        }
+    }
+    grid_html += "<input type='hidden' id='menuCount' value=" + count + " />";
+    $("#menuContainer").html(grid_html);
+}
+
+function writeHomeGridItem(grid_item, count) {
+    var html_text = "<div class='menuobject' id='menuobject" + count + "' >";
+    html_text += "<a href='" + grid_item["url"] + "' class='title'>" + grid_item["title"] + "</a>";
+    html_text += "<input type='hidden' id='menuObjectLink" + count + "' value='" + grid_item["url"] + "'>";
+    html_text += "<input type='hidden' id='menuObjectIcon" + count + "' value='" + grid_item["img"] + "'>";
+    html_text += "</div>";
+    return html_text;
+}
 
 function setUpGrid(){
     //Find max and min per row

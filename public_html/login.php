@@ -6,16 +6,6 @@ include_once $include_path . '/includes/class.phpmailer.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
 
-sec_session_start();
-$resultArray = checkUserLoginStatus("");
-
-if($resultArray[0]){
-    $url = isset($_SESSION['url']) ? $_SESSION['url'] : "portalhome.php";
-    unset($_SESSION['url']);
-    header("Location: $url");
-    exit();
-}
-
 $info = Info::getInfo();
 $info_version = $info->getVersion();
 

@@ -134,6 +134,14 @@ class User
     function getValidation() {
         return $this->validation;
     }
+    
+    function setDisplayName($firstName, $surname) {
+        $this->displayname = $firstName . " " . $surname;
+    }
+    
+    function getDisplayName() {
+        return $this->displayname;
+    }
 }
 
 class Teacher extends User
@@ -153,6 +161,7 @@ class Teacher extends User
         $teacher->setUserId($id);
         $teacher->setFirstName($user[0]['First Name']);
         $teacher->setSurname($user[0]['Surname']);
+        $teacher->setDisplayName($user[0]['First Name'], $user[0]['Surname']);
         $teacher->setTitle($user[0]['Title']);
         $teacher->setEmail($user[0]['Email']);
         $teacher->setRole($user[0]['Role']);
@@ -199,6 +208,7 @@ class Student extends User
         $student->setFirstName($user[0]['First Name']);
         $student->setSurname($user[0]['Surname']);
         $student->setPrefferedName($user[0]['Preferred Name']);
+        $student->setDisplayName($user[0]['First Name'], $user[0]['Surname']);
         $student->setEmail($user[0]['Email']);
         $student->setRole($user[0]['Role']);
         $student->setValidation($user[0]['Validation']);
