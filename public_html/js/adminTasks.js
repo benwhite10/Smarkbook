@@ -1,9 +1,36 @@
+var user;
+
+$(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
+    getVersion();
+}
+
+function getVersion() {
+    var infoArray = {
+        type: "GETVERSION",
+        token: user["token"]
+    };
+
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/adminTasks.php",
+        dataType: "json",
+        success: function(json){
+            $("#version_number").val(json["result"]);
+        }
+    });
+}
 function runDeleteDownloads() {
     $("#task_downloads_button").html("<p>Running..</p>");
     var infoArray = {
         type: "DELETEDOWNLOADS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
 
     $.ajax({
@@ -21,8 +48,8 @@ function runBackUp() {
     $("#task_backup_button").html("<p>Running..</p>");
     var infoArray = {
         type: "BACKUPDB",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        userid: user["userId"],
+        token: user["token"]
     };
     
     $.ajax({
@@ -67,8 +94,7 @@ function runUpdateVersion() {
     var infoArray = {
         type: "UPDATEVERSION",
         version_number: $("#version_number").val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     
     $.ajax({

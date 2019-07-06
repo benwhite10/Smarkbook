@@ -12,39 +12,26 @@ $desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 $groupid = filter_input(INPUT_POST,'group',FILTER_SANITIZE_NUMBER_INT);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($requestType){
     case "FILTERED":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getAllCompletedWorksheetsForGroup($groupid, $staffid, $orderby, $desc);
         break;
     case "ALLWORKSHEETS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getAllWorksheets($orderby, $desc);
     case "DELETEDWORKSHEETS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getAllDeletedWorksheets($orderby, $desc);
     case "STUDENTEDITABLESHEETS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
         getAllEditableWorksheetsForGroup($groupid, $orderby, $desc);
     default:
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getAllWorksheetNames($orderby, $desc);
         break;
 }

@@ -1,8 +1,22 @@
 var displayed_gwid = "";
 var student_report_view = false;
 var set_staff_link = [];
+var user;
+var staff_id;
+var stu_id;
+var set_id;
+var start_date;
+var end_date;
+var set_student;
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
+});
+
+function init_page() {
+    writeNavbar(user);
     $("#variablesInputBoxShowHideButton").click(function(){
         showHideButton("variablesInputMain", "variablesInputBoxShowHideButton");
     });
@@ -14,7 +28,7 @@ $(document).ready(function(){
     showAllSections();
     showAllSpinners();
     setUpVariableInputs();
-});
+}
 
 $(function() {
     $(".datepicker").pickadate({
@@ -28,9 +42,15 @@ $(function() {
 
 /* Section set up methods */
 function setUpVariableInputs(){
+    staff_id = getParameterByName("staff");
+    stu_id = getParameterByName("stu");
+    set_id = getParameterByName("set");
+    start_date = getParameterByName("start");
+    end_date = getParameterByName("end");
+    set_student = user["role"] === "STUDENT" ? user["userId"] : getParameterByName("student");
+    
     localStorage.setItem("initialRun", true);
     disableGenerateReportButton();
-    var set_student = $("#set_student").val();
     if (set_student) {
         student_report_view = true;
         setStudent(set_student);
@@ -45,8 +65,7 @@ function setStudent(stuid){
     var infoArray = {
         type: "STUDENTSETS",
         student: stuid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -92,11 +111,11 @@ function setVariableInputs(json) {
             });
         }
 
-        var initial_set_val = $('#setid').val();
+        var initial_set_val = set_id;
         if($("#set option[value='" + initial_set_val + "']").length !== 0){
             $('#set').val(initial_set_val);
         }
-        var initial_staff_val = $('#staffid').val();
+        var initial_staff_val = staff_id;
         if($("#staff option[value='" + initial_staff_val + "']").length !== 0){
             $('#staff').val(initial_staff_val);
         }
@@ -114,11 +133,11 @@ function setVariableInputs(json) {
 }
 
 function setDates(){
-    if($("#start").val()){
-        $("#startDate").val($("#start").val());
+    if(start_date && start_date !== null){
+        $("#startDate").val(start_date);
     }
-    if($("#end").val()){
-        $("#endDate").val($("#end").val());
+    if(end_date && end_date !== null){
+        $("#endDate").val(end_date);
     } else {
         $("#endDate").val(moment().format('DD/MM/YYYY'));
     }
@@ -172,8 +191,7 @@ function showHideFullTagResults(){
 function getStaff(){
     var infoArray = {
         orderby: "Initials",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -194,8 +212,7 @@ function updateSets(){
             desc: "FALSE",
             type: "SETSBYSTAFF",
             staff: $('#staff').val(),
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
+            token: user["token"]
         };
         $.ajax({
             type: "POST",
@@ -215,8 +232,7 @@ function updateStudents(){
         var infoArray = {
             type: "STUDENTSBYSET",
             set: $('#set').val(),
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
+            token: user["token"]
         };
         $.ajax({
             type: "POST",
@@ -233,6 +249,7 @@ function updateStudents(){
     }
 }
 
+//TODO
 function generateQuestionsRequest(reqid, tagsArray){
     var infoArray = JSON.parse(localStorage.getItem("activeReportRequest"));
     if(parseInt(infoArray["reqid"]) === reqid){
@@ -252,6 +269,7 @@ function generateQuestionsRequest(reqid, tagsArray){
     }
 }
 
+//TODO
 function sendSummaryRequest(infoArray){
     infoArray["type"] = "STUDENTSUMMARY";
     $.ajax({
@@ -270,8 +288,7 @@ function sendWorksheetSummaryRequest(gwid){
         type: "WORKSHEETREPORT",
         student: $('#student').val(),
         gwid: gwid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -293,8 +310,7 @@ function sendReportRequest(){
         student: $('#student').val(),
         staff: $('#staff').val(),
         set: $('#set').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
     infoArray["type"] = "NEWSTUDENTREPORT";
@@ -324,7 +340,7 @@ function getStaffForSet(set) {
 
 function getStaffSuccess(json){
     if(json["success"]){
-        var staff = json["staff"];
+        var staff = json["response"];
         var htmlValue = staff.length === 0 ? "<option value='0'>No Teachers</option>" : "";
         $('#staff').html(htmlValue);
         for (var key in staff) {
@@ -333,7 +349,7 @@ function getStaffSuccess(json){
                 text : staff[key]["Initials"]
             }));
         }
-        var initialVal = $('#staffid').val();
+        var initialVal = staff_id;
         if($("#staff option[value='" + initialVal + "']").length !== 0){
             $('#staff').val(initialVal);
         }
@@ -354,7 +370,7 @@ function updateSetsSuccess(json){
                 text : sets[key]["Name"]
             }));
         }
-        var initialVal = $('#setid').val();
+        var initialVal = set_id;
         if($("#set option[value='" + initialVal + "']").length !== 0){
             $('#set').val(initialVal);
         }
@@ -377,7 +393,7 @@ function updateStudentsSuccess(json){
                 text : name
             }));
         }
-        var initialVal = $('#studentid').val();
+        var initialVal = stu_id;
         if($("#student option[value='" + initialVal + "']").length !== 0){
             $('#student').val(initialVal);
         }
@@ -1282,8 +1298,7 @@ function getNotesRequest() {
         endDate: $('#endDate').val(),
         stuid: $('#student').val(),
         type: "GET_ALL_NOTE_TYPES",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -1337,4 +1352,16 @@ function parseReportNotes(reports_array) {
         string += "</div></div>";
         $("#report_notes_notes").append(string);
     }
+}
+
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }

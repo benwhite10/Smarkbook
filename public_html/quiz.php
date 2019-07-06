@@ -1,29 +1,8 @@
 <?php
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
-include_once $include_path . '/includes/session_functions.php';
-
-sec_session_start();
-$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){
-    $user = $_SESSION['user'];
-    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-    $userid = $user->getUserId();
-    $userRole = $user->getRole();
-    $userval = base64_encode($user->getValidation());
-    $info = Info::getInfo();
-    $info_version = $info->getVersion();
-}else{
-    header($resultArray[1]);
-    exit();
-}
-
-if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
-    header("Location: unauthorisedAccess.php");
-    exit();
-}
+$info_version = Info::getInfo()->getVersion();
 ?>
 
 <!DOCTYPE html>
@@ -48,10 +27,10 @@ if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])){
         <script src='js/jquery-ui.js?<?php echo $info_version; ?>'></script>
         <script src="libraries/circles.js?<?php echo $info_version; ?>"></script>
         <script src="js/quiz.js?<?php echo $info_version; ?>"></script>
+        <script src="js/methods.js?<?php echo $info_version; ?>"></script>
         <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     </head>
     <body>
-        <?php setUpRequestAuthorisation($userid, $userval); ?>
         <div id="quiz_loading"><img src="images/quiz_loading.gif" alt="Loading"></div>
         <div id="quiz_title"></div>
         <div id="start_menu">

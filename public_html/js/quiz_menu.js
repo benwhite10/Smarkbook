@@ -1,10 +1,17 @@
 var test_circle;
+var user;
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
+});
+
+function init_page() {
     requestQuizzes();
     //createCircle();
     //setTimeout(function(){ updateCircle(); }, 3000);
-});
+}
 
 function createCircle() {
     test_circle = Circles.create({
@@ -30,7 +37,8 @@ function updateCircle() {
 function requestQuizzes() {
     var infoArray = {
         type: "GETQUIZZES",
-        userid: $("#userid").val()
+        userid: user["userId"],
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

@@ -7,8 +7,7 @@ $(document).ready(function(){
 function setUpStaff(){
     var infoArray = {
         orderby: "Initials",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -24,7 +23,7 @@ function setUpStaff(){
 
 function staffSuccess(json){
     if(json["success"]){
-        var staff = json["staff"];
+        var staff = json["response"];
         var userid = document.getElementById("creatingStaffMember").value;
         var str = "<option value=0>-Initials-</option>";
         var str2 = "<option value=0>-Initials-</option>";
@@ -163,8 +162,7 @@ function setUpStudents(){
                 desc: "FALSE",
                 type: "STUDENTSBYSET",
                 set: set,
-                userid: $('#userid').val(),
-                userval: $('#userval').val()
+                token: user["token"]
             };
             $.ajax({
                 type: "POST",

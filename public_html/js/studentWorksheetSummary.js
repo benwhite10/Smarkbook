@@ -2,8 +2,20 @@ var timeout;
 var summary_timeout;
 var summary_first = true;
 var questions = [];
+var gwid;
+var stuid;
+var save_changes_array;
+var active_request;
+var user;
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
+});
+
+function init_page() {
+    writeNavbar(user);
     sessionStorage.setItem("gwid", getParameterByName("gw"));
     sessionStorage.setItem("stuid", getParameterByName("s"));
     sessionStorage.setItem("save_changes_array", "[]");
@@ -14,15 +26,15 @@ $(document).ready(function(){
     setUpSaveButton();
     createChart([], [], 0);
     sendSummaryRequestAfter(1000);
-});
+}
 
 function getStudentResults(stuid, gwid) {
     var infoArray = {
         type: "STUDENTWORKSHEETSUMMARY",
         student: stuid,
         gwid: gwid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"],
+        userid: user["userId"]
     };
     $.ajax({
         type: "POST",
@@ -43,8 +55,8 @@ function getStudentSummary() {
         type: "CALCSTUWORKSHEETSUMMARY",
         student: stuid,
         gwid: gwid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"],
+        userid: user["userId"]
     };
     $.ajax({
         type: "POST",
@@ -241,8 +253,8 @@ function getWorksheetDetails(gwid) {
     var infoArray = {
         type: "WORKSHEETDETAILS",
         gwid: gwid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"],
+        userid: user["userId"]
     };
     $.ajax({
         type: "POST",
@@ -419,8 +431,8 @@ function saveChangesRequest(button) {
                 req_id: 0,
                 type: "SAVERESULTSSTUDENT",
                 save_changes_array: save_changes_array,
-                userid: $('#userid').val(),
-                userval: $('#userval').val()
+                token: user["token"],
+                userid: user["userId"]
             };
             $.ajax({
                 type: "POST",
@@ -474,8 +486,8 @@ function sendSaveWorksheetsRequest() {
             req_id: 0,
             type: "SAVEWORKSHEETSSTUDENT",
             save_worksheets_array: [comp_worksheet],
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
+            token: user["token"],
+            userid: user["userId"]
         };
         $.ajax({
             type: "POST",

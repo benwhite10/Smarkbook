@@ -9,29 +9,30 @@ include_once $include_path . '/public_html/includes/logEvents.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$user_val = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 $info_array = isset($_POST["array"]) ? $_POST["array"] : [];
 $tags = filter_input(INPUT_POST,'tags',FILTER_SANITIZE_STRING);
 $div_id = filter_input(INPUT_POST,'div_id',FILTER_SANITIZE_STRING);
 $wid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_STRING);
 $req_id = filter_input(INPUT_POST,'req_id',FILTER_SANITIZE_NUMBER_INT);
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($user_id, $user_val, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($request_type){
     case "UPDATEWORKSHEET":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         updateWorksheet($info_array, $req_id);
         break;
     case "NEWWORKSHEET":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         newWorksheet($info_array);
         break;
     case "COPYWORKSHEET":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         copyWorksheet($wid);
         break;
     case "SUGGESTEDTAGS":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getSuggestedTags($tags, $div_id);
         break;
     default:

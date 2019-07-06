@@ -1,34 +1,8 @@
 <?php
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/includes/class.phpmailer.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
-
-sec_session_start();
-$resultArray = checkUserLoginStatus("");
-if($resultArray[0]){
-    if(isset($_SESSION['url'])){
-        $url = $_SESSION['url'];
-    }else{
-        $url = "portalhome.php";
-    }
-    unset($_SESSION['url']);
-    header("Location: $url");
-    exit();
-}
-$info = Info::getInfo();
-$info_version = $info->getVersion();
-
-if(isset($_SESSION['message'])){
-    $Message = $_SESSION['message'];
-    $message = $Message->getMessage();
-    unset($_SESSION['message']);
-}
-
-$email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
-
+$info_version = Info::getInfo()->getVersion();
 ?>
 
 <!DOCTYPE html>
@@ -37,8 +11,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
     <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook - Login", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/login.css?<?php echo $info_version; ?>" />
-    <script src="js/sha512.js?<?php echo $info_version; ?>"></script>
-    <script type="text/javascript" src="js/userFunctions.js?<?php echo $info_version; ?>"></script>
+    <script type="text/javascript" src="js/login.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
     <div id="main">
@@ -48,26 +21,16 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
           </div>
           <div id="msg_IE_close" onclick="closeIEMsg()">X</div>
       </div>
-    	<div id="header">
-            <div id="title">
-                <a href="index.php"><img src="branding/mainlogo.png"/></a>
-            </div>
-    	</div>
     	<div class="login_div">
-            <div class="login_container">
-                <div id="messageText" class="error"><p><?php if(isset($message)){echo $message;} ?></p></div>
-
-                <form class="login_form" id="login_form" action="includes/process_login.php" method="POST">
-                    <input type="text" name="username" placeholder="Username" value="<?php if(isset($email)){echo $email;} ?>"/>
-                    <input type="password" name="password" placeholder="Password" id="password"/>
-                    <input type="submit" value="LOGIN" />
-                </form>
-
-                <div id="forgot">
-                    <a href="forgottenPassword.php<?php if(isset($email)){echo "?email=" . $email;} ?>">Forgot your password?</a>
+            <div class="login_outer_container">
+                <div class="login_inner_container">
+                    <div class="login_logo"><img src="branding/mainlogo.png"/></div>
+                    <input id="login_username" type="text" name="username" placeholder="Username" value=""/>
+                    <input id="login_password" type="password" name="password" placeholder="Password" id="password"/>
+                    <div class="login_button" onclick="clickLogin()">Login</div>
+                    <div id="login_message" class="login_message">Update June 2019: Please login using your Wellington College login details. If you have any problems please contact <a href="mailto:contact.smarkbook@gmail.com" style="color:inherit; font-size:inherit;">contact.smarkbook@gmail.com</a>.</div>
                 </div>
             </div>
         </div>
-        <?php pageFooter($info_version) ?>
     </div>
 </body>

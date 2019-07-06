@@ -7,36 +7,6 @@ include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
 
-sec_session_start();
-$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_STRING));
-if ($resultArray[0]) {
-    $user = $_SESSION['user'];
-    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-    $userid = $user->getUserId();
-    $userRole = $user->getRole();
-    $userval = base64_encode($user->getValidation());
-    $info = Info::getInfo();
-    $info_version = $info->getVersion();
-} else {
-    header($resultArray[1]);
-    exit();
-}
-
-if (!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF", "STUDENT"])) {
-    header("Location: unauthorisedAccess.php");
-    exit();
-}
-
-if (isset($_SESSION['message'])) {
-    $message = $_SESSION['message'];
-}
-
-$staffid = filter_input(INPUT_GET, 'staff', FILTER_SANITIZE_NUMBER_INT);
-$studentid = filter_input(INPUT_GET, 'stu', FILTER_SANITIZE_NUMBER_INT);
-$setid = filter_input(INPUT_GET, 'set', FILTER_SANITIZE_NUMBER_INT);
-$startdate = filter_input(INPUT_GET, 'start', FILTER_SANITIZE_STRING);
-$enddate = filter_input(INPUT_GET, 'end', FILTER_SANITIZE_STRING);
-$set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'student', FILTER_SANITIZE_NUMBER_INT);
 ?>
 
 <!DOCTYPE html>
@@ -55,44 +25,14 @@ $set_student = $userRole === "STUDENT" ? $userid : filter_input(INPUT_GET, 'stud
         <script src="libraries/spin.js?<?php echo $info_version; ?>"></script>
     </head>
     <body>
-        <?php
-        echo "<input type='hidden' id='staffid' value='$staffid' />";
-        echo "<input type='hidden' id='studentid' value='$studentid' />";
-        echo "<input type='hidden' id='set_student' value='$set_student' />";
-        echo "<input type='hidden' id='setid' value='$setid' />";
-        echo "<input type='hidden' id='start' value='$startdate' />";
-        echo "<input type='hidden' id='end' value='$enddate' />";
-        setUpRequestAuthorisation($userid, $userval);
-        ?>
         <div id="main">
             <div id="header">
                 <div id="title">
-                    <a href="index.php"><img src="branding/mainlogo.png"/></a>
+                    <a href="portalhome.php"><img src="branding/mainlogo.png"/></a>
                 </div>
-                <?php navbarMenu($fullName, $userid, $userRole) ?>
+                <ul class='menu topbar'><li id="navbar"></li></ul>
             </div>
             <div id="body">
-                <?php
-                if (isset($message)) {
-                    $type = $message->getType();
-                    $string = $message->getMessage();
-                    if ($type == "ERROR") {
-                        $div = 'class="error"';
-                    } else if ($type == "SUCCESS") {
-                        $div = 'class="success"';
-                    }
-                } else {
-                    $div = 'style="display:none;"';
-                }
-                ?>
-
-                <div id="message" <?php echo $div; ?>>
-                    <div id="messageText"><p><?php if (isset($string)) {
-                    echo $string;
-                } ?></p>
-                    </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-                </div>
-
                 <form id="variablesInput" class="fullSection" style="border: none;" action="" method="POST">
                     <div id="variablesInputBox" class="sectionSummary">
                         <div id="variablesInputBoxDetails" class="sectionSummaryDetails">

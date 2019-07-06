@@ -11,25 +11,17 @@ $orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
 $desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
-$external = filter_input(INPUT_POST,'external',FILTER_SANITIZE_STRING);
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, $external);
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($requestType){
     case "STUDENTSBYSET":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getStudentsForSet($setid);
         break;
     case "ALLSTUDENTS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getAllStudents($orderby, $desc);
         break;
     default:
@@ -87,7 +79,8 @@ function returnToPageError($ex, $message){
 
 function failRequest($message){
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message);
     echo json_encode($response);
     exit();
 }

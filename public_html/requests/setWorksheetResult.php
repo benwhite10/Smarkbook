@@ -17,62 +17,43 @@ $grade_boundaries = filter_input(INPUT_POST, 'grade_boundaries', FILTER_SANITIZE
 $save_worksheets = filter_input(INPUT_POST, 'save_worksheets_array', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $worksheet_details = filter_input(INPUT_POST, 'worksheet_details', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
-$userid = $postData['userid'] ? $postData['userid'] : filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = $postData['userval'] ? base64_decode($postData['userval']) : base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $req_id = filter_input(INPUT_POST, 'req_id', FILTER_SANITIZE_NUMBER_INT);
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($requestType){
     case "UPDATE":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         updateGroupWorksheet($worksheetDetails, $newResults, $completedWorksheets);
         break;
     case "DELETEGW":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         deleteGroupWorksheet($gwid);
         break;
     case "SAVERESULTS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         saveResults($gwid, $save_changes, $req_id);
         break;
     case "SAVERESULTSSTUDENT":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         saveResults($gwid, $save_changes, $req_id);
         break;
     case "SAVEWORKSHEETS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         saveWorksheets($gwid, $save_worksheets, $req_id, FALSE);
         break;
     case "SAVEWORKSHEETSSTUDENT":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
         saveWorksheets($gwid, $save_worksheets, $req_id, TRUE);
         break;
     case "SAVEGROUPWORKSHEET":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         saveGroupWorksheet($worksheet_details, $grade_boundaries, $userid);
         break;
     default:
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getAllWorksheetNames($orderby, $desc);
         break;
 }

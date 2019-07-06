@@ -10,31 +10,21 @@ include_once $include_path . '/public_html/libraries/PHPExcel.php';
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
-$userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($requestType){
     case "MARKBOOKFORSETANDTEACHER":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getMarkbookForSetAndTeacher($setid, $staffid);
         break;
     case "DOWNLOADMARKBOOKFORSETANDTEACHER":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         downloadMarkbookForSetAndTeacher($setid, $staffid);
         break;
     case "DOWNLOADMARKBOOKFORTEACHER":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         downloadAllSets($staffid);
         break;
     default:

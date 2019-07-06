@@ -11,31 +11,26 @@ include_once $include_path . '/public_html/libraries/PHPExcel.php';
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $version_number = filter_input(INPUT_POST,'version_number',FILTER_SANITIZE_STRING);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($requestType){
     case "DELETEDOWNLOADS":
-        if(!authoriseUserRoles($role, ["SUPER_USER"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER"]);
         deleteDownloads();
         break;
     case "BACKUPDB":
-        if(!authoriseUserRoles($role, ["SUPER_USER"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER"]);
         backUpDB($userid);
         break;
     case "UPDATEVERSION":
-        if(!authoriseUserRoles($role, ["SUPER_USER"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER"]);
         updateVersion($version_number);
+        break;
+    case "GETVERSION":
+        authoriseUserRoles($roles, ["SUPER_USER"]);
+        getVersionNumber();
         break;
     default:
         break;
@@ -99,6 +94,16 @@ function updateVersion($version) {
         failRequest($ex->getMessage());
     }
     succeedRequest(null, "Version updated to '$version'");
+}
+
+function getVersionNumber() {
+    $query = "SELECT `Detail` FROM TINFO WHERE `Type` = 'VERSION'";
+    try {
+        $result = db_select_exception($query);
+        succeedRequest($result[0]["Detail"], null);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
 }
 
 function succeedRequest($result, $message) {

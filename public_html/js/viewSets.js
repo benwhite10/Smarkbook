@@ -2,22 +2,29 @@ var sets;
 var staff;
 var subjects;
 var years;
+var user;
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
+    writeNavbar(user);
     requestAllStaff();
     getSets();
     getAcademicYears();
     getSubjects();
-});
+}
 
 function getSets() {
     var staff_id = $("#staff_select").val();
-    if(!staff_id || parseInt(staff_id) === 0) staff_id = $('#userid').val();
+    if(!staff_id || parseInt(staff_id) === 0) staff_id = user["userId"];
     var infoArray = {
         type: "GETSETSFORSTAFF",
         staff: staff_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -46,8 +53,7 @@ function getSetsSuccess(json) {
 function requestAllStaff() {
     var infoArray = {
         orderby: "Surname",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -62,7 +68,7 @@ function requestAllStaff() {
 
 function requestStaffSuccess(json) {
     if (json["success"]) {
-        staff = json["staff"];
+        staff = json["response"];
         var staff_select = "";
         for (var i in staff) {
             var name = staff[i]["First Name"] + " " + staff[i]["Surname"];
@@ -70,8 +76,8 @@ function requestStaffSuccess(json) {
         }
         $("#staff_select").html(staff_select);
         $("#staff_select_2").html(staff_select);
-        $("#staff_select").val($("#userid").val());
-        $("#staff_select_2").val($("#userid").val());
+        $("#staff_select").val(user["userId"]);
+        $("#staff_select_2").val(user["userId"]);
     } else {
         console.log(json["message"]);
     }
@@ -80,8 +86,7 @@ function requestStaffSuccess(json) {
 function getAcademicYears() {
     var infoArray = {
         type: "GETYEARS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -97,8 +102,7 @@ function getAcademicYears() {
 function getSubjects() {
     var infoArray = {
         type: "GETSUBJECTS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -155,8 +159,7 @@ function addSet() {
         subject: $("#subject_select").val(),
         name: name,
         baseline_type: $("#type_select").val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

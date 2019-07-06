@@ -2,12 +2,17 @@
 
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/public_html/requests/core.php';
 
 $result = isset($_POST['result']) ? json_decode($_POST['result'], TRUE) : [];
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $quiz_id = filter_input(INPUT_POST,'qid',FILTER_SANITIZE_NUMBER_INT);
 $time = filter_input(INPUT_POST,'time',FILTER_SANITIZE_STRING);
 $user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
+
+$roles = validateRequestAndGetRoles($token);
+authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
 
 switch ($request_type){
     case "GETQUIZ":

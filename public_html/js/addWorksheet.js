@@ -1,17 +1,23 @@
+var user;
 
 $(document).ready(function(){
-    requestAllStaff();
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
 
+function init_page() {
+    writeNavbar(user);
+    requestAllStaff();
     $(function() {
         $( "#datepicker" ).datepicker({ dateFormat: 'dd/mm/yy' });
     });
-});
+}
 
 function requestAllStaff() {
     var infoArray = {
         orderby: "Initials",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -26,7 +32,7 @@ function requestAllStaff() {
 
 function requestStaffSuccess(json) {
     if(json["success"]) {
-        var staff = json["staff"];
+        var staff = json["response"];
         $("#worksheet_author").html("");
         var options = "<option value='0' selected>Author</option>";
         for (var key in staff) {
@@ -35,7 +41,7 @@ function requestStaffSuccess(json) {
             options += "<option value='" + userid + "'>" + teacher["Initials"] + "</option>";
         }
         $("#worksheet_author").html(options);
-        $("#worksheet_author").val($('#userid').val());
+        $("#worksheet_author").val(user["userId"]);
     } else {
         console.log("There was an error getting the staff: " + json["message"]);
     }
@@ -62,8 +68,7 @@ function createWorksheetRequest() {
     var infoArray = {
         type: "NEWWORKSHEET",
         array: array_to_send,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

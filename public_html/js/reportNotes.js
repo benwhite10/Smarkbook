@@ -1,11 +1,24 @@
+var user;
+var student_id;
+var set_id;
+
 $(document).ready(function(){
-    getStaff();
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
 });
+
+function init_page() {
+    writeNavbar(user);
+    getStaff();
+    student_id = getParameterByName("st");
+    set_id = getParameterByName("set");
+}
 
 function getStaff() {
     var infoArray = {
         orderby: "Initials",
-        external: "JIs7r"
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -27,7 +40,7 @@ function updateSets(){
         desc: "FALSE",
         type: "SETSBYSTAFF",
         staff: $('#staffInput').val(),
-        external: "JIs7r"
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -46,7 +59,7 @@ function updateStudents(){
         desc: "FALSE",
         type: "STUDENTSBYSET",
         set: $('#setsInput').val(),
-        external: "JIs7r"
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -61,16 +74,16 @@ function updateStudents(){
 
 function getStaffSuccess(json) {
     if(json["success"]){
-        var staff = json["staff"];
+        var staff = json["response"];
         var htmlValue = staff.length === 0 ? "<option value='0'>No Teachers</option>" : "";
         $('#staffInput').html(htmlValue);
         for (var key in staff) {
             $('#staffInput').append($('<option/>', { 
-                value: staff[key]["Staff ID"],
+                value: staff[key]["User ID"],
                 text : staff[key]["Initials"] 
             }));
         }
-        var initialVal = $('#staffid').val();
+        var initialVal = user["userId"];
         if($("#staffInput option[value='" + initialVal + "']").length !== 0){
             $('#staffInput').val(initialVal);
         }
@@ -91,7 +104,7 @@ function updateSetsSuccess(json){
                 text : sets[key]["Name"] 
             }));
         }
-        var initialVal = $('#setid').val();
+        var initialVal = set_id;
         if($("#setsInput option[value='" + initialVal + "']").length !== 0){
             $('#setsInput').val(initialVal);
         }
@@ -114,7 +127,7 @@ function updateStudentsSuccess(json){
                 text : name 
             }));
         }
-        var initialVal = $('#studentid').val();
+        var initialVal = student_id;
         if($("#studentInput option[value='" + initialVal + "']").length !== 0){
             $('#studentInput').val(initialVal);
         }
@@ -130,8 +143,7 @@ function saveNote(){
         staffid: $('#staffInput').val(),
         setid: $('#setsInput').val(),
         note: $('#note').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -179,4 +191,16 @@ function cancelNote() {
 
 function viewNotes() {
     window.location.href = 'viewReportNotes.php';
+}
+
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }

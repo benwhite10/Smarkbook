@@ -1,6 +1,14 @@
+var user;
 $(document).ready(function(){
-    getChecklists();
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
 });
+
+function init_page() {
+    writeNavbar(user);
+    getChecklists();
+}
 
 function setContentHeight() {
     var height = $("#checklist_div").height();
@@ -10,8 +18,8 @@ function setContentHeight() {
 function getChecklists() {
     var infoArray = {
         type: "GETCHECKLISTS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        userid: user["userId"],
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -49,8 +57,8 @@ function getSpecificationPoints(id) {
     var infoArray = {
         type: "GETALLSPECPOINTS",
         course_id: id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        userid: user["userId"],
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -169,8 +177,8 @@ function updateScore(spec_id, score) {
         type: "UPDATESCORE",
         checklist_id: spec_id,
         score: score,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        userid: user["userId"],
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
