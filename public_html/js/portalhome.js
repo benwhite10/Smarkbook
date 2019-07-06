@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var user = JSON.parse(localStorage.getItem("sbk_usr"));
     window.addEventListener("valid_user", function(){init_page(user);});
-    validateAccessToken(user);
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
 });
 
 function init_page(user) {
@@ -30,15 +30,14 @@ function writeHomeGrid(user) {
     grid_options["reports_student"] = {url: "reportHome.php?student=" + user_id, title: "Reports", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF","STUDENT"]};
     grid_options["reports_staff"] = {url: "reportHome.php?staff=" + user_id, title: "Reports", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["internal_results"] = {url: "internalResultsMenu.php", title: "Int. Results", img: "home-markbook.png", permissions: ["SUPER_USER", "STAFF"]};
-    grid_options["sets"] = {url: "viewMySets.php?staffId=" + user_id, title: "My Sets", img: "home-sets.png", permissions: ["SUPER_USER", "STAFF"]};
-    grid_options["account"] = {url: "editUser.php?userid=" + user_id, title: "My Account", img: "home-user.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
+    grid_options["sets"] = {url: "viewMySets.php", title: "My Sets", img: "home-sets.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["tags"] = {url: "viewAllTags.php", title: "Manage Tags", img: "home-modify.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["notes"] = {url: "reportNotes.php?t=" + user_id, title: "Report Notes", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["quiz"] = {url: "quiz_menu.php", title: "Quiz", img: "home-quiz.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
     
     var grid_html = "";
-    var staff_grid = ["view_worksheets", "mark_book", "checklists", "enter_results_staff", "reports_staff", "internal_results", "sets", "account", "tags", "notes", "quiz"];
-    var student_grid = ["enter_results_student", "reports_student", "checklists", "quiz", "account"];
+    var staff_grid = ["view_worksheets", "mark_book", "checklists", "enter_results_staff", "reports_staff", "internal_results", "sets", "tags", "notes", "quiz"];
+    var student_grid = ["enter_results_student", "reports_student", "checklists", "quiz"];
     var final_grid = [];
     if(user_role === "STAFF" || user_role === "SUPER_USER") {
         final_grid = staff_grid;
@@ -48,6 +47,7 @@ function writeHomeGrid(user) {
     var count = 0;
     for (var i = 0; i< final_grid.length; i++) {
         var grid_item = grid_options[final_grid[i]];
+        if (grid_item === undefined) continue;
         if (checkRole(user_role, grid_item["permissions"])) {
             count++;
             grid_html += writeHomeGridItem(grid_item, count);

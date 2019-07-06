@@ -3,14 +3,22 @@ var students;
 var details;
 var years = false;
 var subjects = false;
+var user;
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
+    writeNavbar(user);
     set_id = getParameterByName("id");
     getUsers();
     getAcademicYears();
     getSubjects();
     getSetDetails();
-});
+}
 
 function removeStudentPrompt(groupid, userid) {
     var full_name = "";
@@ -30,8 +38,7 @@ function getSetDetails() {
     var infoArray = {
         type: "GETSETDETAILS",
         set: set_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -47,8 +54,7 @@ function getSetDetails() {
 function getAcademicYears() {
     var infoArray = {
         type: "GETYEARS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -64,8 +70,7 @@ function getAcademicYears() {
 function getSubjects() {
     var infoArray = {
         type: "GETSUBJECTS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -173,8 +178,7 @@ function removeStudent(groupid, userid){
         type: "REMOVEFROMGROUP",
         studentid: userid,
         groupid: groupid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -192,8 +196,7 @@ function getUsers(){
         orderby: "SName",
         desc: "FALSE",
         type: "ALLSTUDENTS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -258,8 +261,7 @@ function addStudentRequest(studentid, groupid) {
         type: "ADDTOGROUP",
         studentid: studentid,
         groupid: groupid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -293,8 +295,7 @@ function saveSet() {
         year: year,
         subject: subject,
         baseline_type: baseline_type,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -316,8 +317,7 @@ function deleteSet() {
         var infoArray = {
             type: "DELETESET",
             set: set_id,
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
+            token: user["token"]
         };
         $.ajax({
             type: "POST",

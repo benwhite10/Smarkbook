@@ -9,27 +9,24 @@ include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $version_id = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
+
+$roles = validateRequestAndGetRoles($token);
 $staff_ids = [];
 
 switch ($requestType){
     case "WORKSHEET":
     default:
-        /*if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }*/
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getWorksheetSummary($version_id, TRUE);
-        //echo json_encode($response);
         break;
     case "INDIVIDUALWORKSHEET":
-        /*if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }*/
-        //getIndividualWorksheetSummary($version_id, $staff_ids);
-        getIndividualWorksheetSummary2($version_id);
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        getIndividualWorksheetSummary($version_id);
         break;
 }
 
-function getIndividualWorksheetSummary2($version_id) {
+function getIndividualWorksheetSummary($version_id) {
     $response = getWorksheetSummary($version_id, FALSE);
     $file_name = rand(111111, 999999);
     $objPHPExcel = new PHPExcel();

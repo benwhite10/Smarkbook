@@ -5,10 +5,11 @@
  */
 
 $(document).ready(function(){
-    //localStorage.setItem("sbk_usr", "[]");
     var user = JSON.parse(localStorage.getItem("sbk_usr"));
-    window.addEventListener("valid_user", function(){redirect();});
-    validateAccessToken(user);
+    if (user !== null && user.length > 0) {
+        window.addEventListener("valid_user", function(){redirect();});
+        validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
+    }
     $("#login_password").on("keydown", function (e) {
         if (e.keyCode === 13) clickLogin();
     });

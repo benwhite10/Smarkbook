@@ -1,6 +1,15 @@
 var awesompletes = [];
+var user;
+var context_tag_id = "";
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
+    writeNavbar(user);
     setWorksheetID();
     requestAllStaff();
     requestAllTags();
@@ -30,9 +39,7 @@ $(document).ready(function(){
             toggleMenuOff();
         }
     });
-});
-
-var context_tag_id = "";
+}
 
 function clickInsideElement(e, className, notClassName) {
   var el = e.srcElement || e.target;
@@ -176,8 +183,7 @@ function showHideDetails() {
 function requestAllStaff() {
     var infoArray = {
         orderby: "Initials",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -195,7 +201,7 @@ function requestAllStaff() {
 
 function requestStaffSuccess(json) {
     if(json["success"]) {
-        var staff = json["staff"];
+        var staff = json["response"];
         $("#worksheet_author").html("");
         var options = "<option value='0' selected>No Teacher</option>";
         for (var key in staff) {
@@ -213,8 +219,7 @@ function requestStaffSuccess(json) {
 function requestAllTags(){
     var infoArray = {
         type: "GETALLTAGS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -248,8 +253,7 @@ function getWorksheetInfo() {
     var infoArray = {
         wid: wid,
         type: "WORKSHEETINFO",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -743,8 +747,7 @@ function requestSuggestedTags(div_id) {
         type: "SUGGESTEDTAGS",
         tags: tags,
         div_id: div_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -777,8 +780,7 @@ function requestSimilarTags(name) {
     var infoArray = {
         type: "SIMILARNEWTAGS",
         name: name,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -845,8 +847,7 @@ function saveNewTag() {
         name: name,
         type_id: tag_type,
         div_id: div_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -1012,8 +1013,7 @@ function saveWorksheetRequest(delete_sqid) {
         type: "UPDATEWORKSHEET",
         array: array_to_send,
         req_id: req_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -1121,8 +1121,7 @@ function deleteWorksheet(){
         var infoArray = {
             type: type,
             vid: wid,
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
+            token: user["token"]
         };
         $.ajax({
             type: "POST",
@@ -1146,8 +1145,7 @@ function copyWorksheet() {
         var infoArray = {
             type: "COPYWORKSHEET",
             vid: wid,
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
+            token: user["token"]
         };
         $.ajax({
             type: "POST",

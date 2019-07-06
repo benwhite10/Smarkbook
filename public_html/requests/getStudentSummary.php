@@ -16,13 +16,10 @@ $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
 $setId = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $tagsArrayString = "";
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
 $reqid = filter_input(INPUT_POST, 'reqid', FILTER_SANITIZE_NUMBER_INT);
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 $questions = [];
 $setWorksheets = [];
@@ -38,15 +35,11 @@ $timeConstant = 0.0004;
 
 switch ($requestType){
     case "STUDENTREPORT":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "NEWSTUDENTREPORT":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
         logReport($userid, $studentId, $staffId, $setId, "");
         getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
@@ -60,21 +53,15 @@ switch ($requestType){
         getStudentSets($studentId);
         break;
     case "STUDENTWORKSHEETSUMMARY":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
         getStudentWorksheetSummary($studentId, $gwid, $userid, $role);
         break;
     case "CALCSTUWORKSHEETSUMMARY":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
         studentWorksheetSummary($studentId, $gwid, $userid, $role);
         break;
     case "WORKSHEETDETAILS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF", "STUDENT"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
         getWorksheetDetails($gwid, $userid, $studentId, $role);
         break;
     default:

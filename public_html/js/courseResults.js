@@ -1,13 +1,21 @@
 var awesompletes = [];
+var user; 
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
+    writeNavbar(user);
     sessionStorage.setItem("details", "[]");
     sessionStorage.setItem("worksheets", "[]");
     sessionStorage.setItem("active_tab", isNaN(parseInt(getParameterByName("tab"))) ? 0 : parseInt(getParameterByName("tab")));
     sessionStorage.setItem("search_results", "no_results");
     sessionStorage.setItem("course_id", getParameterByName("cid"));
     getWorksheets();
-});
+}
 
 function getColour(num, av) {
     var colours = av ? [
@@ -73,8 +81,7 @@ function getResultsRequest(course_id) {
     var infoArray = {
         type: "GETCOURSEOVERVIEW",
         course: course_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -96,8 +103,7 @@ function getWorksheets() {
         type: type,
         orderby: "WV.`Date Added`",
         desc: "TRUE",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -250,8 +256,7 @@ function clickWorksheet(vid) {
         type: "GETEXISTINGRESULTS",
         course: sessionStorage.getItem("course_id"),
         vid: vid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -324,8 +329,7 @@ function addWorksheet(vid) {
         results: JSON.stringify(existing_sheets[0]),
         date: date_string,
         vid: vid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -373,8 +377,7 @@ function removeWorksheet(cwid) {
     var infoArray = {
         type: "REMOVEWORKSHEET",
         cwid: cwid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -678,8 +681,7 @@ function searchWorksheets() {
     var infoArray = {
         type: "SEARCH",
         search: searchTerm,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -722,8 +724,7 @@ function changeDate(id) {
             type: "UPDATEWORKSHEET",
             cwid: id,
             date: $("#datepicker_" + id).val(),
-            userid: $('#userid').val(),
-            userval: $('#userval').val()
+            token: user["token"]
         };
         $.ajax({
             type: "POST",

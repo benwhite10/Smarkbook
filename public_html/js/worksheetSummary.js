@@ -15,8 +15,15 @@ var summary_table_desc = true;
 var students_table_array;
 var students_table_order = "RelPerc";
 var students_table_desc = true;
+var user;
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
     active_tab = isNaN(parseInt(getParameterByName("tab"))) ? 0 : parseInt(getParameterByName("tab"));
     worksheet_id = getParameterByName("wid");
     $("#dialog_message_background").css("display", "none");
@@ -24,7 +31,7 @@ $(document).ready(function(){
     getWorksheetDetails();
     showAllSpinners();
     getResultsAnalysis();
-});
+}
 
 function getColour(num, av) {
     var colours = av ? [
@@ -647,8 +654,7 @@ function getWorksheetDetails() {
     var infoArray = {
         type: "WORKSHEETINFO",
         wid: worksheet_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -673,8 +679,7 @@ function getResultsAnalysis() {
     var infoArray = {
         type: "WORKSHEET",
         vid: worksheet_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -831,8 +836,7 @@ function downloadResultsAnalysis() {
     var infoArray = {
         type: "INDIVIDUALWORKSHEET",
         vid: worksheet_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

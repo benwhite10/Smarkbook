@@ -1,16 +1,8 @@
 <?php
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/includes/class.phpmailer.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
-
-$info = Info::getInfo();
-$info_version = $info->getVersion();
-
-$email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
-
+$info_version = Info::getInfo()->getVersion();
 ?>
 
 <!DOCTYPE html>
@@ -19,7 +11,6 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
     <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook - Login", $info_version); ?>
     <link rel="stylesheet" type="text/css" href="css/login.css?<?php echo $info_version; ?>" />
-    <script type="text/javascript" src="js/userFunctions.js?<?php echo $info_version; ?>"></script>
     <script type="text/javascript" src="js/login.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
@@ -34,7 +25,7 @@ $email = filter_input(INPUT_GET,'email',FILTER_SANITIZE_STRING);
             <div class="login_outer_container">
                 <div class="login_inner_container">
                     <div class="login_logo"><img src="branding/mainlogo.png"/></div>
-                    <input id="login_username" type="text" name="username" placeholder="Username" value="<?php if(isset($email)){echo $email;} ?>"/>
+                    <input id="login_username" type="text" name="username" placeholder="Username" value=""/>
                     <input id="login_password" type="password" name="password" placeholder="Password" id="password"/>
                     <div class="login_button" onclick="clickLogin()">Login</div>
                     <div id="login_message" class="login_message">Update June 2019: Please login using your Wellington College login details. If you have any problems please contact <a href="mailto:contact.smarkbook@gmail.com" style="color:inherit; font-size:inherit;">contact.smarkbook@gmail.com</a>.</div>

@@ -1,4 +1,15 @@
+var user;
+var groups_loaded = false;
+var worksheets_loaded = false;
+
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
+    writeNavbar(user);
     sessionStorage.setItem("first_time", "TRUE");
     sessionStorage.setItem("check_add", "TRUE");
     sessionStorage.setItem("groups", "[]");
@@ -19,7 +30,13 @@ $(document).ready(function(){
     $("#search_bar_text_input").keyup(function(event){
         searchWorksheets();
     });
-});
+}
+
+function checkFullPageLoad() {
+    if (groups_loaded && worksheets_loaded) {
+        parseWorksheets();
+    }
+}
 
 function getWorksheets(restore) {
     var type = "ALLWORKSHEETS";
@@ -31,8 +48,7 @@ function getWorksheets(restore) {
         type: type,
         orderby: "WV.`Date Added`",
         desc: "TRUE",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -82,8 +98,8 @@ function clickOption(val) {
 function getGroups() {
     var infoArray = {
         type: "GETGROUPS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        userid: user["userId"],
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -93,6 +109,11 @@ function getGroups() {
         success: function(json){
             if (json["success"]) {
                 sessionStorage.setItem("groups", JSON.stringify(json["result"]));
+                groups_loaded = true;
+                checkFullPageLoad();
+            } else {
+                console.log("There was an error getting the groups.");
+                console.log(json);
             }
         },
         error: function() {
@@ -104,7 +125,8 @@ function getGroups() {
 function getWorksheetsSuccess(json) {
     if(json["success"]) {
         localStorage.setItem("worksheets", JSON.stringify(json["worksheets"]));
-        parseWorksheets();
+        worksheets_loaded = true;
+        checkFullPageLoad();
     } else {
         console.log("There was an error getting the worksheets.");
         console.log(json["message"]);
@@ -326,8 +348,8 @@ function clickSet(group_id, vid) {
         type: "CHECKNEW",
         set: group_id,
         worksheet: vid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        userid: user["userId"],
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -348,8 +370,7 @@ function addNewGroupWorksheet(group_id, vid) {
         type: "FORCENEW",
         set: group_id,
         worksheet: vid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -416,8 +437,7 @@ function searchWorksheets() {
     var infoArray = {
         type: "SEARCH",
         search: searchTerm,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

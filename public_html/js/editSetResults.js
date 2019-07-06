@@ -1,13 +1,24 @@
+var user;
+var gwid;
+
 $(document).ready(function(){
-    var gwid = getParameterByName("gwid");
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
+    writeNavbar(user);
+    gwid = getParameterByName("gwid");
 
     clearSaveChangesArray();
     clearSaveWorksheetsArray();
     clearGWChanges();
+    writeDateInputs();
     setUpInputs();
     requestWorksheet(gwid);
     requestAllStaff();
-    log_event("EDIT_SET_RESULTS", $('#userid').val(), gwid);
+    log_event("EDIT_SET_RESULTS", user["userId"], gwid);
 
     setAutoSave(5000);
 
@@ -29,7 +40,25 @@ $(document).ready(function(){
             return "You have unsaved changes, if you leave now they will not be saved.";
         }
     };
-});
+}
+
+function writeDateInputs() {
+    var html_text_day = "";
+    var html_text_year = "";
+    for (var i = 1; i <= 31; i++) {
+        var year = 2009 + i;
+        html_text_day += "<option value=" + i + ">" + pad(i, 2) + "</option>";
+        html_text_year += "<option value=" + year + ">" + year + "</option>";
+    }
+    $("#day").html(html_text_day);
+    $("#year").html(html_text_year);
+}
+
+function pad(num, size) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
 
 function pressKeyInDiv(div, e) {
     switch(e.keyCode) {
@@ -273,16 +302,11 @@ function getRow(row_student_array, student_id) {
 }
 
 /* Get worksheets */
-function requestWorksheet(gwid) {
-    if(!gwid) {
-        gwid = getParameterByName("gwid");
-    }
-
+function requestWorksheet() {
     var infoArray = {
         type: "WORKSHEETFORGWID",
         gwid: gwid,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -334,8 +358,7 @@ function combineInputs(completed_worksheets, inputs) {
 function setUpInputs() {
     var infoArray = {
         type: "GETINPUTTYPES",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -424,12 +447,10 @@ function inputsSuccess(json) {
 }
 
 function updateInputs(input, show_input) {
-    var gwid = getParameterByName("gwid");
     console.log("I ran an update on " + input);
     var infoArray = {
         type: "UPDATEGWINPUTs",
-        userid: $('#userid').val(),
-        userval: $('#userval').val(),
+        token: user["token"],
         gwid: gwid,
         input: input,
         show_input: show_input
@@ -461,8 +482,7 @@ function setAutoSave(interval) {
 function requestAllStaff() {
     var infoArray = {
         orderby: "Initials",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -477,7 +497,7 @@ function requestAllStaff() {
 
 function requestStaffSuccess(json) {
     if(json["success"]) {
-        sessionStorage.setItem("staffList", JSON.stringify(json["staff"]));
+        sessionStorage.setItem("staffList", JSON.stringify(json["response"]));
     } else {
         console.log("There was an error getting the staff: " + json["message"]);
     }
@@ -489,8 +509,7 @@ function deleteRequest() {
     var infoArray = {
         gwid: gwid,
         type: "DELETEGW",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -522,7 +541,7 @@ function setUpWorksheetInfo() {
     var dateString = dateDue.format("DD/MM/YYYY");
     var name = (details["DisplayName"] && details["DisplayName"] !== "") ? details["DisplayName"] : details["WName"];
     $("#title2").html("<h1>" + name + "</h1>");
-    $("#gwid").val(getParameterByName("gwid"));
+    $("#gwid").val(gwid);
     $("#summaryBoxShowDetailsTextMain").text(details["SetName"] + " - " + dateString);
     $("#dateDueMain").val(dateString);
     setUpStaffInput("staff1", details["StaffID1"],"Teacher");
@@ -757,7 +776,7 @@ function hideButton() {
     document.getElementById("hide_checkbox").checked = val;
     sessionStorage.setItem("hidden_selected", val);
     var type = val ? "SHOW_SET_RESULTS" : "HIDE_SET_RESULTS";
-    log_event(type, $('#userid').val(), getParameterByName("gwid"));
+    log_event(type, $('#userid').val(), gwid);
     changeGWValue();
 }
 
@@ -778,7 +797,7 @@ function enterTotalsButton() {
 
 function deleteButton() {
     if(confirm("Are you sure you want to delete this group worksheet? This process is irreversible and you will lose any data entered.")){
-        log_event("DELETE_GROUP_WORKSHEET", $('#userid').val(), getParameterByName("gwid"));
+        log_event("DELETE_GROUP_WORKSHEET", $('#userid').val(), gwid);
         deleteRequest();
     }
 }
@@ -895,8 +914,7 @@ function sendDownloadRequest() {
     var infoArray = {
         type: "DOWNLOADGWID",
         gwid: $("#gwid").val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -997,8 +1015,8 @@ function saveGroupWorksheet() {
         type: "SAVEGROUPWORKSHEET",
         worksheet_details: worksheet_details,
         grade_boundaries: grade_boundaries,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        userid: user["userId"],
+        token: user["token"]
     };
 
     $.ajax({
@@ -1077,8 +1095,7 @@ function sendSaveWorksheetsRequest(save_worksheets_array) {
         req_id: req_id,
         type: "SAVEWORKSHEETS",
         save_worksheets_array: save_worksheets_send,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -1114,8 +1131,7 @@ function sendSaveResultsRequest(save_changes_array) {
         req_id: req_id,
         type: "SAVERESULTS",
         save_changes_array: save_changes_send,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

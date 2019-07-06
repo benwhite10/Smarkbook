@@ -1,13 +1,20 @@
+var user;
+
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+});
+
+function init_page() {
     getCourses();
     getSets();
-});
+}
 
 function getCourses() {
     var infoArray = {
         type: "GETCOURSES",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -27,8 +34,7 @@ function getCourses() {
 function getSets() {
     var infoArray = {
         type: "ALLSETS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -77,8 +83,7 @@ function clickCourse(id) {
     var infoArray = {
         type: "GETCOURSEDETAILS",
         course: id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -132,8 +137,7 @@ function addCourse() {
     var infoArray = {
         type: "NEWCOURSE",
         name: course_name,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -160,8 +164,7 @@ function addSet(course_id) {
         type: "ADDSET",
         course: course_id,
         set: $("#add_sets_select").val(),
-        userid: $("#userid").val(),
-        userval: $("#userval").val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -188,8 +191,7 @@ function removeSet(course_id, set_id) {
         type: "REMOVESET",
         course: course_id,
         set: set_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

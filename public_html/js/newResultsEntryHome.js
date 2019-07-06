@@ -1,14 +1,22 @@
+var user;
+
 $(document).ready(function(){
-    setUpSets(true);
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
 });
+
+function init_page() {
+    writeNavbar(user);
+    setUpSets(true);
+}
 
 function setUpSets(firstTime){
     var infoArray = {
         orderby: "Name",
         desc: "FALSE",
-        userid: $('#userid').val(),
-        userval: $('#userval').val(),
-        staff: $('#userid').val(),
+        token: user["token"],
+        staff: user["userId"],
         type: "SETSBYSTUDENT"
     };
 
@@ -55,8 +63,7 @@ function setsSuccess(json, firstTime){
 
 function setUpWorksheets(){
     var infoArray = {
-        userid: $('#userid').val(),
-        userval: $('#userval').val(),
+        token: user["token"],
         type: "STUDENTEDITABLESHEETS"
     };
     infoArray["group"] = document.getElementById("group") ? document.getElementById("group").value : 0;
@@ -110,17 +117,14 @@ function changeGroup(){
 
 function goToInput() {
     var gwid = $("#worksheet").val();
-    var url = "/studentWorksheetSummary.php?gw=" + gwid + "&s=" + $("#userid").val();
+    var url = "/studentWorksheetSummary.php?gw=" + gwid + "&s=" + user["userId"];
     window.location.href = url;
 }
-
-
 
 function setUpStaff(){
     var infoArray = {
         orderby: "Initials",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -136,7 +140,7 @@ function setUpStaff(){
 
 function staffSuccess(json){
     if(json["success"]){
-        var staff = json["staff"];
+        var staff = json["response"];
         var userid = document.getElementById("creatingStaffMember").value;
         var str = "<option value=0>-Initials-</option>";
         var str2 = "<option value=0>-Initials-</option>";
@@ -158,79 +162,3 @@ function staffSuccess(json){
         console.log("There was an error retrieving the staff.");
     }
 }
-
-
-
-/*
-function setUpStudents(){
-    if(document.getElementById("level")){
-        var level = document.getElementById("level").value;
-        if(level === "1"){
-            document.getElementById("students").style.display = "none";
-            document.getElementById("studentslabel").style.display = "none";
-        }else{
-            document.getElementById("students").style.display = "inline-block";
-            document.getElementById("studentslabel").style.display = "inline-block";
-            var set = document.getElementById("group") ? document.getElementById("group").value : 0;
-            var infoArray = {
-                orderby: "SName",
-                desc: "FALSE",
-                type: "STUDENTSBYSET",
-                set: set,
-                userid: $('#userid').val(),
-                userval: $('#userval').val()
-            };
-            $.ajax({
-                type: "POST",
-                data: infoArray,
-                url: "requests/getStudents.php",
-                dataType: "json",
-                success: studentsSuccess,
-                error: function() {
-                    console.log("There was an error loading the students.");
-                }
-            });
-        }
-    }
-}
-
-function studentsSuccess(json){
-    if(json["success"]){
-        var students = json["students"];
-        var studentid = 0;
-        var str = "";
-        if(students.length === 0){
-            str = "<option value=0>-No Students-</option>";
-        }
-        for(var i = 0; i < students.length; i++){
-            var student = students[i];
-            var id = student["ID"];
-            var name = (student["PName"] === undefined || student["PName"] === "") ? student["FName"] : student["PName"];
-            var sname = student["SName"];
-            if(id === studentid){
-                str += "<option value=" + id + " selected>" + name + " " + sname + "</option>";
-            } else{
-                str += "<option value=" + id + ">" + name + " " + sname + "</option>";
-            }
-        }
-    } else {
-        console.log("There was an error loading the students.");
-    }
-    document.getElementById("students").innerHTML = str;
-}
-
-
-
-
-function changeStaffMember(){
-    if(document.getElementById("creatingStaffMember") && document.getElementById("creatingStaff")){
-        document.getElementById("creatingStaffMember").value = document.getElementById("creatingStaff").value;
-    }
-    setUpSets(false);
-}
-
-function addDate(){
-    var dateString = moment().format("DD/MM/YYYY");
-    document.getElementById("datedue").value = dateString;
-}
-*/

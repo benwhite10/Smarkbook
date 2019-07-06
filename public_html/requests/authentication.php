@@ -2,11 +2,10 @@
 
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/logEvents.php';
-include_once $include_path . '/jwt/JWT.php';
+include_once $include_path . '/includes/authentication.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 
@@ -15,31 +14,23 @@ switch ($request_type){
         $user = db_escape_string(filter_input(INPUT_POST,'user',FILTER_SANITIZE_STRING));
         logInUser($user, $_POST["pwd"]);
         break;
-    case "logout":
-        /*$user_code = filter_input(INPUT_POST,'user',FILTER_SANITIZE_STRING);
-        $session_code = filter_input(INPUT_POST,'session',FILTER_SANITIZE_STRING);
-        logOutUser($user_code, $session_code);
-        returnRequest(TRUE, null);
-        break;*/
     case "validateSession":
         $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
         $user_id = filter_input(INPUT_POST,'user_id',FILTER_SANITIZE_STRING);
         validateSession($token, $user_id);
         break;
-    case "adminSwitchUser":
-        /*$user_code = filter_input(INPUT_POST,'user',FILTER_SANITIZE_STRING);
-        $session_code = filter_input(INPUT_POST,'session',FILTER_SANITIZE_STRING);
-        $switch_user = filter_input(INPUT_POST, 'switch_user', FILTER_SANITIZE_STRING);
-        if (!validateSession($user_code, $session_code)) returnRequest(FALSE, null, "Invalid session.");
-        switchUser($switch_user, $user_code);
-        break;*/
+    case "switchUser":
+        $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
+        $new_user_id = filter_input(INPUT_POST,'new_user_id',FILTER_SANITIZE_STRING);
+        switchUser($token, $new_user_id);
+        break;
     default:
         returnRequest(FALSE, null, "Unrecognised request type", $ex);
         break;
 }
 
 function logInUser($user_input, $pwd) {
-    sec_session_start();
+    $response = [TRUE, "test"];
     $config = parse_ini_file('../../includes/config.ini');
     $user = cleanUserName($user_input);
     $email = $user . "@wellingtoncollege.org.uk";
@@ -48,9 +39,8 @@ function logInUser($user_input, $pwd) {
     $response = $config['server'] === 'local' ? [TRUE, ""] :authenticateCredentialsCurl($user, $pwd);
     $url = "portalhome.php";
     if ($response[0]) {
-        $url = createSession($user_id);
         $user = createUser($user_id);
-        $user->token = createJWT($user_id);
+        $user->token = createJWT($user_id, $user->role);
     }
     returnRequest(TRUE, array(
         "success" => $response[0],
@@ -60,75 +50,32 @@ function logInUser($user_input, $pwd) {
     ));
 }
 
-function createJWT($user_id) {
-    $config = parse_ini_file('../../includes/config.ini');
-    $jwt_key = $config["jwt_key"];
-
-    // create a token
-    $payload_array = array();
-    $payload_array['user_id'] = $user_id;
-    $payload_array['nbf'] = time();
-    $payload_array['exp'] = time() + 12*60*60;
-    
-    $token = JWT::encode($payload_array, $jwt_key);
-    return $token;
-}
-
-function validateSession($token, $user_id) {
+function validateSession($token) {
     $response = validateToken($token);
-    $success = FALSE;
-    if ($response[0]) {
-        $success = $response[1] === $user_id;
-        $message = $response[1] === $user_id ? null : "Incorrect user.";
-    } else {
-        $message = $response[1];
-    }
-    returnRequest($success, $message);
+    $message = $response[0] ? "" : $response[1];
+    returnRequest($response[0], $message);
 }
 
-function validateToken($token) {
-    $config = parse_ini_file('../../includes/config.ini');
-    $jwt_key = $config["jwt_key"];
-    try {
-        $decoded_array = JWT::decode($token, $jwt_key, array('HS256'));
-        $user_id= $decoded_array->user_id;
-        return [TRUE, $user_id];
-    } catch (BeforeValidException $ex) {
-        return [FALSE, "This token is not yet valid."];
-    } catch (ExpiredException $ex) {
-        return [FALSE, "This token has expired."];
-    } catch (SignatureInvalidException $ex) {
-        return [FALSE, "This token is invalid"];
-    } catch (Exception $ex) {
-        return [FALSE, "This token is invalid"];
+function switchUser($token, $new_user_id) {
+    $response = runSwitchUser($token, $new_user_id);
+    $success = $response[0];
+    $message = $response[0] ? "" : $response[1];
+    $user = [];
+    if ($response[0]) {
+        $user = createUser($new_user_id);
+        $user->token = $response[1];
     }
-    return [TRUE, "Valid token"];
+    returnRequest($success, array("user" => $user), $message);
 }
 
 function createUser($user_id) {
     $user = User::createUserLoginDetails($user_id);
     $return_user = $user->getRole() === 'STUDENT' ? Student::createStudentFromId($user_id) : Teacher::createTeacherFromId($user_id);
+    $return_user->parent_id = ""; 
+    $return_user->parent_role = ""; 
     infoLog("User $user_id has been successfully logged in.");
     logEvent($user_id, "USER_LOGIN", "");
     return $return_user;
-}
-
-function createSession($user_id) {
-    $user = User::createUserLoginDetails($user_id);
-    $url = "portalhome.php";
-    if($user->getRole() === 'STUDENT'){
-        $_SESSION['user'] = Student::createStudentFromId($user_id);
-    }else{
-        $_SESSION['user'] = Teacher::createTeacherFromId($user_id);
-    }
-    $_SESSION['timeout'] = time();
-    infoLog("User $user_id has been successfully logged in.");
-    if(isset($_SESSION['url']) && $_SESSION['url'] !== ""){
-        $url = $_SESSION['url'];
-        unset($_SESSION['url']);
-    }
-    logEvent($user_id, "USER_LOGIN", "");
-    return $url;
 }
 
 function getDetails($email, $name){
@@ -144,17 +91,6 @@ function cleanUserName($user) {
     $pos = strpos($user,"@");
     if ($pos === FALSE) return $user;
     return strpos($user,"wellingtoncollege") !== FALSE ? substr($user, 0, $pos) : FALSE;
-}
-
-function returnRequest($success, $response_array = null, $message = null, $ex = null){
-    $response = array(
-        "success" => $success,
-        "response" => $response_array,
-        "message" => $message
-    );
-    if (!is_null($ex)) $response["ex_message"] = $ex->getMessage();
-    echo json_encode($response);
-    exit();
 }
 
 function authenticateCredentials($user, $pwd) {

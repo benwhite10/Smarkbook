@@ -1,11 +1,20 @@
+var user;
+
 $(document).ready(function(){
-    getNotes();
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
 });
+
+function init_page() {
+    writeNavbar(user);
+    getNotes(); 
+}
 
 function getStaff() {
     var infoArray = {
         orderby: "Initials",
-        external: "JIs7r"
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -27,7 +36,7 @@ function updateSets(){
         desc: "FALSE",
         type: "SETSBYSTAFF",
         staff: $('#staffInput').val(),
-        external: "JIs7r"
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -46,7 +55,7 @@ function updateStudents(){
         desc: "FALSE",
         type: "STUDENTSBYSET",
         set: $('#setsInput').val(),
-        external: "JIs7r"
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -61,7 +70,7 @@ function updateStudents(){
 
 function getStaffSuccess(json) {
     if(json["success"]){
-        var staff = json["staff"];
+        var staff = json["response"];
         var htmlValue = staff.length === 0 ? "<option value='0'>No Teachers</option>" : "";
         $('#staffInput').html(htmlValue);
         for (var key in staff) {
@@ -126,9 +135,8 @@ function updateStudentsSuccess(json){
 function getNotes(){
     var infoArray = {
         type: "GET_NOTES_STAFF",
-        staffid: $('#userid').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val() 
+        staffid: user["userId"],
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

@@ -1,38 +1,8 @@
 <?php
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/includes/class.phpmailer.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
-
-sec_session_start();
-$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){
-    $user = $_SESSION['user'];
-    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-    $userid = $user->getUserId();
-    $userRole = $user->getRole();
-    $userval = base64_encode($user->getValidation());
-    $info = Info::getInfo();
-    $info_version = $info->getVersion();
-}else{
-    header($resultArray[1]);
-    exit();
-}
-
-if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
-    header("Location: unauthorisedAccess.php");
-    exit();
-}
-
-if(isset($_SESSION['message'])){
-    $Message = $_SESSION['message'];
-    $message = $Message->getMessage();
-    $type = $Message->getType();
-    unset($_SESSION['message']);
-}
-
+$info_version = Info::getInfo()->getVersion();
 ?>
 
 <!DOCTYPE html>
@@ -45,32 +15,14 @@ if(isset($_SESSION['message'])){
     <link rel='stylesheet' type='text/css' href='css/viewAllTags.css?<?php echo $info_version; ?>' />
 </head>
 <body>
-    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
-                <a href="index.php"><img src="branding/mainlogo.png"/></a>
+                <a href="portalhome.php"><img src="branding/mainlogo.png"/></a>
             </div>
-            <?php navbarMenu($fullName, $userid, $userRole) ?>
+            <ul class='menu topbar'><li id="navbar"></li></ul>
     	</div>
     	<div id="body">
-            <?php
-                if(isset($message)){
-                    if($type == "ERROR"){
-                        $div = 'class="error"';
-                    }else if($type == "SUCCESS"){
-                        $div = 'class="success"';
-                    }
-                }else{
-                    $div = 'style="display:none;"';
-                }
-            ?>
-
-            <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($message)) {echo $message;} ?></p>
-                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>
-
             <div id="top_bar">
                 <div id="title2">
                     <h1>Tags</h1>

@@ -1,38 +1,8 @@
 <?php
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/includes/class.phpmailer.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
-
-sec_session_start();
-$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){
-    $user = $_SESSION['user'];
-    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-    $userid = $user->getUserId();
-    $userRole = $user->getRole();
-    $userval = base64_encode($user->getValidation());
-    $info = Info::getInfo();
-    $info_version = $info->getVersion();
-}else{
-    header($resultArray[1]);
-    exit();
-}
-
-if(!authoriseUserRoles($userRole, ["SUPER_USER"])){
-    header("Location: unauthorisedAccess.php");
-    exit();
-}
-
-if(isset($_SESSION['message'])){
-    $Message = $_SESSION['message'];
-    $message = $Message->getMessage();
-    $type = $Message->getType();
-    unset($_SESSION['message']);
-}
-
+$info_version = Info::getInfo()->getVersion();
 ?>
 
 <!DOCTYPE html>
@@ -45,13 +15,12 @@ if(isset($_SESSION['message'])){
 </head>
 <body>
     <?php googleAnalytics(); ?>
-    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="header">
             <div id="title">
-                <a href="index.php"><img src="branding/mainlogo.png"/></a>
+                <a href="portalhome.php"><img src="branding/mainlogo.png"/></a>
             </div>
-            <?php navbarMenu($fullName, $userid, $userRole) ?>
+            <ul class='menu topbar'><li id="navbar"></li></ul>
     	</div>
     	<div id="body">
             <div id="top_bar">
@@ -87,7 +56,7 @@ if(isset($_SESSION['message'])){
                             <p>Update the version number</p>
                         </div>
                         <div class="task_text_input">
-                            <input id="version_number" type="text" class="task_text_input" value="<?php echo $info_version; ?>"/>
+                            <input id="version_number" type="text" class="task_text_input" value=""/>
                         </div>
                         <div id="task_version_button" class="task_button" onclick="runUpdateVersion()">
                             <p>Update</p>

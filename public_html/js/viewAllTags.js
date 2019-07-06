@@ -1,12 +1,19 @@
+var user;
+
 $(document).ready(function(){
-    requestAllTags();
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
 });
 
+function init_page() {
+    writeNavbar(user);
+    requestAllTags();
+}
 function requestAllTags(){
     var infoArray = {
         type: "GETALLTAGS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -92,8 +99,7 @@ function updateTagRequest(tag_id, type_id){
         type: "UPDATETAG",
         tagid: tag_id,
         type_id: type_id,
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",

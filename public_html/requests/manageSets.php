@@ -16,55 +16,37 @@ $set_subject = filter_input(INPUT_POST,'subject',FILTER_SANITIZE_NUMBER_INT);
 $set_name = filter_input(INPUT_POST,'name',FILTER_SANITIZE_STRING);
 $baseline_type = filter_input(INPUT_POST,'baseline_type',FILTER_SANITIZE_STRING);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
-$external = filter_input(INPUT_POST,'external',FILTER_SANITIZE_STRING);
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, $external);
-if(!$role){
-    returnRequest(FALSE, null, "Unable to validate request.");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($requestType){
     case "GETSETDETAILS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            returnRequest(FALSE, null, "You are not authorised to complete that request.");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getSetDetails($setid);
         break;
     case "GETYEARS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            returnRequest(FALSE, null, "You are not authorised to complete that request.");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getYears();
         break;
     case "GETSUBJECTS":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            returnRequest(FALSE, null, "You are not authorised to complete that request.");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getSubjects();
         break;
     case "SAVESET":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            returnRequest(FALSE, null, "You are not authorised to complete that request.");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         saveSet($setid, $set_name, $set_subject, $set_year, $baseline_type);
         break;
     case "GETSETSFORSTAFF":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            returnRequest(FALSE, null, "You are not authorised to complete that request.");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getSetsForStaff($staff_id);
         break;
     case "ADDSET":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            returnRequest(FALSE, null, "You are not authorised to complete that request.");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         addSet($staff_id, $set_name, $set_subject, $set_year, $baseline_type);
         break;
     case "DELETESET":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            returnRequest(FALSE, null, "You are not authorised to complete that request.");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         deleteSet($setid);
         break;
     default:
@@ -214,12 +196,4 @@ function getSetsForStaff($staff_id) {
         returnRequest(FALSE, null, $message);
     }
     returnRequest(TRUE, $sets, null);
-}
-
-function returnRequest($success, $response, $message) {
-    echo json_encode(array(
-        "success" => $success,
-        "response" => $response,
-        "message" => $message));
-    exit();
 }

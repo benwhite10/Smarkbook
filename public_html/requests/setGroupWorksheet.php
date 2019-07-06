@@ -11,31 +11,24 @@ $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
 $versionid = filter_input(INPUT_POST,'worksheet',FILTER_SANITIZE_NUMBER_INT);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
-$userval = base64_decode(filter_input(INPUT_POST,'userval',FILTER_SANITIZE_STRING));
+$token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
-$role = validateRequest($userid, $userval, "");
-if(!$role){
-    failRequest("There was a problem validating your request");
-}
+$roles = validateRequestAndGetRoles($token);
 
 switch ($requestType){
     case "CHECKNEW":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         tryNewGroupWorksheet($userid, $setid, $versionid);
         break;
     case "FORCENEW":
-        if(!authoriseUserRoles($role, ["SUPER_USER", "STAFF"])){
-            failRequest("You are not authorised to complete that request");
-        }
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         createNewGroupWorksheet($userid, $setid, $versionid);
         break;
     default:
         break;
 }
 
-function tryNewGroupWorksheet($staff, $setid, $versionid, $name){
+function tryNewGroupWorksheet($staff, $setid, $versionid){
     // See if group worksheet already exists for set, staff and worksheet
     $query = "SELECT GW.`Group Worksheet ID` GWID, G.`Name`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date FROM `TGROUPWORKSHEETS` GW
                 JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`

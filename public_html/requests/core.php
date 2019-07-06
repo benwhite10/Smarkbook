@@ -1,5 +1,9 @@
 <?php
 
+$include_path = get_include_path();
+include_once $include_path . '/includes/authentication.php';
+include_once $include_path . '/public_html/includes/errorReporting.php';
+
 function orderBy($orderby, $desc){
     $query = "";
     if(count($orderby) == count($desc)){
@@ -98,20 +102,31 @@ function sendCURLRequest($url, $postData){
     return [$success, $resp];
 }
 
-function validateRequest($userid, $userval, $external){
-    if ($external === 'JIs7r') return 'EXTERNAL';
-    $query = "SELECT `Validation`, `Role` FROM TUSERS U WHERE `User ID` = $userid";
-    try{
-        $result = db_select_exception($query);
-        if(count($result) > 0 && $result[0]['Validation'] === $userval){
-            return $result[0]['Role'];
-        } else {
-            errorLog("Request failed due to invalid credentials");
-            return false;
-        }
-    } catch (Exception $ex) {
-        //Request invalidated
-        errorLog("Request failed with exception: " . $ex->getMessage());
-        return false;
+function validateRequestAndGetRoles($token) {
+    $response = validateToken($token);
+    if ($response[0]) {
+        $token_array = $response[1];
+        $roles = [$token_array->user_role];
+        if($token_array->parent_role !== null) array_push($roles, $token_array->parent_role);
+        return $roles;
+    } else {
+        errorLog("Request failed due to invalid JWT token: " . $response[1]);
+        returnRequest(FALSE, null, "There was a problem validating your request", null);
     }
+}
+
+function authoriseUserRoles($user_roles, $valid_roles){
+    foreach($user_roles as $user_role){
+        if (in_array($user_role, $valid_roles)) return true;
+    }
+    returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+}
+
+function returnRequest($success, $response = null, $message = null, $ex = null) {
+    if ($ex !== null) $message .= $ex->getMessage();
+    echo json_encode(array(
+        "success" => $success,
+        "response" => $response,
+        "message" => $message));
+    exit();
 }

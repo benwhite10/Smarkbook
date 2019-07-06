@@ -1,7 +1,19 @@
+var user;
+var tags = [];
+var initial_tag;
+
 $(document).ready(function(){
-    changeType();
-    changeTag();
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
 });
+
+function init_page() {
+    initial_tag = getParameterByName("tagid");
+    writeNavbar(user);
+    changeType();
+    getTags();
+}
 
 function changeType(){
     if($("#mode").val() === "MODIFY"){
@@ -17,7 +29,6 @@ function setUpForModify(){
     $("#tag1").show();
     $("#tag2").hide();
     $("#name").show();
-    $("#tagType").show();
     $("#tag1label").html("Tag:");
     $("#descText").hide();
     $("#submit").text("Save");
@@ -28,7 +39,6 @@ function setUpForMerge(){
     $("#tag1").show();
     $("#tag2").show();
     $("#name").hide();
-    $("#tagType").hide();
     $("#tag1label").html("Tag 1:");
     $("#descText").show();
     $("#submit").text("Merge");
@@ -39,18 +49,52 @@ function setUpForDelete(){
     $("#tag1").show();
     $("#tag2").hide();
     $("#name").hide();
-    $("#tagType").hide();
     $("#tag1label").html("Tag:");
     $("#descText").hide();
     $("#submit").val("Delete");
+}
+
+function getTags(){
+    var infoArray = {
+        type: "GETALLTAGS",
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/tags.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                tags = json["tagsInfo"];
+                writeTags();
+                changeTag();
+            } else {
+                console.log("There was an error loading the tags.");
+                console.log(json);
+            }
+        },
+        error: function(){
+            console.log("There was an error requesting the tag information");
+        }
+    });
+}
+
+function writeTags() {
+    var tags_html = "<option value='0'>-No Tag Selected-</option>";
+    for (var i = 0; i < tags.length; i++) {
+        tags_html += "<option value='" + tags[i]["Tag ID"] + "'>" + tags[i]["Name"] + "</option>";
+    }
+    $("#tag1input").html(tags_html);
+    $("#tag2input").html(tags_html);
+    $("#tag1input").val(initial_tag);
 }
 
 function changeTag(){
     var infoArray = {
         tagid: $("#tag1input").val(),
         type: "INFO",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -60,7 +104,7 @@ function changeTag(){
         success: function(json){
             updateInfo(json);
         },
-        error: function(json){
+        error: function(){
             console.log("There was an error requesting the tag information");
         }
     });
@@ -69,13 +113,7 @@ function changeTag(){
 function updateInfo(json){
     if(json["success"]){
         var tagInfo = json["tagInfo"];
-        var name = tagInfo["Name"];
-        var type = "TOPIC"
-        if(tagInfo["Type"] === "CLASSIFICATION"){
-            type = tagInfo["Type"];
-        }
-        $("#nameInput").val(name);
-        $("#typeInput").val(type);
+        $("#nameInput").val(tagInfo["Name"]);
     } else {
         console.log("There was an error requesting the tag information");
     }  
@@ -86,8 +124,7 @@ function mergeTags() {
         tag1: $("#tag1input").val(),
         tag2: $("#tag2input").val(),
         type: "MERGETAGS",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -117,8 +154,7 @@ function modifyTag() {
         tag1: $("#tag1input").val(),
         name: $("#nameInput").val(),
         type: "MODIFYTAG",
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -128,8 +164,20 @@ function modifyTag() {
         success: function(json){
             mergeSuccess(json);
         },
-        error: function(json){
+        error: function(){
             alert("There was an error modifying the tags");
         }
     });
+}
+
+function getParameterByName(name, url) {
+    if (!url) {
+      url = window.location.href;
+    }
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }

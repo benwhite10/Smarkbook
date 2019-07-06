@@ -1,15 +1,8 @@
 <?php
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/public_html/includes/mail_functions.php';
-include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
-
-$info = Info::getInfo();
-$info_version = $info->getVersion();
-
+$info_version = Info::getInfo()->getVersion();
 ?>
 
 <!DOCTYPE html>
@@ -30,11 +23,9 @@ $info_version = $info->getVersion();
       </div>
       <div id="header">
             <div id="title">
-                <a href="index.php"><img src="branding/mainlogo.png"/></a>
+                <a href="portalhome.php"><img src="branding/mainlogo.png"/></a>
             </div>
-            <ul class='menu topbar'>
-                <li id="navbar"></li>
-            </ul>
+            <ul class='menu topbar'><li id="navbar"></li></ul>
     	</div>
     	<div id="body">
             <div id="top_bar">

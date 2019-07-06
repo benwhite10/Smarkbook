@@ -1,38 +1,8 @@
 <?php
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/public_html/includes/mail_functions.php';
-include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';
-include_once $include_path . '/public_html/includes/logEvents.php';
-
-sec_session_start();
-$resultArray = checkUserLoginStatus(filter_input(INPUT_SERVER,'REQUEST_URI',FILTER_SANITIZE_STRING));
-if($resultArray[0]){
-    $user = $_SESSION['user'];
-    $fullName = $user->getFirstName() . ' ' . $user->getSurname();
-    $userid = $user->getUserId();
-    $userRole = $user->getRole();
-    $userval = base64_encode($user->getValidation());
-    $info = Info::getInfo();
-    $info_version = $info->getVersion();
-}else{
-    header($resultArray[1]);
-    exit();
-}
-
-if(!authoriseUserRoles($userRole, ["SUPER_USER", "STAFF"])){
-    header("Location: unauthorisedAccess.php");
-    exit();
-}
-
-if(isset($_SESSION['message'])){
-    $message = $_SESSION['message'];
-    unset($_SESSION['message']);
-}
-
+$info_version = Info::getInfo()->getVersion();
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +23,6 @@ if(isset($_SESSION['message'])){
     <script src="pickadate/legacy.js?<?php echo $info_version; ?>"></script>
 </head>
 <body>
-    <?php setUpRequestAuthorisation($userid, $userval); ?>
     <div id="main">
     	<div id="popUpBackground">
             <div id="popUpBox">
@@ -78,14 +47,7 @@ if(isset($_SESSION['message'])){
                         <div class="dateLabel">
                             <p>Handed In</p>
                         </div><div class="dateInput">
-                            <select id="day" onChange="dueDateChange()">
-                                <?php
-                                    for($i = 1; $i <= 31; $i++){
-                                        $val = sprintf("%02d", $i);
-                                        echo "<option value=$i>$val</option>";
-                                    }
-                                ?>
-                            </select>
+                            <select id="day" onChange="dueDateChange()"></select>
                             <select id="month" onChange="dueDateChange()">
                                 <option value=1>Jan</option>
                                 <option value=2>Feb</option>
@@ -100,13 +62,7 @@ if(isset($_SESSION['message'])){
                                 <option value=11>Nov</option>
                                 <option value=12>Dec</option>
                             </select>
-                            <select id="year" onChange="dueDateChange()">
-                                <?php
-                                    for($i = 2010; $i <= 2040; $i++){
-                                        echo "<option value=$i>$i</option>";
-                                    }
-                                ?>
-                            </select>
+                            <select id="year" onChange="dueDateChange()"></select>
                         </div>
                     </div>
                     <div id="popUpDateDue">
@@ -130,30 +86,11 @@ if(isset($_SESSION['message'])){
         </div>
         <div id="header">
             <div id="title">
-                <a href="index.php"><img src="branding/mainlogo.png"/></a>
+                <a href="portalhome.php"><img src="branding/mainlogo.png"/></a>
             </div>
-            <?php navbarMenu($fullName, $userid, $userRole) ?>
+            <ul class='menu topbar'><li id="navbar"></li></ul>
     	</div>
     	<div id="body">
-            <?php
-                if(isset($message)){
-                    $type = $message->getType();
-                    $string = $message->getMessage();
-                    if($type == "ERROR"){
-                        $div = 'class="error"';
-                    }else if($type == "SUCCESS"){
-                        $div = 'class="success"';
-                    }
-                }else{
-                    $div = 'style="display:none;"';
-                }
-            ?>
-
-            <div id="message" <?php echo $div; ?>>
-                <div id="messageText"><p><?php if(isset($string)) {echo $string;} ?></p>
-                </div><div id="messageButton" onclick="closeDiv()"><img src="branding/close.png"/></div>
-            </div>
-
             <div id="top_bar">
                 <div id="title2"></div>
                 <ul class="menu navbar"></ul>

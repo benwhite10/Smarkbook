@@ -12,14 +12,21 @@ var timer_circle;
 var score_circle;
 var current_score = 0;
 var bottom_boundary = 0;
+var user;
 
 $(document).ready(function(){
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
+    window.addEventListener("valid_user", function(){init_page();});
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
+});
+
+function init_page() {
     quiz_id = getParameterByName("qid");
     requestQuiz();
     setLeaderboardLoading();
     requestLeaderboard();
     startLeaderboard();
-});
+}
 
 $(window).resize(function () {
     updateTitleSize();
@@ -41,7 +48,8 @@ function startQuiz() {
 function requestQuiz() {
     var infoArray = {
         type: "GETQUIZ",
-        qid: quiz_id
+        qid: quiz_id,
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -61,7 +69,8 @@ function requestLeaderboard() {
     var infoArray = {
         type: "LEADERBOARD",
         qid: quiz_id,
-        time: time
+        time: time,
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
@@ -597,10 +606,11 @@ function storeQuizAttempt() {
 
 function sendCompletedQuiz(result) {
     var infoArray = {
-        userid: $("#userid").val(),
+        userid: user["userId"],
         type: "STOREQUIZ",
         qid: details["ID"],
-        result: JSON.stringify(result)
+        result: JSON.stringify(result),
+        token: user["token"]
     };
     $.ajax({
         type: "POST",
