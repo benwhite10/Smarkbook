@@ -157,9 +157,8 @@ function getMarkbookSuccess() {
 function downloadExcel(set_id){
     var infoArray = {
         type: "DOWNLOADMARKBOOKFORTEACHER",
-        staff: $('#userid').val(),
-        userid: $('#userid').val(),
-        userval: $('#userval').val()
+        staff: user["userId"],
+        token: user["token"]
     };
     if(set_id) {
         infoArray["set"] = set_id;

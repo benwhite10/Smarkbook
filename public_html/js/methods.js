@@ -26,18 +26,15 @@ function closeIEMsg() {
 
 function validateAccessToken(user, roles) {
     if (!user || user === null) {
-        console.log("No user.");
         log_out();
+        return;
     }
     
     var jwt = parseJwt(user["token"])
     var user_role = jwt["user_role"];
     var parent_role = jwt["parent_role"];
     
-    if(!checkRole(user_role, roles) && !checkRole(parent_role, roles)) {
-        console.log(user);
-        unauthorisedAccess();
-    }
+    if(!checkRole(user_role, roles) && !checkRole(parent_role, roles)) unauthorisedAccess();
     
     var infoArray = {
         type: "validateSession",
@@ -52,16 +49,13 @@ function validateAccessToken(user, roles) {
         dataType: "json",
         success: function(json) {
             if(json["success"]){
-                console.log("Valid token.");
                 window.dispatchEvent(new Event("valid_user"));
             } else {
-                console.log("Invalid token");
                 console.log(json);
                 log_out();
             }
         },
         error: function(json) {
-            console.log("Error validating token");
             console.log(json);
             log_out();
         }

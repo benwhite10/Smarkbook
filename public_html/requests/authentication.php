@@ -30,13 +30,12 @@ switch ($request_type){
 }
 
 function logInUser($user_input, $pwd) {
-    $response = [TRUE, "test"];
     $config = parse_ini_file('../../includes/config.ini');
     $user = cleanUserName($user_input);
     $email = $user . "@wellingtoncollege.org.uk";
     $user_id = getDetails($email, 'User ID');
     if ($user_id === FALSE) returnRequest(FALSE, array("success" => FALSE, "message" => "Invalid username/password.", "url" => ""), null, null);
-    $response = $config['server'] === 'local' ? [TRUE, ""] :authenticateCredentialsCurl($user, $pwd);
+    $response = $config['server'] === 'local' ? [TRUE, ""] :authenticateCredentials($user, $pwd);
     $url = "portalhome.php";
     if ($response[0]) {
         $user = createUser($user_id);
@@ -94,28 +93,6 @@ function cleanUserName($user) {
 }
 
 function authenticateCredentials($user, $pwd) {
-    $url = 'https://reports.wellingtoncollege.org.uk/api/login.php';
-    $data = array('type' => 'authenticateCredentials', 'user' => $user, 'pwd' => $pwd);
-
-    $options = array(
-        'http' => array(
-            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-            'method'  => 'POST',
-            'content' => http_build_query($data)
-        )
-    );
-    $context  = stream_context_create($options);
-    $result = file_get_contents($url, false, $context);
-    if ($result === FALSE) return [FALSE, "There was an error processing your login."];
-    $result_object = json_decode($result);
-    $success = $result_object->success && $user == $result_object->response->user;
-    $message = "";
-    if (!$success && $result_object->success) $message = "Incorrect user.";
-    if (!$result_object->success) $message = $result_object->message;
-    return [$success, $message];
-}
-
-function authenticateCredentialsCurl($user, $pwd) {
     $url = 'https://reports.wellingtoncollege.org.uk/api/login.php';
     
     $curl = curl_init();
