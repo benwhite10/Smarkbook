@@ -37,7 +37,7 @@ switch ($requestType){
 }
 
 function getAllWorksheetNames($orderby, $desc){
-    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName "
+    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName "
             . "FROM TWORKSHEETVERSION WV "
             . "WHERE WV.`Deleted` = 0";
     if(isset($orderby)){
@@ -63,7 +63,7 @@ function getAllWorksheetNames($orderby, $desc){
 }
 
 function getAllWorksheets($orderby, $desc){
-    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, U.`Initials` Author "
+    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, U.`Initials` Author, WV.`ParentID`, WV.`Type` "
             . "FROM TWORKSHEETVERSION WV "
             . "JOIN TUSERS U ON U.`User ID` = WV.`Author ID` "
             . "WHERE WV.`Deleted` = 0";
@@ -91,7 +91,7 @@ function getAllWorksheets($orderby, $desc){
 }
 
 function getAllDeletedWorksheets($orderby, $desc){
-    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, U.`Initials` Author "
+    $query = "SELECT WV.`Version ID` ID, WV.`WName` WName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, U.`Initials` Author "
             . "FROM TWORKSHEETVERSION WV "
             . "JOIN TUSERS U ON U.`User ID` = WV.`Author ID` "
             . "WHERE WV.`Deleted` = 1";

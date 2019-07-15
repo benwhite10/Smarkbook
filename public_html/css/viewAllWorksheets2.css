@@ -1,0 +1,205 @@
+body {
+    height: auto;
+}
+
+#main_content {
+    width: 100%;
+}
+
+#main_content div {
+    display: inline-block;
+    float: left;
+    position: relative;
+}
+
+.jstree-anchor {
+    font-size: 0.9rem;
+    font-weight: 400;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    user-select: none;
+}
+
+.jstree-icon {
+    //color: #66E11B;
+}
+
+
+#all_worksheets_div {
+    width: calc(100% - 2px);
+    height: auto;
+    border: 1px solid #323232;
+}
+
+#all_worksheets_top_bar, #all_worksheets_top_buttons {
+    height: 30px;
+    width: 100%;
+    border-bottom: 1px solid gray;
+}
+
+#all_worksheets_content {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+}
+
+#all_worksheets_top_bar {
+    padding: 0 10px;
+    width: 100%;
+}
+
+#all_worksheets_top_bar.hidden {
+    display: none;
+}
+
+#all_worksheets_top_bar a {
+    line-height: 30px;
+    font-size: 0.9rem;
+}
+
+.all_worksheets_top_button {
+    width: 150px;
+    height: 29px;
+    cursor: pointer;
+    background: transparent;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 30px;
+    user-select: none;
+}
+
+.all_worksheets_top_button:hover {
+    background: lightgray;
+}
+
+.modal[aria-hidden='true'] { display: none; }
+
+.modal { 
+    //font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, ubuntu, roboto, noto, segoe ui, arial, sans-serif; 
+    display: flex;
+}
+
+.modal p {
+    margin: 0;
+    padding: 0;
+}
+
+.modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal__container {
+  background-color: #fff;
+  padding: 30px;
+  max-width: 500px;
+  max-height: 100vh;
+  border-radius: 4px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal__title {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  color: #323232;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.modal__title.error {
+    color: #f50202;
+}
+
+.modal__close {
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.modal__header .modal__close:before { content: "\2715"; }
+
+.modal__content {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+  color: rgba(0,0,0,.8);
+  width: 440px;
+}
+
+#input_modal-content, #input_modal_input {
+    width: 440px;
+}
+
+.modal__btn {
+    font-size: .875rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    background-color: #e6e6e6;
+    color: rgba(0,0,0,.8);
+    border-radius: .25rem;
+    border-style: none;
+    border-width: 0;
+    cursor: pointer;
+    -webkit-appearance: button;
+    text-transform: none;
+    overflow: visible;
+    line-height: 1.15;
+    margin: 0;
+    will-change: transform;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    transition: -webkit-transform .25s ease-out;
+    transition: transform .25s ease-out;
+    transition: transform .25s ease-out, -webkit-transform .25s ease-out;
+    user-select: none;
+    outline: none;
+}
+
+.modal__btn:focus, .modal__btn:hover {
+  -webkit-transform: scale(1.05);
+  transform: scale(1.05);
+}
+
+.modal__btn-primary {
+  background-color: #66E11B;
+  color: #fff;
+}
+
+#input_modal_text {
+    display: block;
+    color: black;
+}
+
+#input_modal_text > p {
+    margin: 0;
+    padding: 0;
+}
+
+#input_modal_text.hidden {
+    display: none;
+}
+
+#input_modal_text.error {
+    color: #f50202;
+}

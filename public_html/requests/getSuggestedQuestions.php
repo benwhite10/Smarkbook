@@ -171,7 +171,7 @@ function getFirstSectionOfArray($array, $num, $key){
 }
 
 function getWorksheetInformationFor($array){
-    $query = "SELECT SQ.`Stored Question ID` SQID, SQ.`Version ID` VID, SQ.`Number` Number, SQ.`Marks` Marks, WV.`WName` WName, WV.`VName` VName, WV.`Link` Link FROM TSTOREDQUESTIONS SQ
+    $query = "SELECT SQ.`Stored Question ID` SQID, SQ.`Version ID` VID, SQ.`Number` Number, SQ.`Marks` Marks, WV.`WName` WName FROM TSTOREDQUESTIONS SQ
             JOIN TQUESTIONS Q ON Q.`Question ID` = SQ.`Question ID`
             JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = SQ.`Version ID`
             WHERE SQ.`Stored Question ID` IN (";

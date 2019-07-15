@@ -22,7 +22,7 @@ function writeHomeGrid(user) {
     var user_id = user["userId"];
     var user_role = user["role"];
     var grid_options = {};
-    grid_options["view_worksheets"] = {url: "viewAllWorksheets.php?opt=0", title: "Worksheets", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["view_worksheets"] = {url: "viewAllWorksheets2.php?opt=0", title: "Worksheets", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["mark_book"] = {url: "viewSetMarkbook.php?staffId=" + user_id, title: "Mark Book", img: "home-markbook.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["checklists"] = {url: "revisionChecklist.php?course=1", title: "Checklists", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
     grid_options["enter_results_student"] = {url: "newResultsEntryHome.php", title: "Enter Results", img: "home-enter-results.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};

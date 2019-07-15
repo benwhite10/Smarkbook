@@ -38,7 +38,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 AND G.`Archived` <> 1 
                 AND U.`Role` = 'STUDENT'
                 ORDER BY U.Surname;";
-    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName,
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName 
                 DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks,
                 GW.`DisplayName` DisplayName
                 FROM TGROUPWORKSHEETS GW
@@ -138,7 +138,7 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
                 AND G.`Archived` <> 1 
                 AND U.`Role` = 'STUDENT' 
                 ORDER BY U.Surname;";
-    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks
                 FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`

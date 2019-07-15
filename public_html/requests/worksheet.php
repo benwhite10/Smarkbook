@@ -27,6 +27,10 @@ switch ($request_type){
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         newWorksheet($info_array);
         break;
+    case "NEWFOLDER":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        newFolder($info_array);
+        break;
     case "COPYWORKSHEET":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         copyWorksheet($wid);
@@ -34,6 +38,10 @@ switch ($request_type){
     case "SUGGESTEDTAGS":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getSuggestedTags($tags, $div_id);
+        break;
+    case "UPDATEFILETREE":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        updateFileTree($info_array);
         break;
     default:
         break;
@@ -222,16 +230,43 @@ function deleteQuestion($sqid) {
     }
 }
 
+function newFolder($details) {
+    $name = $details["name"];
+    $author = checkValidId($details["author"]);
+    $parent = $details["parent"];
+    
+    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `Author ID`,`Date Added`,`Deleted`, `ParentID`, `Type`) "
+            . "VALUES ('$name', $author, NOW(), 0, '$parent', 'Folder');";
+    try {
+        db_begin_transaction();
+        $result = db_insert_query_exception($query);
+        $vid = checkValidId($result[1]);
+        if ($vid == 0) {
+            db_rollback_transaction();
+            failRequest("Adding new folder failed: " . $ex->getMessage());
+        }
+        db_commit_transaction();
+        logEvent($author, "ADD_FOLDER", "ID: " . $vid . ", Title: " . $name);
+        $new_folder_query = "SELECT WV.`Version ID` ID, WV.`WName` WName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, WV.`ParentID`, WV.`Type` 
+                                FROM TWORKSHEETVERSION WV 
+                                WHERE WV.`Version ID` = $vid;";
+        $new_folder_return = db_select_exception($new_folder_query);
+        succeedRequest("New folder added.", $new_folder_return[0]);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("Adding new folder failed: " . $ex->getMessage());
+    }
+}
+
 function newWorksheet($details) {
     $name = $details["name"];
-    $link = $details["link"];
     $author = checkValidId($details["author"]);
     $date = $details["date"];
     $questions_count = $details["questions"];
     $vid = "";
 	
-    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`,`Date Added`,`Deleted`) "
-            . "VALUES ('$name', '', '$link', $author, STR_TO_DATE('$date','%d/%m/%Y'),0);";
+    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `Author ID`,`Date Added`,`Deleted`) "
+            . "VALUES ('$name', $author, STR_TO_DATE('$date','%d/%m/%Y'),0);";
     try {
         db_begin_transaction();
         $result = db_insert_query_exception($query);
@@ -251,6 +286,32 @@ function newWorksheet($details) {
     } catch (Exception $ex) {
         db_rollback_transaction();
         failRequest("Adding new worksheet failed: " . $ex->getMessage());
+    }
+}
+
+function updateFileTree($update_array) {
+    $updated = [];
+    $errors = [];
+    for ($i = 0; $i < count($update_array); $i++) {
+        $name = $update_array[$i]["text"];
+        $parent = $update_array[$i]["parent"];
+        $id = $update_array[$i]["id"];
+        $query = "UPDATE `TWORKSHEETVERSION` SET `WName`='$name',`ParentID`='$parent' WHERE `Version ID` = $id;";
+        try {
+            db_query_exception($query);
+            array_push($updated, $id);
+        } catch (Exception $ex) {
+            array_push($errors, [$id, [$ex->getMessage(), $query]]);
+        }
+    }
+    
+    if (count($errors) > 0) {
+        failRequest("Error(s) updating filetree.", array(
+            "updated" => $updated,
+            "errors" => $errors
+        ));
+    } else {
+        succeedRequest("Update successful.", $updated);
     }
 }
 
@@ -440,11 +501,12 @@ function succeedRequest($message, $result){
     exit();
 }
 
-function failRequest($message){
+function failRequest($message, $result = null){
     errorLog("There was an error in the tag request: " . $message);
     $response = array(
         "success" => FALSE,
-        "message" => $message);
+        "message" => $message,
+        "result" => $result);
     echo json_encode($response);
     exit();
 }
