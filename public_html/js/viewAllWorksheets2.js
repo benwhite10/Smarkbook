@@ -18,6 +18,13 @@ function init_page() {
     writeNavbar(user);
     setUpKeyStrokeListeners();
     getWorksheets("0");
+    $("#search_bar_text_input").keyup(function(event){
+        searchWorksheets();
+    });
+    var favourites = [{"Name":"Favourites 1"},{"Name":"Favourites 2"},{"Name":"Favourites 3"},{"Name":"Favourites 4"},{"Name":"Favourites 5"}];
+    var recents = [{"Name":"Recent 1", "Version ID": "1074"},{"Name":"Recent 2", "Version ID": "1074"},{"Name":"Recent 3", "Version ID": "1074"},{"Name":"Recent 4", "Version ID": "1074"},{"Name":"Recent 5", "Version ID": "1074"}];
+    writeFilteredWorksheets(recents, "recent_results", 3);
+    writeFavouritesBar(favourites, null);
 }
 
 function setUpKeyStrokeListeners() {
@@ -62,6 +69,79 @@ function getWorksheetsSuccess(json) {
     setUpJSTree();
 }
 
+function getWorksheetDetails(id) {
+    var infoArray = {
+        type: "WORKSHEETSUMMARY",
+        wid: id,
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/getWorksheet.php",
+        dataType: "json",
+        success: function(json){
+            getWorksheetDetailsSuccess(json);
+        },
+        error: function() {
+            console.log("There was an error sending the worksheets request.");
+        }
+    });
+}
+
+function selectTabOption(option_id) {
+    $('.nav-tabs a[href="#' + option_id + '"]').tab('show');
+}
+
+function getWorksheetDetailsSuccess(json) {
+    if (json["success"]) {
+        writeSelectedWorksheet(json["worksheet"]);
+        selectTabOption("selected_worksheet");
+        $('html, body').animate({
+            scrollTop: $("#selected_worksheet").offset().top - 50
+        }, 500);
+    } else {
+        $("#selected_worksheet").html("<div class='no_worksheet'>No worksheet selected.</div>");
+    }
+}
+
+function writeSelectedWorksheet(worksheet) {
+    var html_text = "<div class='selected_worksheet_pane'>";
+    html_text += "<div class='selected_worksheet_title'>" + worksheet["WName"] + "</div>";
+    html_text += "<div class='selected_worksheet_filetree'></div>";
+    html_text += "<div class='selected_worksheet_subpane'>";
+    html_text += writeWorksheetInfoOption("Author", worksheet["Initials"]);
+    var date_added = moment(worksheet["Date Added"]);
+    html_text += writeWorksheetInfoOption("Date", date_added.format("DD/MM/YY"));
+    html_text += writeWorksheetInfoOption("Questions", worksheet["questions"]);
+    html_text += writeWorksheetInfoOption("Marks", worksheet["marks"]);
+    html_text += writeWorksheetInfoOption("Students", worksheet["students"]);
+    html_text += "</div><div class='selected_worksheet_subpane last'>";
+    html_text += "<div class='selected_worksheet_button add'>Add Results</div>";
+    html_text += "<a class='selected_worksheet_button' href='/editWorksheet.php?id=" + worksheet["Version ID"] + "'>Edit</a>";
+    html_text += "<div class='selected_worksheet_button'>Rename</div>";
+    html_text += "<div class='selected_worksheet_button last remove'>Delete</div>";
+    html_text += "</div></div><div class='selected_worksheet_pane last'>";
+    html_text += "<div class='selected_worksheet_title results'>Existing Results</div>";
+    html_text += "<div class='selected_worksheet_results'>";
+    var sets = worksheet["sets"];
+    for (var i = 0; i < sets.length; i++) {
+        var date_due = moment(worksheet["Date Due"]);
+        var text = sets[i]["Name"] + " - " + sets[i]["Initials"] + " - " + date_due.format("DD/MM/YY");
+        html_text += "<div class='selected_worksheet_result'>" + text + "</div>";
+    }
+    html_text += "</div></div>";
+    $("#selected_worksheet").html(html_text);
+}
+
+function writeWorksheetInfoOption(label, value) {
+    var html_text = "<div class='selected_worksheet_info'>";
+    html_text += "<div class='selected_worksheet_info_label'>" + label + "</div>";
+    html_text += "<div class='selected_worksheet_info_value'>" + value + "</div>";
+    html_text += "</div>";
+    return html_text;
+}
+
 function setUpFolders(worksheets) {
     folders = [];
     for (var i = 0; i < worksheets.length; i++) {
@@ -93,7 +173,7 @@ function orderFolders() {
 
 function setUpJSTree() {
     var data = setUpDataForRoot(folders, root);
-    $('#jstree_demo_div').jstree({ 
+    $('#jstree_demo_div').jstree({
         core: {
             data : data,
             themes: {dots: false},
@@ -113,16 +193,18 @@ function setUpJSTree() {
             }
         },
         plugins: ["types", "dnd"]
-    }).on('open_node.jstree', function (e, data) { 
-        data.instance.set_icon(data.node, "glyphicon glyphicon-folder-open"); 
-    }).on('close_node.jstree', function (e, data) { 
+    }).on('open_node.jstree', function (e, data) {
+        data.instance.set_icon(data.node, "glyphicon glyphicon-folder-open");
+    }).on('close_node.jstree', function (e, data) {
         data.instance.set_icon(data.node, "glyphicon glyphicon-folder-close");
     }).on('click.jstree', '.jstree-anchor', function (e) {
         clicks++;
         if (clicks <= 1) {
-            setTimeout(function(){ 
+            setTimeout(function(){
                 if (!double_clicked) {
                     $("#jstree_demo_div").jstree(true).toggle_node(e.target);
+                    var node = $("#jstree_demo_div").jstree().get_node(e.target);
+                    if (node.type === "File") getWorksheetDetails(node.id);
                 }
                 double_clicked = false;
                 clicks = 0;
@@ -130,8 +212,12 @@ function setUpJSTree() {
         }
     }).on('dblclick.jstree', '.jstree-anchor', function (evt) {
         double_clicked = true;
-        var node = $("#jstree_demo_div").jstree().get_node(evt.target); 
-        if(node.type !== "File") refreshTreeForRoot(node.id);
+        var node = $("#jstree_demo_div").jstree().get_node(evt.target);
+        if(node.type !== "File") {
+            refreshTreeForRoot(node.id);
+        } else {
+            goToEditWorksheet(node.id);
+        }
     }).on("changed.jstree", function (e, data) {
         //console.log(data.selected);
     }).bind("move_node.jstree", function(e, data) {
@@ -155,6 +241,10 @@ function updateMovedFiles(new_data) {
     }
     refreshTreeForRoot();
     requestFolderUpdate();
+}
+
+function goToEditWorksheet(id) {
+    window.location.href = "editWorksheet.php?id=" + id;
 }
 
 function getNewParent(new_folder) {
@@ -438,7 +528,7 @@ function getChildrenTypes(children) {
 function renameFolder() {
     $("#input_modal_text").addClass("hidden");
     $("#input_modal_text").removeClass("error");
-    
+
     var selected = $("#jstree_demo_div").jstree("get_selected", true);
     if (selected.length > 0) {
         var folder_id = parseInt(selected[0]["id"]);
@@ -455,10 +545,10 @@ function renameFolder() {
         $("#input_modal_text").addClass("error");
         return;
     }
-    
+
     var node = $("#jstree_demo_div").jstree('get_selected');
     $("#jstree_demo_div").jstree(true).rename_node(node, name);
-    
+
     for (var j = 0; j < folders.length; j++) {
         if (folder_id === parseInt(folders[j]["id"])) {
             folders[j]["text"] = name;
@@ -582,6 +672,71 @@ function createNewFolderRequest(name, parent_id) {
     });
 }
 
+function searchWorksheets() {
+    var searchTerm = $("#search_bar_text_input").val();
+    var infoArray = {
+        type: "SEARCH",
+        search: searchTerm,
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/searchWorksheets.php",
+        dataType: "json",
+        success: function(json){
+            searchSuccess(json, searchTerm);
+        },
+        error: function() {
+            console.log("There was an error sending the search worksheets request.");
+        }
+    });
+}
+
+function searchSuccess(json, searchTerm) {
+    if(json["success"]) {
+        if(!json["noresults"]) {
+            writeFilteredWorksheets(json["vids"], "search_results", null);
+        } else {
+            writeFilteredWorksheets(false, "search_results", null);
+        }
+    } else {
+        console.log("There was an error searching the worksheets.");
+        console.log(json["message"]);
+    }
+}
+
+function clickSearchResult(id) {
+    getWorksheetDetails(id);
+    $("#jstree_demo_div").jstree("deselect_all", true);
+}
+
+function writeFilteredWorksheets(results, id, max = null) {
+    var html_text = "";
+    var count = max === null ? results.length : Math.min(max, results.length);
+    if (results) {
+        for (var i = 0; i < count; i++) {
+            html_text += "<div class='worksheet_result";
+            if (i === count - 1) html_text += " last";
+            html_text += "' onclick='clickSearchResult(" + results[i]["Version ID"] + ")'>";
+            html_text += results[i]["Name"] + "</div>";
+        }
+        $("#" + id).removeClass("no_results");
+    } else {
+        html_text += "No search results to display.";
+        $("#" + id).addClass("no_results");
+    }
+    $("#" + id).html(html_text);
+}
+
+function writeFavouritesBar(favourites, max) {
+    var html_text = "<div class='all_worksheets_favourite favourite_title'>Favourites:</div>";
+    var count = max === null ? favourites.length : Math.min(max, favourites.length);
+    for (var i = 0; i < count; i++) {
+        html_text += "<div class='all_worksheets_favourite'><span class='glyphicon glyphicon-folder-close'></span> " + favourites[i]["Name"] + "</div>";
+    }
+    $("#all_worksheets_favourites_bar").html(html_text);
+}
 function getParameterByName(name, url) {
     if (!url) {
       url = window.location.href;

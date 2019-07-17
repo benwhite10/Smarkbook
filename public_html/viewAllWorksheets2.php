@@ -25,18 +25,42 @@ $info_version = Info::getInfo()->getVersion();
             <ul class='menu topbar'><li id="navbar"></li></ul>
     	</div>
     	<div id="body">
-            <div id="top_bar">
-                <div id="title2">
-                    <h1>Worksheets</h1>
+            <div id="main_content" class="main_content">
+                <div id="personal_worksheets_div">
+                    <div id="personal_worksheets_div_content">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#selected_worksheet">Selected Worksheet</a></li>
+                            <li><a data-toggle="tab" href="#recent">Recent</a></li>
+                            <li><a data-toggle="tab" href="#search" class="right">Search</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="selected_worksheet" class="tab-pane fade in active">
+                                <div class="no_worksheet">No worksheet selected.</div>
+                            </div>
+                            <div id="recent" class="tab-pane fade">
+                                <div id="recent_results" class="worksheet_table no_results">No results to display</div>
+                            </div>
+                            <div id="search" class="tab-pane fade">
+                                <div id="search_bar">
+                                    <div id="search_bar_text">
+                                        <input id="search_bar_text_input" type="text" placeholder="Search Worksheets">
+                                    </div>
+                                    <div id="search_bar_cancel" onclick="clearSearch()"></div>
+                                    <div id="search_bar_button" onclick="searchWorksheets()"></div>
+                                </div>
+                                <div id="search_results" class="worksheet_table no_results">No results to display</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <ul class="menu navbar"></ul>
-            </div><div id="main_content">
                 <div id="all_worksheets_div">
                     <div id="all_worksheets_top_buttons">
                         <div class="all_worksheets_top_button" id="rename_button" onclick="clickRename()">Rename</div>
                         <div class="all_worksheets_top_button" id="delete_button" onclick="clickDelete()">Delete</div>
                         <div class="all_worksheets_top_button" id="create_button" onclick="clickNewFolder()">New Folder</div>
                     </div>
+                    <div id="all_worksheets_favourites_bar"></div>
                     <div id="all_worksheets_top_bar"></div>
                     <div id="all_worksheets_content">
                         <div id="jstree_demo_div"></div>

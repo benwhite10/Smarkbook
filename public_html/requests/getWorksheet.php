@@ -27,6 +27,10 @@ switch ($requestType){
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getWorksheetInfo($wid);
         break;
+    case "WORKSHEETSUMMARY":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        getWorksheetSummary($wid);
+        break;
     case "DOWNLOADGWID":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         downloadGWID($gwid);
@@ -49,7 +53,7 @@ function getWorksheetForGWID($gwid){
                 WHERE `Group Worksheet ID` = $gwid  AND C.`Deleted` = 0;";
 
     //Details for the worksheet, date due, notes etc
-    $query3 = "SELECT WV.`WName` WName, GW.`Group ID` SetID, G.`Name` SetName, G.`BaselineSubject`, G.`BaselineType`, 
+    $query3 = "SELECT WV.`WName` WName, GW.`Group ID` SetID, G.`Name` SetName, G.`BaselineSubject`, G.`BaselineType`,
                 GW.`Primary Staff ID` StaffID1, GW.`Additional Staff ID` StaffID2, GW.`Additional Staff ID 2` StaffID3,
                 GW.`Version ID` VID, GW.`Date Due` DateDue, GW.`Date Last Modified` DateAdded,
                 GW.`Additional Notes Student` StudentNotes, GW.`Additional Notes Staff` StaffNotes, GW.`Hidden` Hidden,
@@ -77,7 +81,7 @@ function getWorksheetForGWID($gwid){
                 FROM TUSERS U
                 JOIN TUSERGROUPS UG ON UG.`User ID` = U.`User ID`
                 JOIN TGROUPWORKSHEETS GW ON GW.`Group ID` = UG.`Group ID`
-                WHERE GW.`Group Worksheet ID` = $gwid 
+                WHERE GW.`Group Worksheet ID` = $gwid
                 AND UG.`Archived` <> 1
                 AND U.`Role` = 'STUDENT'
                 GROUP BY U.`User ID`
@@ -136,8 +140,8 @@ function getWorksheetForGWID($gwid){
 function getBaseline($stu_id, $baseline_subject, $baseline_type) {
     if (intval($baseline_subject)) {
         $baseline_query = "SELECT `Baseline` FROM `TBASELINES`
-            WHERE `Deleted` = 0 
-            AND `Subject` = $baseline_subject 
+            WHERE `Deleted` = 0
+            AND `Subject` = $baseline_subject
             AND `Type` = '$baseline_type'
             AND `UserID` = $stu_id";
         try {
@@ -148,7 +152,7 @@ function getBaseline($stu_id, $baseline_subject, $baseline_type) {
         }
     } else {
         return null;
-    }   
+    }
 }
 
 function downloadGWID($gwid) {
@@ -327,6 +331,39 @@ function getWorksheetInfo($wid) {
     $response = array (
         "success" => TRUE,
         "worksheet" => $worksheet
+    );
+    echo json_encode($response);
+    exit();
+}
+
+function getWorksheetSummary($wid) {
+    $details_query = "SELECT WV.*, U.`Initials` FROM `TWORKSHEETVERSION` WV
+                        JOIN `TUSERS` U ON WV.`Author ID` = U.`User ID`
+                        WHERE `Version ID` = $wid;";
+    $questions_count_query = "SELECT COUNT(*) Count, SUM(`Marks`) Marks FROM `TSTOREDQUESTIONS` WHERE `Version ID` = $wid AND `Deleted` = 0 ORDER BY `Question Order`";
+    $students_count_query = "SELECT COUNT(*) Count FROM `TCOMPLETEDWORKSHEETS` CW
+                        JOIN `TGROUPWORKSHEETS` GW ON CW.`Group Worksheet ID` = GW.`Group Worksheet ID`
+                        WHERE GW.`Version ID` = $wid AND GW.`Deleted` = 0";
+    $sets_query = "SELECT `Group Worksheet ID`, GW.`Date Due`, U.`Initials`, G.`Name` FROM `TGROUPWORKSHEETS` GW
+                        JOIN `TUSERS` U ON GW.`Primary Staff ID` = U.`User ID`
+                        JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
+                        WHERE GW.`Version ID` = $wid AND GW.`Deleted` = 0";
+    try {
+        $details = db_select_exception($details_query);
+        $questions_count = db_select_exception($questions_count_query);
+        $students_count = db_select_exception($students_count_query);
+        $sets = db_select_exception($sets_query);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    $worksheet_details = $details[0];
+    $worksheet_details["questions"] = $questions_count[0]["Count"];
+    $worksheet_details["marks"] = $questions_count[0]["Marks"];
+    $worksheet_details["students"] = $students_count[0]["Count"];
+    $worksheet_details["sets"] = $sets;
+    $response = array (
+        "success" => TRUE,
+        "worksheet" => $worksheet_details
     );
     echo json_encode($response);
     exit();

@@ -9,6 +9,7 @@ function pageHeader($title, $info_version) {
     echo "<meta name='keywords' content='Intelligent, personalised feedback through smart data analysis' />";
     echo "<meta http-equiv='content-type' content='text/html; charset=utf-8' />";
     echo "<meta http-equiv='X-UA-Compatible' content='IE=11' />";
+    echo "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
     echo "<!--<link rel='stylesheet' media='screen and (min-device-width: 668px)' type='text/css' href='css/branding.css' />-->";
     echo "<script src='js/jquery.js?$info_version'></script>";
     echo "<script src='js/jquery-ui.js?$info_version;'></script>";
