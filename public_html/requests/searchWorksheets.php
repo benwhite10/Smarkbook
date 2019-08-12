@@ -24,32 +24,32 @@ switch ($requestType){
 
 function searchWorksheets($searchTerms){
     $searchArray = convertSearchTerms($searchTerms);
-    
+
     if (count($searchArray) === 0) { returnToPageNoResults(); }
-        
-    $query = "SELECT `Version ID`, `WName` Name, DATE_FORMAT(`Date Added`, '%d/%m/%y') Date FROM `TWORKSHEETVERSION` WHERE ";
+
+    $query = "SELECT `Version ID`, `WName` Name, DATE_FORMAT(`Date Added`, '%d/%m/%y') Date FROM `TWORKSHEETVERSION` WHERE `Type` = 'File' AND (";
     foreach($searchArray as $key => $searchTerm) {
         if ($key != 0) $query .= " OR ";
         $query .= "`WName` LIKE '%$searchTerm%' ";
     }
-    $query .= "ORDER BY `WName`";
-    
+    $query .= ") ORDER BY `WName`";
+
     try {
         $worksheets = db_select_exception($query);
         if (count($worksheets) === 0) { returnToPageNoResults(); }
     } catch (Exception $ex) {
         returnToPageError($ex, "There was an error running the search query");
     }
-    
+
     $fullSearchArray = getFullSearchArray($searchArray);
-    
+
     // Score the worksheets
     foreach($worksheets as $key => $worksheet) {
         $worksheets[$key] = scoreWorksheet($worksheet, $fullSearchArray);
     }
-    
+
     $sorted = array_orderby($worksheets, 'Score', SORT_DESC, 'Name', SORT_ASC);
-    
+
     $response = array(
         "success" => TRUE,
         "vids" => $sorted);

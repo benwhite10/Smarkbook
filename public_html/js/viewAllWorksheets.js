@@ -1,40 +1,69 @@
 var user;
-var groups_loaded = false;
-var worksheets_loaded = false;
+var folders = [];
+var root = "#";
+var clicks = 0;
+var double_clicked = 0;
+var update_locked = false;
+var failed_updates = 0;
+var selected_worksheet;
+var teacher_sets = [];
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
     window.addEventListener("valid_user", function(){init_page();});
     validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+    MicroModal.init();
 });
 
 function init_page() {
     writeNavbar(user);
-    sessionStorage.setItem("first_time", "TRUE");
-    sessionStorage.setItem("check_add", "TRUE");
-    sessionStorage.setItem("groups", "[]");
-    sessionStorage.setItem("search_ids", "[]");
-    var order = [['Author','0'],['WName','0'],['CustomDate','1']];
-    sessionStorage.setItem("order", JSON.stringify(order));
-    
-    setUpOptions(getParameterByName("rst"));
-    
-    if(getParameterByName("rst") === "1") {
-        $("#title2").html("<h1>Deleted Worksheets</h1>");
-    }
-    
-    $("#worksheets_table").css("display", "none");
-    getWorksheets(getParameterByName("rst"));
-    getGroups();
-
+    getSets();
+    setUpKeyStrokeListeners();
+    getWorksheets("0");
     $("#search_bar_text_input").keyup(function(event){
         searchWorksheets();
     });
+    var favourites = [];
+    var recents = [{"Name":"Recent 1", "Version ID": "1074"},{"Name":"Recent 2", "Version ID": "1074"},{"Name":"Recent 3", "Version ID": "1074"},{"Name":"Recent 4", "Version ID": "1074"},{"Name":"Recent 5", "Version ID": "1074"}];
+    //writeFilteredWorksheets(recents, "recent_results", 3);
+    writeFavouritesBar(favourites, null);
+    selectTabOption("search");
 }
 
-function checkFullPageLoad() {
-    if (groups_loaded && worksheets_loaded) {
-        parseWorksheets();
+// TODO See if possibe to add date to file tree
+
+function setUpKeyStrokeListeners() {
+    var input_modal_input = document.getElementById("input_modal_input");
+    input_modal_input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            $("#input_modal_button").click();
+        }
+    });
+}
+
+function getSets() {
+    var infoArray = {
+        type: "GETSETSFORSTAFF",
+        staff: user["userId"],
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/manageSets.php",
+        dataType: "json",
+        success: function(json){
+            getSetsSuccess(json);
+        }
+    });
+}
+
+function getSetsSuccess(json) {
+    if (json["success"]) {
+        teacher_sets = json["response"];
+    } else {
+        console.log(json["message"]);
     }
 }
 
@@ -42,7 +71,7 @@ function getWorksheets(restore) {
     var type = "ALLWORKSHEETS";
     if (restore === "1") {
         type = "DELETEDWORKSHEETS";
-        $("#restore_link").html("<a href='/viewAllWorksheets.php'>View Worksheets</a>");
+        //$("#restore_link").html("<a href='/viewAllWorksheets.php'>View Worksheets</a>");
     }
     var infoArray = {
         type: type,
@@ -64,305 +93,109 @@ function getWorksheets(restore) {
     });
 }
 
-function setUpOptions(restore) {
-    var options = [["Add New Worksheet", 0]];
-    options.push(restore ? ["View Worksheets", 2] : ["Restore Worksheets", 1]);
-    var width = 100/options.length;
-    var border = (options.length - 1) / options.length;
-    var width_text = "width: calc(" + width + "% - " + border + "px)";
-    $("#options").html("");
-    var html_string = "";
-    for (var i = 0; i < options.length; i++) {
-        var class_text = i + 1 === options.length ? "option last" : "option";
-        html_string += "<div class='" + class_text + "' onclick='clickOption(" + options[i][1] + ")' style='" + width_text + "'>" + options[i][0] + "</div>";
-    }
-    $("#options").html(html_string);
-}
-
-function clickOption(val) {
-    switch (val) {
-        case 0:
-            window.location.href = "addNewWorksheet.php";
-            break;
-        case 1:
-            window.location.href = "viewAllWorksheets.php?rst=1&opt=2";
-            break;
-        case 2:
-            window.location.href = "viewAllWorksheets.php";
-            break;
-        default:
-            break;
-    }
-}
-
-function getGroups() {
-    var infoArray = {
-        type: "GETGROUPS",
-        userid: user["userId"],
-        token: user["token"]
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/updateSets.php",
-        dataType: "json",
-        success: function(json){
-            if (json["success"]) {
-                sessionStorage.setItem("groups", JSON.stringify(json["result"]));
-                groups_loaded = true;
-                checkFullPageLoad();
-            } else {
-                console.log("There was an error getting the groups.");
-                console.log(json);
-            }
-        },
-        error: function() {
-            console.log("There was an error getting the groups.");
-        }
-    });
-}
-
 function getWorksheetsSuccess(json) {
-    if(json["success"]) {
-        localStorage.setItem("worksheets", JSON.stringify(json["worksheets"]));
-        worksheets_loaded = true;
-        checkFullPageLoad();
+    if (json["success"]) {
+        setUpFolders(json["worksheets"]);
+        setUpFilePathBar("all_worksheets_top_bar");
+        setUpJSTree();
     } else {
-        console.log("There was an error getting the worksheets.");
-        console.log(json["message"]);
+        console.log("Error getting worksheet details.");
+        console.log(json);
     }
+
 }
 
-function getWorksheetName(vid) {
-    var worksheets = JSON.parse(localStorage.getItem("worksheets"));
-    for(var key in worksheets){
-        if(parseInt(vid) === parseInt(worksheets[key]["ID"])) {
-            return worksheets[key]["WName"];
-        }
-    }
-    return "";
-}
-
-function parseWorksheets(searchTerm) {
-    var worksheets = orderWorksheets();
-    var ids = JSON.parse(sessionStorage.getItem("search_ids"));
-    var string = parseWorksheetHeaderRow();
-    if(ids === undefined || ids.length === 0) {
-        for(var key in worksheets){
-            var worksheet = worksheets[key];
-            var date = worksheet["Date"];
-            string += parseWorksheetRow(worksheet["WName"], worksheet["Author"], date, worksheet["ID"]);
-        }
-    } else {
-        for(var id_key in ids){
-            var id = ids[id_key];
-            for(var key in worksheets){
-                var worksheet = worksheets[key];
-                if(parseInt(id) === parseInt(worksheet["ID"])) {
-                    var date = worksheet["Date"];
-                    var name = highlightSearchTerms(worksheet["WName"], searchTerm);
-                    string += parseWorksheetRow(name, worksheet["Author"], date, worksheet["ID"]);
-                    break;
-                }
-            }
-        }
-    }
-    $('#worksheets_table').html(string);
-    $("#worksheets_table").css("display", "inline-block");
-    goToOriginalWorksheet();
-    checkAddResults();
-}
-
-function orderWorksheets() {
-    var worksheets = JSON.parse(localStorage.getItem("worksheets"));
-    var order = JSON.parse(sessionStorage.getItem("order"));
-    for (var i = 0; i < order.length; i++) {
-        worksheets = orderArrayBy(worksheets, order[i][0], order[i][1] === "1");
-    }
-    return worksheets;
-}
-
-function orderArrayBy(array, key, desc) {
-    return array.sort(function(a, b) {
-        var x = a[key]; var y = b[key];
-        if (desc) {
-            return ((x > y) ? -1 : ((x < y) ? 1 : 0));
-        } else {
-            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-        }
-    });
-}
-
-function parseWorksheetRow(title, author, date, id) {
-    var class_text = getParameterByName("rst") !== "1" ? "worksheet_row_title" : "worksheet_row_title restore";
-    var string = "<div class='worksheet_row'>";
-    string += "<div class='" + class_text + "' onclick='clickWorksheet(" + id +")'>" + title + "</div>";
-    string += "<div class='worksheet_row_author' onclick='clickWorksheet(" + id +")'>" + author + "</div>";
-    string += "<div class='worksheet_row_date' onclick='clickWorksheet(" + id +")'>" + date + "</div>";
-    if (getParameterByName("rst") !== "1") {
-        string += "<div class='worksheet_row_edit' onclick='goToWorksheet(" + id +")'>Edit</div>";
-        string += "<div class='worksheet_row_add' onclick='addResults(" + id + ")'>Add Results</div>";
-    }
-    string += "</div>";
-    return string;
-}
-
-function parseWorksheetHeaderRow() {
-    var string = "<div class='worksheet_row header'>";
-    string += "<div class='worksheet_row_title header' onclick='clickHeading(0)'>Title</div>";
-    string += "<div class='worksheet_row_author header' onclick='clickHeading(1)'>Author</div>";
-    string += "<div class='worksheet_row_date header' onclick='clickHeading(2)'>Date</div>";
-    if (getParameterByName("rst") !== "1") {
-        string += "<div class='worksheet_row_edit header'></div>";
-        string += "<div class='worksheet_row_add header'></div>";
-    }
-    string += "</div>";
-    return string;
-}
-
-function clickHeading(id) {
-    var order = JSON.parse(sessionStorage.getItem("order"));
-    var key = getKey(id);
-    var new_order = [];
-    var desc = "0";
-    for (var i = 0; i < order.length; i++) {
-        if (order[i][0] !== key) {
-            new_order.push(order[i]);
-        } else if (i + 1 === order.length) {
-            desc = order[i][1] === "0" ? "1" : "0";
-        }
-    }
-    new_order.push([key, desc]);
-    sessionStorage.setItem("order", JSON.stringify(new_order));
-    parseWorksheets();
-}
-
-function getKey(id) {
-    switch(id) {
-        case 0:
-        default:
-            return "WName";
-            break;
-        case 1:
-            return "Author";
-            break;
-        case 2:
-            return "CustomDate";
-            break;
-    }
-}
-
-function clickWorksheet(id) {
-    var opt = getParameterByName("opt");
-    switch (opt) {
-        case "0":
-        case "2":
-        default:
-            goToWorksheet(id);
-            break;
-        case "1":
-            addResults(id);
-            break;
-    }
-}
-
-function highlightSearchTerms(string, searchTerm) {
-    var terms = searchTerm ? searchTerm.split(" ") : null;
-    var update_array = [];
-    for (var key in terms) {
-        var term = terms[key];
-        var capitalised_terms = getCapitalForTerm(term);
-        for (var i in capitalised_terms) {
-            var new_term = capitalised_terms[i];
-            var index = string.indexOf(new_term);
-            if (index >= 0) {
-                for (var j = 0; j < new_term.length; j++) {
-                    update_array.push(index);
-                    index++;
-                }
-            }
-        }
-    }
-    update_array.sort();
-    var selected = false;
-    var string2 = "";
-    var last_val = 0;
-    for (var i = 0; i < string.length; i ++) {
-        if (!selected && update_array.indexOf(i) >= 0) {
-            string2 += string.substring(last_val, i);
-            string2 += "<span class='highlight'>";
-            last_val = i;
-            selected = true;
-        } else if (selected && update_array.indexOf(i) < 0) {
-            string2 += string.substring(last_val, i);
-            string2 += "</span>";
-            last_val = i;
-            selected = false;
-        }
-    }
-    string2 += string.substring(last_val);
-    return string2;
-}
-
-function getCapitalForTerm(term) {
-    var return_array = [];
-    return_array.push(term);
-    if (return_array.indexOf(term.toLowerCase()) === -1) return_array.push(term.toLowerCase());
-    if (return_array.indexOf(term.toUpperCase()) === -1) return_array.push(term.toUpperCase());
-    if (return_array.indexOf(capitaliseFirstLetter(term)) === -1) return_array.push(capitaliseFirstLetter(term));
-    return return_array;
-}
-
-function capitaliseFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-}
-
-function addResults(vid) {
-    $("#pop_up_title").html("Add Results");
-    var title = getWorksheetName(vid);
-    $("#pop_up_details").html("To add results to <b>'" + title + "'</b> select a set from the list below.");
-    var groups = JSON.parse(sessionStorage.getItem("groups"));
-    var table_string = "";
-    for (var i = 0; i < groups.length; i++) {
-        var class_text = (i + 1 === groups.length) ? "table_row bottom" : "table_row";
-        table_string += "<div class='" + class_text + "' onclick='clickSet(" + groups[i]["Group ID"] + ", " + vid + ")'>" + groups[i]["Name"] + "</div>";
-    }
-    $("#pop_up_table").html(table_string);
-    $("#pop_up_button_1").html("");
-    $("#pop_up_button_2").html("Cancel");
-    $("#pop_up_button_1").css("display", "none");
-    $("#pop_up_button_2").css("display", "block");
-    $("#pop_up_button_1").click(function(){});
-    $("#pop_up_button_2").click(function() {
-        closePopUp();
-    });
-    $("#pop_up_background").css("display", "block");
-}
-
-function closePopUp() {
-    $("#pop_up_background").css("display", "none");
-}
-
-function clickSet(group_id, vid) {
+function getWorksheetDetails(id) {
     var infoArray = {
-        type: "CHECKNEW",
-        set: group_id,
-        worksheet: vid,
-        userid: user["userId"],
-        token: user["token"]
+        type: "WORKSHEETSUMMARY",
+        wid: id,
+        token: user["token"],
+        userid: user["userId"]
     };
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/setGroupWorksheet.php",
+        url: "/requests/getWorksheet.php",
         dataType: "json",
         success: function(json){
-            tryAddSetSuccess(json);
+            getWorksheetDetailsSuccess(json);
         },
         error: function() {
-            console.log("There was an error getting the groups.");
+            console.log("There was an error sending the worksheets request.");
         }
     });
+}
+
+function selectTabOption(option_id) {
+    $('.nav-tabs a[href="#' + option_id + '"]').tab('show');
+}
+
+function getWorksheetDetailsSuccess(json) {
+    if (json["success"]) {
+        selected_worksheet = json["worksheet"];
+        writeSelectedWorksheet(selected_worksheet);
+        selectTabOption("selected_worksheet");
+        $('html, body').animate({
+            scrollTop: $("#selected_worksheet").offset().top - 100
+        }, 500);
+    } else {
+        $("#selected_worksheet").html("<div class='no_worksheet'>No worksheet selected.</div>");
+    }
+}
+
+function writeSelectedWorksheet(worksheet) {
+    var html_text = "<div class='selected_worksheet_pane'>";
+    html_text += "<div class='selected_worksheet_title'>" + worksheet["WName"] + "</div>";
+    html_text += "<div id='selected_worksheet_filetree'></div>";
+    html_text += "<div class='selected_worksheet_subpane'>";
+    html_text += writeWorksheetInfoOption("Author", worksheet["Initials"]);
+    var date_added = moment(worksheet["Date Added"]);
+    html_text += writeWorksheetInfoOption("Date", date_added.format("DD/MM/YY"));
+    html_text += writeWorksheetInfoOption("Questions", worksheet["questions"]);
+    html_text += writeWorksheetInfoOption("Marks", worksheet["marks"]);
+    html_text += writeWorksheetInfoOption("Students", worksheet["students"]);
+    html_text += "</div><div class='selected_worksheet_subpane last'>";
+    html_text += "<div class='selected_worksheet_button add' onclick='addNewResults()'>Add New Results</div>";
+    html_text += "<a class='selected_worksheet_button' href='/editWorksheet.php?id=" + worksheet["Version ID"] + "'>Edit</a>";
+    html_text += "<div class='selected_worksheet_button' onclick='clickRename(\"selected\")'>Rename</div>";
+    html_text += "<div class='selected_worksheet_button last remove' onclick='clickDelete(\"selected\")'>Delete</div>";
+    html_text += "</div></div><div class='selected_worksheet_pane last'>";
+    html_text += "<div class='selected_worksheet_title results'>Existing Results</div>";
+    html_text += "<div class='selected_worksheet_results'>";
+    var sets = worksheet["sets"];
+    for (var i = 0; i < sets.length; i++) {
+        var date_due = moment(sets[i]["Date Due"], "DD/MM/YYYY");
+        var text = sets[i]["Name"] + " - " + sets[i]["Initials"] + " - " + date_due.format("DD/MM/YY");
+        var gwid = sets[i]["Group Worksheet ID"];
+        html_text += "<a class='selected_worksheet_result' onclick='goToExistingResult(" + gwid + ")' href='/editSetResults.php?gwid=" + gwid + "'>" + text + "</a>";
+    }
+    html_text += "</div></div>";
+    $("#selected_worksheet").html(html_text);
+    setUpFilePathBar("selected_worksheet_filetree", worksheet["ParentID"]);
+}
+
+function goToExistingResult(gwid) {
+    window.location.href = "editSetResults.php?gwid=" + gwid;
+}
+
+function addNewResults() {
+    $("#new_results_text").html("To enter results for the worksheet '" + selected_worksheet["WName"] + "' select either an existing set of results to edit or select a set to enter new results for.");
+    var existing_html = "";
+    var worksheet_id = selected_worksheet["Version ID"];
+    var sets = selected_worksheet["sets"];
+    for (var i = 0; i < sets.length; i++) {
+        var date_due = moment(sets[i]["Date Due"], "DD/MM/YYYY");
+        var text = sets[i]["Name"] + " - " + sets[i]["Initials"] + " - " + date_due.format("DD/MM/YY");
+        var gwid = sets[i]["Group Worksheet ID"];
+        existing_html += "<a href='/editSetResults.php?gwid=" + gwid + "' class='new_results_section_result' onclick='goToExistingResult(" + gwid + ")'>" + text + "</a>";
+    }
+    $("#existing_results_section").html(existing_html);
+    var sets_html = "";
+    for (var i = 0; i < teacher_sets.length; i++) {
+        sets_html += "<div class='new_results_section_result' onclick='addNewGroupWorksheet(" + teacher_sets[i]["Group ID"] + "," + worksheet_id + ")'>" + teacher_sets[i]["Name"] + "</div>";
+    }
+    $("#new_sets_section").html(sets_html);
+    MicroModal.show("new_results_modal");
 }
 
 function addNewGroupWorksheet(group_id, vid) {
@@ -370,6 +203,7 @@ function addNewGroupWorksheet(group_id, vid) {
         type: "FORCENEW",
         set: group_id,
         worksheet: vid,
+        userid: user["userId"],
         token: user["token"]
     };
     $.ajax({
@@ -392,48 +226,672 @@ function addNewGroupWorksheet(group_id, vid) {
     });
 }
 
-function tryAddSetSuccess(json) {
-    if (json["success"]) {
-        if (json["result"]["created"]) {
-            window.location.href = "editSetResults.php?gwid=" + json["result"]["gwid"];
-        } else {
-            addExistingWorksheets(json["result"]["groups"], json["result"]["group_id"], json["result"]["version_id"], json["result"]["group_name"]);
+function writeWorksheetInfoOption(label, value) {
+    var html_text = "<div class='selected_worksheet_info'>";
+    html_text += "<div class='selected_worksheet_info_label'>" + label + "</div>";
+    html_text += "<div class='selected_worksheet_info_value'>" + value + "</div>";
+    html_text += "</div>";
+    return html_text;
+}
+
+function setUpFolders(worksheets) {
+    folders = [];
+    for (var i = 0; i < worksheets.length; i++) {
+        var worksheet = worksheets[i];
+        folders.push({
+           id: worksheet["ID"],
+           parent: worksheet["ParentID"],
+           text: worksheet["WName"],
+           date: worksheet["Date"],
+           type: worksheet["Type"],
+           changed: false,
+           changes_sent: false,
+           state: {opened: false, disabled: false, selected: false}
+        });
+    }
+    orderFolders();
+}
+
+function orderFolders() {
+    var temp_folders = [];
+    var type_order = ["Folder", "File"];
+    for (var i = 0; i < type_order.length; i++) {
+        for (var j = 0; j < folders.length; j++) {
+            if (folders[j].type === type_order[i]) temp_folders.push(folders[j]);
         }
+    }
+    folders = temp_folders;
+}
+
+function setUpJSTree() {
+    var data = setUpDataForRoot(folders, root);
+    $('#worksheets_jstree').jstree({
+        core: {
+            data : data,
+            themes: {dots: false},
+            dblclick_toggle : false,
+            check_callback: checkOperation,
+            multiple: false
+        },
+        types: {
+            "default": {
+                icon: "glyphicon glyphicon-folder-close"
+            },
+            "Folder": {
+                icon: "glyphicon glyphicon-folder-close"
+            },
+            "File": {
+                icon: "glyphicon glyphicon-file"
+            }
+        },
+        plugins: ["types", "dnd"]
+    }).on('open_node.jstree', function (e, data) {
+        data.instance.set_icon(data.node, "glyphicon glyphicon-folder-open");
+    }).on('close_node.jstree', function (e, data) {
+        data.instance.set_icon(data.node, "glyphicon glyphicon-folder-close");
+    }).on('click.jstree', '.jstree-anchor', function (e) {
+        clicks++;
+        if (clicks <= 1) {
+            setTimeout(function(){
+                if (!double_clicked) {
+                    $("#worksheets_jstree").jstree(true).toggle_node(e.target);
+                    var node = $("#worksheets_jstree").jstree().get_node(e.target);
+                    if (node.type === "File") getWorksheetDetails(node.id);
+                }
+                double_clicked = false;
+                clicks = 0;
+            }, 300);
+        }
+    }).on('dblclick.jstree', '.jstree-anchor', function (evt) {
+        double_clicked = true;
+        var node = $("#worksheets_jstree").jstree().get_node(evt.target);
+        if(node.type !== "File") {
+            refreshTreeForRoot(node.id);
+        } else {
+            goToEditWorksheet(node.id);
+        }
+    }).on("changed.jstree", function (e, data) {
+        //console.log(data.selected);
+    }).bind("move_node.jstree", function(e, data) {
+        updateMovedFiles($("#worksheets_jstree").jstree(true)._model.data);
+    });
+}
+
+function updateMovedFiles(new_data) {
+    for (var key in new_data) {
+        var new_folder = new_data[key];
+        for (var j = 0; j < folders.length; j++) {
+            if (new_folder["id"] === folders[j]["id"]) {
+                if (checkIfChangedFolder(new_folder, folders[j])) {
+                    folders[j]["text"] = new_folder["text"];
+                    folders[j]["parent"] = getNewParent(new_folder);
+                    folders[j]["changed"] = true;
+                }
+                break;
+            }
+        }
+    }
+    refreshTreeForRoot();
+    requestFolderUpdate();
+}
+
+function goToEditWorksheet(id) {
+    window.location.href = "editWorksheet.php?id=" + id;
+}
+
+function getNewParent(new_folder) {
+    var new_parent = new_folder["parent"];
+    if (new_parent === "#") return root;
+    for (var i = 0; i < folders.length; i++) {
+        if (folders[i]["id"] === new_parent) {
+            if (folders[i]["type"] === "File") {
+                return folders[i]["parent"];
+            } else {
+                return folders[i]["id"];
+            }
+        }
+    }
+    return root;
+}
+
+function requestFolderUpdate() {
+    if (update_locked) return;
+    update_locked = true;
+    var changes = [];
+    for (var i = 0; i < folders.length; i++) {
+        if (folders[i]["changed"]) {
+            changes.push(folders[i]);
+            folders[i]["changed"] = false;
+            folders[i]["changes_sent"] = true;
+        }
+    }
+    if (changes.length === 0) {
+        update_locked = false;
+        return;
+    }
+    var infoArray = {
+        type: "UPDATEFILETREE",
+        array: changes,
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/worksheet.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                updateChangesArray(json["result"], null);
+                failed_updates = 0;
+                update_locked = false;
+                requestFolderUpdate();
+            } else {
+                updateChangesArray(json["result"]["updated"], json["result"]["errors"]);
+                failed_updates++;
+                if (failed_updates < 5) {
+                    if (failed_updates === 1) {
+                        console.log("Update filetree request failed.");
+                        console.log(json);
+                    }
+                    update_locked = false;
+                    requestFolderUpdate();
+                } else {
+                    $("#message_modal-content").html("<p>There has been an error updating the folders. Please refresh and try again.<br>If the problem persists then contact <a mailto='contact.smarkbook@gmail.com'>support</a>.</p>");
+                    MicroModal.show("message_modal");
+                    console.log("Update filetree request failed too many times and has been disabled.");
+                }
+            }
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+            updateChangesArrayOnError();
+            failed_updates++;
+            if (failed_updates < 5) {
+                update_locked = false;
+                requestFolderUpdate();
+            } else {
+                $("#message_modal-content").html("<p>There has been an error updating the folders. Please refresh and try again.<br>If the problem persists then contact <a mailto='contact.smarkbook@gmail.com'>support</a>.</p>");
+                MicroModal.show("message_modal");
+                console.log("Update filetree request failed too many times and has been disabled.");
+            }
+        }
+    });
+}
+
+function updateChangesArray(updated, errors) {
+    for (var i = 0; i < folders.length; i++) {
+        if (folders[i]["changes_sent"]) {
+            if (updated !== null) {
+                for (var j = 0; j < updated.length; j++) {
+                    var updated_id = parseInt(updated[j]);
+                    var folder_id = parseInt(folders[i]["id"]);
+                    if (updated_id === folder_id) {
+                        folders[i]["changes_sent"] = false;
+                    }
+                }
+            }
+            if (errors !== null) {
+                for (var j = 0; j < errors.length; j++) {
+                    var error_id = parseInt(errors[j][0]);
+                    var folder_id = parseInt(folders[i]["id"]);
+                    if (error_id === folder_id) {
+                        folders[i]["changes_sent"] = false;
+                        folders[i]["changed"] = true;
+                    }
+                }
+            }
+        }
+    }
+}
+
+function updateChangesArrayOnError() {
+    for (var i = 0; i < folders.length; i++) {
+        if (folders[i]["changes_sent"]) {
+            folders[i]["changes_sent"] = false;
+            folders[i]["changed"] = true;
+        }
+    }
+}
+
+function checkIfChangedFolder(new_folder, original_folder) {
+    if (new_folder["text"] !== original_folder["text"]) return true;
+    if (new_folder["parent"] !== original_folder["parent"]) return true;
+    return false;
+}
+
+function checkOperation(operation, node, parent, position, more) {
+    if (operation === "move_node") {
+        if (more && more.dnd && more.pos !== "i") {
+            return false;
+        } else {
+            return true;
+        }
+    } else if (operation === "copy_node") {
+        return false;
+    }
+    return true;
+}
+
+function refreshTreeForRoot(new_root) {
+    root = isNaN(parseInt(new_root)) ? "#" : parseInt(new_root);
+    setUpFilePathBar("all_worksheets_top_bar");
+    orderFolders();
+    $('#worksheets_jstree').jstree(true).settings.core.data = setUpDataForRoot(folders, root);
+    $("#worksheets_jstree").jstree("deselect_all", true);
+    $('#worksheets_jstree').jstree(true).refresh();
+}
+
+function setUpDataForRoot(folders, root) {
+    if (root === "#") return folders;
+    var data = [];
+    var roots = [root];
+    while(true) {
+        if(roots.length === 0) break;
+        var new_roots = [];
+        for (var j = 0; j < roots.length; j++) {
+            for (var i = 0; i < folders.length; i++) {
+                var folder = folders[i];
+                var parent_id = parseInt(folder["parent"]);
+                if (parent_id === roots[j]) {
+                    data.push(JSON.parse(JSON.stringify(folder)));
+                    if (parent_id === root) data[data.length - 1]["parent"] = "#";
+                    new_roots.push(parseInt(folder["id"]));
+                }
+            }
+        }
+        roots = new_roots;
+    }
+    return data;
+}
+
+function setUpFilePathBar(id, local_root = root) {
+    $("#" + id).html(getFullFilePath(folders, local_root));
+}
+
+function getFullFilePath(folders, root) {
+    var html_text = "";
+    var urls = [];
+    var current_root = isNaN(parseInt(root)) ? root : parseInt(root);
+    var flag = true;
+    while (flag) {
+        flag = false;
+        for (var i = 0; i < folders.length; i++) {
+            if (parseInt(folders[i]["id"]) === current_root) {
+                urls.push([folders[i]["id"], folders[i]["text"]]);
+                current_root = parseInt(folders[i]["parent"]);
+                flag = true;
+                break;
+            }
+        }
+    }
+    urls.push(["#", "Home"]);
+    for (var i = urls.length - 1; i >= 0; i--) {
+        if (i < urls.length - 1) html_text += "<span class='folder_display_span'>></span>";
+        html_text += "<div class='folder_display_div' onclick='return clickFolder(\"" + urls[i][0] + "\")'>" + urls[i][1] + "</div>";
+        //html_text += "<a href='" + writeUrl(urls[i][0]) + "' onclick='return clickFolder(\"" + urls[i][0] + "\")';>" + urls[i][1] + "</a>";
+    }
+    return html_text;
+}
+
+function clickFolder(root) {
+    var new_root = isNaN(parseInt(root)) ? "#" : parseInt(root);
+    refreshTreeForRoot(new_root);
+    return false;
+}
+
+function writeUrl(root) {
+    return "/viewAllWorksheets.php?root=" + root;
+}
+
+function clickNewFolder() {
+    setUpInputModal("New Folder",
+        {"Value": "", "Placeholder": "Folder Name"},
+        false,
+        false,
+        false,
+        "Create");
+    $("#input_modal_button").off('click').on('click',createNewFolder);
+    MicroModal.show("input_modal");
+    $("#input_modal_input").select();
+}
+
+function clickNewFile() {
+    setUpInputModal("New Worksheet",
+        {"Value": "", "Placeholder": "Worksheet Title"},
+        {"Value": "1", "Placeholder": "No. Of Questions", "Label": "Questions"},
+        false,
+        false,
+        "Create");
+    $("#input_modal_button").off('click').on('click',createNewFile);
+    MicroModal.show("input_modal");
+    $("#input_modal_input").select();
+}
+
+function setUpInputModal(title = "Title", input_1 = false, input_2 = false, text = false, id=false, button = false) {
+    $("#input_modal-title").html(title);
+    if (input_1) {
+        $("#input_modal_input").val(input_1["Value"] ? input_1["Value"] : "");
+        $("#input_modal_input").attr("placeholder", input_1["Placeholder"] ? input_1["Placeholder"] : "");
+        $("#input_modal_input").removeClass("hidden");
     } else {
+        $("#input_modal_input").addClass("hidden");
+    }
+    if (input_2) {
+        $("#input_modal_input_2").val(input_2["Value"] ? input_2["Value"] : "");
+        $("#input_modal_input_2").attr("placeholder", input_2["Placeholder"] ? input_2["Placeholder"] : "");
+        $("#input_modal_input_2_label").html(input_2["Label"] ? input_2["Label"] : "");
+        $("#input_modal_input_2").removeClass("hidden");
+        $("#input_modal_input_2_label").removeClass("hidden");
+    } else {
+        $("#input_modal_input_2").addClass("hidden");
+        $("#input_modal_input_2_label").addClass("hidden");
+    }
+    if (text) {
+        $("#input_modal_text").html("<p>" + text + "</p>");
+        $("#input_modal_text").removeClass("hidden");
+        $("#input_modal_text").removeClass("error");
+    } else {
+        $("#input_modal_text").html("<p></p>");
+        $("#input_modal_text").addClass("hidden");
+        $("#input_modal_text").removeClass("error");
+    }
+    $("#input_modal_id").val(id ? id : 0);
+    $("#input_modal_button").html(button ? button : "Create");
+}
+
+
+function clickRename(type) {
+    var current_name;
+    var current_id;
+    if (type === "selected") {
+        current_name = selected_worksheet["WName"];
+        current_id = selected_worksheet["Version ID"];
+    } else {
+        var selected = $("#worksheets_jstree").jstree("get_selected", true);
+        if (selected.length === 0) return;
+        current_id = selected[0]["original"]["id"];
+        current_name = selected[0]["original"]["text"];
+    }
+    $("#input_modal-title").html("Rename");
+    $("#input_modal_input").val(current_name);
+    $("#input_modal_button").html("Confirm");
+    $("#input_modal_id").val(current_id);
+    $("#input_modal_button").off('click').on('click',renameFolder);
+    MicroModal.show("input_modal");
+}
+
+function clickDelete(type) {
+    var current_name;
+    var current_id;
+    var selected_type;
+    var message = "";
+    if (type === "selected") {
+        current_name = selected_worksheet["WName"];
+        current_id = selected_worksheet["Version ID"];
+        selected_type = "File";
+        message = "<p>Are you sure your wish to delete the file '<b>" + current_name + "</b>'?";
+    } else {
+        var selected = $("#worksheets_jstree").jstree("get_selected", true);
+        if (selected.length === 0) return;
+        selected_type = selected[0]["original"]["type"];
+        current_id = selected[0]["original"]["id"];
+        current_name = selected[0]["original"]["text"];
+        if (selected_type === "File") {
+            message = "<p>Are you sure your wish to delete the file '<b>" + current_name + "</b>'?";
+        } else {
+            var children = selected[0]["children_d"];
+            var children_types = getChildrenTypes(children);
+            var files_count = children_types["files"];
+            var folders_count = children_types["folders"];
+            message = "<p>Are you sure your wish to delete the folder '<b>" + current_name + "</b>'? <br>";
+            message += "The folder contains: <br> &emsp;- " + writeFilesCount(folders_count, "subfolder");
+            message += "<br> &emsp;- " + writeFilesCount(files_count, "subfile");
+        }
+    }
+    message += "<br>This process is irreversible and all associated results will also be lost.</p>";
+    $("#message_modal_title").html("Delete");
+    $("#message_modal_content").html(message);
+    $("#message_modal_button").html("Delete");
+    $("#message_modal_button").off('click').on('click',function(){
+        deleteFolder(current_id);
+    });
+    MicroModal.show("message_modal");
+}
+
+function writeFilesCount(count, text) {
+    var return_text = count + " ";
+    if (count === 0 || count > 1) {
+        return_text += text + "s";
+    } else {
+        return_text += text;
+    }
+    return return_text;
+}
+
+function getChildrenTypes(children) {
+    var folders_count = 0;
+    var files_count = 0;
+    for (var i = 0; i < folders.length; i++) {
+        for (var j = 0; j < children.length; j++) {
+            if (folders[i]["id"] === children[j]) {
+                if (folders[i]["type"] === "File") files_count++;
+                if (folders[i]["type"] === "Folder") folders_count++;
+            }
+        }
+    }
+    return {
+        folders: folders_count,
+        files: files_count
+    };
+}
+
+function renameFolder() {
+    $("#input_modal_text").addClass("hidden");
+    $("#input_modal_text").removeClass("error");
+    var folder_id = parseInt($("#input_modal_id").val());
+    if (isNaN(folder_id)) {
+        $("#input_modal_text").html("<p>There has been an error, please refresh and try again.</p>");
+        $("#input_modal_text").removeClass("hidden");
+        $("#input_modal_text").addClass("error");
+        return;
+    }
+    var name = $("#input_modal_input").val();
+    if (name === "" || name === null || name === undefined) {
+        $("#input_modal_text").html("<p>Please input a valid name.</p>");
+        $("#input_modal_text").removeClass("hidden");
+        $("#input_modal_text").addClass("error");
+        return;
+    }
+
+    var node = $("#worksheets_jstree").jstree('get_selected');
+    $("#worksheets_jstree").jstree(true).rename_node(node, name);
+
+    for (var j = 0; j < folders.length; j++) {
+        if (folder_id === parseInt(folders[j]["id"])) {
+            folders[j]["text"] = name;
+            folders[j]["changed"] = true;
+            break;
+        }
+    }
+    if (selected_worksheet && selected_worksheet["Version ID"] && parseInt(selected_worksheet["Version ID"]) === parseInt(folder_id)) {
+        selected_worksheet["WName"] = name;
+        writeSelectedWorksheet(selected_worksheet);
+    }
+    requestFolderUpdate();
+    MicroModal.close("input_modal");
+}
+
+function deleteFolder(id) {
+    var type = "DELETEFOLDER";
+    var infoArray = {
+        type: type,
+        vid: id,
+        token: user["token"]
+    };
+    $("#message_modal_button").off('click');
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/worksheetFunctions.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                location.reload();
+            } else {
+                console.log("Delete folder request has failed.");
+                console.log(json);
+                $("#message_modal_title").html("Error");
+                $("#message_modal_content").html("<p>There has been an error deleting one or more of the files requested. Please refresh and try again.</p>");
+                $("#message_modal_button").html("OK");
+                $("#message_modal_button").off('click').on('click',function (){
+                    location.reload();
+                });
+                MicroModal.show("message_modal");
+            }
+        },
+        error: function(response){
+            console.log("Delete folder request has failed.");
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+            $("#message_modal_title").html("Error");
+            $("#message_modal_content").html("<p>There has been an error deleting one or more of the files requested. Please refresh and try again.</p>");
+            $("#message_modal_button").html("OK");
+            $("#message_modal_button").off('click').on('click',function (){
+                location.reload();
+            });
+            MicroModal.show("message_modal");
+        }
+    });
+}
+
+function createNewFile() {
+    var name = $("#input_modal_input").val();
+    if (name === "" || name === null || name === undefined) name = "New Worksheet";
+    var selected = $("#worksheets_jstree").jstree("get_selected", true);
+    var parent_id = root;
+    if (selected.length > 0) {
+        if (selected[0]["original"]["type"] === "File") {
+            parent_id = selected[0]["parent"] !== "#" ? selected[0]["parent"] : root;
+        } else {
+            parent_id = selected[0]["id"];
+        }
+    }
+    var questions = isNaN(parseInt($("#input_modal_input_2").val())) ? 1 : parseInt($("#input_modal_input_2").val());
+    $("#input_modal_button").off('click');
+    var array_to_send = {
+        name: name,
+        author: user["userId"],
+        questions: questions,
+        parent: parent_id
+    };
+    var infoArray = {
+        type: "NEWWORKSHEET",
+        array: array_to_send,
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/worksheet.php",
+        dataType: "json",
+        success: function(json){
+            createNewFileSuccess(json);
+        },
+        error: function(response){
+            $("#input_modal_button").off('click').on('click',createNewFile);
+            $("#input_modal_text").html("<p>Error creating worksheet, please try again.</p>");
+            $("#input_modal_text").removeClass("hidden");
+            $("#input_modal_text").addClass("error");
+            console.log("Create new file request failed with status code: " + response.status + " - " + response.statusText);
+        }
+    });
+}
+
+function createNewFileSuccess(json) {
+    if (json["success"]) {
+        var new_vid = json["result"];
+        window.location.href = "editWorksheet.php?id=" + new_vid;
+    } else {
+        $("#input_modal_button").off('click').on('click',createNewFile);
+        $("#input_modal_text").html("<p>Error creating worksheet, please try again.</p>");
+        $("#input_modal_text").removeClass("hidden");
+        $("#input_modal_text").addClass("error");
+        console.log("Error creating new file.");
         console.log(json);
     }
 }
 
-function addExistingWorksheets(groups, group_id, version_id, group_name) {
-    $("#pop_up_title").html("Add Results");
-    $("#pop_up_details").html("You have existing results for <b>'" + group_name + "'</b> and <b>'" + getWorksheetName(version_id) + "'</b>. <br><br>Select one of the options below if you wish to either edit the existing results or add further students to those sets. <br><br>Select '<b>Add New Results</b>' if you wish to create a completely new set of results.");
-    var table_string = "";
-    for (var i = 0; i < groups.length; i++) {
-        var class_text = (i + 1 === groups.length) ? "table_row bottom" : "table_row";
-        table_string += "<div class='" + class_text + "' onclick='clickGroup(" + groups[i]["GWID"] + ")'>" + groups[i]["Name"] + " - " + groups[i]["Date"] + "</div>";
+function createNewFolder() {
+    var name = $("#input_modal_input").val();
+    if (name === "" || name === null || name === undefined) name = "New Folder";
+    var selected = $("#worksheets_jstree").jstree("get_selected", true);
+    var parent_id = root;
+    if (selected.length > 0) {
+        if (selected[0]["original"]["type"] === "File") {
+            parent_id = selected[0]["parent"] !== "#" ? selected[0]["parent"] : root;
+        } else {
+            parent_id = selected[0]["id"];
+        }
     }
-    $("#pop_up_table").html(table_string);
-    $("#pop_up_button_1").html("Add New Results");
-    $("#pop_up_button_2").html("Cancel");
-    $("#pop_up_button_1").css("display", "block");
-    $("#pop_up_button_2").css("display", "block");
-    $("#pop_up_button_1").click(function() {
-        addNewGroupWorksheet(group_id, version_id);
-    });
-    $("#pop_up_button_2").click(function() {
-        closePopUp();
-    });
-    $("#pop_up_background").css("display", "block");
+    createNewFolderRequest(name, parent_id);
 }
 
-function clickGroup(gwid) {
-    window.location.href = "editSetResults.php?gwid=" + gwid;
+function newFolderSuccess(new_folder) {
+    folders.push({
+        id: new_folder["ID"],
+        parent: new_folder["ParentID"],
+        text: new_folder["WName"],
+        date: new_folder["Date"],
+        type: new_folder["Type"],
+        changed: false,
+        state: {opened: false, disabled: false, selected: false}
+     });
+    MicroModal.close("input_modal");
+    $("#input_modal_input").val("New Folder");
+    refreshTreeForRoot(root);
 }
+
+function createNewFolderRequest(name, parent_id) {
+    var array_to_send = {
+        name: name,
+        author: user["userId"],
+        parent: parent_id
+    };
+    var infoArray = {
+        type: "NEWFOLDER",
+        array: array_to_send,
+        token: user["token"]
+    };
+    $("#input_modal_button").off('click');
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/worksheet.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                newFolderSuccess(json["result"]);
+                console.log("New folder success");
+                console.log(json["result"]);
+            } else {
+                console.log("Add new folder request failed.");
+                $("#input_modal_button").off('click').on('click',createNewFolder);
+                $("#input_modal_text").html("<p>Error creating worksheet, please try again.</p>");
+                $("#input_modal_text").removeClass("hidden");
+                $("#input_modal_text").addClass("error");
+            }
+        },
+        error: function(response){
+            console.log("Request failed with status code: " + response.status + " - " + response.statusText);
+            $("#input_modal_button").off('click').on('click',createNewFolder);
+            $("#input_modal_text").html("<p>Error creating worksheet, please try again.</p>");
+            $("#input_modal_text").removeClass("hidden");
+            $("#input_modal_text").addClass("error");
+        }
+    });
+}
+
 function searchWorksheets() {
     var searchTerm = $("#search_bar_text_input").val();
-    if(searchTerm.length < 2) {
-        parseWorksheets();
-    }
     var infoArray = {
         type: "SEARCH",
         search: searchTerm,
@@ -456,12 +914,9 @@ function searchWorksheets() {
 function searchSuccess(json, searchTerm) {
     if(json["success"]) {
         if(!json["noresults"]) {
-            var ids = getIdsFromResult(json["vids"]);
-            if(ids.length === 0) {
-                ids.push(0);
-            }
-            sessionStorage.setItem("search_ids", JSON.stringify(ids));
-            parseWorksheets(searchTerm);
+            writeFilteredWorksheets(json["vids"], "search_results", null);
+        } else {
+            writeFilteredWorksheets(false, "search_results", null);
         }
     } else {
         console.log("There was an error searching the worksheets.");
@@ -469,42 +924,51 @@ function searchSuccess(json, searchTerm) {
     }
 }
 
-function getIdsFromResult(input) {
-    var ids = [];
-    for(var key in input) {
-       ids.push(input[key]["Version ID"]);
-    }
-    return ids;
+function clickSearchResult(id) {
+    getWorksheetDetails(id);
+    $("#worksheets_jstree").jstree("deselect_all", true);
 }
 
 function clearSearch() {
     $("#search_bar_text_input").val("");
-    parseWorksheets();
+    searchWorksheets();
 }
 
-function goToWorksheet(vid) {
-    window.location.href = "editWorksheet.php?id=" + vid;
-}
 
-function goToOriginalWorksheet() {
-    var vid = getParameterByName("v");
-    var firsttime = sessionStorage.getItem("first_time");
-    if (firsttime && vid && firsttime === "TRUE") {
-        document.getElementById("v" + vid).scrollIntoView();
-        window.scrollTo(window.scrollX, window.scrollY - 200);
+function writeFilteredWorksheets(results, id, max = null) {
+    var html_text = "";
+    var count = max === null ? results.length : Math.min(max, results.length);
+    if (results) {
+        for (var i = 0; i < count; i++) {
+            html_text += "<a class='worksheet_result";
+            if (i === count - 1) html_text += " last";
+            html_text += "' onclick='clickSearchResult(" + results[i]["Version ID"] + ")'";
+            html_text += " href='/editWorksheet.php?id=" + results[i]["Version ID"] + "'>";
+            html_text += "<div class='worksheet_result_name'>" + results[i]["Name"] + "</div>";
+            html_text += "<div class='worksheet_result_date'>" + results[i]["Date"] + "</div></a>";
+        }
+        $("#" + id).removeClass("no_results");
+    } else {
+        html_text += "No search results to display.";
+        $("#" + id).addClass("no_results");
     }
-    sessionStorage.setItem("first_time", "FALSE");
+    $("#" + id).html(html_text);
 }
 
-function checkAddResults() {
-    var check_add = sessionStorage.getItem("check_add");
-    var add_vid = parseInt(getParameterByName("addv"));
-    if (check_add && !isNaN(add_vid) && check_add === "TRUE") {
-        addResults(add_vid);
+function writeFavouritesBar(favourites, max) {
+    if (favourites.length === 0) {
+        $("#all_worksheets_favourites_bar").html(html_text);
+        $("#all_worksheets_favourites_bar").addClass("hidden");
+        return;
     }
-    sessionStorage.setItem("check_add", "FALSE");
+    var html_text = "<div class='folder_display_div favourite_title'>Favourites:</div>";
+    var count = max === null ? favourites.length : Math.min(max, favourites.length);
+    for (var i = 0; i < count; i++) {
+        html_text += "<div class='folder_display_div'><span class='glyphicon glyphicon-folder-close'></span> " + favourites[i]["Name"] + "</div>";
+    }
+    $("#all_worksheets_favourites_bar").html(html_text);
+    $("#all_worksheets_favourites_bar").removeClass("hidden");
 }
-
 function getParameterByName(name, url) {
     if (!url) {
       url = window.location.href;

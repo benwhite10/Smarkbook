@@ -11,6 +11,7 @@ $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_NUMBER_INT);
 $wid = filter_input(INPUT_POST,'wid',FILTER_SANITIZE_NUMBER_INT);
 $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
+$user_id = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 
 $roles = validateRequestAndGetRoles($token);
 
@@ -29,7 +30,7 @@ switch ($requestType){
         break;
     case "WORKSHEETSUMMARY":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
-        getWorksheetSummary($wid);
+        getWorksheetSummary($wid, $user_id);
         break;
     case "DOWNLOADGWID":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
@@ -336,7 +337,7 @@ function getWorksheetInfo($wid) {
     exit();
 }
 
-function getWorksheetSummary($wid) {
+function getWorksheetSummary($wid, $user_id) {
     $details_query = "SELECT WV.*, U.`Initials` FROM `TWORKSHEETVERSION` WV
                         JOIN `TUSERS` U ON WV.`Author ID` = U.`User ID`
                         WHERE `Version ID` = $wid;";
@@ -344,10 +345,12 @@ function getWorksheetSummary($wid) {
     $students_count_query = "SELECT COUNT(*) Count FROM `TCOMPLETEDWORKSHEETS` CW
                         JOIN `TGROUPWORKSHEETS` GW ON CW.`Group Worksheet ID` = GW.`Group Worksheet ID`
                         WHERE GW.`Version ID` = $wid AND GW.`Deleted` = 0";
-    $sets_query = "SELECT `Group Worksheet ID`, GW.`Date Due`, U.`Initials`, G.`Name` FROM `TGROUPWORKSHEETS` GW
+    $sets_query = "SELECT `Group Worksheet ID`, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') `Date Due`, U.`Initials`, G.`Name`, IF(U.`User ID` = $user_id, 1, 0) CurrentUser
+                        FROM `TGROUPWORKSHEETS` GW
                         JOIN `TUSERS` U ON GW.`Primary Staff ID` = U.`User ID`
                         JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
-                        WHERE GW.`Version ID` = $wid AND GW.`Deleted` = 0";
+                        WHERE GW.`Version ID` = $wid AND GW.`Deleted` = 0
+                        ORDER BY CurrentUser DESC, DATE_FORMAT(GW.`Date Due`, '%Y/%m/%d') DESC, U.`Initials`";
     try {
         $details = db_select_exception($details_query);
         $questions_count = db_select_exception($questions_count_query);
