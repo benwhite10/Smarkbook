@@ -35,10 +35,10 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
     $query1 = "SELECT U.`User ID` ID, U.`Preferred Name` PName, U.`Surname`, U.`First Name` FName FROM TUSERGROUPS G
                 JOIN TUSERS U ON G.`User ID` = U.`User ID`
                 WHERE G.`Group ID` = $setid
-                AND G.`Archived` <> 1 
+                AND G.`Archived` <> 1
                 AND U.`Role` = 'STUDENT'
                 ORDER BY U.Surname;";
-    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName,
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, 
                 DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks,
                 GW.`DisplayName` DisplayName
                 FROM TGROUPWORKSHEETS GW
@@ -62,7 +62,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
         $worksheets = db_select_exception($query2);
     } catch (Exception $ex) {
         $message = "There was an error retrieving the markbook";
-        returnToPageError($ex, $message);
+        returnToPageError($ex, $query2);
     }
 
     $resultsArray = array();
@@ -78,7 +78,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
         try{
             $results = db_select_exception($query);
         } catch (Exception $ex) {
-            $message = "There was an error retrieving the markbook";
+            $message = "There was an error analysing the markbook";
             returnToPageError($ex, $message);
         }
         $newArray = array();
@@ -135,10 +135,10 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
     $query1 = "SELECT U.`User ID` ID, CONCAT(U.`Preferred Name`,' ',U.`Surname`) Name FROM TUSERGROUPS G
                 JOIN TUSERS U ON G.`User ID` = U.`User ID`
                 WHERE G.`Group ID` = $setid
-                AND G.`Archived` <> 1 
-                AND U.`Role` = 'STUDENT' 
+                AND G.`Archived` <> 1
+                AND U.`Role` = 'STUDENT'
                 ORDER BY U.Surname;";
-    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, WV.`VName` VName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks
                 FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`
@@ -279,7 +279,10 @@ function downloadAllSets($staffid) {
 function returnToPageError($ex, $message){
     errorLog("There was an error in the get markbook request: " . $ex->getMessage());
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message,
+        "exception" => $ex->getMessage()
+    );
     echo json_encode($response);
     exit();
 }

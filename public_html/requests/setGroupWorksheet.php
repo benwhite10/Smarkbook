@@ -34,11 +34,11 @@ function tryNewGroupWorksheet($staff, $setid, $versionid){
                 JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
                 WHERE GW.`Primary Staff ID` = $staff
                 AND GW.`Group ID` = $setid
-                AND GW.`Version ID` = $versionid 
+                AND GW.`Version ID` = $versionid
                 AND GW.`Deleted` = 0";
-    
+
     $group_query = "SELECT `Name` FROM `TGROUPS` WHERE `Group ID` = $setid;";
-    
+
     try {
         $groups = db_select_exception($query);
         $group_result = db_select_exception($group_query);
@@ -73,7 +73,7 @@ function createNewGroupWorksheet($staff, $setid, $versionid) {
                 $versionid,
                 NOW(),
                 NOW())";
-    
+
     try{
         db_begin_transaction();
         $result = db_insert_query_exception($query);
@@ -84,7 +84,7 @@ function createNewGroupWorksheet($staff, $setid, $versionid) {
         errorLog("Error creating a new group worksheet: " . $ex->getMessage());
         failRequest($ex->getMessage());
     }
-    
+
     logEvent($staff[0], "ADD_SET_RESULTS", $gwid);
     succeedRequest(array(
         "created" => TRUE,
@@ -103,7 +103,9 @@ function succeedRequest($result) {
 function failRequest($message) {
     errorLog("There was an error in the get group request: " . $message);
     $response = array(
-        "success" => FALSE);
+        "success" => FALSE,
+        "message" => $message
+    );
     echo json_encode($response);
     exit();
 }

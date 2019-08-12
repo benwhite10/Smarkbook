@@ -27,6 +27,10 @@ switch ($request_type){
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         newWorksheet($info_array);
         break;
+    case "NEWFOLDER":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        newFolder($info_array);
+        break;
     case "COPYWORKSHEET":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         copyWorksheet($wid);
@@ -34,6 +38,10 @@ switch ($request_type){
     case "SUGGESTEDTAGS":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getSuggestedTags($tags, $div_id);
+        break;
+    case "UPDATEFILETREE":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        updateFileTree($info_array);
         break;
     default:
         break;
@@ -152,7 +160,7 @@ function updateWorksheetTags($wid, $tags) {
                 $link_id = $current_tag["ID"];
                 if ($link_id == 0) throw new Exception('Error getting link id');
                 $remove_query = "DELETE FROM `TWORKSHEETTAGS` WHERE `ID` = $link_id";
-                db_query_exception($remove_query);    
+                db_query_exception($remove_query);
             }
         }
         // Add any new tags that don't currently exist
@@ -222,16 +230,43 @@ function deleteQuestion($sqid) {
     }
 }
 
+function newFolder($details) {
+    $name = $details["name"];
+    $author = checkValidId($details["author"]);
+    $parent = $details["parent"];
+
+    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `Author ID`,`Date Added`,`Deleted`, `ParentID`, `Type`) "
+            . "VALUES ('$name', $author, NOW(), 0, '$parent', 'Folder');";
+    try {
+        db_begin_transaction();
+        $result = db_insert_query_exception($query);
+        $vid = checkValidId($result[1]);
+        if ($vid == 0) {
+            db_rollback_transaction();
+            failRequest("Adding new folder failed: " . $ex->getMessage());
+        }
+        db_commit_transaction();
+        logEvent($author, "ADD_FOLDER", "ID: " . $vid . ", Title: " . $name);
+        $new_folder_query = "SELECT WV.`Version ID` ID, WV.`WName` WName, DATE_FORMAT(WV.`Date Added`, '%d/%m/%y') Date, DATE_FORMAT(WV.`Date Added`, '%Y%m%d%H%i%S') CustomDate, WV.`ParentID`, WV.`Type`
+                                FROM TWORKSHEETVERSION WV
+                                WHERE WV.`Version ID` = $vid;";
+        $new_folder_return = db_select_exception($new_folder_query);
+        succeedRequest("New folder added.", $new_folder_return[0]);
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        failRequest("Adding new folder failed: " . $ex->getMessage());
+    }
+}
+
 function newWorksheet($details) {
     $name = $details["name"];
-    $link = $details["link"];
     $author = checkValidId($details["author"]);
-    $date = $details["date"];
-    $questions_count = $details["questions"];
+    $questions_count = array_key_exists("questions", $details) ? $details["questions"] : 1;
     $vid = "";
-	
-    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`,`Date Added`,`Deleted`) "
-            . "VALUES ('$name', '', '$link', $author, STR_TO_DATE('$date','%d/%m/%Y'),0);";
+    $parent_id = array_key_exists("parent", $details) ? $details["parent"] : "#";
+
+    $query = "INSERT INTO TWORKSHEETVERSION (`WName`, `Author ID`,`Date Added`,`Deleted`, `ParentID`, `Type`) "
+            . "VALUES ('$name', $author, NOW(),0,'$parent_id','File');";
     try {
         db_begin_transaction();
         $result = db_insert_query_exception($query);
@@ -254,6 +289,32 @@ function newWorksheet($details) {
     }
 }
 
+function updateFileTree($update_array) {
+    $updated = [];
+    $errors = [];
+    for ($i = 0; $i < count($update_array); $i++) {
+        $name = $update_array[$i]["text"];
+        $parent = $update_array[$i]["parent"];
+        $id = $update_array[$i]["id"];
+        $query = "UPDATE `TWORKSHEETVERSION` SET `WName`='$name',`ParentID`='$parent' WHERE `Version ID` = $id;";
+        try {
+            db_query_exception($query);
+            array_push($updated, $id);
+        } catch (Exception $ex) {
+            array_push($errors, [$id, [$ex->getMessage(), $query]]);
+        }
+    }
+
+    if (count($errors) > 0) {
+        failRequest("Error(s) updating filetree.", array(
+            "updated" => $updated,
+            "errors" => $errors
+        ));
+    } else {
+        succeedRequest("Update successful.", $updated);
+    }
+}
+
 function copyWorksheet($wid) {
     // Get details
     $name_query = "SELECT `WName` FROM TWORKSHEETVERSION WHERE `Version ID` = $wid;";
@@ -266,7 +327,7 @@ function copyWorksheet($wid) {
         }
         $name = db_escape_string($name_result[0]["WName"] . " (Copy)");
         $copy_query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`,`Date Added`,`Deleted`)
-        (SELECT '$name', `VName`, `Link`, `Author ID`,NOW(),0 
+        (SELECT '$name', `VName`, `Link`, `Author ID`,NOW(),0
         FROM TWORKSHEETVERSION WHERE `Version ID` = $wid)";
         $result = db_insert_query_exception($copy_query);
         $new_wid = $result[1];
@@ -276,24 +337,24 @@ function copyWorksheet($wid) {
         db_rollback_transaction();
         failRequest("Copying worksheet failed (1): " . $ex->getMessage());
     }
-    
+
     try {
         foreach ($questions as $question) {
             $sqid = $question["Stored Question ID"];
-            $copy_questions_query = "INSERT INTO `TSTOREDQUESTIONS` 
-                (`Question ID`, `Version ID`, `Number`, `Marks`, `Date Added`, `Question Order`, `Deleted`) 
-                SELECT `Question ID`, $new_wid, `Number`, `Marks`, NOW(), `Question Order`, 0 
+            $copy_questions_query = "INSERT INTO `TSTOREDQUESTIONS`
+                (`Question ID`, `Version ID`, `Number`, `Marks`, `Date Added`, `Question Order`, `Deleted`)
+                SELECT `Question ID`, $new_wid, `Number`, `Marks`, NOW(), `Question Order`, 0
                 FROM TSTOREDQUESTIONS WHERE `Stored Question ID` = $sqid";
             $result = db_insert_query_exception($copy_questions_query);
             $new_sqid = $result[1];
-            $copy_tags_query = "INSERT INTO `TQUESTIONTAGS` 
-                (`Tag ID`, `Stored Question ID`, `Deleted`) 
-                SELECT `Tag ID`, $new_sqid, 0 FROM `TQUESTIONTAGS` 
+            $copy_tags_query = "INSERT INTO `TQUESTIONTAGS`
+                (`Tag ID`, `Stored Question ID`, `Deleted`)
+                SELECT `Tag ID`, $new_sqid, 0 FROM `TQUESTIONTAGS`
                 WHERE `Stored Question ID` = $sqid";
             $result = db_insert_query_exception($copy_tags_query);
         }
-        // Worksheet tags 
-        $worksheet_tags_query = "INSERT INTO `TWORKSHEETTAGS`(`Worksheet ID`, `Tag ID`) 
+        // Worksheet tags
+        $worksheet_tags_query = "INSERT INTO `TWORKSHEETTAGS`(`Worksheet ID`, `Tag ID`)
                 SELECT $new_wid, `Tag ID` FROM `TWORKSHEETTAGS`
                 WHERE `Worksheet ID` = $wid";
         $result = db_insert_query_exception($worksheet_tags_query);
@@ -306,9 +367,9 @@ function copyWorksheet($wid) {
         failRequest("Copying worksheet failed (2): " . $ex->getMessage());
     }
     // Create new worksheet
-    
+
     // Add questions
-    
+
     // Add tags
 }
 
@@ -351,7 +412,7 @@ function getSuggestedTags($tags, $div_id) {
             foreach($tags_result as $tag) {
                 if (!tagIsInArray($tag, $tags_array)) {
                     $suggested_tags = addTagToSuggestedTagArray($tag, $suggested_tags, $count);
-                }  
+                }
             }
         } catch (Exception $ex) {
             errorLog($ex->getMessage());
@@ -384,8 +445,8 @@ function addTagToSuggestedTagArray($tag, $suggested_tags, $count) {
         );
         array_push($suggested_tags, $new_value);
     }
-    
-    
+
+
     return $suggested_tags;
 }
 
@@ -440,11 +501,12 @@ function succeedRequest($message, $result){
     exit();
 }
 
-function failRequest($message){
+function failRequest($message, $result = null){
     errorLog("There was an error in the tag request: " . $message);
     $response = array(
         "success" => FALSE,
-        "message" => $message);
+        "message" => $message,
+        "result" => $result);
     echo json_encode($response);
     exit();
 }

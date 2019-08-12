@@ -88,7 +88,6 @@ function worksheetsSuccess(json){
             for(var i = 0; i < worksheets.length; i++){
                 var worksheet = worksheets[i];
                 var name = worksheet["WName"];
-                var vname = worksheet["VName"];
                 var date = worksheet["DueDate"];
                 var id = worksheet["ID"];
                 if(date !== undefined){

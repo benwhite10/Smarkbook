@@ -499,7 +499,7 @@ function getSetWorksheets(){
     global $returns, $setWorksheets;
 
     $query = "SELECT GW.`Group Worksheet ID` GWID, GW.`Version ID` VID, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') DateDue, GW.`Additional Notes Student` StuNotes,
-                GW.`Additional Notes Staff` StaffNotes, WV.`WName` WName, WV.`VName` VName, GW.`DisplayName` DisplayName from TGROUPWORKSHEETS GW
+                GW.`Additional Notes Staff` StaffNotes, WV.`WName` WName, GW.`DisplayName` DisplayName from TGROUPWORKSHEETS GW
                JOIN TWORKSHEETVERSION WV ON GW.`Version ID` = WV.`Version ID`
                JOIN TSTOREDQUESTIONS SQ ON SQ.`Version ID` = GW.`Version ID`
                JOIN TQUESTIONTAGS QT ON SQ.`Stored Question ID` = QT.`Stored Question ID` ";

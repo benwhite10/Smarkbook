@@ -29,7 +29,7 @@ include_once $include_path . '/jwt/JWT.php';
 function createJWT($user_id, $user_role, $parent_id = null, $parent_role = null) {
     $config = parse_ini_file('../../includes/config.ini');
     $jwt_key = $config["jwt_key"];
-
+    $server = $config["server"];
     // create a token
     $payload_array = array();
     $payload_array['user_id'] = $user_id;
@@ -37,7 +37,7 @@ function createJWT($user_id, $user_role, $parent_id = null, $parent_role = null)
     $payload_array['parent_id'] = $parent_id;
     $payload_array['parent_role'] = $parent_role;
     $payload_array['nbf'] = time();
-    $payload_array['exp'] = time() + 12*60*60;
+    $payload_array['exp'] = $server === "local" ? time() + 315569520 : time() + 12*60*60;
     
     $token = JWT::encode($payload_array, $jwt_key);
     return $token;
