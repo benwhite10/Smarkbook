@@ -17,7 +17,8 @@ function init_page() {
 function requestAllStaff() {
     var infoArray = {
         orderby: "Initials",
-        token: user["token"]
+        token: user["token"],
+        type: "ALLSTAFF"
     };
     $.ajax({
         type: "POST",

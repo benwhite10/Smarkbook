@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $studentid = filter_input(INPUT_POST,'studentid',FILTER_SANITIZE_NUMBER_INT);
@@ -46,7 +43,7 @@ function addToGroup($studentid, $groupid) {
             $query3 = "UPDATE `TUSERGROUPS` SET `Archived` = 0 WHERE ";
             foreach ($links as $link) {
                 $id = $link["Link ID"];
-                $query3 .= "`Link ID` = $id AND "; 
+                $query3 .= "`Link ID` = $id AND ";
             }
             $query3 = substr($query3, 0, -5);
             db_query_exception($query3);
@@ -74,9 +71,9 @@ function removeFromGroup($studentid, $groupid) {
 
 function getGroupsForStaff($userid) {
     $query = "SELECT G.`Group ID`, G.`Name`
-                FROM TGROUPS G 
+                FROM TGROUPS G
                 JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`
-                WHERE UG.`User ID` = $userid 
+                WHERE UG.`User ID` = $userid
                     AND UG.`Archived` = 0
                 ORDER BY G.`Name`";
     try {
@@ -87,8 +84,8 @@ function getGroupsForStaff($userid) {
     succeedRequest($groups);
 }
 
-function failRequest($message){
-    errorLog("There was an error in the edit group request: " . $message);
+function failRequest($message = ""){
+    log_error("There was an error in the edit group request: " . $message, "requests/updateSets.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);
@@ -96,7 +93,7 @@ function failRequest($message){
     exit();
 }
 
-function succeedRequest($result) {
+function succeedRequest($result = null) {
     $response = array(
         "success" => TRUE,
         "result" => $result);

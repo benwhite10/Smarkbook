@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/public_html/includes/logEvents.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -415,7 +412,7 @@ function getSuggestedTags($tags, $div_id) {
                 }
             }
         } catch (Exception $ex) {
-            errorLog($ex->getMessage());
+            log_error($ex->getMessage(), "requests/worksheet.php", __LINE__);
         }
     }
     $response = array(
@@ -496,13 +493,13 @@ function succeedRequest($message, $result){
     $response = array(
         "success" => TRUE,
         "result" => $result);
-    if($message !== null) infoLog($message);
+    if($message !== null) log_info($message, "requests/worksheet.php");
     echo json_encode($response);
     exit();
 }
 
 function failRequest($message, $result = null){
-    errorLog("There was an error in the tag request: " . $message);
+    log_error("There was an error in the tag request: " . $message, "requests/worksheet.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message,

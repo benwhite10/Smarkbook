@@ -1,15 +1,11 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
-//$orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
-//$desc = filter_input(INPUT_POST,'desc',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_NUMBER_INT);
+$oldsetid = filter_input(INPUT_POST,'oldset',FILTER_SANITIZE_NUMBER_INT);
 $staff_id = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
 $set_year = filter_input(INPUT_POST,'year',FILTER_SANITIZE_NUMBER_INT);
 $set_subject = filter_input(INPUT_POST,'subject',FILTER_SANITIZE_NUMBER_INT);
@@ -49,6 +45,14 @@ switch ($requestType){
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         deleteSet($setid);
         break;
+    case "MERGESETS":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        mergeSets($setid, $oldsetid);
+        break;
+    case "MERGEABLESETS":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        getMergeSets($setid, $staff_id);
+        break;
     default:
         returnRequest(FALSE, null, "Invalid request type.");
         break;
@@ -63,7 +67,7 @@ function getSetDetails($setid) {
                 AND U.`Role` = 'STUDENT'
                 ORDER BY `Surname` ";
 
-    $group_query = "SELECT * FROM TGROUPS G 
+    $group_query = "SELECT * FROM TGROUPS G
             LEFT JOIN TSUBJECTS S ON G.`BaselineSubject` = S.`SubjectID`
             WHERE G.`Group ID` = $setid;";
 
@@ -74,7 +78,7 @@ function getSetDetails($setid) {
         $message = "There was an error loading the students: " . $ex->getMessage();
         returnRequest(FALSE, null, $message);
     }
-    
+
     $response = array(
         "students" => $students,
         "details" => $group_details
@@ -152,7 +156,7 @@ function addSet($staff_id, $set_name, $set_subject, $set_year, $baseline_type) {
     } catch (Exception $ex) {
         $message = "There was an error saving the set: " . $ex->getMessage();
         returnRequest(FALSE, null, $message);
-    }    
+    }
     returnRequest(TRUE, $group_id, null);
 }
 
@@ -173,11 +177,11 @@ function deleteSet($set_id) {
 }
 
 function getSetsForStaff($staff_id) {
-    $sets_query = "SELECT G.`Group ID`, G.`Name` 
-        FROM `TUSERGROUPS` UG 
+    $sets_query = "SELECT G.`Group ID`, G.`Name`
+        FROM `TUSERGROUPS` UG
         JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
         WHERE UG.`User ID` = $staff_id
-        AND UG.`Archived` = 0
+        AND UG.`Archived` = 0 AND G.`Archived` = 0
         ORDER BY G.`Name`";
     try{
         $sets = db_select_exception($sets_query);
@@ -185,8 +189,8 @@ function getSetsForStaff($staff_id) {
             $set_id = $sets[$i]["Group ID"];
             $count_query = "SELECT COUNT(1) Count FROM `TUSERGROUPS` UG
                 JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
-                WHERE UG.`Group ID` = $set_id 
-                AND UG.`Archived` = 0 
+                WHERE UG.`Group ID` = $set_id
+                AND UG.`Archived` = 0
                 AND U.`Role` = 'STUDENT';";
             $count_result = db_select_exception($count_query);
             $sets[$i]["Count"] = $count_result[0]["Count"];
@@ -196,4 +200,70 @@ function getSetsForStaff($staff_id) {
         returnRequest(FALSE, null, $message);
     }
     returnRequest(TRUE, $sets, null);
+}
+
+function mergeSets($setid, $oldsetid) {
+    try{
+        db_begin_transaction();
+        $user_groups_query = "UPDATE `TUSERGROUPS` SET `Archived` = 0 WHERE `Group ID` = $oldsetid;";
+        $group_worksheets_query = "UPDATE `TGROUPWORKSHEETS` SET `Group ID` = $setid WHERE `Group ID` = $oldsetid";
+        db_query_exception($user_groups_query);
+        db_query_exception($group_worksheets_query);
+        db_commit_transaction();
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        $message = "There was an error merging the the sets.";
+        log_error($message, "requests/manageSets.php", __LINE__);
+        log_error($ex->getMessage(), "requests/manageSets.php", __LINE__);
+        returnRequest(FALSE, null, $message);
+    }
+    returnRequest(TRUE, null, null);
+}
+
+function getMergeSets($setid, $staffid) {
+    try{
+        $user_groups_query = "SELECT UG.`Group ID`, G.`Name`, AY.`Year`
+            FROM `TUSERGROUPS` UG
+            JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
+            JOIN `TACADEMICYEAR` AY ON G.`AcademicYear` = AY.`ID`
+            WHERE UG.`User ID` = $staffid AND UG.`Group ID` <> $setid
+            ORDER BY AY.`Year` DESC, G.`Name`";
+        $user_groups = db_select_exception($user_groups_query);
+        $return_array = array();
+        for ($i = 0; $i < count($user_groups); $i++) {
+            $group_id = $user_groups[$i]["Group ID"];
+            $worksheets_count_query = "SELECT COUNT(*) Count
+                FROM `TGROUPWORKSHEETS`
+                WHERE `Group ID` = $group_id
+                AND `Deleted` = 0
+                AND (`Primary Staff ID` = $staffid OR `Additional Staff ID` = $staffid OR `Additional Staff ID 2` = $staffid)";
+            $worksheets_count_result = db_select_exception($worksheets_count_query);
+            $worksheets_count = $worksheets_count_result[0]["Count"];
+            $user_groups[$i]["WorksheetCount"] = $worksheets_count;
+            if ($worksheets_count > 0) {
+                $student_count_query = "SELECT COUNT(*) Count
+                    FROM `TUSERGROUPS` UG
+                    JOIN TUSERS U ON UG.`User ID` = U.`User ID`
+                    JOIN (SELECT UG.`User ID`
+                    FROM `TUSERGROUPS` UG
+                    JOIN TUSERS U ON UG.`User ID` = U.`User ID`
+                    WHERE UG.`Group ID` = $setid AND U.`Role` = 'STUDENT'
+                    AND UG.`Archived` = 0) A ON A.`User ID` = UG.`User ID`
+                    WHERE UG.`Group ID` = $group_id AND U.`Role` = 'STUDENT'";
+                $student_count_result = db_select_exception($student_count_query);
+                $student_count = $student_count_result[0]["Count"];
+                if ($student_count > 0) {
+                    $user_groups[$i]["StudentCount"] = $student_count;
+                    array_push($return_array, $user_groups[$i]);
+                }
+            }
+        }
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        $message = "There was an error getting the mergeable sets.";
+        log_error($message, "requests/manageSets.php", __LINE__);
+        log_error($ex->getMessage(), "requests/manageSets.php", __LINE__);
+        returnRequest(FALSE, null, $message);
+    }
+    returnRequest(TRUE, $return_array, null);
 }

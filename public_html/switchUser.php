@@ -10,7 +10,7 @@ $info_version = Info::getInfo()->getVersion();
 <head lang="en">
     <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
-    <link rel="stylesheet" type="text/css" href="css/editworksheet.css?<?php echo $info_version; ?>" />
+    <link rel="stylesheet" type="text/css" href="css/switchUser.css?<?php echo $info_version; ?>" />
     <script src="js/jquery-ui.js?<?php echo $info_version; ?>"></script>
     <script src="js/switchUser.js?<?php echo $info_version; ?>"></script>
 </head>
@@ -31,14 +31,11 @@ $info_version = Info::getInfo()->getVersion();
                 </ul>
             </div>
             <div id="main_content">
-                <label>Staff:</label>
-                <select name="userid" id="staff" onchange="change_dropdown(this.id)">
-                    <option value=0>No Staff</option>
-                </select>
-                <label>Student:</label>
-                <select name="stuid" id="student" onchange="change_dropdown(this.id)">
-                    <option value=0>No Student</option>
-                </select>
+                <label>User:</label>
+                <input id="user_input" class="datalist_input" type="text" list="users" placeholder="-">
+                <datalist id="users">
+                    <option data-value="0">No Users</option>
+                </datalist>
             </div>
             <div id="side_bar">
                 <ul class="menu sidebar">

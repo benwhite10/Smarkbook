@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
@@ -52,7 +49,7 @@ function getStudentsForSet($setid){
 
 function getAllStudents($orderby, $desc){
     $query = "SELECT U.`User ID` ID, U.`First Name` FName, U.`Surname` SName FROM TUSERS U ";
-    $query .= filterBy(["U.`Archived`", "U.`Role`"], ["0", "STUDENT"]);
+    $query .= filterBy(["U.`Archived`", "U.`Role`", "U.`CurrentPupil`"], ["0", "STUDENT", "1"]);
     $query .= orderBy([$orderby], [$desc]);
 
     try{
@@ -69,7 +66,7 @@ function getAllStudents($orderby, $desc){
 }
 
 function returnToPageError($ex, $message){
-    errorLog("There was an error in the get students request: " . $ex->getMessage());
+    log_error("There was an error in the get students request: " . $ex->getMessage(), "requests/getStudents.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message . ": " . $ex->getMessage());

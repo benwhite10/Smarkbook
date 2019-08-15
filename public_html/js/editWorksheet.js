@@ -183,7 +183,8 @@ function showHideDetails() {
 function requestAllStaff() {
     var infoArray = {
         orderby: "Initials",
-        token: user["token"]
+        token: user["token"],
+        type: "ALLSTAFF"
     };
     $.ajax({
         type: "POST",
@@ -1140,7 +1141,7 @@ function deleteWorksheet(){
 
 function copyWorksheet() {
     var save_worksheet_array = JSON.parse(sessionStorage.getItem("save_requests"));
-    if (save_worksheet_array.length === 0) { 
+    if (save_worksheet_array.length === 0) {
         var wid = sessionStorage.getItem("worksheet_id");
         var infoArray = {
             type: "COPYWORKSHEET",
@@ -1162,7 +1163,7 @@ function copyWorksheet() {
     } else {
         alert("Please save your changes before copying the worksheet.");
     }
-    
+
 }
 
 function clickResultsAnalysis() {

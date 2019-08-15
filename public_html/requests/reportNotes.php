@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $studentId = filter_input(INPUT_POST,'stuid',FILTER_SANITIZE_NUMBER_INT);
@@ -85,7 +82,7 @@ function succeedRequest($result){
 }
 
 function failRequest($message){
-    errorLog("There was an error in the worksheet function request: " . $message);
+    log_error("There was an error in the worksheet function request: " . $message, "requests/reportNotes.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

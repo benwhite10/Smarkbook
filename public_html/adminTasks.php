@@ -51,7 +51,7 @@ $info_version = Info::getInfo()->getVersion();
                             <p>Run</p>
                         </div>
                     </div>
-                    <div id="task_version" class="task" style="border-bottom: none">
+                    <div id="task_version" class="task">
                         <div class="task_description input">
                             <p>Update the version number</p>
                         </div>

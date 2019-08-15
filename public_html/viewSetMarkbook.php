@@ -32,4 +32,20 @@ $info_version = Info::getInfo()->getVersion();
     	</div>
         <?php pageFooter($info_version) ?>
     </div>
+    <div class="modal micromodal-bounce" id="message_modal" aria-hidden="true">
+        <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+            <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="message_model-title" aria-describedby="message_modal-content">
+                <div role="document">
+                    <header class="modal__header">
+                        <h3 class="modal__title error" id="message_modal_title">Title</h3>
+                        <button class="modal__close" aria-label="Close modal" aria-controls="modal__container1" data-micromodal-close></button>
+                    </header>
+                    <main class="modal__content" id="message_modal_content"></main>
+                    <footer class="modal__footer">
+                        <button class="modal__btn" data-micromodal-close aria-label="Close this dialog window" id="message_modal_button">OK</button>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>

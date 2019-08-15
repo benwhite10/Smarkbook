@@ -7,6 +7,7 @@ $(document).ready(function(){
 });
 
 function init_page() {
+    writeNavbar(user);
     getVersion();
 }
 
@@ -51,7 +52,7 @@ function runBackUp() {
         userid: user["userId"],
         token: user["token"]
     };
-    
+
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -62,7 +63,7 @@ function runBackUp() {
         }
     });
 }
-    
+
 function deleteDownloadSuccess(json){
     $("#task_downloads_button").html("<p>Run</p>");
     if(json["success"]){
@@ -71,8 +72,8 @@ function deleteDownloadSuccess(json){
         showErrorMessage('There was an error deleting the temporary downloads');
         console.log(json["message"]);
     }
-    setTimeout(function(){ 
-        closeMessage(); 
+    setTimeout(function(){
+        closeMessage();
     }, 3000);
 }
 
@@ -84,8 +85,8 @@ function backUpSuccess(json) {
         showErrorMessage('There was an error deleting the temporary downloads');
         console.log(json["message"]);
     }
-    setTimeout(function(){ 
-        closeMessage(); 
+    setTimeout(function(){
+        closeMessage();
     }, 3000);
 }
 
@@ -96,7 +97,7 @@ function runUpdateVersion() {
         version_number: $("#version_number").val(),
         token: user["token"]
     };
-    
+
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -116,8 +117,8 @@ function updateSuccess(json) {
         showErrorMessage('There was an error updating the version number.');
         console.log(json["message"]);
     }
-    setTimeout(function(){ 
-        closeMessage(); 
+    setTimeout(function(){
+        closeMessage();
     }, 3000);
 }
 
@@ -138,5 +139,3 @@ function showErrorMessage(message) {
 function closeMessage() {
     $('#temp_message').slideUp(600);
 }
-
-

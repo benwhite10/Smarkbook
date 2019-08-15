@@ -1,4 +1,4 @@
-/* 
+/*
     Created on : 19-Nov-2016, 16:04:00
     Author     : benwhite
 */
@@ -21,22 +21,17 @@ body {
     padding-bottom: 10px;
 }
 
-#students_input {
-    width: 90%;
-    margin: 0;
-}
-
 #students_input_div {
     display: inline-block;
     float: left;
     margin-left: 10px;
-    width: 60%;    
+    width: 60%;
 }
 
 #students_button_div {
     display: inline-block;
     float: left;
-    width: 200px;  
+    width: 200px;
     height: 35px;
     background: #DDD;
     color: #000;
@@ -60,6 +55,15 @@ body {
     width: 100%;
     height: 40px;
     line-height: 40px;
+}
+
+.set_details_header {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.set_details_header.top {
+    margin-top: 0;
 }
 
 .set_details_header > h1 {
@@ -107,29 +111,16 @@ body {
     width: calc(100% - 250px);
 }
 
-input[type="text"].set_details_input {
+input[type="text"].set_details_input, input[type="text"].datalist_input {
     display: inline-block;
     float: left;
     padding: 0;
     margin: 3px 0;
     padding-left: 10px;
     width: calc(100% - 270px);
-    max-width: 400px;
     height: 32px;
     line-height: 32px;
     font-size: 14px;
-}
-
-#students_input {
-    display: inline-block;
-    float: left;
-    padding: 0;
-    margin: 3px 0;
-    padding-left: 10px;
-    width: calc(100% - 270px);
-    max-width: 400px;
-    height: 32px;
-    line-height: 32px;
 }
 
 select.set_details_input {
@@ -137,7 +128,6 @@ select.set_details_input {
     margin: 4px 0;
     padding-left: 10px;
     width: calc(100% - 270px);
-    max-width: 412px;
     height: 32px;
     line-height: 32px;
     outline: none;

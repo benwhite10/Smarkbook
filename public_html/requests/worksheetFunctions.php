@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $vid = filter_input(INPUT_POST,'vid',FILTER_SANITIZE_NUMBER_INT);
@@ -22,7 +19,7 @@ switch ($requestType){
     case "DELETEFOLDER":
     case "RESTOREFOLDER":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
-        $type = $requestType === "RESTOREFOLDER" ? "RESTORE" : "DELETE"; 
+        $type = $requestType === "RESTOREFOLDER" ? "RESTORE" : "DELETE";
         updateFolderRequest($vid, $type);
         break;
     default:
@@ -73,11 +70,11 @@ function updateWorksheetRequest($vid, $type) {
         $ex = $result["ex"] ? $result["ex"] : null;
         returnToPage(FALSE, null, $msg, $ex);
     }
-    
+
 }
 function updateWorksheet($vid, $type){
     global $userid;
-    
+
     if($type === "DELETE"){
         $query = "UPDATE TWORKSHEETVERSION Set `Deleted` = TRUE WHERE `Version ID` = $vid";
         $errorMsg = "There was an error deleting the worksheet.";
@@ -94,7 +91,7 @@ function updateWorksheet($vid, $type){
             "msg" => "There was an error completing your request."
         );
     }
-    
+
     try{
         db_begin_transaction();
         db_query_exception($query);
@@ -149,6 +146,6 @@ function returnToPage($success, $response_array = null, $msg = null, $ex = null)
         "ex" => $ex !== null ? $ex->getMessage() : "",
         "msg" => $msg);
     echo json_encode($response);
-    if($msg !== null) infoLog($msg);
+    if($msg !== null) log_info($msg, "requests/worksheetFunctions.php");
     exit();
 }

@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/public_html/includes/logEvents.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -189,7 +186,7 @@ function getUserAverage($dates){
     $set = $returns["inputs"]["set"];
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, COUNT(Marks) N
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID` JOIN TGROUPWORKSHEETS GW ON GW.`Group Worksheet ID` = CQ.`Group Worksheet ID`
-            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND CQ.`Student ID` = $student AND GW.`Primary Staff ID` = $staff AND GW.`Group ID` = $set ";
+            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND CQ.`Student ID` = $student AND (GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff) AND GW.`Group ID` = $set ";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
@@ -215,7 +212,7 @@ function getSetAverage($dates){
     $query = "SELECT SUM(Mark)/SUM(Marks) AVG, Count(Mark) N
             FROM TCOMPLETEDQUESTIONS CQ JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
             LEFT JOIN TGROUPWORKSHEETS GW ON GW.`Group Worksheet ID` = CQ.`Group Worksheet ID`
-            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND GW.`Group ID` = $set AND GW.`Primary Staff ID` = $staff ";
+            WHERE CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND GW.`Group ID` = $set AND (GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff)";
     if(count($dates) === 2){
         $startDate = $dates[0];
         $endDate = $dates[1];
@@ -511,7 +508,7 @@ function getSetWorksheets(){
         $inputs = $returns["inputs"];
         if(array_key_exists("staff", $inputs)){
             $staff = $inputs["staff"];
-            array_push($filters, "GW.`Primary Staff ID` = $staff");
+            array_push($filters, "(GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff)");
         }
         if(array_key_exists("set", $inputs)){
             $set = $inputs["set"];
@@ -583,7 +580,7 @@ function getStudentWorksheets(){
         $inputs = $returns["inputs"];
         if(array_key_exists("staff", $inputs)){
             $staff = $inputs["staff"];
-            $query .= "GW.`Primary Staff ID` = $staff AND ";
+            $query .= "(GW.`Primary Staff ID` = $staff OR GW.`Additional Staff ID` = $staff OR GW.`Additional Staff ID 2` = $staff) AND ";
         }
         if(array_key_exists("set", $inputs)){
             $set = $inputs["set"];
@@ -815,7 +812,7 @@ function getStudentSets($studentId) {
         foreach($sets as $set) {
             $group_id = $set["Group ID"];
             $staff_query = "SELECT U.`User ID` UserID, GW.`Group ID` GroupID, U.`Initials` Initials, G.`Name` GroupName FROM `TGROUPWORKSHEETS` GW
-                            JOIN TUSERS U ON GW.`Primary Staff ID` = U.`User ID`
+                            JOIN TUSERS U ON (GW.`Primary Staff ID` = U.`User ID` OR GW.`Additional Staff ID` = U.`User ID` OR GW.`Additional Staff ID 2` = U.`User ID`)
                             JOIN TGROUPS G ON GW.`Group ID` = G.`Group ID`
                             WHERE GW.`Group ID` = $group_id AND GW.`Deleted` = 0 AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')
                             GROUP BY U.`User ID`
@@ -1071,7 +1068,7 @@ function studentWorksheetSummary($studentId, $gwid, $userid, $role) {
 
 function failRequestWithException($message, $ex){
     $ex_message = $ex->getMessage();
-    errorLog("There was an error requesting the report: " . $ex_message);
+    log_error("There was an error requesting the report: " . $ex_message, "requests/getStudentSummary.php", __LINE__);
     failRequest("$message: $ex_message");
 }
 
