@@ -51,14 +51,10 @@ function deleteDownloads() {
 
 function backUpDB($userid) {
     try {
-        $return = db_back_up();
-        $local = $return[0];
-        $backup_name = $return[1];
-        $backup_file = $return[2];
+        db_back_up();
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-    emailFile($local, $backup_name, $backup_file, $userid);
     succeedRequest(null, "Database successfully backed up");
 }
 

@@ -121,7 +121,16 @@ function db_back_up() {
    $include_path = get_include_path();
    $backup_file = "$include_path/db_backups/$backup_name";
    $command = "$mysqldump --host=$dbhost --user=$dbuser --password=$dbpass $dbname | gzip > $backup_file";
-   exec($command);
+   try {
+       exec($command);
+       log_info("Database backed up. ($backup_file)", "includes/db_functions.php");
+       return [TRUE, null];
+   } catch (Exception $ex) {
+       $message = "Error baccking up the database" . $ex->getMessage();
+       log_error($message, "includes/db_functions.php", __LINE__);
+       return [FALSE, $message];
+   }
+
 
    if($server === "local") {
        return ["LOCAL:", $backup_name, $backup_file];

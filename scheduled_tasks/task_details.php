@@ -16,6 +16,8 @@ function getTaskDetails($key) {
             );
             break;
         case "TidyLogs":
+        case "ClearDownloads":
+        case "BackupDatabase":
             return array(
                 "ScheduledFreq" => "+1 day",
                 "ScheduledStart" => [2, 5, 0],
@@ -44,6 +46,12 @@ function runTask($key, $max_time) {
             break;
         case "TidyLogs":
             return tidyLogs($max_time);
+            break;
+        case "ClearDownloads":
+            return clearDownloads();
+            break;
+        case "BackupDatabase":
+            return backupDatabase();
             break;
         case "UpdateAllUsersFull":
             return updateAllUsers($max_time, TRUE);
