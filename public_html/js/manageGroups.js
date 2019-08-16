@@ -204,7 +204,7 @@ function getUsers(){
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStudents.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             getUsersSuccess(json);

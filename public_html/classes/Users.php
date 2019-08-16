@@ -10,12 +10,6 @@ class User
     public $surname;
     public $email;
     public $role;
-    public $locked;
-    public $lockedTime;
-    public $password;
-    public $salt;
-    public $lastFailedLogin;
-    public $loginAttempts;
     public $validation;
 
     function __construct() {
@@ -29,12 +23,6 @@ class User
         $userObject->setUserId($id);
         $userObject->setEmail($user[0]['Email']);
         $userObject->setRole($user[0]['Role']);
-        $userObject->setLocked($user[0]['Locked']);
-        $userObject->setLockedTime($user[0]['Locked Time']);
-        $userObject->setLastFailedLogin($user[0]['Last Failed Login']);
-        $userObject->setLoginAttempts($user[0]['Login Attempts']);
-        $userObject->setPassword($user[0]['Password']);
-        $userObject->setSalt($user[0]['Salt']);
         $userObject->setValidation($user[0]['Validation']);
         return $userObject;
     }
@@ -77,54 +65,6 @@ class User
 
     function setRole($role) {
         $this->role = $role;
-    }
-
-    function getLocked() {
-        return $this->locked;
-    }
-
-    function setLocked($locked) {
-        $this->locked = $locked;
-    }
-
-    function getLockedTime() {
-        return $this->lockedTime;
-    }
-
-    function setLockedTime($lockedTime) {
-        $this->lockedTime = $lockedTime;
-    }
-
-    function getPassword() {
-        return $this->password;
-    }
-
-    function getSalt() {
-        return $this->salt;
-    }
-
-    function getLastFailedLogin() {
-        return $this->lastFailedLogin;
-    }
-
-    function getLoginAttempts() {
-        return $this->loginAttempts;
-    }
-
-    function setPassword($password) {
-        $this->password = $password;
-    }
-
-    function setSalt($salt) {
-        $this->salt = $salt;
-    }
-
-    function setLastFailedLogin($lastFailedLogin) {
-        $this->lastFailedLogin = $lastFailedLogin;
-    }
-
-    function setLoginAttempts($loginAttempts) {
-        $this->loginAttempts = $loginAttempts;
     }
 
     function setValidation($validation) {

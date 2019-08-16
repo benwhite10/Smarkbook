@@ -189,7 +189,7 @@ function requestAllStaff() {
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             requestStaffSuccess(json);

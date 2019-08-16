@@ -20,7 +20,7 @@ function getStaff() {
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             getStaffSuccess(json);
@@ -61,7 +61,7 @@ function updateStudents(){
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStudents.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             updateStudentsSuccess(json);

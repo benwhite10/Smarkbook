@@ -50,21 +50,6 @@ function createUserData($response) {
     return $return_array;
 }
 
-function createSchoolReports($response) {
-    $return_array = array();
-    $options = array('alwaysArray' => array("ReportCycles", "ReportCycle", "GeneralComment", "Comment", "Grading", "Value", "Grade"));
-    $overall_school_reports = cleanArray(xmlToArray($response->SchoolReports, $options));
-    $return_array["ReportTypes"] = $overall_school_reports["SchoolReports"]["ReportTypes"]["ReportType"];
-    $return_array["Templates"] = $overall_school_reports["SchoolReports"]["Templates"]["Template"];
-    $report_cycles = $overall_school_reports["SchoolReports"]["ReportCycles"];
-    for ($i = 0; $i < count($report_cycles); $i++) {
-        if (!is_array($report_cycles[$i])) continue;
-        $type = array_key_exists("Filtered", $report_cycles[$i]) ? "ReportCycles" : "Reports";
-        $return_array[$type] = array_key_exists("ReportCycle", $report_cycles[$i]) ? $report_cycles[$i]["ReportCycle"] : [];
-    }
-    return $return_array;
-}
-
 function xmlToArray($xml, $options = array()) {
     $defaults = array(
         'namespaceSeparator' => ':',//you may want this to be something other than a colon

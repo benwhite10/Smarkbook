@@ -3,6 +3,7 @@
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/includes/logging.php';
+include_once $include_path . '/public_html/includes/logEvents.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 
@@ -39,15 +40,6 @@ function runUpdate($isams_array, $name, $key, $update_current, $current_array) {
         $end_time = microtime(true);
         log_info(logCount($update_count, $name, round($end_time - $start_time, 1)), "includes/core.php");
     }
-    /*if ($update_current) {
-        log_info("Updating current records for " . strtolower($name) . ".", "includes/core.php");
-        $start_time = microtime(true);
-        $result = update_current($isams_array, $current_array["TableName"], $current_array["ISAMSKey"], $current_array["DBKey"], $current_array["DBCol"], $current_array["DBText"]);
-        if (!$result[0]) log_error($result[1], "includes/core.php", __LINE__);
-        $end_time = microtime(true);
-        $total_time = round($end_time - $start_time, 1);
-        log_info("Current records for " . strtolower($name) . " updated in $total_time s", "includes/core.php");
-    }*/
     return TRUE;
 }
 

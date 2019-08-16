@@ -12,7 +12,7 @@ function setUpStaff(){
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "requests/getStaff.php",
+        url: "requests/getUsers.php",
         dataType: "json",
         success: staffSuccess,
         error: function(){
@@ -166,7 +166,7 @@ function setUpStudents(){
             $.ajax({
                 type: "POST",
                 data: infoArray,
-                url: "requests/getStudents.php",
+                url: "requests/getUsers.php",
                 dataType: "json",
                 success: studentsSuccess,
                 error: function() {

@@ -2,7 +2,6 @@
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/public_html/includes/mail_functions.php';
-include_once $include_path . '/includes/session_functions.php';
 include_once $include_path . '/public_html/classes/AllClasses.php';
 include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/includes/htmlCore.php';

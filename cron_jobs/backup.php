@@ -1,5 +1,7 @@
 <?php
 
+// TODO Check these
+
 $include_path = get_include_path();
 include_once $include_path . '/includes/db_functions.php';
 include_once $include_path . '/public_html/includes/mail_functions.php';

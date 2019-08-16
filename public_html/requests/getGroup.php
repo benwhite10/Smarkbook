@@ -31,9 +31,9 @@ switch ($requestType){
 }
 
 function getSetsForUser($staffid, $orderby, $desc){
-    $query = "select G.`Group ID` ID, G.`Name` Name from TGROUPS G
-                join TUSERGROUPS UG on G.`Group ID` = UG.`Group ID`";
-    $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`"], [$staffid, 3, 0]);
+    $query = "SELECT G.`Group ID` ID, G.`Name` Name FROM TGROUPS G
+                JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`";
+    $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`", "G.`Archived`"], [$staffid, 3, 0, 0]);
     $query .= orderBy([$orderby], [$desc]);
 
     try{
@@ -63,7 +63,7 @@ function getAllSets() {
                 JOIN TUSERGROUPS UG on G.`Group ID` = UG.`Group ID`
                 JOIN TUSERS U ON UG.`User ID` = U.`User ID`
                 WHERE G.`Type ID` = 3
-                AND UG.`Archived` = 0
+                AND UG.`Archived` = 0 AND G.`Archived` = 0
                 AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')
                 GROUP BY G.`Group ID`
                 ORDER BY G.`Name` ";

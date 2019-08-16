@@ -11,8 +11,6 @@ $external = filter_input(INPUT_POST,'external',FILTER_SANITIZE_STRING);
 
 $roles = validateRequestAndGetRoles($token);
 
-// Replace get staff and students
-
 switch ($requestType){
     case "STUDENTSBYSET":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
@@ -103,8 +101,8 @@ function getAllStaff($orderby) {
         try{
             $staff = db_select_exception($query1);
         } catch (Exception $ex) {
-            log_error("Error getting the associated staff.", "public_html/requests/getStaff.php", __LINE__);
-            log_error($ex->getMessage(), "public_html/requests/getStaff.php", __LINE__);
+            log_error("Error getting the associated staff.", "public_html/requests/getUsers.php", __LINE__);
+            log_error($ex->getMessage(), "public_html/requests/getUsers.php", __LINE__);
             returnRequest(FALSE);
         }
     }
@@ -129,8 +127,8 @@ function getStaffAndStudents($orderby, $desc) {
         try{
             $users = db_select_exception($query1);
         } catch (Exception $ex) {
-            log_error("Error getting the associated staff.", "public_html/requests/getStaff.php", __LINE__);
-            log_error($ex->getMessage(), "public_html/requests/getStaff.php", __LINE__);
+            log_error("Error getting the associated staff.", "public_html/requests/getUsers.php", __LINE__);
+            log_error($ex->getMessage(), "public_html/requests/getUsers.php", __LINE__);
             returnRequest(FALSE);
         }
     }
@@ -147,8 +145,8 @@ function getAssociatedSetStaff($group_id) {
     try{
         $staff = db_select_exception($query);
     } catch (Exception $ex) {
-        log_error("Error getting the associated staff.", "public_html/requests/getStaff.php", __LINE__);
-        log_error($ex->getMessage(), "public_html/requests/getStaff.php", __LINE__);
+        log_error("Error getting the associated staff.", "public_html/requests/getUsers.php", __LINE__);
+        log_error($ex->getMessage(), "public_html/requests/getUsers.php", __LINE__);
         returnRequest(FALSE);
     }
     returnRequest(TRUE, $staff);

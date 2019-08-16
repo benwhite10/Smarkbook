@@ -17,6 +17,10 @@ td.marks {
     cursor: default;
 }
 
+td.name {
+    padding-right: 10px;
+}
+
 table {
     width: auto;
     overflow: visible;
