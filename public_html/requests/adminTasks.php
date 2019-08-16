@@ -1,11 +1,8 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/public_html/includes/mail_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
 include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -54,14 +51,10 @@ function deleteDownloads() {
 
 function backUpDB($userid) {
     try {
-        $return = db_back_up();
-        $local = $return[0];
-        $backup_name = $return[1];
-        $backup_file = $return[2];
+        db_back_up();
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-    emailFile($local, $backup_name, $backup_file, $userid);
     succeedRequest(null, "Database successfully backed up");
 }
 
@@ -77,8 +70,8 @@ function emailFile($local, $title, $file_path, $userid) {
                 <p>User: $name</p>
                 </body>
             </html>";
-    
-    
+
+
     try {
         sendMailFromContact("contact.smarkbook@gmail.com", "Smarkbook", $body, $subject, $file_path);
     } catch (Exception $ex) {
@@ -117,7 +110,7 @@ function succeedRequest($result, $message) {
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get group request: " . $message);
+    log_error("There was an error in the get group request: " . $message, "includes/adminTasks.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

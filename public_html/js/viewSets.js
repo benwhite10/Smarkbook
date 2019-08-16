@@ -3,6 +3,7 @@ var staff;
 var subjects;
 var years;
 var user;
+var selected_staff;
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
@@ -21,6 +22,7 @@ function init_page() {
 function getSets() {
     var staff_id = $("#staff_select").val();
     if(!staff_id || parseInt(staff_id) === 0) staff_id = user["userId"];
+    selected_staff = staff_id;
     var infoArray = {
         type: "GETSETSFORSTAFF",
         staff: staff_id,
@@ -42,7 +44,7 @@ function getSetsSuccess(json) {
         sets = json["response"];
         var table_text = "";
         for (var i in sets) {
-            table_text += "<tr onclick=goToSet(" + sets[i]["Group ID"] + ")><td>" + sets[i]["Name"] + "</td><td class='students'>" + sets[i]["Count"] + "</td></tr>";
+            table_text += "<tr onclick=goToSet(" + sets[i]["Group ID"] + "," + selected_staff + ")><td>" + sets[i]["Name"] + "</td><td class='students'>" + sets[i]["Count"] + "</td></tr>";
         }
         $("#table_content").html(table_text);
     } else {
@@ -53,12 +55,13 @@ function getSetsSuccess(json) {
 function requestAllStaff() {
     var infoArray = {
         orderby: "Surname",
-        token: user["token"]
+        token: user["token"],
+        type: "ALLSTAFF"
     };
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             requestStaffSuccess(json);
@@ -187,8 +190,8 @@ function changeSubject() {
     }
 }
 
-function goToSet(set_id) {
-    window.location.href = "viewGroup.php?id=" + set_id;
+function goToSet(set_id, staff_id) {
+    window.location.href = "viewGroup.php?id=" + set_id + "&staff=" + staff_id;
 }
 
 function goBack() {

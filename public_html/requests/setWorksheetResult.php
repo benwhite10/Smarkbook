@@ -1,11 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
-include_once $include_path . '/public_html/includes/errorReporting.php';
+include_once $include_path . '/includes/core.php';
 
 $postData = json_decode(filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING), TRUE);
 $worksheetDetails = $postData['details'];
@@ -205,7 +201,7 @@ function addNewWorksheet($worksheet) {
             $update = TRUE;
         }
     } catch (Exception $ex) {
-        errorLog("There was an error getting the old completed worksheet id: " . $ex->getMessage());
+        log_error("There was an error getting the old completed worksheet id: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
     }
 
     if ($update) {
@@ -336,7 +332,7 @@ function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid) {
         updateGradeBoundaries($grade_boundaries, $gwid);
     } catch (Exception $ex) {
         $message = "There was an error saving the details for the worksheet.";
-        errorLog($message . " Exception: " . $ex->getMessage());
+        log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
         $array = array(
             "result" => FALSE,
             "message" => $message
@@ -350,6 +346,7 @@ function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid) {
 }
 
 function updateGradeBoundaries($grade_boundaries, $gwid) {
+    if (is_null($grade_boundaries)) return;
     $query1 = "SELECT * FROM `TGRADEBOUNDARIES` "
                 . "WHERE `GroupWorksheet` = $gwid "
                 . "ORDER BY `BoundaryOrder`;";
@@ -384,7 +381,7 @@ function updateGradeBoundaries($grade_boundaries, $gwid) {
     } catch (Exception $ex) {
         db_rollback_transaction();
         $message = "There was an error updating the grade boundaries.";
-        errorLog($message . " Exception: " . $ex->getMessage());
+        log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
         $array = array(
             "result" => FALSE,
             "message" => $message
@@ -420,7 +417,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
     } catch (Exception $ex) {
         db_rollback_transaction();
         $message = "There was an error saving the details for the worksheet.";
-        errorLog($message . " Exception: " . $ex->getMessage());
+        log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
         $array = array(
             "result" => FALSE,
             "message" => $message
@@ -460,7 +457,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
     } catch (Exception $ex) {
         db_rollback_transaction();
         $message = "There was an error saving the results for the worksheet.";
-        errorLog($message . " Exception: " . $ex->getMessage());
+        log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
         $array = array(
             "result" => FALSE,
             "message" => $message
@@ -521,7 +518,7 @@ function updateGroupWorksheet($worksheetDetails, $newResults, $completedWorkshee
     } catch (Exception $ex) {
         db_rollback_transaction();
         $message = "There was an error saving the status of the worksheet.";
-        errorLog($message . " Exception: " . $ex->getMessage());
+        log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
         $array = array(
             "result" => FALSE,
             "message" => $message
@@ -549,7 +546,7 @@ function deleteGroupWorksheet($gwid) {
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get group request: " . $message);
+    log_error("There was an error in the get group request: " . $message, "requests/setWorksheetResult.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

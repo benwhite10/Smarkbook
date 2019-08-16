@@ -1,11 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
-include_once $include_path . '/public_html/includes/errorReporting.php';
+include_once $include_path . '/includes/core.php';
 
 //$postData = json_decode(filter_input(INPUT_POST, 'data', FILTER_SANITIZE_STRING), TRUE);
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -40,22 +36,22 @@ switch ($requestType){
 
 function getAllSpecificationPoints($courseId, $userid) {
     $details_query = "SELECT * FROM `TREVISIONCOURSE` WHERE `ID` = $courseId;";
-    $query = "SELECT `ID`, `Subject`, `Title`, `Subtitle`, `Description` 
-                FROM `TREVISIONCHECKLIST` 
-                WHERE `CourseID` = $courseId 
+    $query = "SELECT `ID`, `Subject`, `Title`, `Subtitle`, `Description`
+                FROM `TREVISIONCHECKLIST`
+                WHERE `CourseID` = $courseId
                 ORDER BY `Order`;";
     try {
         $spec_points = db_select_exception($query);
         foreach ($spec_points as $key => $point) {
             $id = $point["ID"];
-            $links_query = "SELECT `ID`, `Title`, `Link` 
-                FROM `TREVISIONLINKS` 
+            $links_query = "SELECT `ID`, `Title`, `Link`
+                FROM `TREVISIONLINKS`
                 WHERE `ChecklistID` = $id
                 ORDER BY `Title`";
             $score_query = "SELECT `Score` FROM (
                             SELECT *
-                            FROM `TUSERREVISIONSCORES` 
-                            WHERE `UserID` = $userid 
+                            FROM `TUSERREVISIONSCORES`
+                            WHERE `UserID` = $userid
                             AND `ChecklistID` = $id
                             ORDER BY `Date Added` DESC
                         ) as A
@@ -92,8 +88,8 @@ function getChecklists() {
 function updateScore($checklistId, $userid, $score) {
     $query = "SELECT `ID`, `Score`, `Date Added` FROM (
                     SELECT *
-                    FROM `TUSERREVISIONSCORES` 
-                    WHERE `UserID` = 1 
+                    FROM `TUSERREVISIONSCORES`
+                    WHERE `UserID` = 1
                     AND `ChecklistID` = 6
                     ORDER BY `Date Added` DESC
                 ) as A
@@ -110,9 +106,9 @@ function updateScore($checklistId, $userid, $score) {
                         . " VALUES ($userid,$checklistId,$score,NOW())";
                 db_insert_query_exception($insert_query);
             } else {
-                $update_query = "UPDATE `TUSERREVISIONSCORES` 
+                $update_query = "UPDATE `TUSERREVISIONSCORES`
                                 SET `Score` = $score,
-                                `Date Added` = NOW() 
+                                `Date Added` = NOW()
                                 WHERE `ID` = $id;";
                 db_query_exception($update_query);
             }
@@ -141,7 +137,7 @@ function getCourses() {
 
 function failRequestWithException($message, $ex){
     $ex_message = $ex->getMessage();
-    errorLog("There was an error requesting the report: " . $ex_message);
+    log_error("There was an error requesting the report: " . $ex_message, "requests/revisionChecklist.php", __LINE__);
     failRequest("$message: $ex_message");
 }
 

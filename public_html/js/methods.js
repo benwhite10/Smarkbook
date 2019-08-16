@@ -29,13 +29,13 @@ function validateAccessToken(user, roles) {
         log_out();
         return;
     }
-    
+
     var jwt = parseJwt(user["token"])
     var user_role = jwt["user_role"];
     var parent_role = jwt["parent_role"];
-    
+
     if(!checkRole(user_role, roles) && !checkRole(parent_role, roles)) unauthorisedAccess();
-    
+
     var infoArray = {
         type: "validateSession",
         token: user["token"],
@@ -89,11 +89,11 @@ function writeNavbar(user) {
     var navbar_html = "";
     navbar_html += "<a href='portalhome.php'>" + display_name + " &#x25BE</a>";
     navbar_html += "<ul class='dropdown topdrop'>";
-    navbar_html += "<a href='portalhome.php' id='navbar_home'><li>Home</li></a>";
-    navbar_html += "<a href='editUser.php' id='navbar_account'><li>My Account</li></a>";
-    navbar_html += "<a href='#' id='navbar_log_out' onclick='log_out()'><li>Log Out</li></a>";
-    if(checkRole(user_role, ["STAFF", "SUPER_USER"]) || checkRole(parent_role, ["STAFF", "SUPER_USER"])) navbar_html += "<a href='switchUser.php' id='navbar_switch'><li>Switch User</li></a>";
-    if(checkRole(user_role, ["SUPER_USER"]) || checkRole(parent_role, ["SUPER_USER"])) navbar_html += "<a href='adminTasks.php' id='navbar_tasks'><li>Tasks</li></a>";
+    navbar_html += "<li><a href='portalhome.php' id='navbar_home'>Home</a></li>";
+    navbar_html += "<li><a href='editUser.php' id='navbar_account'>My Account</a></li>";
+    navbar_html += "<li><a href='#' id='navbar_log_out' onclick='log_out()'>Log Out</a></li>";
+    if(checkRole(user_role, ["STAFF", "SUPER_USER"]) || checkRole(parent_role, ["STAFF", "SUPER_USER"])) navbar_html += "<li><a href='switchUser.php' id='navbar_switch'>Switch User</a></li>";
+    if(checkRole(user_role, ["SUPER_USER"]) || checkRole(parent_role, ["SUPER_USER"])) navbar_html += "<li><a href='adminTasks.php' id='navbar_tasks'>Tasks</a></li>";
     navbar_html += "</ul>";
     $("#navbar").html(navbar_html);
 }

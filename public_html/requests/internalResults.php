@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $date = filter_input(INPUT_POST,'date',FILTER_SANITIZE_STRING);
@@ -84,7 +81,7 @@ function getCourseDetails($course_id) {
                             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID`
                             WHERE GC.`CourseID` = $course_id
                             AND (U.`ROLE` = 'STAFF' OR U.`Role` = 'SUPER_USER')
-                            AND UG.`Archived` = 0 
+                            AND UG.`Archived` = 0
                             AND GC.`Archived` = 0";
     try {
         $set_details = db_select_exception($set_details_query);
@@ -143,7 +140,7 @@ function getCourseOverview($course_id) {
                     WHERE GC.`CourseID` = $course_id
                     AND U.`ROLE` = 'STUDENT'
                     AND UG.`Archived` = 0
-                    AND GC.`Archived` = 0 
+                    AND GC.`Archived` = 0
                     ORDER BY G.`Name`, U.`Surname`, U.`First Name`";
 
     try {
@@ -212,8 +209,8 @@ function getExistingResults($course_id, $vid) {
                 JOIN `TUSERS` U ON GW.`Primary Staff ID` = U.`User ID`
                 WHERE GW.`Group ID` IN (
                   SELECT `GroupID` FROM `TGROUPCOURSE`
-                  WHERE `CourseID` = $course_id 
-                  AND `Archived` = 0 
+                  WHERE `CourseID` = $course_id
+                  AND `Archived` = 0
                 ) AND GW.`Version ID` = $vid
                 AND GW.`Deleted` = 0
                 AND GW.`CourseWorksheetID` IS NULL
@@ -507,7 +504,7 @@ function addSet($course_id, $set_id) {
             failRequest($ex->getMessage());
         }
     }
-    db_commit_transaction();    
+    db_commit_transaction();
     succeedRequest(null);
 }
 
@@ -537,7 +534,7 @@ function succeedRequest($result){
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get worksheet request: " . $message);
+    log_error("There was an error in the get worksheet request: " . $message, "requests/internalResults.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

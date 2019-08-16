@@ -7,6 +7,7 @@ $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
     window.addEventListener("valid_user", function(){init_page();});
     validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+    MicroModal.init();
 });
 
 function init_page() {
@@ -44,9 +45,14 @@ function getSets() {
 }
 
 function getSetsSuccess() {
-    if (set_id === 0) set_id = sets[0]["Group ID"];
-    getMarkbook();
-    writeSetDropdown();
+    if (sets.length > 0) {
+        if (set_id === 0) set_id = sets[0]["Group ID"];
+        getMarkbook();
+        writeSetDropdown();
+    } else {
+        console.log("No sets.")
+    }
+
 }
 
 function writeSetDropdown() {
@@ -65,7 +71,7 @@ function writeSetDropdown() {
     html_text += "</ul></li></ul>";
     $("#top_bar").html(html_text);
 }
-            
+
 function getSetForId(group_id) {
     for (var i = 0; i < sets.length; i++) {
         if (sets[i]["Group ID"] === group_id) return sets[i];
@@ -92,7 +98,7 @@ function getMarkbook() {
             } else {
                 console.log("Error requesting mark book.");
                 console.log(json);
-            } 
+            }
         },
         error: function (response) {
             console.log(response);
@@ -148,7 +154,7 @@ function getMarkbookSuccess() {
             html_text += "<td class='marks'></td>";
         }
         html_text += "</tr>";
-    }                            
+    }
     html_text += "</tbody></table>";
     $("#main_content").html(html_text);
     stopSpinnerInDiv("spinner");
@@ -173,19 +179,47 @@ function downloadExcel(set_id){
             downloadSuccess(json);
         },
         error: function (response) {
-                console.log(response.responseText);
+            writeMessageModal("Download", "There was an error downloading the markbook, please refresh and try again.", "OK", false);
+            console.log(response.responseText);
         }
     });
+    writeMessageModal("Download", "Markbook downloading...", false, false);
 }
 
 function downloadSuccess(json) {
     if (json["success"]) {
+        MicroModal.close("message_modal");
         var link = document.createElement("a");
         link.setAttribute("href", json["url"]);
         link.setAttribute("download", json["title"]);
         document.body.appendChild(link);
         link.click();
+    } else {
+        writeMessageModal("Download", "There was an error downloading the markbook, please refresh and try again.", "OK", false);
+        console.log(json);
     }
+}
+
+function writeMessageModal(title = "", message = "", button_title = false, button_function = false) {
+    $("#message_modal_title").html(title);
+    $("#message_modal_content").html("<p>" + message + "</p>");
+    if (button_title) {
+        $("#message_modal_button").html(button_title);
+        $("#message_modal_button").removeClass("hidden");
+    } else {
+        $("#message_modal_button").html("");
+        $("#message_modal_button").addClass("hidden");
+    }
+    if (button_function) {
+        $("#message_modal_button").off('click').on('click', button_function);
+    } else {
+        $("#message_modal_button").off('click');
+    }
+    MicroModal.show("message_modal");
+}
+
+function reloadPage() {
+    location.reload();
 }
 
 function viewWorksheet(gwid) {

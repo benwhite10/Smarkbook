@@ -48,7 +48,7 @@ function setUpVariableInputs(){
     start_date = getParameterByName("start");
     end_date = getParameterByName("end");
     set_student = user["role"] === "STUDENT" ? user["userId"] : getParameterByName("student");
-    
+
     localStorage.setItem("initialRun", true);
     disableGenerateReportButton();
     if (set_student) {
@@ -191,12 +191,13 @@ function showHideFullTagResults(){
 function getStaff(){
     var infoArray = {
         orderby: "Initials",
-        token: user["token"]
+        token: user["token"],
+        type: "ALLSTAFF"
     };
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             getStaffSuccess(json);
@@ -237,7 +238,7 @@ function updateStudents(){
         $.ajax({
             type: "POST",
             data: infoArray,
-            url: "/requests/getStudents.php",
+            url: "/requests/getUsers.php",
             dataType: "json",
             success: function(json){
                 updateStudentsSuccess(json);
@@ -346,7 +347,7 @@ function getStaffSuccess(json){
         for (var key in staff) {
             $('#staff').append($('<option/>', {
                 value: staff[key]["User ID"],
-                text : staff[key]["Initials"]
+                text : staff[key]["Initials"].toUpperCase()
             }));
         }
         var initialVal = staff_id;

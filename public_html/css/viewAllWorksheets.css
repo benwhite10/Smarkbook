@@ -600,6 +600,10 @@ a, a:hover, a:focus {
     text-decoration: none;
 }
 
+.selected_worksheet_result:hover, .new_results_section_result:hover {
+    background: lightgray;
+}
+
 #new_results_content {
     display: inline-block;
     float: left;

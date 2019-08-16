@@ -1,0 +1,38 @@
+input[type="text"], textarea, input[type="password"], input[type="submit"], select, input[type="url"], input[type="date"]{
+    display: inline-block;
+    font: normal 100% 'Open Sans', sans-serif;
+    line-height: 20px;
+    height: 32px;
+    width: calc(100% - 150px);
+    background: #FFF;
+    margin: 0px auto 10px auto;
+    padding: 0 10px;
+    border: 1px solid;
+    -moz-border-radius: 2px; /* Firefox */
+    -webkit-border-radius: 2px; /* Safari, Chrome */
+    -khtml-border-radius: 2px; /* KHTML */
+    border-radius: 2px; /* CSS3 */
+    font-size: 0.9rem;
+    color: #323232;
+    outline: none;
+}
+
+input[type="checkbox"] {
+    cursor: pointer;
+}
+
+select{
+  width: calc(100% - 162px);
+}
+
+label {
+    display: inline-block;
+    float: left;
+    width: 150px;
+    height:32px;
+    line-height: 32px;
+    padding-left: 10px;
+    font-size: 1.1rem;
+    font-weight: 400;
+    vertical-align: middle;
+}

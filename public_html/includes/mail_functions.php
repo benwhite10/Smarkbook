@@ -1,7 +1,7 @@
 <?php
 $include_path = get_include_path();
 require $include_path . '/includes/class.phpmailer.php';
-include_once $include_path . '/public_html/includes/errorReporting.php';
+include_once $include_path . '/includes/core.php';
 
 if(isset($_POST['email'], $_POST['name'])){
     send_mail(CONTACT, $_POST['email'], $_POST['name'], $_POST['body']);
@@ -23,21 +23,19 @@ function sendMailFromContact($to, $name, $body, $subject, $attachment){
     $mail->AddReplyTo("contact.smarkbook@gmail.com", 'Smarkbook'); // Reply TO
 
     $mail->AddAddress($to, $name); // recipient email
-    
+
     if ($attachment !== null) {
         $mail->AddAttachment($attachment);
     }
-    
+
     $mail->Subject    = $subject; // email subject
     $mail->Body       = $body;
     $mail->IsHTML(true);
 
     if(!$mail->Send()) {
-        infoLog("Email failed to send to $name about $subject");
+        log_info("Email failed to send to $name about $subject", "includes/mail_functions.php");
         throw new Exception("Email failed to send");
     } else {
-        infoLog("Email sent to $name about $subject");
+        log_info("Email sent to $name about $subject", "includes/mail_functions.php");
     }
 }
-
-

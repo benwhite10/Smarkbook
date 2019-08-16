@@ -2,8 +2,7 @@ body {
     height: auto;
 }
 
-th, td
-{
+th, td {
     height: auto;
     padding-left: 0px;
 }
@@ -12,8 +11,7 @@ td {
     cursor: default;
 }
 
-table
-{
+table {
     margin: 0px auto;
 }
 
@@ -25,13 +23,12 @@ tr:hover, tr:nth-child(even):hover {
     background-color: transparent;
 }
 
-.fullSection
-{
+.fullSection {
     width: 100%;
     margin-top: 20px;
 }
-.sectionSummary
-{
+
+.sectionSummary {
     display: block;
     width: 100%;
     background: transparent;
@@ -39,8 +36,7 @@ tr:hover, tr:nth-child(even):hover {
     cursor: pointer;
 }
 
-.sectionSummaryDetails
-{
+.sectionSummaryDetails {
     display: inline-block;
     width: 100%;
     background: transparent;
@@ -50,16 +46,14 @@ tr:hover, tr:nth-child(even):hover {
     vertical-align: top;
 }
 
-.sectionSummaryDetails h2
-{
+.sectionSummaryDetails h2 {
     line-height: 60px;
     margin-left: 20px;
     width: calc(100%-40px);
     font-weight: 400;
 }
 
-.sectionSummaryButtons
-{
+.sectionSummaryButtons {
     display: inline-block;
     width: 0%;
     background: transparent;
@@ -69,8 +63,7 @@ tr:hover, tr:nth-child(even):hover {
     vertical-align: top;
 }
 
-.sectionSummaryDetailsText
-{
+.sectionSummaryDetailsText {
     display: inline-block;
     width: calc(100% - 40px);
     height: 60px;
@@ -79,8 +72,7 @@ tr:hover, tr:nth-child(even):hover {
     vertical-align: middle;
 }
 
-.sectionSummaryShowHideButton
-{
+.sectionSummaryShowHideButton {
     display: inline-block;
     width: 25px;
     height: 25px;
@@ -93,25 +85,21 @@ tr:hover, tr:nth-child(even):hover {
     background-position: -75px;
 }
 
-.sectionSummaryShowHideButton:hover
-{
+.sectionSummaryShowHideButton:hover {
     background-position: -50px;
 }
 
-.sectionSummaryShowHideButton.minus
-{
+.sectionSummaryShowHideButton.minus {
     background-position: -25px;
 }
 
-.sectionSummaryShowHideButton.minus:hover
-{
+.sectionSummaryShowHideButton.minus:hover {
     background-position: 0px;
 }
 
-.sectionMain
-{
-    width: calc(100% - 20px);
-    display: block;
+.sectionMain {
+    width: 100%;
+    display: inline-block;
     margin: 0px;
     padding: 10px;
     background: transparent;

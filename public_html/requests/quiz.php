@@ -1,8 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $result = isset($_POST['result']) ? json_decode($_POST['result'], TRUE) : [];
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -292,7 +291,7 @@ function succeedRequest($result){
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get worksheet request: " . $message);
+    log_error("There was an error in the get worksheet request: " . $message, "requests/quiz.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

@@ -10,7 +10,6 @@ $info_version = Info::getInfo()->getVersion();
 <head lang="en">
     <?php googleAnalytics(); ?>
     <?php pageHeader("Worksheets", $info_version); ?>
-    <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
     <script src="js/viewAllWorksheets.js?<?php echo $info_version; ?>"></script>
     <script src="libraries/jstree/jstree.js"></script>
     <link rel="stylesheet" type="text/css" href="libraries/jstree/themes/default/style.css" />

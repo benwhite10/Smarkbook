@@ -29,7 +29,7 @@
 }
 
 .checklist_item_title {
-    width: calc(100% - 71px);
+    width: calc(100% - 50px);
     height: auto;
     display: inline-block;
     float: left;
@@ -49,7 +49,7 @@
 }
 
 .checklist_item:hover .checklist_item_title {
-    width: calc(100% - 271px);
+    width: calc(100% - 250px);
 }
 
 .checklist_item_buttons {
@@ -100,7 +100,7 @@
 }
 
 .checklist_button.selected,
-.checklist_item:hover .checklist_button.selected, 
+.checklist_item:hover .checklist_button.selected,
 .checklist_item:hover .checklist_button:hover,
 .checklist_item:hover .checklist_button > p {
     opacity: 1;

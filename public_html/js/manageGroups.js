@@ -4,6 +4,7 @@ var details;
 var years = false;
 var subjects = false;
 var user;
+var staff_id;
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
@@ -14,10 +15,12 @@ $(document).ready(function(){
 function init_page() {
     writeNavbar(user);
     set_id = getParameterByName("id");
+    staff_id = getParameterByName("staff");
     getUsers();
     getAcademicYears();
     getSubjects();
     getSetDetails();
+    getMergeSets();
 }
 
 function removeStudentPrompt(groupid, userid) {
@@ -28,7 +31,7 @@ function removeStudentPrompt(groupid, userid) {
         }
     }
     var set_name = details["Name"];
-    
+
     if(confirm("Are you sure you want to remove " + full_name + " from " + set_name + "?")) {
         removeStudent(groupid,userid);
     }
@@ -125,8 +128,8 @@ function checkIfReady() {
         setUpStudents();
         return;
     }
-    setTimeout(function(){ 
-        checkIfReady(); 
+    setTimeout(function(){
+        checkIfReady();
     }, 500);
 }
 
@@ -134,23 +137,23 @@ function setUpStudents() {
     var title_text = "<h1>" + details["Name"] + " (" + students.length + " students)</h1>";
     $("#title2").html(title_text);
     $("#name_input").val(details["Name"]);
-    
+
     var year_id = details["AcademicYear"];
     var subject_id = details["BaselineSubject"];
     var baseline_type = details["BaselineType"];
-    
+
     if(year_id) {
         $("#year_input").val(year_id);
     } else {
         $("#year_input").val(0);
     }
-    
+
     if(subject_id) {
         $("#subject_input").val(subject_id);
     } else {
         $("#subject_input").val(0);
     }
-    
+
     $("#type_input").val(baseline_type);
 
     var students_text = "";
@@ -201,10 +204,28 @@ function getUsers(){
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStudents.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             getUsersSuccess(json);
+        }
+    });
+}
+
+function getMergeSets() {
+    var infoArray = {
+        type: "MERGEABLESETS",
+        set: set_id,
+        staff: staff_id,
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/manageSets.php",
+        dataType: "json",
+        success: function(json){
+            getMergeSetsSuccess(json);
         }
     });
 }
@@ -227,9 +248,67 @@ function getUsersSuccess(json) {
             $('#students').append("<option data-value='" + users[i]["ID"] + "'>" + text + "</option>");
         }
     } else {
-        $('#students').html("<option value='0'>No Students</option>");
+        $('#students').html("<option data-value='0'>No Students</option>");
         console.log("There was an error getting the users:" + json["message"]);
     }
+}
+
+function getMergeSetsSuccess(json) {
+    if(json["success"]){
+        var sets = json["response"];
+        if (sets.length > 0) writeMergeSetsOption(sets);
+    } else {
+        console.log("There was an error getting the merge sets:" + json["message"]);
+    }
+}
+
+function writeMergeSetsOption(sets) {
+    var html_text = "<div class='set_details_header'><h1>Merge Sets</h1>";
+    html_text += "<div class='set_details_header_button' onclick='mergeSets()''>Merge</div></div>";
+    html_text += "<div class='set_details_input_div' id='set_details_student'>";
+    html_text += "<div class='set_details_input_title'>Existing Sets: </div>";
+    html_text += "<input id='merge_sets_input' class='datalist_input' type='text' list='merge_sets' placeholder='Sets'>";
+    html_text += "<datalist id='merge_sets'>";
+    for (var i = 0; i < sets.length; i++) {
+        var text = sets[i]["Name"] + " - " + sets[i]["Year"] + " (" + sets[i]["WorksheetCount"] + " worksheets, "+ sets[i]["StudentCount"] +" students)";
+        html_text += "<option data-value='" + sets[i]["Group ID"] + "'>" + text + "</option>";
+    }
+    html_text += "</datalist></div>";
+    $("#set_details").append(html_text);
+}
+
+function mergeSets() {
+    var merge_set_id = getSetId();
+    if (merge_set_id === -1) {
+        alert("You have not entered a set to merge.");
+    } else if (merge_set_id === 0) {
+        alert("The set you have entered cannot be found, please check that the name has been entered correctly.");
+    } else {
+        mergeSetRequest(merge_set_id, set_id);
+    }
+}
+
+function mergeSetRequest(merge_set_id, set_id) {
+    var infoArray = {
+        type: "MERGESETS",
+        set: set_id,
+        oldset: merge_set_id,
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/manageSets.php",
+        dataType: "json",
+        success: function(json){
+            if (json["success"]) {
+                window.location.reload();
+            } else {
+                alert("There has been an error merging the sets, please refresh and try again.");
+                console.log(json);
+            }
+        }
+    });
 }
 
 function addStudent() {
@@ -240,7 +319,7 @@ function addStudent() {
         alert("The student you have entered cannot be found, please check that the name has been entered correctly.");
     } else {
         addStudentRequest(stuid, set_id);
-    }  
+    }
 }
 
 function getStudentId() {
@@ -250,7 +329,20 @@ function getStudentId() {
     var list = document.getElementById("students").options;
     for (var i = 0; i < list.length; i++) {
         if (list[i].innerHTML === input_text) {
-            return list[i].dataset["value"];
+            return parseInt(list[i].dataset["value"]);
+        }
+    }
+    return 0;
+}
+
+function getSetId() {
+    var input = document.getElementById("merge_sets_input");
+    var input_text = input.value;
+    if (input_text === "") return -1;
+    var list = document.getElementById("merge_sets").options;
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].innerHTML === input_text) {
+            return parseInt(list[i].dataset["value"]);
         }
     }
     return 0;
@@ -287,7 +379,7 @@ function saveSet() {
     var year = $("#year_input").val();
     var subject = $("#subject_input").val();
     var baseline_type = $("#type_input").val();
-    
+
     var infoArray = {
         type: "SAVESET",
         set: set_id,

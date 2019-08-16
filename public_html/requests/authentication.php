@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
-include_once $include_path . '/public_html/includes/logEvents.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/includes/authentication.php';
 
 $request_type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -70,9 +67,9 @@ function switchUser($token, $new_user_id) {
 function createUser($user_id) {
     $user = User::createUserLoginDetails($user_id);
     $return_user = $user->getRole() === 'STUDENT' ? Student::createStudentFromId($user_id) : Teacher::createTeacherFromId($user_id);
-    $return_user->parent_id = ""; 
-    $return_user->parent_role = ""; 
-    infoLog("User $user_id has been successfully logged in.");
+    $return_user->parent_id = "";
+    $return_user->parent_role = "";
+    log_info("User $user_id has been successfully logged in.", "includes/authentication.php");
     logEvent($user_id, "USER_LOGIN", "");
     return $return_user;
 }
@@ -94,7 +91,7 @@ function cleanUserName($user) {
 
 function authenticateCredentials($user, $pwd) {
     $url = 'https://reports.wellingtoncollege.org.uk/api/login.php';
-    
+
     $curl = curl_init();
     curl_setopt_array($curl, [
         CURLOPT_RETURNTRANSFER => 1,
@@ -106,7 +103,7 @@ function authenticateCredentials($user, $pwd) {
             pwd => $pwd
         ]
     ]);
-    
+
     $result = curl_exec($curl);
     curl_close($curl);
     if ($result === FALSE) return [FALSE, "There was an error processing your login."];

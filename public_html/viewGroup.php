@@ -26,11 +26,11 @@ $info_version = Info::getInfo()->getVersion();
             <div id="top_bar">
                 <div id="title2"></div>
                 <ul class="menu navbar">
-                    <li onclick="goBack()">Back</li>
+                    <li onclick="goBack()"><a>Back</a></li>
                 </ul>
             </div><div id="main_content">
                 <div id="set_details">
-                    <div class="set_details_header">
+                    <div class="set_details_header top">
                         <h1>Set Details</h1>
                         <div class="set_details_header_button" onclick="saveSet()">Save</div>
                         <div class="set_details_header_button delete" onclick="deleteSet()">Delete</div>
@@ -65,11 +65,12 @@ $info_version = Info::getInfo()->getVersion();
                     </div>
                     <div class="set_details_input_div" id="set_details_student">
                         <div class="set_details_input_title">Student: </div>
-                        <input id="students_input" type="text" list="students" placeholder="Student">
+                        <input id="students_input" class="datalist_input" type="text" list="students" placeholder="Student">
                         <datalist id="students">
-                            <option value="0">No Students</option>
+                            <option data-value="0">No Students</option>
                         </datalist>
-                    </div>                    
+                    </div>
+
                 </div>
                 <table>
                     <thead>

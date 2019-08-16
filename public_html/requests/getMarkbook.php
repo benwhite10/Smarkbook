@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -38,13 +35,13 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 AND G.`Archived` <> 1
                 AND U.`Role` = 'STUDENT'
                 ORDER BY U.Surname;";
-    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, 
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName,
                 DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks,
                 GW.`DisplayName` DisplayName
                 FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`
-                WHERE GW.`Primary Staff ID` = $staffid AND GW.`Group ID` = $setid AND WV.`Deleted` = 0
+                WHERE (GW.`Primary Staff ID` = $staffid OR GW.`Additional Staff ID` = $staffid OR GW.`Additional Staff ID 2` = $staffid) AND GW.`Group ID` = $setid AND WV.`Deleted` = 0
                 AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1) AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1) AND SQ.`Deleted` = 0
                 GROUP BY GW.`Group Worksheet ID`
                 ORDER BY GW.`Date Due` DESC, WV.`WName`;";
@@ -62,6 +59,8 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
         $worksheets = db_select_exception($query2);
     } catch (Exception $ex) {
         $message = "There was an error retrieving the markbook";
+        log_error($message, "requests/getMarkbook.php", __LINE__);
+        log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
         returnToPageError($ex, $query2);
     }
 
@@ -79,6 +78,8 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
             $results = db_select_exception($query);
         } catch (Exception $ex) {
             $message = "There was an error analysing the markbook";
+            log_error($message, "requests/getMarkbook.php", __LINE__);
+            log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
             returnToPageError($ex, $message);
         }
         $newArray = array();
@@ -107,6 +108,8 @@ function downloadMarkbookForSetAndTeacher($setid, $staffid){
         $set_name = db_select_single_exception($query2, "Name");
     } catch (Exception $ex) {
         $message = "There was an error retrieving the markbook";
+        log_error($message, "requests/getMarkbook.php", __LINE__);
+        log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
         returnToPageError($ex, $message);
     }
 
@@ -142,7 +145,7 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
                 FROM TGROUPWORKSHEETS GW
                 JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
                 JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`
-                WHERE GW.`Primary Staff ID` = $staffid AND GW.`Group ID` = $setid AND WV.`Deleted` = 0
+                WHERE (GW.`Primary Staff ID` = $staffid OR GW.`Additional Staff ID` = $staffid OR GW.`Additional Staff ID 2` = $staffid) AND GW.`Group ID` = $setid AND WV.`Deleted` = 0
                 AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1) AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1) AND SQ.`Deleted` = 0
                 GROUP BY GW.`Group Worksheet ID`
                 ORDER BY GW.`Date Due`, WV.`WName`;";
@@ -152,6 +155,8 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
         $worksheets = db_select_exception($query2);
     } catch (Exception $ex) {
         $message = "There was an error retrieving the markbook";
+        log_error($message, "requests/getMarkbook.php", __LINE__);
+        log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
         returnToPageError($ex, $message);
     }
 
@@ -193,6 +198,8 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
             $results = db_select_exception($query);
         } catch (Exception $ex) {
             $message = "There was an error retrieving the markbook";
+            log_error($message, "requests/getMarkbook.php", __LINE__);
+            log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
             returnToPageError($ex, $message);
         }
 
@@ -238,15 +245,20 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
 
 function downloadAllSets($staffid) {
     $query1 = "SELECT Initials FROM TUSERS WHERE `User ID` = $staffid";
-    $query2 = "SELECT G.`Group ID` ID, G.Name Name "
-        . "FROM TUSERGROUPS U JOIN TGROUPS G ON U.`Group ID` = G.`Group ID` "
-        . "WHERE `User ID` = $staffid AND G.`Type ID` = 3 AND U.`Archived` <> 1 ORDER BY G.Name;";
+    $query2 = "SELECT G.`Group ID` ID, G.`Name`
+        FROM `TUSERGROUPS` UG
+        JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
+        WHERE UG.`User ID` = $staffid
+        AND UG.`Archived` = 0 AND G.`Archived` = 0
+        ORDER BY G.`Name`";
 
     try{
         $staff_initials = db_select_single_exception($query1, "Initials");
         $sets = db_select_exception($query2);
     } catch (Exception $ex) {
         $message = "There was an error retrieving the markbook";
+        log_error($message, "requests/getMarkbook.php", __LINE__);
+        log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
         returnToPageError($ex, $message);
     }
 
@@ -277,7 +289,7 @@ function downloadAllSets($staffid) {
 }
 
 function returnToPageError($ex, $message){
-    errorLog("There was an error in the get markbook request: " . $ex->getMessage());
+    log_error("There was an error in the get markbook request: " . $ex->getMessage(), "requests/getMarkbook.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message,
@@ -288,7 +300,7 @@ function returnToPageError($ex, $message){
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get markbook request: " . $message);
+    log_error("There was an error in the get markbook request: " . $message, "requests/getMarkbook.php", __LINE__);
     $response = array(
         "success" => FALSE);
     echo json_encode($response);

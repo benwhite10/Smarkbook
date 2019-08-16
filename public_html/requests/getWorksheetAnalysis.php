@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -96,7 +93,7 @@ function getWorksheetSummary($version_id, $return) {
     } catch (Exception $ex) {
         failRequest($ex->getMessage());
     }
-    
+
     $time_2 = microtime(true);
     $log_text .= "Worksheet: " . round($time_2-$time_1,2) . "s, ";
     // Get list of students
@@ -107,19 +104,19 @@ function getWorksheetSummary($version_id, $return) {
                     AND `Deleted` = 0 ";
 
         $gw_ids = db_select_exception($gw_query);
-        
+
         //$time_3 = microtime(true);
         //$log_text .= "DB Request 1: " . round($time_3-$time_2,2) . "s, ";
-        
+
         // 0.18 s
         $results_query = "SELECT CQ.`Student ID`, CQ.`Stored Question ID`, CQ.`Mark`, CQ.`Group Worksheet ID` FROM `TCOMPLETEDQUESTIONS` CQ
                             JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
                             WHERE GW.`Version ID` = $version_id AND CQ.`Deleted` = 0 AND GW.`Deleted` = 0";
         $results = db_select_exception($results_query);
-        
+
         //$time_3_1 = microtime(true);
         //$log_text .= "DB Request 2: " . round($time_3_1-$time_3,2) . "s, ";
-        
+
         // 2.0 s
         $students_query = "SELECT CQ.`Student ID`, CQ.`Group Worksheet ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, GW.`Group ID`, G.`Name`, B.`Baseline`, UU.`Initials` FROM `TCOMPLETEDQUESTIONS` CQ
                         JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
@@ -131,10 +128,10 @@ function getWorksheetSummary($version_id, $return) {
                         GROUP BY CQ.`Student ID`, CQ.`Group Worksheet ID`
                         ORDER BY G.`Name`, U.`Surname`";
         $students = db_select_exception($students_query);
-        
+
         //$time_3_2 = microtime(true);
         //$log_text .= "DB Request 3: " . round($time_3_2-$time_3_1,2) . "s, ";
-        
+
         $time_3 = microtime(true);
         $log_text .= "DB Requests: " . round($time_3-$time_2,2) . "s, ";
 
@@ -201,10 +198,10 @@ function getWorksheetSummary($version_id, $return) {
             $student_questions_array["Total"] = $total;
             $students[$i]["Questions"] = $student_questions_array;
         }
-        
+
         $time_4 = microtime(true);
         $log_text .= "Update students: " . round($time_4-$time_3,2) . "s, ";
-        
+
         foreach ($groups as $key => $group) {
             $total = 0;
             $count = 0;
@@ -218,7 +215,7 @@ function getWorksheetSummary($version_id, $return) {
             $groups[$key]["Questions"]["Total"]["AvMark"] = $total/$count;
             $groups[$key]["Questions"]["Total"]["AvCount"] = $count;
         }
-        
+
         $time_5 = microtime(true);
         $log_text .= "Update groups: " . round($time_5-$time_4,2) . "s, ";
         $log_text .= "Total time: " . round($time_5-$time_1,2) . "s, ";
@@ -1084,7 +1081,7 @@ function getQuestionWithID($questions, $sq_id) {
 }
 
 function returnToPageError($ex, $message){
-    errorLog("$message: " . $ex->getMessage());
+    log_error("$message: " . $ex->getMessage(), "requests/getWorksheetAnalysis.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $ex->getMessage());
@@ -1093,7 +1090,7 @@ function returnToPageError($ex, $message){
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get worksheet request: " . $message);
+    log_error("There was an error in the get worksheet request: " . $message, "requests/getWorksheetAnalysis.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

@@ -2,7 +2,6 @@
 
 $include_path = get_include_path();
 include_once $include_path . '/includes/authentication.php';
-include_once $include_path . '/public_html/includes/errorReporting.php';
 
 function orderBy($orderby, $desc){
     $query = "";
@@ -24,7 +23,7 @@ function orderBy($orderby, $desc){
                     $query .= "DESC ";
                 }
                 if($i != count($orderby) - 1){
-                    $query .= ","; 
+                    $query .= ",";
                 }
             }
         }
@@ -45,7 +44,7 @@ function groupBy($variables){
             $variable = $variables[$i];
             $query .= " $variable";
             if($i != count($variables) - 1){
-                $query .= ","; 
+                $query .= ",";
             }
         }
     }
@@ -66,7 +65,7 @@ function filterBy($variables, $values){
                 $value = $values[$i];
                 $query .= " $variable = '$value'";
                 if($i != count($variables) - 1){
-                    $query .= " AND "; 
+                    $query .= " AND ";
                 }
             }
         }
@@ -77,7 +76,7 @@ function filterBy($variables, $values){
 function sendCURLRequest($url, $postData){
     // Get cURL resource
     $curl = curl_init();
-    
+
     $url = $_SERVER['HTTP_HOST'] . $url;
 
     // Set some options - we are passing in a useragent too here
@@ -95,10 +94,10 @@ function sendCURLRequest($url, $postData){
         $success = FALSE;
         $resp = 'Error: "' . curl_error($curl) . '" - Code: ' . curl_errno($curl);
     }
-    
+
     // Close request to clear up some resources
     curl_close($curl);
-    
+
     return [$success, $resp];
 }
 
@@ -110,7 +109,7 @@ function validateRequestAndGetRoles($token) {
         if($token_array->parent_role !== null) array_push($roles, $token_array->parent_role);
         return $roles;
     } else {
-        errorLog("Request failed due to invalid JWT token: " . $response[1]);
+        log_error("Request failed due to invalid JWT token: " . $response[1], "requests/core.php", __LINE__);
         returnRequest(FALSE, null, "There was a problem validating your request", null);
     }
 }

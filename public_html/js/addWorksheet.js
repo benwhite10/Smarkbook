@@ -17,12 +17,13 @@ function init_page() {
 function requestAllStaff() {
     var infoArray = {
         orderby: "Initials",
-        token: user["token"]
+        token: user["token"],
+        type: "ALLSTAFF"
     };
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             requestStaffSuccess(json);

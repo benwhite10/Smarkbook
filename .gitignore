@@ -15,3 +15,5 @@ public_html/phpinfo.php
 public_html/downloads/*
 /db_backups/*
 .htaccess
+info.log
+public_html/user_data.txt

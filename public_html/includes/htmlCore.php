@@ -16,6 +16,7 @@ function pageHeader($title, $info_version) {
     echo "<script src='js/moment.js?$info_version'></script>";
     echo "<script src='js/methods.js?$info_version'></script>";
     echo "<script src='js/jquery.validate.min.js?$info_version'></script>";
+    echo "<script src='https://unpkg.com/micromodal/dist/micromodal.min.js'></script>";
     echo "<script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js'></script>";
     echo "<link rel='stylesheet' type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'/>";
     echo "<link rel='shortcut icon' href='branding/favicon.ico?$info_version'>";

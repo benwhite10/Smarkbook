@@ -8,18 +8,19 @@ $(document).ready(function(){
 
 function init_page() {
     writeNavbar(user);
-    getNotes(); 
+    getNotes();
 }
 
 function getStaff() {
     var infoArray = {
         orderby: "Initials",
-        token: user["token"]
+        token: user["token"],
+        type: "ALLSTAFF"
     };
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             getStaffSuccess(json);
@@ -60,7 +61,7 @@ function updateStudents(){
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStudents.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             updateStudentsSuccess(json);
@@ -74,9 +75,9 @@ function getStaffSuccess(json) {
         var htmlValue = staff.length === 0 ? "<option value='0'>No Teachers</option>" : "";
         $('#staffInput').html(htmlValue);
         for (var key in staff) {
-            $('#staffInput').append($('<option/>', { 
+            $('#staffInput').append($('<option/>', {
                 value: staff[key]["Staff ID"],
-                text : staff[key]["Initials"] 
+                text : staff[key]["Initials"]
             }));
         }
         var initialVal = $('#staffid').val();
@@ -95,9 +96,9 @@ function updateSetsSuccess(json){
         var htmlValue = sets.length === 0 ? "<option value='0'>No Sets</option>" : "";
         $('#setsInput').html(htmlValue);
         for (var key in sets) {
-            $('#setsInput').append($('<option/>', { 
+            $('#setsInput').append($('<option/>', {
                 value: sets[key]["ID"],
-                text : sets[key]["Name"] 
+                text : sets[key]["Name"]
             }));
         }
         var initialVal = $('#setid').val();
@@ -118,9 +119,9 @@ function updateStudentsSuccess(json){
         for (var key in students) {
             var fname = students[key]["PName"] !== "" ? students[key]["PName"] : students[key]["FName"];
             var name = fname + " " + students[key]["SName"];
-            $('#studentInput').append($('<option/>', { 
+            $('#studentInput').append($('<option/>', {
                 value: students[key]["ID"],
-                text : name 
+                text : name
             }));
         }
         var initialVal = $('#studentid').val();
@@ -158,7 +159,7 @@ function getNotesSuccess(json) {
             var name = note["Preferred Name"] + " " + note["Surname"];
             var date = note["date_format"];
             var group = note["Name"];
-            var note_text = note["Note"]; 
+            var note_text = note["Note"];
             htmlValue += "<tr><td>" + name + "</td><td>" + date + "</td><td>" + group + "</td><td>" + note_text + "</td></tr>";
         }
         htmlValue += "</table>";

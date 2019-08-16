@@ -1,14 +1,14 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
+include_once $include_path . '/includes/core.php';
 
 function logEvent($userid, $type, $note) {
     $query = "INSERT INTO TEVENTS (UserID, Type, Date, Note) VALUES ($userid, '$type', NOW(), '$note');";
     try {
         db_insert_query_exception($query);
     } catch (Exception $ex) {
-        errorLog($ex);
+        log_error("Logging event error: ". $ex->getMessage(), "includes/logEvents.php", __LINE__);
     }
 }
 
@@ -18,6 +18,6 @@ function logReport($userid, $stuid, $staffid, $setid, $note) {
     try {
         db_insert_query_exception($query);
     } catch (Exception $ex) {
-        errorLog($ex);
+        log_error("Logging report error: ". $ex->getMessage(), "includes/logEvents.php", __LINE__);
     }
 }

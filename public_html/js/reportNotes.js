@@ -18,12 +18,13 @@ function init_page() {
 function getStaff() {
     var infoArray = {
         orderby: "Initials",
-        token: user["token"]
+        token: user["token"],
+        type: "ALLSTAFF"
     };
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             getStaffSuccess(json);
@@ -64,7 +65,7 @@ function updateStudents(){
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStudents.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             updateStudentsSuccess(json);
@@ -78,9 +79,9 @@ function getStaffSuccess(json) {
         var htmlValue = staff.length === 0 ? "<option value='0'>No Teachers</option>" : "";
         $('#staffInput').html(htmlValue);
         for (var key in staff) {
-            $('#staffInput').append($('<option/>', { 
+            $('#staffInput').append($('<option/>', {
                 value: staff[key]["User ID"],
-                text : staff[key]["Initials"] 
+                text : staff[key]["Initials"]
             }));
         }
         var initialVal = user["userId"];
@@ -99,9 +100,9 @@ function updateSetsSuccess(json){
         var htmlValue = sets.length === 0 ? "<option value='0'>No Sets</option>" : "";
         $('#setsInput').html(htmlValue);
         for (var key in sets) {
-            $('#setsInput').append($('<option/>', { 
+            $('#setsInput').append($('<option/>', {
                 value: sets[key]["ID"],
-                text : sets[key]["Name"] 
+                text : sets[key]["Name"]
             }));
         }
         var initialVal = set_id;
@@ -122,9 +123,9 @@ function updateStudentsSuccess(json){
         for (var key in students) {
             var fname = students[key]["PName"] !== "" ? students[key]["PName"] : students[key]["FName"];
             var name = fname + " " + students[key]["SName"];
-            $('#studentInput').append($('<option/>', { 
+            $('#studentInput').append($('<option/>', {
                 value: students[key]["ID"],
-                text : name 
+                text : name
             }));
         }
         var initialVal = student_id;
@@ -160,8 +161,8 @@ function noteSavedSuccess(json){
     if(json["success"]){
         $('#note').val("");
         showSavedMessage();
-        setTimeout(function(){ 
-            closeMessage(); 
+        setTimeout(function(){
+            closeMessage();
         }, 3000);
     } else {
         showErrorMessage('Error');

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * The MIT License
  *
  * Copyright 2019 benwhite.
@@ -38,7 +38,7 @@ function createJWT($user_id, $user_role, $parent_id = null, $parent_role = null)
     $payload_array['parent_role'] = $parent_role;
     $payload_array['nbf'] = time();
     $payload_array['exp'] = $server === "local" ? time() + 315569520 : time() + 12*60*60;
-    
+
     $token = JWT::encode($payload_array, $jwt_key);
     return $token;
 }
@@ -89,11 +89,11 @@ function getUserRole($user_id) {
         if (count($result) > 0) {
             return $result[0]["Role"];
         } else {
-            errorLog("Get user role failed due to invalid user with ID ($user_id).");
+            log_error("Get user role failed due to invalid user with ID ($user_id).", "includes/authentication.php", __LINE__);
             return FALSE;
         }
     } catch (Exception $ex) {
-        errorLog("Get user role failed with exception: " . $ex->getMessage());
+        log_error("Get user role failed with exception: " . $ex->getMessage(), "includes/authentication.php", __LINE__);
         return FALSE;
     }
 }

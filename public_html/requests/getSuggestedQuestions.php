@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $tagList = json_decode($_POST["tagsList"], TRUE);
@@ -28,15 +25,15 @@ switch ($requestType){
 
 function generateQuestionsForStudent(){
     global $studentId, $tagList;
-    
+
     $tagList = setUpTagList();
-    
+
     // Create question list for student
     $questions = createQuestionsForStudent($studentId);
-    
+
     //Compare that to their own tag list
     $scoredQuestions = scoreQuestions($questions);
-    
+
     if(count($scoredQuestions) > 0){
         succeedRequest(getWorksheetInformationFor(getFirstSectionOfArray($scoredQuestions, 100, "score")));
     } else {
@@ -48,27 +45,27 @@ function generateQuestionsForStudent(){
 
 function setUpTagList(){
     global $tagList;
-    
+
     if (count($tagList) == 0) return;
-    
+
     $newTagList = [];
-    
+
     foreach ($tagList as $tag) {
         $newTagList[$tag["TagID"]] = array (
             "score" => $tag["weightedScore"]
         );
     }
-    
+
     return $newTagList;
 }
 
 function createQuestionsForStudent($student){
     global $tagList;
-    
+
     if (count($tagList) == 0) return null;
-    
+
     $query1 = "SELECT SQIDS.SQID, SQ.`Marks`, QT.`Tag ID` TagID, T.`Name` Name FROM (
-                    SELECT `Stored Question ID` SQID FROM TQUESTIONTAGS 
+                    SELECT `Stored Question ID` SQID FROM TQUESTIONTAGS
                     WHERE `Tag ID` IN (";
     foreach($tagList as $id => $tag){
         $query1 .= $id . ", ";
@@ -81,7 +78,7 @@ function createQuestionsForStudent($student){
                 JOIN TWORKSHEETVERSION WV ON SQ.`Version ID` = WV.`Version ID`
                 WHERE WV.`Deleted` = 0
                 ORDER BY SQIDS.SQID, T.`Name`;";
-    
+
     $query2 = "SELECT CQ.`Stored Question ID` SQID, MAX(CQ.`Mark`) Mark, GREATEST(DATEDIFF(CURDATE(), CQ.`Date Added`), 0) Days, DATE_FORMAT(CQ.`Date Added`, '%d/%m/%Y') Date
                 FROM TCOMPLETEDQUESTIONS CQ
                 WHERE CQ.`Student ID` = $student AND CQ.`Deleted` = 0
@@ -107,8 +104,8 @@ function createQuestionsForStudent($student){
                 $finalQuestions[$result["SQID"]]["mark"] = $result["Mark"];
                 $finalQuestions[$result["SQID"]]["days"] = $result["Days"];
                 $finalQuestions[$result["SQID"]]["date"] = $result["Date"];
-            } 
-        } 
+            }
+        }
         return $finalQuestions;
     } catch (Exception $ex) {
         failRequestWithException("Something went wrong loading all of the questions", $ex);
@@ -117,9 +114,9 @@ function createQuestionsForStudent($student){
 
 function scoreQuestions($questions){
     global $tagList;
-    
+
     if (count($questions) == 0) return null;
-    
+
     foreach($questions as $key => $question){
         $score = 0;
         $count = 0;
@@ -136,7 +133,7 @@ function scoreQuestions($questions){
         $questions[$key]["score"] = $avScore * $lastScoreWeight;
         // Add something to find the relevance of the question to that student based on classification tags
     }
-    
+
     return $questions;
 }
 
@@ -145,7 +142,7 @@ function getLastScoreWeight($score, $days){
         $length = 10 + $score * 60;
     } else {
         $length = 40 + $score * 120;
-    }  
+    }
     return min($days/$length, 1);
 }
 
@@ -199,7 +196,7 @@ function getWorksheetInformationFor($array){
 /* Exit page */
 
 function failRequestWithException($message, $ex){
-    errorLog("There was an error requesting the report: " . $ex->getMessage());
+    log_error("There was an error requesting the report: " . $ex->getMessage(), "requests/getSuggestedQuestions.php", __LINE__);
     failRequest($message . ": " . $ex->getMessage());
 }
 

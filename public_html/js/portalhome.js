@@ -34,9 +34,9 @@ function writeHomeGrid(user) {
     grid_options["tags"] = {url: "viewAllTags.php", title: "Manage Tags", img: "home-modify.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["notes"] = {url: "reportNotes.php?t=" + user_id, title: "Report Notes", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["quiz"] = {url: "quiz_menu.php", title: "Quiz", img: "home-quiz.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
-    
+
     var grid_html = "";
-    var staff_grid = ["view_worksheets", "mark_book", "checklists", "enter_results_staff", "reports_staff", "internal_results", "sets", "tags", "notes", "quiz"];
+    var staff_grid = ["view_worksheets", "mark_book", "checklists", "reports_staff", "sets", "tags", "quiz"];
     var student_grid = ["enter_results_student", "reports_student", "checklists", "quiz"];
     var final_grid = [];
     if(user_role === "STAFF" || user_role === "SUPER_USER") {
@@ -82,13 +82,13 @@ function setUpGrid(){
     // Min number = minAvailableSpace / maxSize
     var minN = (screenWidth + maxMargin - 2 * maxSideMargin) / (maxWidth + maxMargin);
     var intMinN = Math.ceil(minN);
-    
+
     var possN = new Array();
     for(var i = intMaxN; i >= intMinN; i--){
         var ratio = totalBlocks % i !== 0 ? (totalBlocks % i) / i : 1;
         possN.push(ratio);
     }
-    
+
     var n = 0;
     var maxRatio = 0;
     for(var i = 0; i < possN.length; i++){
@@ -97,7 +97,7 @@ function setUpGrid(){
             n = intMaxN - i;
         }
     }
-    
+
     var finalSize = minWidth;
     var finalMargin = minMargin;
     var finalSideMargin = getSideMargin(screenWidth, finalSize, finalMargin, n);
@@ -113,7 +113,7 @@ function setUpGrid(){
             }
         }
     }
-    
+
     // Set the size of everything
     var numCols = n;
     var numRows = Math.ceil(totalBlocks/numCols);
@@ -131,7 +131,7 @@ function setUpGrid(){
         } else {
             light = (col % 2 === 0);
         }
-        
+
         setUpBlockSize(i+1, left, right, top, bottom, finalSize, finalMargin, finalSideMargin, light);
     }
 }
@@ -146,16 +146,16 @@ function setUpBlockSize(num, left, right, top, bottom, size, margin, side, light
     } else {
         $(id).css("margin-left", margin / 2);
     }
-    
+
     if(right){
         $(id).css("margin-right", side - 1);
     } else {
         $(id).css("margin-right", margin / 2);
     }
-    
+
     $(id).css("margin-top", margin / 2);
     $(id).css("margin-bottom", margin / 2);
-    
+
     if(light){
         $(id).addClass("light");
     } else {

@@ -59,7 +59,7 @@ function db_insert_query_exception($query){
 function db_select($query){
     $rows = array();
     $result = db_query($query);
-    
+
     if($result == false){
         return false;
     }
@@ -108,7 +108,7 @@ function db_escape_string($string) {
     return mysqli_real_escape_string($mysql, $string);
 }
 
-function db_back_up() {      
+function db_back_up() {
    $config = parse_ini_file('config.ini');
    $dbhost = $config['host'];
    $dbuser = $config['username'];
@@ -116,13 +116,22 @@ function db_back_up() {
    $dbname = $config['dbname'];
    $server = $config['server'];
    $mysqldump = $config['mysqldump'];
-   
+
    $backup_name = "$dbname-" . date("Y-m-d-H-i-s") . ".sql.gz";
    $include_path = get_include_path();
    $backup_file = "$include_path/db_backups/$backup_name";
    $command = "$mysqldump --host=$dbhost --user=$dbuser --password=$dbpass $dbname | gzip > $backup_file";
-   exec($command);
-   
+   try {
+       exec($command);
+       log_info("Database backed up. ($backup_file)", "includes/db_functions.php");
+       return [TRUE, null];
+   } catch (Exception $ex) {
+       $message = "Error baccking up the database" . $ex->getMessage();
+       log_error($message, "includes/db_functions.php", __LINE__);
+       return [FALSE, $message];
+   }
+
+
    if($server === "local") {
        return ["LOCAL:", $backup_name, $backup_file];
    } else {

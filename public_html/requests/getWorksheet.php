@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -115,7 +112,7 @@ function getWorksheetForGWID($gwid){
         $worksheetInputs = db_select_exception($query7);
         $finalResults = groupResultsByStudent($results, $students);
     } catch (Exception $ex) {
-        errorLog("Something went wrong loading the data for the worksheet: " . $ex->getMessage());
+        log_error("Something went wrong loading the data for the worksheet: " . $ex->getMessage(), "requests/getWorksheet.php", __LINE__);
         $test = array(
             "success" => FALSE,
             "message" => $ex->getMessage());
@@ -190,7 +187,7 @@ function downloadGWID($gwid) {
         $students = db_select_exception($query4);
         $finalResults = groupResultsByStudent($results, $students);
     } catch (Exception $ex) {
-        errorLog("Something went wrong downloading the data for the worksheet: " . $ex->getMessage());
+        log_error("Something went wrong downloading the data for the worksheet: " . $ex->getMessage(), "requests/getWorksheet.php", __LINE__);
         $test = array(
             "success" => FALSE,
             "message" => $ex->getMessage());
@@ -296,7 +293,7 @@ function getNotesForGWID($gwid){
     try{
         $notes = optimiseArray(db_select_exception($query), "Student ID");
     } catch (Exception $ex) {
-        errorLog("Something went wrong loading the notes for the worksheet: " . $ex->getMessage());
+        log_error("Something went wrong loading the notes for the worksheet: " . $ex->getMessage(), "requests/getWorksheet.php", __LINE__);
         $test = array(
                 "success" => FALSE);
         echo json_encode($test);
@@ -391,7 +388,7 @@ function getTagsForQuestions($questions) {
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get group request: " . $message);
+    log_error("There was an error in the get group request: " . $message, "requests/getWorksheet.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

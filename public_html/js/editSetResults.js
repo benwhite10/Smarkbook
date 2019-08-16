@@ -17,7 +17,6 @@ function init_page() {
     writeDateInputs();
     setUpInputs();
     requestWorksheet(gwid);
-    requestAllStaff();
     log_event("EDIT_SET_RESULTS", user["userId"], gwid);
 
     setAutoSave(5000);
@@ -214,7 +213,7 @@ function moveUpDown(id, up) {
                 new_id = pos[0] + "_" + student;
             } else {
                 new_id = false;
-            }  
+            }
         }
     }
     if (new_id) {
@@ -331,11 +330,11 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
 
         setScreenSize();
-        setUpWorksheetInfo();
         parseMainTable();
         getQuestionAverages();
         updateInputTypes();
         toggleEnterTotals();
+        requestAssociatedStaff();
     } else {
         console.log("There was an error getting the worksheet: " + json["message"]);
     }
@@ -479,15 +478,17 @@ function setAutoSave(interval) {
 }
 
 /* Get Staff */
-function requestAllStaff() {
+function requestAssociatedStaff() {
+    var details = JSON.parse(sessionStorage.getItem("details"));
     var infoArray = {
-        orderby: "Initials",
+        groupid: details["SetID"],
+        type: "ASSOCIATEDSETSTAFF",
         token: user["token"]
     };
     $.ajax({
         type: "POST",
         data: infoArray,
-        url: "/requests/getStaff.php",
+        url: "/requests/getUsers.php",
         dataType: "json",
         success: function(json){
             requestStaffSuccess(json);
@@ -498,6 +499,7 @@ function requestAllStaff() {
 function requestStaffSuccess(json) {
     if(json["success"]) {
         sessionStorage.setItem("staffList", JSON.stringify(json["response"]));
+        setUpWorksheetInfo();
     } else {
         console.log("There was an error getting the staff: " + json["message"]);
     }

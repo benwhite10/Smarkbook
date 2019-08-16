@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 include_once $include_path . '/public_html/includes/logEvents.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
@@ -81,7 +78,7 @@ function createNewGroupWorksheet($staff, $setid, $versionid) {
         db_commit_transaction();
     } catch (Exception $ex) {
         db_rollback_transaction();
-        errorLog("Error creating a new group worksheet: " . $ex->getMessage());
+        log_error("Error creating a new group worksheet: " . $ex->getMessage(), "requests/setGroupWorksheet.php", __LINE__);
         failRequest($ex->getMessage());
     }
 
@@ -101,7 +98,7 @@ function succeedRequest($result) {
 }
 
 function failRequest($message) {
-    errorLog("There was an error in the get group request: " . $message);
+    log_error("There was an error in the get group request: " . $message, "requests/setGroupWorksheet.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message

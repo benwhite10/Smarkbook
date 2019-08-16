@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $orderby = filter_input(INPUT_POST,'orderby',FILTER_SANITIZE_STRING);
@@ -34,9 +31,9 @@ switch ($requestType){
 }
 
 function getSetsForUser($staffid, $orderby, $desc){
-    $query = "select G.`Group ID` ID, G.`Name` Name from TGROUPS G
-                join TUSERGROUPS UG on G.`Group ID` = UG.`Group ID`";
-    $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`"], [$staffid, 3, 0]);
+    $query = "SELECT G.`Group ID` ID, G.`Name` Name FROM TGROUPS G
+                JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`";
+    $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`", "G.`Archived`"], [$staffid, 3, 0, 0]);
     $query .= orderBy([$orderby], [$desc]);
 
     try{
@@ -52,10 +49,7 @@ function getSetsForUser($staffid, $orderby, $desc){
             $sets[$key]["Initials"] = $result[0]["Initials"];
         }
     } catch (Exception $ex) {
-        errorLog("Error loading the worksheets: " . $ex->getMessage());
-        $response = array(
-            "success" => TRUE);
-        echo json_encode($response);
+        failRequest("Error loading the worksheets: " . $ex->getMessage());
     }
 
     $response = array(
@@ -67,18 +61,16 @@ function getSetsForUser($staffid, $orderby, $desc){
 function getAllSets() {
     $query = "SELECT G.`Group ID` ID, G.`Name` Name, U.`Initials` Initials FROM TGROUPS G
                 JOIN TUSERGROUPS UG on G.`Group ID` = UG.`Group ID`
-                JOIN TUSERS U ON UG.`User ID` = U.`User ID` 
+                JOIN TUSERS U ON UG.`User ID` = U.`User ID`
                 WHERE G.`Type ID` = 3
-                AND UG.`Archived` = 0 
-                AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER') 
+                AND UG.`Archived` = 0 AND G.`Archived` = 0
+                AND (U.`Role` = 'STAFF' OR U.`Role` = 'SUPER_USER')
                 GROUP BY G.`Group ID`
                 ORDER BY G.`Name` ";
     try{
         $sets = db_select_exception($query);
     } catch (Exception $ex) {
-        $message = "Error loading the worksheets: " . $ex->getMessage();
-        errorLog($message);
-        failRequest($message);
+        failRequest("Error loading the worksheets: " . $ex->getMessage());
     }
 
     $response = array(
@@ -88,7 +80,7 @@ function getAllSets() {
 }
 
 function failRequest($message){
-    errorLog("There was an error in the get group request: " . $message);
+    log_error("There was an error in the get group request: " . $message, "requests/getGroup.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

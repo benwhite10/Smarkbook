@@ -1,10 +1,7 @@
 <?php
 
 $include_path = get_include_path();
-include_once $include_path . '/includes/db_functions.php';
-include_once $include_path . '/includes/session_functions.php';
-include_once $include_path . '/public_html/classes/AllClasses.php';
-include_once $include_path . '/public_html/requests/core.php';
+include_once $include_path . '/includes/core.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $tagId = filter_input(INPUT_POST,'tagid',FILTER_SANITIZE_NUMBER_INT);
@@ -46,14 +43,14 @@ function requestTagInfo($tagid){
         $msg = "There was an error retrieving the tag.";
         failRequest($msg . ": " . $ex->getMessage());
     }
-    
+
     if(count($result) > 0){
         $tagInfo = $result[0];
     } else {
         $msg = "There were no tags returned for that id.";
         failRequest($msg . ": " . $ex->getMessage());
     }
-    
+
     $response = array(
         "success" => TRUE,
         "tagInfo" => $tagInfo);
@@ -176,14 +173,14 @@ function succeedRequest($message, $array){
         $response[$key] = $value;
     }
     if($message !== null){
-        infoLog($message);
+        log_info($message, "requests/tags.php");
     }
     echo json_encode($response);
     exit();
 }
 
 function failRequest($message){
-    errorLog("There was an error in the tag request: " . $message);
+    log_error("There was an error in the tag request: " . $message, "requests/tags.php", __LINE__);
     $response = array(
         "success" => FALSE,
         "message" => $message);

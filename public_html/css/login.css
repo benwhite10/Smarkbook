@@ -14,10 +14,10 @@
     top: 0;
     left: 0;
 }
-  
+
 /*Login container*/
 
-.login_container { 
+.login_container {
   height: auto;
   width: 400px;
   margin-left: auto;
@@ -79,7 +79,7 @@
 }
 
 .login_inner_container > input {
-    width: calc(100% - 20px);
+    width: 100%;
     margin: 0;
     margin-bottom: 15px;
     padding: 0 10px;
@@ -108,7 +108,7 @@
     font-family: 'Open Sans', sans-serif;
     font-size: 24px;
     font-weight: 300;
-    line-height: 40px;
+    line-height: 35px;
     text-align: center;
     user-select: none;
 }
