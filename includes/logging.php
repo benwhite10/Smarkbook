@@ -19,7 +19,7 @@ function write_log($message) {
     $logs_path = $include_path . "/logs/";
     $current_log_path = $logs_paths . "/info.log";
     $file_name = date("Y-m-d") . ".log";
-    $file_path = $info_root . $file_name;
+    $file_path = $logs_path . $file_name;
     if(!file_exists($file_path)) fopen($file_path, "w");
     if(!file_exists($current_log_path)) fopen($current_log_path, "w");
     try {
