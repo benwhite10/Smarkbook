@@ -38,7 +38,8 @@ function logInUser($user_input, $pwd) {
         $user = createUser($user_id);
         $user->token = createJWT($user_id, $user->role);
     }
-    log_info("User (" . $user["initials"] . " - $user_id) logged in.", "requests/authentication.php");
+    log_info("User (" . $user->getInitials() . " - $user_id) logged in.", "requests/authentication.php");
+    logEvent($user_id, "USER_LOGIN", "");
     returnRequest(TRUE, array(
         "success" => $response[0],
         "message" => $response[1],
@@ -70,8 +71,6 @@ function createUser($user_id) {
     $return_user = $user->getRole() === 'STUDENT' ? Student::createStudentFromId($user_id) : Teacher::createTeacherFromId($user_id);
     $return_user->parent_id = "";
     $return_user->parent_role = "";
-    log_info("User $user_id has been successfully logged in.", "includes/authentication.php");
-    logEvent($user_id, "USER_LOGIN", "");
     return $return_user;
 }
 

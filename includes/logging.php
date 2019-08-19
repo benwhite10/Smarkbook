@@ -16,11 +16,12 @@ function log_error($message, $file, $line) {
 
 function write_log($message) {
     $include_path = get_include_path();
-    $current_log_path = $include_path . "/info.log";
-    $info_root = $include_path . "/logs/";
+    $logs_path = $include_path . "/logs/";
+    $current_log_path = $logs_paths . "/info.log";
     $file_name = date("Y-m-d") . ".log";
     $file_path = $info_root . $file_name;
     if(!file_exists($file_path)) fopen($file_path, "w");
+    if(!file_exists($current_log_path)) fopen($current_log_path, "w");
     try {
         error_log($message, 3, $file_path);
         error_log($message, 3, $current_log_path);
