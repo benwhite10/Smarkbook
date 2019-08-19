@@ -38,6 +38,7 @@ function logInUser($user_input, $pwd) {
         $user = createUser($user_id);
         $user->token = createJWT($user_id, $user->role);
     }
+    log_info("User (" . $user["initials"] . " - $user_id) logged in.", "requests/authentication.php");
     returnRequest(TRUE, array(
         "success" => $response[0],
         "message" => $response[1],
