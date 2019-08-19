@@ -1,0 +1,23 @@
+#maths_title {
+	text-align: center
+}
+
+#maths_button {
+	width: 200px;
+    overflow: hidden;
+    margin: 10px auto;
+    padding: 12px 12px;
+    cursor: pointer;
+	color: #FFFFFF;
+    background: #2b90d9;
+	text-align: center;
+}
+
+#maths_button.h3 {
+	 line-height: 50px
+}
+
+#maths_button:hover {
+	transition: all 60ms ease;
+    opacity: .85;
+}
