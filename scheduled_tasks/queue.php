@@ -7,7 +7,7 @@ require $include_path . '/includes/class.phpmailer.php';
 
 function checkQueue() {
     $config = getConfigFile();
-    $dev = $config["status"] === "dev";
+    $dev = $config["status"] === "dev";    
     $running_query = "SELECT * FROM `TTASKSQUEUE`
         WHERE `Running` = 1";
     $queue_query = "SELECT * FROM `TTASKSQUEUE`
