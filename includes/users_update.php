@@ -35,7 +35,7 @@ function updateTerms($terms, $name, $key) {
         $update_query = "UPDATE `TACADEMICYEAR` SET `CurrentYear` = IF(`StartingYear`=$current_year, 1, 0)";
         db_query_exception($update_query);
     } catch (Exception $ex) {
-        log_error("Error updating the current academic year.", "db_tables/update_tables.php", __LINE__);
+        log_error("Error updating the current academic year.", "includes/users_update.php", __LINE__);
         log_error($ex->getMessage(), "db_tables/update_tables.php", __LINE__);
     }
 }

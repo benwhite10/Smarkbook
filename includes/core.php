@@ -26,6 +26,7 @@ function runUpdate($isams_array, $name, $key, $update_current, $current_array) {
     $isams_array_count = count($isams_array);
     $isams_array_chunked = array_chunk($isams_array, 1000);
     $isams_array_chunked_count = count($isams_array_chunked);
+    if ($isams_array_chunked_count === 0) log_info("No data to update for $name.", "includes/core.php");
     for ($j = 0; $j < $isams_array_chunked_count; $j++) {
         $count_text = $isams_array_chunked_count === 1 ? "" : "(" . ($j + 1) . "/" . $isams_array_chunked_count . ")";
         $chunk = $isams_array_chunked[$j];

@@ -21,18 +21,18 @@ function write_log($message) {
     $file_name = date("Y-m-d") . ".log";
     $file_path = $logs_path . $file_name;
     try {
-    	if(!file_exists($file_path)) {
-	    fopen($file_path, "w");
-	    chmod($file_path, 0771);
-	}
-    	error_log($message, 3, $file_path);
-	if(!file_exists($current_log_path)) {
+        if(!file_exists($file_path)) {
+            fopen($file_path, "w");
+            chmod($file_path, 0771);
+        }
+        error_log($message, 3, $file_path);
+        if(!file_exists($current_log_path)) {
             fopen($current_log_path, "w");
             chmod($current_log_path, 0771);
         }
         error_log($message, 3, $current_log_path);
     } catch (Exception $ex) {
-	return;
+        return;
     }
     return;
 }
