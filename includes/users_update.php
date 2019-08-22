@@ -136,7 +136,7 @@ function updateSets($sets, $set_lists, $update_all_sets) {
                 $update_query = "UPDATE `TUSERGROUPS` SET ";
                 for ($j = 0; $j < count($update_array); $j++) {
                     $update_query .= "`" . $update_array[$j][0] . "`=" . $update_array[$j][1];
-                    if ($j + 1 < count($update_query)) $update_query .= ", ";
+                    if ($j + 1 < count($update_array)) $update_query .= ", ";
                 }
                 $update_query .= " WHERE `Link ID`=" . $user_groups[$i]["Link ID"];
                 db_query_exception($update_query);

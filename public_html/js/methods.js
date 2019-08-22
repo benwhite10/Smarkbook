@@ -24,7 +24,7 @@ function closeIEMsg() {
     $("#msg_IE").css("display", "none");
 }
 
-function validateAccessToken(user, roles) {
+function validateAccessToken(user, roles, unauthorised = false) {
     if (!user || user === null) {
         log_out();
         return;
@@ -34,7 +34,7 @@ function validateAccessToken(user, roles) {
     var user_role = jwt["user_role"];
     var parent_role = jwt["parent_role"];
 
-    if(!checkRole(user_role, roles) && !checkRole(parent_role, roles)) unauthorisedAccess();
+    if(!checkRole(user_role, roles) && !checkRole(parent_role, roles)) unauthorisedAccess(unauthorised);
 
     var infoArray = {
         type: "validateSession",
@@ -77,8 +77,12 @@ function log_out() {
     window.location.href = "/login.php";
 }
 
-function unauthorisedAccess() {
-    window.location.href = "/unauthorisedAccess.php";
+function unauthorisedAccess(unauthorised) {
+    if (unauthorised) {
+        window.dispatchEvent(new Event("valid_user"));
+    } else {
+        window.location.href = "/unauthorisedAccess.php";
+    }
 }
 
 function writeNavbar(user) {

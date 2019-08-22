@@ -11,11 +11,11 @@ $info_version = Info::getInfo()->getVersion();
     <?php googleAnalytics(); ?>
     <?php pageHeader("Smarkbook", $info_version); ?>
     <script>
-        var user; 
+        var user;
         $(document).ready(function(){
             user = JSON.parse(localStorage.getItem("sbk_usr"));
             window.addEventListener("valid_user", function(){init_page();});
-            validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
+            validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"], true);
         });
         function init_page() {
             writeNavbar(user);
