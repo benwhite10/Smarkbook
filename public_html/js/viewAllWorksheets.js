@@ -236,6 +236,7 @@ function writeWorksheetInfoOption(label, value) {
 
 function setUpFolders(worksheets) {
     folders = [];
+    worksheets = orderWorksheets(worksheets);
     for (var i = 0; i < worksheets.length; i++) {
         var worksheet = worksheets[i];
         folders.push({
@@ -249,18 +250,41 @@ function setUpFolders(worksheets) {
            state: {opened: false, disabled: false, selected: false}
         });
     }
-    orderFolders();
 }
 
-function orderFolders() {
+function orderWorksheets(worksheets) {
     var temp_folders = [];
-    var type_order = ["Folder", "File"];
-    for (var i = 0; i < type_order.length; i++) {
-        for (var j = 0; j < folders.length; j++) {
-            if (folders[j].type === type_order[i]) temp_folders.push(folders[j]);
-        }
+    var temp_files = [];
+    for (var j = 0; j < worksheets.length; j++) {
+        if (worksheets[j].Type === "Folder") temp_folders.push(worksheets[j]);
+        if (worksheets[j].Type === "File") temp_files.push(worksheets[j]);
     }
-    folders = temp_folders;
+    temp_folders.sort(compareValues('WName'));
+    temp_files.sort(compareValues('CustomDate', 'desc'));
+    return temp_folders.concat(temp_files);
+}
+
+// function for dynamic sorting
+function compareValues(key, order='asc') {
+      return function(a, b) {
+            if(!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+                // property doesn't exist on either object
+                return 0;
+            }
+
+            const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
+            const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
+
+            let comparison = 0;
+            if (varA > varB) {
+                comparison = 1;
+            } else if (varA < varB) {
+                comparison = -1;
+            }
+            return (
+                (order == 'desc') ? (comparison * -1) : comparison
+            );
+      };
 }
 
 function setUpJSTree() {
