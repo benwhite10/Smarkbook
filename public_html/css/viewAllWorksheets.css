@@ -672,3 +672,16 @@ a, a:hover, a:focus {
     font-weight: 400;
     text-decoration: none;
 }
+
+.jstree-icon {
+    float: left;
+}
+
+.left_span {
+    float: left;
+}
+
+.right_span {
+    margin-right: 10px;
+    float: right;
+}

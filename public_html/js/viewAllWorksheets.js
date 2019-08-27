@@ -236,32 +236,38 @@ function writeWorksheetInfoOption(label, value) {
 
 function setUpFolders(worksheets) {
     folders = [];
-    worksheets = orderWorksheets(worksheets);
     for (var i = 0; i < worksheets.length; i++) {
         var worksheet = worksheets[i];
         folders.push({
            id: worksheet["ID"],
            parent: worksheet["ParentID"],
-           text: worksheet["WName"],
+           value: worksheet["WName"],
            date: worksheet["Date"],
+           customDate: worksheet["CustomDate"],
            type: worksheet["Type"],
            changed: false,
            changes_sent: false,
            state: {opened: false, disabled: false, selected: false}
         });
     }
+    orderFoldersAndUpdateText();
 }
 
-function orderWorksheets(worksheets) {
+function orderFoldersAndUpdateText() {
     var temp_folders = [];
     var temp_files = [];
-    for (var j = 0; j < worksheets.length; j++) {
-        if (worksheets[j].Type === "Folder") temp_folders.push(worksheets[j]);
-        if (worksheets[j].Type === "File") temp_files.push(worksheets[j]);
+    for (var j = 0; j < folders.length; j++) {
+        if (folders[j].type === "Folder") temp_folders.push(folders[j]);
+        if (folders[j].type === "File") temp_files.push(folders[j]);
     }
-    temp_folders.sort(compareValues('WName'));
-    temp_files.sort(compareValues('CustomDate', 'desc'));
-    return temp_folders.concat(temp_files);
+    temp_folders.sort(compareValues("value"));
+    temp_files.sort(compareValues("customDate", "desc"));
+    folders = temp_folders.concat(temp_files);
+    for (var j = 0; j < folders.length; j++) {
+        var text = "<span class='left_span'>" + folders[j]["value"] + "</span>";
+        if (folders[j]["type"] === "File") text += "<span class='right_span'>" + folders[j]["date"] + "</span>";
+        folders[j]["text"] = text;
+    }
 }
 
 // function for dynamic sorting
@@ -347,7 +353,7 @@ function updateMovedFiles(new_data) {
         for (var j = 0; j < folders.length; j++) {
             if (new_folder["id"] === folders[j]["id"]) {
                 if (checkIfChangedFolder(new_folder, folders[j])) {
-                    folders[j]["text"] = new_folder["text"];
+                    folders[j]["value"] = new_folder["text"];
                     folders[j]["parent"] = getNewParent(new_folder);
                     folders[j]["changed"] = true;
                 }
@@ -398,18 +404,26 @@ function requestFolderUpdate() {
         array: changes,
         token: user["token"]
     };
+    console.log(infoArray);
     $.ajax({
         type: "POST",
         data: infoArray,
         url: "/requests/worksheet.php",
         dataType: "json",
         success: function(json){
+            console.log(json);
             if (json["success"]) {
                 updateChangesArray(json["result"], null);
                 failed_updates = 0;
                 update_locked = false;
                 requestFolderUpdate();
             } else {
+                if (json["result"] === undefined) {
+                    $("#message_modal-content").html("<p>There has been an error updating the folders. Please refresh and try again.<br>If the problem persists then contact <a mailto='contact.smarkbook@gmail.com'>support</a>.</p>");
+                    MicroModal.show("message_modal");
+                    console.log(json);
+                    return;
+                }
                 updateChangesArray(json["result"]["updated"], json["result"]["errors"]);
                 failed_updates++;
                 if (failed_updates < 5) {
@@ -423,6 +437,7 @@ function requestFolderUpdate() {
                     $("#message_modal-content").html("<p>There has been an error updating the folders. Please refresh and try again.<br>If the problem persists then contact <a mailto='contact.smarkbook@gmail.com'>support</a>.</p>");
                     MicroModal.show("message_modal");
                     console.log("Update filetree request failed too many times and has been disabled.");
+                    console.log(json);
                 }
             }
         },
@@ -478,7 +493,7 @@ function updateChangesArrayOnError() {
 }
 
 function checkIfChangedFolder(new_folder, original_folder) {
-    if (new_folder["text"] !== original_folder["text"]) return true;
+    if (new_folder["original"]["value"] !== original_folder["value"]) return true;
     if (new_folder["parent"] !== original_folder["parent"]) return true;
     return false;
 }
@@ -499,7 +514,7 @@ function checkOperation(operation, node, parent, position, more) {
 function refreshTreeForRoot(new_root) {
     root = isNaN(parseInt(new_root)) ? "#" : parseInt(new_root);
     setUpFilePathBar("all_worksheets_top_bar");
-    orderFolders();
+    orderFoldersAndUpdateText();
     $('#worksheets_jstree').jstree(true).settings.core.data = setUpDataForRoot(folders, root);
     $("#worksheets_jstree").jstree("deselect_all", true);
     $('#worksheets_jstree').jstree(true).refresh();
@@ -541,7 +556,7 @@ function getFullFilePath(folders, root) {
         flag = false;
         for (var i = 0; i < folders.length; i++) {
             if (parseInt(folders[i]["id"]) === current_root) {
-                urls.push([folders[i]["id"], folders[i]["text"]]);
+                urls.push([folders[i]["id"], folders[i]["value"]]);
                 current_root = parseInt(folders[i]["parent"]);
                 flag = true;
                 break;
@@ -634,7 +649,7 @@ function clickRename(type) {
         var selected = $("#worksheets_jstree").jstree("get_selected", true);
         if (selected.length === 0) return;
         current_id = selected[0]["original"]["id"];
-        current_name = selected[0]["original"]["text"];
+        current_name = selected[0]["original"]["value"];
     }
     $("#input_modal-title").html("Rename");
     $("#input_modal_input").val(current_name);
@@ -659,7 +674,7 @@ function clickDelete(type) {
         if (selected.length === 0) return;
         selected_type = selected[0]["original"]["type"];
         current_id = selected[0]["original"]["id"];
-        current_name = selected[0]["original"]["text"];
+        current_name = selected[0]["original"]["value"];
         if (selected_type === "File") {
             message = "<p>Are you sure your wish to delete the file '<b>" + current_name + "</b>'?";
         } else {
@@ -732,11 +747,13 @@ function renameFolder() {
 
     for (var j = 0; j < folders.length; j++) {
         if (folder_id === parseInt(folders[j]["id"])) {
-            folders[j]["text"] = name;
+            // TODO add text change here
+            folders[j]["value"] = name;
             folders[j]["changed"] = true;
             break;
         }
     }
+    orderFoldersAndUpdateText();
     if (selected_worksheet && selected_worksheet["Version ID"] && parseInt(selected_worksheet["Version ID"]) === parseInt(folder_id)) {
         selected_worksheet["WName"] = name;
         writeSelectedWorksheet(selected_worksheet);
@@ -863,12 +880,14 @@ function newFolderSuccess(new_folder) {
     folders.push({
         id: new_folder["ID"],
         parent: new_folder["ParentID"],
-        text: new_folder["WName"],
+        value: new_folder["WName"],
+        customDate: new_folder["CustomDate"],
         date: new_folder["Date"],
         type: new_folder["Type"],
         changed: false,
         state: {opened: false, disabled: false, selected: false}
-     });
+    });
+    orderFoldersAndUpdateText();
     MicroModal.close("input_modal");
     $("#input_modal_input").val("New Folder");
     refreshTreeForRoot(root);

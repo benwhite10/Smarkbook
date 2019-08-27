@@ -290,7 +290,7 @@ function updateFileTree($update_array) {
     $updated = [];
     $errors = [];
     for ($i = 0; $i < count($update_array); $i++) {
-        $name = $update_array[$i]["text"];
+        $name = $update_array[$i]["value"];
         $parent = $update_array[$i]["parent"];
         $id = $update_array[$i]["id"];
         $query = "UPDATE `TWORKSHEETVERSION` SET `WName`='$name',`ParentID`='$parent' WHERE `Version ID` = $id;";
