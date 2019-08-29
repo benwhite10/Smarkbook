@@ -416,12 +416,12 @@ function updateWorksheetTags() {
 
 function getWorksheetInputs() {
     var update_array = [];
-    var input_types = JSON.parse(sessionStorage.getItem("input_types"));
+    if (document.getElementById("select_input_checkbox_-1").checked) update_array.push("-1");
+    if (document.getElementById("select_input_checkbox_0").checked) update_array.push("0");
+    var input_types = JSON.parse(sessionStorage.getItem("inputs"));
     for (var i = 0; i < input_types.length; i++) {
         var row = input_types[i];
-        if (document.getElementById("select_input_checkbox_" + row["Input"]).checked) {
-            update_array.push(row["Input"]);
-        }
+        if (document.getElementById("select_input_checkbox_" + row["ID"]).checked) update_array.push(row["ID"]);
     }
     return update_array;
 }
@@ -2253,7 +2253,7 @@ function click_input(id) {
 }
 
 function click_checkbox(id) {
-    document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
+    //document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
 }
 
 function click_tag(id) {
@@ -2262,7 +2262,7 @@ function click_tag(id) {
 }
 
 function click_tag_checkbox(id) {
-    document.getElementById("select_tag_checkbox_" + id).checked = !document.getElementById("select_tag_checkbox_" + id).checked;
+    //document.getElementById("select_tag_checkbox_" + id).checked = !document.getElementById("select_tag_checkbox_" + id).checked;
 }
 
 function change_input(id) {
