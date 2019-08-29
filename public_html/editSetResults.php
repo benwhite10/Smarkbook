@@ -161,10 +161,16 @@ $info_version = Info::getInfo()->getVersion();
                                 <td class="form title">
                                     <h1>Inputs</h1>
                                 </td>
+                                <td class="form title">
+                                    <h1>Tags</h1>
+                                </td>
                             </tr>
                             <tr class="form">
-                                <td class="form inputs" colspan="2">
-                                    <div class="select_inputs_input" id="select_inputs_input"></div>
+                                <td class="form inputs">
+                                    <div class="select_inputs_input left" id="select_inputs_input"></div>
+                                </td>
+                                <td class="form inputs">
+                                    <div class="select_inputs_input" id="select_inputs_tags"></div>
                                 </td>
                             </tr>
                             <tr class="form grade_boundaries_row">

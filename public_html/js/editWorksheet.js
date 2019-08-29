@@ -219,7 +219,7 @@ function requestStaffSuccess(json) {
 
 function requestAllTags(){
     var infoArray = {
-        type: "GETALLTAGS",
+        type: "GETALLWORKSHEETTAGS",
         token: user["token"]
     };
     $.ajax({

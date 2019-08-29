@@ -177,13 +177,16 @@ function deleteSet($set_id) {
 }
 
 function getSetsForStaff($staff_id) {
-    $sets_query = "SELECT G.`Group ID`, G.`Name`
-        FROM `TUSERGROUPS` UG
-        JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
-        WHERE UG.`User ID` = $staff_id
-        AND UG.`Archived` = 0 AND G.`Archived` = 0
-        ORDER BY G.`Name`";
     try{
+        $year_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
+        $year_response = db_select_exception($year_query);
+        $current_year_id = $year_response[0]["ID"];
+        $sets_query = "SELECT G.`Group ID`, G.`Name`
+            FROM `TUSERGROUPS` UG
+            JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
+            WHERE UG.`User ID` = $staff_id
+            AND UG.`Archived` = 0 AND G.`Archived` = 0 AND G.`AcademicYear` = $current_year_id 
+            ORDER BY G.`Name`";
         $sets = db_select_exception($sets_query);
         for ($i = 0; $i < count($sets); $i++) {
             $set_id = $sets[$i]["Group ID"];

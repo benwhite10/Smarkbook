@@ -77,14 +77,13 @@ function updateSets($sets, $set_lists, $update_all_sets) {
         "DBCol" => "CurrentGroup"
     ));
     try {
-        $year_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
+        /*$year_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
         $year_response = db_select_exception($year_query);
         $current_year_id = $year_response[0]["ID"];
         $update_query = "UPDATE `TGROUPS`
             SET `Type ID` = 3,
-            `AcademicYear` = IF(`CurrentGroup`=0, `AcademicYear`, $current_year_id),
-            `Archived` = IF(`CurrentGroup`=0,1,0)";
-        db_query_exception($update_query);
+            `AcademicYear` = IF(`CurrentGroup`=0, `AcademicYear`, $current_year_id)";
+        db_query_exception($update_query);*/
     } catch (Exception $ex) {
         log_error("Error updating the set details in the db.", "includes/users_update.php", __LINE__);
         log_error($ex->getMessage(), "includes/users_update.php", __LINE__);
@@ -124,12 +123,13 @@ function updateSets($sets, $set_lists, $update_all_sets) {
                     }
                 }
             }
-            $groups_break_count = 0;
-            for ($j = 0; $j < $groups_count; $j++) {
-                if ($user_groups[$i]["SetId"] === $groups[$j]["SetID"]) {
-                    if ($user_groups[$i]["Group ID"] === "0") array_push($update_array, ["Group ID", $groups[$j]["Group ID"]]);
-                    if ($groups[$j]["Archived"] === "1" && $user_groups[$i]["Archived"] === "0") array_push($update_array, ["Archived", "1"]);
-                    break;
+            if ($user_groups[$i]["Group ID"] === "0") {
+                for ($j = 0; $j < $groups_count; $j++) {
+                    if ($user_groups[$i]["SetId"] === $groups[$j]["SetID"]) {
+                         array_push($update_array, ["Group ID", $groups[$j]["Group ID"]]);
+                        //if ($groups[$j]["Archived"] === "1" && $user_groups[$i]["Archived"] === "0") array_push($update_array, ["Archived", "1"]);
+                        break;
+                    }
                 }
             }
             if (count($update_array) > 0) {

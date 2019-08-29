@@ -20,7 +20,14 @@ switch ($requestType){
         requestTagInfo($tagId);
         break;
     case "GETALLTAGS":
-        getAllTags();
+        getAllTags("ALL");
+        break;
+    case "GETALLWORKSHEETTAGS":
+        getAllTags("WORKSHEET");
+        break;
+    case "GETALLCOMPLETEDWORKSHEETTAGS":
+        getAllTags("COMPLETEDWORKSHEET");
+        break;
     case "MERGETAGS":
         mergeTags($tag1, $tag2);
     case "MODIFYTAG":
@@ -58,9 +65,34 @@ function requestTagInfo($tagid){
     exit();
 }
 
-function getAllTags(){
+function getAllTags($type){
+    $query = "SELECT T.`Tag ID`, T.`Name`, T.`Date Added`, T.`Type` TypeID, TT.`Name` Type FROM TTAGS T "
+            . "LEFT JOIN TTAGTYPES TT ON T.`Type` = TT.`ID` ";
+    switch ($type) {
+        case "ALL":
+        default:
+            break;
+        case "WORKSHEET":
+            $query .= "WHERE T.`Type` < 4 ";
+            break;
+        case "COMPLETEDWORKSHEET":
+            $query .= "WHERE T.`Type` = 4 ";
+            break;
+    }
+    $query .= "ORDER BY T.`Name`;";
+    try{
+        $result = db_select($query);
+    } catch (Exception $ex) {
+        $msg = "There was an error retrieving the tags.";
+        failRequest($msg . ":" . $ex->getMessage());
+    }
+    succeedRequest(null, array("tagsInfo" => $result));
+}
+
+function getAllCompletedWorksheetTags(){
     $query = "SELECT T.`Tag ID`, T.`Name`, T.`Date Added`, T.`Type` TypeID, TT.`Name` Type FROM TTAGS T "
             . "LEFT JOIN TTAGTYPES TT ON T.`Type` = TT.`ID` "
+            . "WHERE T.`Type` = 4 "
             . "ORDER BY T.`Name`;";
     try{
         $result = db_select($query);

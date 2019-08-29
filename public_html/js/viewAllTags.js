@@ -12,7 +12,7 @@ function init_page() {
 }
 function requestAllTags(){
     var infoArray = {
-        type: "GETALLTAGS",
+        type: "GETALLWORKSHEETTAGS",
         token: user["token"]
     };
     $.ajax({
@@ -44,7 +44,7 @@ function allTagsRequestSuccess(json){
             str += "<td class='name' onclick='goToTag(" + id + ")'>" + name + "</td>";
             str += "<td class='tag tag_classification' id='classification_" + id + "' onclick='updateType(" + id + ",1)'>Classification</td>"
             str += "<td class='tag tag_major' id='major_" + id + "' onclick='updateType(" + id + ",2)'>Major</td>";
-            str += "<td class='tag tag_minor' id='minor_" + id + "' onclick='updateType(" + id + ",3)'>Minor</td></tr>"; 
+            str += "<td class='tag tag_minor' id='minor_" + id + "' onclick='updateType(" + id + ",3)'>Minor</td></tr>";
             $('#tagsTable tbody').append(str);
             setSelectedTypeForTag(id, type_id);
         }
@@ -141,7 +141,7 @@ function redirectToTag(){
             window.scrollTo(window.scrollX, window.scrollY - 200);
         }
     }
-    
+
 }
 
 function goToTag(tagid) {

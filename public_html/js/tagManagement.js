@@ -56,7 +56,7 @@ function setUpForDelete(){
 
 function getTags(){
     var infoArray = {
-        type: "GETALLTAGS",
+        type: "GETALLWORKSHEETTAGS",
         token: user["token"]
     };
     $.ajax({
@@ -116,7 +116,7 @@ function updateInfo(json){
         $("#nameInput").val(tagInfo["Name"]);
     } else {
         console.log("There was an error requesting the tag information");
-    }  
+    }
 }
 
 function mergeTags() {

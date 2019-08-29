@@ -10,6 +10,8 @@ $completedWorksheets = $postData['compWorksheets'];
 $requestType = $postData['type'] ? $postData['type'] : filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $save_changes = filter_input(INPUT_POST, 'save_changes_array', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $grade_boundaries = filter_input(INPUT_POST, 'grade_boundaries', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+$worksheet_inputs = filter_input(INPUT_POST, 'worksheet_inputs', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
+$worksheet_tags = filter_input(INPUT_POST, 'worksheet_tags', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $save_worksheets = filter_input(INPUT_POST, 'save_worksheets_array', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $worksheet_details = filter_input(INPUT_POST, 'worksheet_details', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY);
 $gwid = filter_input(INPUT_POST,'gwid',FILTER_SANITIZE_STRING);
@@ -46,7 +48,7 @@ switch ($requestType){
         break;
     case "SAVEGROUPWORKSHEET":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
-        saveGroupWorksheet($worksheet_details, $grade_boundaries, $userid);
+        saveGroupWorksheet($worksheet_details, $grade_boundaries, $userid, $worksheet_inputs, $worksheet_tags);
         break;
     default:
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
@@ -308,7 +310,7 @@ function addNewResult($change, $gwid) {
     }
 }
 
-function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid) {
+function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid, $worksheet_inputs, $worksheet_tags) {
     // Update the details for the group worksheet
     try{
         $gwid = $worksheetDetails["gwid"];
@@ -330,6 +332,8 @@ function saveGroupWorksheet($worksheetDetails, $grade_boundaries, $userid) {
 
         db_query_exception($query);
         updateGradeBoundaries($grade_boundaries, $gwid);
+        updateWorksheetTags($worksheet_tags, $gwid);
+        updateWorksheetInputs($worksheet_inputs, $gwid);
     } catch (Exception $ex) {
         $message = "There was an error saving the details for the worksheet.";
         log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
@@ -388,6 +392,56 @@ function updateGradeBoundaries($grade_boundaries, $gwid) {
         );
         echo json_encode($array);
         exit();
+    }
+}
+
+function updateWorksheetTags($worksheet_tags, $gwid) {
+    db_begin_transaction();
+    try {
+        $update_query = "UPDATE `TGROUPWORKSHEETTAGS` SET `Display` = 0 WHERE `GroupWorksheetID` = $gwid";
+        db_query_exception($update_query);
+        foreach ($worksheet_tags as $i=>$worksheet_tag) {
+            $select_query = "SELECT `ID` FROM `TGROUPWORKSHEETTAGS` WHERE `GroupWorksheetID` = $gwid AND `TagID` = $worksheet_tag";
+            $existing_tag = db_select_exception($select_query);
+            if (count($existing_tag) > 0) {
+                $existing_id = $existing_tag[0]["ID"];
+                $update_query = "UPDATE `TGROUPWORKSHEETTAGS` SET `Display` = 1 WHERE `GroupWorksheetID` = $gwid AND `TagID` = $worksheet_tag";
+                db_query_exception($update_query);
+            } else {
+                $insert_query = "INSERT INTO `TGROUPWORKSHEETTAGS`(`GroupWorksheetID`, `TagID`, `Display`) VALUES ($gwid, $worksheet_tag, 1)";
+                db_insert_query_exception($insert_query);
+            }
+        }
+        db_commit_transaction();
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        $message = "There was an error updating the worksheet tags.";
+        log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
+    }
+}
+
+function updateWorksheetInputs($worksheet_inputs, $gwid) {
+    db_begin_transaction();
+    try {
+        $update_query = "UPDATE `TGROUPWORKSHEETINPUT` SET `ShowInput` = 0 WHERE `GWID` = $gwid";
+        db_query_exception($update_query);
+        foreach ($worksheet_inputs as $i=>$worksheet_input) {
+            $select_query = "SELECT `ID` FROM `TGROUPWORKSHEETINPUT` WHERE `GWID` = $gwid AND `Input` = $worksheet_input";
+            $existing_input = db_select_exception($select_query);
+            if (count($existing_input) > 0) {
+                $existing_id = $existing_tag[0]["ID"];
+                $update_query = "UPDATE `TGROUPWORKSHEETINPUT` SET `ShowInput` = 1 WHERE `GWID` = $gwid AND `Input` = $worksheet_input";
+                db_query_exception($update_query);
+            } else {
+                $insert_query = "INSERT INTO `TGROUPWORKSHEETINPUT`(`GWID`, `Input`, `ShowInput`) VALUES ($gwid, $worksheet_input, 1)";
+                db_insert_query_exception($insert_query);
+            }
+        }
+        db_commit_transaction();
+    } catch (Exception $ex) {
+        db_rollback_transaction();
+        $message = "There was an error updating the worksheet tags.";
+        log_error($message . " Exception: " . $ex->getMessage(), "requests/setWorksheetResult.php", __LINE__);
     }
 }
 

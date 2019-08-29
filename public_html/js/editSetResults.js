@@ -1,5 +1,7 @@
 var user;
 var gwid;
+var tags;
+var worksheet_tags = [];
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
@@ -326,6 +328,7 @@ function requestWorksheetSuccess(json) {
         sessionStorage.setItem("boundaries", safelyGetObject(json["boundaries"]));
         sessionStorage.setItem("students", safelyGetObject(json["students"]));
         sessionStorage.setItem("input_types", safelyGetObject(json["worksheetInputs"]));
+        worksheet_tags = json["worksheetTags"];
         var completed_worksheets = combineInputs(JSON.parse(safelyGetObject(json["completedWorksheets"])), JSON.parse(safelyGetObject(json["completedWorksheetsInputs"])));
         sessionStorage.setItem("completedWorksheets", JSON.stringify(completed_worksheets));
 
@@ -333,6 +336,7 @@ function requestWorksheetSuccess(json) {
         parseMainTable();
         getQuestionAverages();
         updateInputTypes();
+        updateWorksheetTags();
         toggleEnterTotals();
         requestAssociatedStaff();
     } else {
@@ -368,6 +372,24 @@ function setUpInputs() {
             inputsSuccess(json);
         }
     });
+    infoArray = {
+        type: "GETALLCOMPLETEDWORKSHEETTAGS",
+        token: user["token"]
+    };
+    $.ajax({
+        type: "POST",
+        data: infoArray,
+        url: "/requests/tags.php",
+        dataType: "json",
+        success: tagsSuccess,
+        error: tagsError
+    });
+}
+
+function tagsError(json) {
+    tags = [];
+    console.log("Error getting tags.");
+    console.log(json);
 }
 
 function updateInputTypes() {
@@ -381,14 +403,38 @@ function updateInputTypes() {
             $("." + input_info["ShortName"] + "_col").removeClass('hide_col');
         }
     }
-    // Check UMS
-    if (!document.getElementById("select_input_checkbox_0").checked) {
-        $(".boundaries_ums_row").addClass("hide_col");
+}
+
+function updateWorksheetTags() {
+    for (var i = 0; i < worksheet_tags.length; i++) {
+        var row = worksheet_tags[i];
+        if (row["Display"] === "1") {
+            document.getElementById("select_tag_checkbox_" + row["TagID"]).checked = true;
+        }
     }
-    // Check Grade
-    if (!document.getElementById("select_input_checkbox_-1").checked) {
-        $(".grade_boundaries_row").addClass("hide_col");
+}
+
+function getWorksheetInputs() {
+    var update_array = [];
+    var input_types = JSON.parse(sessionStorage.getItem("input_types"));
+    for (var i = 0; i < input_types.length; i++) {
+        var row = input_types[i];
+        if (document.getElementById("select_input_checkbox_" + row["Input"]).checked) {
+            update_array.push(row["Input"]);
+        }
     }
+    return update_array;
+}
+
+function getWorksheetTags() {
+    var update_array = [];
+    for (var i = 0; i < tags.length; i++) {
+        var row = tags[i];
+        if (document.getElementById("select_tag_checkbox_" + row["Tag ID"]).checked) {
+            update_array.push(row["Tag ID"]);
+        }
+    }
+    return update_array;
 }
 
 function getInputInfo(id) {
@@ -421,22 +467,21 @@ function inputsSuccess(json) {
         sessionStorage.setItem("inputs", JSON.stringify(input_types));
         var div_text = "";
         div_text += "<div class='select_input'>";
-        div_text += "<div class='select_input_title' onclick='click_input(-1)'><h1 class='short_name'>Grade</h1></div>";
         div_text += "<div class='select_input_check_div' onclick='click_input(-1)'><input type='checkbox' class='select_input_check' id='select_input_checkbox_-1' onclick='click_checkbox(-1)'/></div>";
+        div_text += "<div class='select_input_title' onclick='click_input(-1)'><h1 class='short_name'>Grade</h1></div>";
         div_text += "</div>";
         div_text += "<div class='select_input'>";
-        div_text += "<div class='select_input_title' onclick='click_input(0)'><h1 class='short_name'>UMS</h1></div>";
         div_text += "<div class='select_input_check_div' onclick='click_input(0)'><input type='checkbox' class='select_input_check' id='select_input_checkbox_0' onclick='click_checkbox(0)'/></div>";
+        div_text += "<div class='select_input_title' onclick='click_input(0)'><h1 class='short_name'>UMS</h1></div>";
         div_text += "</div>";
         for (var i = 0; i < input_types.length; i++) {
             var name = input_types[i]["Name"];
             var short_name = input_types[i]["ShortName"];
             var full_name = name + " (" + short_name + ")";
             var id = input_types[i]["ID"];
-            var class_name = full_name.length < 34 ? "short_name" : "long_name";
             div_text += "<div class='select_input'>";
-            div_text += "<div class='select_input_title' onclick='click_input(" + id + ")'><h1 class='" + class_name + "'>" + full_name + "</h1></div>";
             div_text += "<div class='select_input_check_div' onclick='click_input(" + id + ")'><input type='checkbox' class='select_input_check' id='select_input_checkbox_" + id + "' onclick='click_checkbox(" + id + ")'/></div>";
+            div_text += "<div class='select_input_title' onclick='click_input(" + id + ")'><h1 class='short_name'>" + full_name + "</h1></div>";
             div_text += "</div>";
         }
         $("#select_inputs_input").html(div_text);
@@ -445,28 +490,24 @@ function inputsSuccess(json) {
     }
 }
 
-function updateInputs(input, show_input) {
-    console.log("I ran an update on " + input);
-    var infoArray = {
-        type: "UPDATEGWINPUTs",
-        token: user["token"],
-        gwid: gwid,
-        input: input,
-        show_input: show_input
-    };
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/inputTypes.php",
-        dataType: "json",
-        success: function(json){
-            if (json["success"]) {
-                console.log("Updated");
-            } else {
-                console.log(json["message"]);
-            }
+function tagsSuccess(json) {
+    if (json["success"]) {
+        tags = json["tagsInfo"];
+        var div_text = "";
+        for (var i = 0; i < tags.length; i++) {
+            var name = tags[i]["Name"];
+            var id = tags[i]["Tag ID"];
+            div_text += "<div class='select_input'>";
+            div_text += "<div class='select_input_check_div' onclick='click_tag(" + id + ")'><input type='checkbox' class='select_input_check' id='select_tag_checkbox_" + id + "' onclick='click_tag_checkbox(" + id + ")'/></div>";
+            div_text += "<div class='select_input_title' onclick='click_tag(" + id + ")'><h1 class='short_name'>" + name + "</h1></div>";
+            div_text += "</div>";
         }
-    });
+        $("#select_inputs_tags").html(div_text);
+    } else {
+        tags = [];
+        console.log("Error getting tags.");
+        console.log(json);
+    }
 }
 
 function setAutoSave(interval) {
@@ -1012,11 +1053,15 @@ function saveGroupWorksheet() {
     };
 
     var grade_boundaries = getGradeBoundariesFromTable();
+    var worksheet_inputs_upload = getWorksheetInputs();
+    var worksheet_tags_upload = getWorksheetTags();
 
     var infoArray = {
         type: "SAVEGROUPWORKSHEET",
         worksheet_details: worksheet_details,
         grade_boundaries: grade_boundaries,
+        worksheet_inputs: worksheet_inputs_upload,
+        worksheet_tags: worksheet_tags_upload,
         userid: user["userId"],
         token: user["token"]
     };
@@ -2172,6 +2217,16 @@ function showHideDetails(){
     } else {
         $("#summaryBoxShowHide").removeClass("minus");
     }
+    if (!document.getElementById("select_input_checkbox_-1").checked) {
+        $(".grade_boundaries_row").addClass("hide_col");
+    } else {
+        $(".grade_boundaries_row").removeClass("hide_col");
+    }
+    if (!document.getElementById("select_input_checkbox_0").checked) {
+        $(".boundaries_ums_row").addClass("hide_col");
+    } else {
+        $(".boundaries_ums_row").removeClass("hide_col");
+    }
     $("#details").slideToggle();
 }
 
@@ -2194,11 +2249,20 @@ $(function() {
 function click_input(id) {
     document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
     change_input(id);
+    changeGWValue();
 }
 
 function click_checkbox(id) {
     document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
-    console.log("Checkbox");
+}
+
+function click_tag(id) {
+    document.getElementById("select_tag_checkbox_" + id).checked = !document.getElementById("select_tag_checkbox_" + id).checked;
+    changeGWValue();
+}
+
+function click_tag_checkbox(id) {
+    document.getElementById("select_tag_checkbox_" + id).checked = !document.getElementById("select_tag_checkbox_" + id).checked;
 }
 
 function change_input(id) {
@@ -2206,22 +2270,19 @@ function change_input(id) {
     var input_info = getInputInfo(id);
     if(show_input === 1) {
         $("." + input_info["ShortName"] + "_col").removeClass('hide_col');
-        if (id === -1) {
-            $(".grade_boundaries_row").removeClass("hide_col");
-        }
-        if (id === 0) {
-            $(".boundaries_ums_row").removeClass("hide_col");
-        }
     } else {
         $("." + input_info["ShortName"] + "_col").addClass('hide_col');
-        if (id === -1) {
-            $(".grade_boundaries_row").addClass("hide_col");
-        }
-        if (id === 0) {
-            $(".boundaries_ums_row").addClass("hide_col");
-        }
     }
-    updateInputs(id, show_input);
+    if (!document.getElementById("select_input_checkbox_-1").checked) {
+        $(".grade_boundaries_row").addClass("hide_col");
+    } else {
+        $(".grade_boundaries_row").removeClass("hide_col");
+    }
+    if (!document.getElementById("select_input_checkbox_0").checked) {
+        $(".boundaries_ums_row").addClass("hide_col");
+    } else {
+        $(".boundaries_ums_row").removeClass("hide_col");
+    }
 }
 
 function toggleEnterTotals() {

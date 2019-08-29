@@ -786,16 +786,25 @@ input[type="text"].grade_input.awaiting_save{
 .select_inputs_input {
     width: 100%;
     height: 150px;
+    overflow-x: hidden;
+    overflow-y: scroll;
     background: transparent;
+    border: 1px solid #323232;
+}
+
+.select_inputs_input.left {
+    width: calc(100% - 10px);
+    margin-right: 10px;
 }
 
 .select_input {
-    width:33.33%;
-    height: 50px;
+    width: 100%;
+    height: 30px;
     display: inline-block;
     float: left;
     margin: 0;
     padding: 0;
+    border-bottom: 1px solid lightgray;
 }
 
 .select_input:hover {
@@ -812,12 +821,11 @@ input[type="text"].grade_input.awaiting_save{
 }
 
 .select_input_title {
-    padding-left: 10px;
-    width: calc(75% - 10px);
+    width: calc(100% - 20px);
 
 }
 .select_input_check_div {
-    width: 25%;
+    width: 20px;
     text-align: center;
 }
 
@@ -833,7 +841,7 @@ input[type="text"].grade_input.awaiting_save{
     font-size: 0.9rem;
     font-weight: normal;
     color: #323232;
-    text-align: center;
+    text-align: left;
     line-height: 25px;
     margin: 0;
     padding: 0;
@@ -841,7 +849,8 @@ input[type="text"].grade_input.awaiting_save{
 }
 
 .select_input_title > h1.short_name {
-    line-height: 50px;
+    padding-left: 10px;
+    line-height: 30px;
 }
 
 .hide_col {
