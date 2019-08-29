@@ -2253,7 +2253,7 @@ function click_input(id) {
 }
 
 function click_checkbox(id) {
-    //document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
+    document.getElementById("select_input_checkbox_" + id).checked = !document.getElementById("select_input_checkbox_" + id).checked;
 }
 
 function click_tag(id) {
@@ -2262,7 +2262,7 @@ function click_tag(id) {
 }
 
 function click_tag_checkbox(id) {
-    //document.getElementById("select_tag_checkbox_" + id).checked = !document.getElementById("select_tag_checkbox_" + id).checked;
+    document.getElementById("select_tag_checkbox_" + id).checked = !document.getElementById("select_tag_checkbox_" + id).checked;
 }
 
 function change_input(id) {
