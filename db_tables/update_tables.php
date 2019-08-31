@@ -8,10 +8,11 @@ function isams_update_or_insert($isams_array, $table, $update_current, $current_
     $table_name = $table_details[0];
     $table_structure = $table_details[1];
     $values_array = array();
+    $primary_key_field = FALSE;
     for ($i = 0; $i < count($table_structure); $i++) {
-        $field_name = $table_structure[$i][0];
-        $field_type = $table_structure[$i][1];
-        $isams_field = (count($table_structure[$i]) > 2) ? $table_structure[$i][2] : $table_structure[$i][0];
+        $field_name = $table_structure[$i]["db_name"];
+        $field_type = $table_structure[$i]["type"];
+        $isams_field = array_key_exists("isams", $table_structure[$i]) ? $table_structure[$i]["isams"] : $field_name;
         if (!array_key_exists($isams_field, $isams_array)) continue;
         $value = $isams_array[$isams_field];
         if (is_array($value)) $value = $value[0];
@@ -26,10 +27,16 @@ function isams_update_or_insert($isams_array, $table, $update_current, $current_
             $value = floatval($value);
         }
         array_push($values_array, [$field_name, $value]);
+        if (array_key_exists("primary", $table_structure[$i]) && $table_structure[$i]["primary"]) {
+            $primary_key_field = $field_name;
+            $primary_key_value = $value;
+        }
     }
-    $primary_key_field = $values_array[0][0];
-    $primary_key_val = $values_array[0][1];
-    $test_query = "SELECT COUNT(1) Count FROM `$table_name` WHERE `$primary_key_field` = $primary_key_val;";
+    if (!$primary_key_field) {
+        log_info("Update for $table skipped due to no primary key.");
+        return "skipped";
+    }
+    $test_query = "SELECT COUNT(1) Count FROM `$table_name` WHERE `$primary_key_field` = $primary_key_value;";
     try {
         $test = db_select_exception($test_query);
         $count = $test[0]["Count"];
@@ -128,30 +135,30 @@ function define_table($table) {
         case "staff":
             $table_name = "TUSERS";
             $structure_array = [
-                ["UserCode", "text"],
-                ["Email", "text", "SchoolEmailAddress"],
-                ["StaffID", "int", "Id"],
-                ["PersonID", "int", "PersonId"],
-                ["Initials", "text"],
-                ["Title", "text"],
-                ["First Name", "text", "Forename"],
-                ["Surname", "text"],
-                ["Preferred Name", "text", "PreferredName"],
-                ["TeachingStaff", "int"]
+                array("db_name" => "UserCode", "type" => "text", "primary" => TRUE),
+                array("db_name" => "Email", "type" => "text", "isams" => "SchoolEmailAddress", "primary" => FALSE),
+                array("db_name" => "StaffID", "type" => "int", "isams" => "Id", "primary" => FALSE),
+                array("db_name" => "PersonID", "type" => "int", "isams" => "PersonId", "primary" => FALSE),
+                array("db_name" => "Initials", "type" => "text", "primary" => FALSE),
+                array("db_name" => "Title", "type" => "text", "primary" => FALSE),
+                array("db_name" => "First Name", "type" => "text", "isams" => "Forename", "primary" => FALSE),
+                array("db_name" => "Surname", "type" => "text", "primary" => FALSE),
+                array("db_name" => "Preferred Name", "type" => "text", "isams" => "PreferredName", "primary" => FALSE),
+                array("db_name" => "TeachingStaff", "type" => "int", "primary" => FALSE)
             ];
             break;
         case "pupils":
             $table_name = "TUSERS";
             $structure_array = [
-                ["UserCode", "text"],
-                ["Email", "text", "EmailAddress"],
-                ["PupilID", "int", "Id"],
-                ["SchoolID", "text", "SchoolId"],
-                ["Title", "text"],
-                ["First Name", "text", "Forename"],
-                ["Surname", "text", "Surname"],
-                ["Initials", "text"],
-                ["Preferred Name", "text", "Preferredname"],
+                array("db_name" => "UserCode", "type" => "text", "primary" => FALSE),
+                array("db_name" => "Email", "type" => "text", "isams" => "EmailAddress", "primary" => FALSE),
+                array("db_name" => "PupilID", "type" => "int", "isams" => "Id", "primary" => TRUE),
+                array("db_name" => "SchoolID", "type" => "int", "isams" => "SchoolId", "primary" => FALSE),
+                array("db_name" => "Initials", "type" => "text", "primary" => FALSE),
+                array("db_name" => "Title", "type" => "text", "primary" => FALSE),
+                array("db_name" => "First Name", "type" => "text", "isams" => "Forename", "primary" => FALSE),
+                array("db_name" => "Surname", "type" => "text", "primary" => FALSE),
+                array("db_name" => "Preferred Name", "type" => "text", "isams" => "PreferredName", "primary" => FALSE)
             ];
             break;
         /*case "boardinghouses":
@@ -181,32 +188,32 @@ function define_table($table) {
         case "terms":
             $table_name = "TTERMS";
             $structure_array = [
-                ["TermID", "int", "Id"],
-                ["Author", "text"],
-                ["SchoolYear", "int"],
-                ["Name", "text"],
-                ["StartDate", "text"],
-                ["FinishDate", "text"],
-                ["LastUpdated", "text"]
+                array("db_name" => "TermID", "type" => "int", "isams" => "Id", "primary" => TRUE),
+                array("db_name" => "Author", "type" => "text", "primary" => FALSE),
+                array("db_name" => "SchoolYear", "type" => "int", "primary" => FALSE),
+                array("db_name" => "Name", "type" => "text", "primary" => FALSE),
+                array("db_name" => "StartDate", "type" => "text", "primary" => FALSE),
+                array("db_name" => "FinishDate", "type" => "text", "primary" => FALSE),
+                array("db_name" => "LastUpdated", "type" => "text", "primary" => FALSE)
             ];
             break;
         case "sets":
             $table_name = "TGROUPS";
             $structure_array = [
-                ["SetID", "int", "Id"],
-                ["SubjectID", "int", "SubjectId"],
-                ["YearId", "int"],
-                ["Name", "text"]
+                array("db_name" => "SetID", "type" => "int", "isams" => "Id", "primary" => TRUE),
+                array("db_name" => "SubjectID", "type" => "int", "isams" => "SubjectId", "primary" => FALSE),
+                array("db_name" => "YearId", "type" => "int", "primary" => FALSE),
+                array("db_name" => "Name", "type" => "text", "primary" => FALSE)
             ];
             break;
         case "setteachers":
             $table_name = "TUSERGROUPS";
             $structure_array = [
-                ["SetListID", "int", "SetTeacherId"],
-                ["StaffId", "int"],
-                ["SetId", "int", "Id"],
-                ["PrimaryTeacher", "int"],
-                ["UserType", "text"]
+                array("db_name" => "SetListID", "type" => "int", "isams" => "SetTeacherId", "primary" => TRUE),
+                array("db_name" => "StaffId", "type" => "int", "primary" => FALSE),
+                array("db_name" => "SetId", "type" => "int", "isams" => "Id", "primary" => FALSE),
+                array("db_name" => "PrimaryTeacher", "type" => "int", "primary" => FALSE),
+                array("db_name" => "Name", "type" => "text", "primary" => FALSE)
             ];
             break;
         case "setlists":
@@ -215,6 +222,11 @@ function define_table($table) {
                 ["SetListID", "int", "Id"],
                 ["SetId", "int"],
                 ["SchoolId", "text"]
+            ];
+            $structure_array = [
+                array("db_name" => "SetListID", "type" => "int", "isams" => "Id", "primary" => TRUE),
+                array("db_name" => "SetId", "type" => "int", "primary" => FALSE),
+                array("db_name" => "SchoolId", "type" => "text", "primary" => FALSE)
             ];
             break;
         default:
