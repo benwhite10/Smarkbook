@@ -25,19 +25,6 @@ function updateAllUsers($max_time = 300, $update_all_sets = FALSE) {
 
 function updateTerms($terms, $name, $key) {
     runUpdate($terms, $name, $key, FALSE, []);
-    try {
-        $current_year_query = "SELECT `SchoolYear` FROM `TTERMS`
-            WHERE `StartDate` < DATE(NOW())
-            ORDER BY `StartDate` DESC
-            LIMIT 1";
-        $current_year_result = db_select_exception($current_year_query);
-        $current_year = $current_year_result[0]["SchoolYear"];
-        $update_query = "UPDATE `TACADEMICYEAR` SET `CurrentYear` = IF(`StartingYear`=$current_year, 1, 0)";
-        db_query_exception($update_query);
-    } catch (Exception $ex) {
-        log_error("Error updating the current academic year.", "includes/users_update.php", __LINE__);
-        log_error($ex->getMessage(), "db_tables/update_tables.php", __LINE__);
-    }
 }
 
 function updateUserDetails() {
