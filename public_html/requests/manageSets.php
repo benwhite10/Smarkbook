@@ -35,7 +35,11 @@ switch ($requestType){
         break;
     case "GETSETSFORSTAFF":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
-        getSetsForStaff($staff_id);
+        getSetsForStaff($staff_id, $set_year);
+        break;
+    case "GETSETYEARSFORSTAFF":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        getStaffSetsYearsRequest($staff_id);
         break;
     case "ADDSET":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
@@ -176,16 +180,22 @@ function deleteSet($set_id) {
     returnRequest(TRUE, null, null);
 }
 
-function getSetsForStaff($staff_id) {
+function getSetsForStaff($staff_id, $year) {
     try{
-        $year_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
-        $year_response = db_select_exception($year_query);
-        $current_year_id = $year_response[0]["ID"];
+        $years_query = "SELECT `ID`, `Year`, `CurrentYear` FROM `TACADEMICYEAR`";
+        $years = db_select_exception($years_query);
+        $year_id = FALSE;
+        $current_year_id = FALSE;
+        for ($i = 0; $i < count($years); $i++) {
+            if ($years[$i]["ID"] === $year) $year_id = $year;
+            if ($years[$i]["CurrentYear"]) $current_year_id = $years[$i]["ID"];
+        }
+        if (!$year_id) $year_id = $current_year_id;
         $sets_query = "SELECT G.`Group ID`, G.`Name`
             FROM `TUSERGROUPS` UG
             JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
             WHERE UG.`User ID` = $staff_id
-            AND UG.`Archived` = 0 AND G.`Archived` = 0 AND G.`AcademicYear` = $current_year_id 
+            AND UG.`Archived` = 0 AND G.`Archived` = 0 AND G.`AcademicYear` = $year_id
             ORDER BY G.`Name`";
         $sets = db_select_exception($sets_query);
         for ($i = 0; $i < count($sets); $i++) {
@@ -198,11 +208,44 @@ function getSetsForStaff($staff_id) {
             $count_result = db_select_exception($count_query);
             $sets[$i]["Count"] = $count_result[0]["Count"];
         }
+        $years = getStaffSetsYears($staff_id);
+        $years = $years[0] ? $years[1] : array();
+        returnRequest(TRUE, array(
+            "sets" => $sets,
+            "year" => $year_id,
+            "years" => $years
+        ), null);
     } catch (Exception $ex) {
         $message = "There was an error getting the sets: " . $ex->getMessage();
         returnRequest(FALSE, null, $message);
     }
     returnRequest(TRUE, $sets, null);
+}
+
+function getStaffSetsYearsRequest($staff_id) {
+    $years = getStaffSetsYears($staff_id);
+    if ($years[0]) {
+        returnRequest(TRUE, array(
+            "years" => $years[1]
+        ), null);
+    } else {
+        returnRequest(FALSE, null, $years[1]);
+    }
+}
+
+function getStaffSetsYears($staff_id) {
+    try {
+        $query = "SELECT G.`AcademicYear`, A.`Year` FROM `TUSERGROUPS` UG
+            JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
+            JOIN `TACADEMICYEAR` A ON G.`AcademicYear` = A.`ID`
+            WHERE UG.`User ID` = $staff_id AND UG.`Archived` = 0 AND G.`Archived` = 0
+            GROUP BY G.`AcademicYear`
+            ORDER BY G.`AcademicYear`";
+        return [TRUE, db_select_exception($query)];
+    } catch (Exception $ex) {
+        $message = "There was an error getting the set years: " . $ex->getMessage();
+        return [FALSE, $message];
+    }
 }
 
 function mergeSets($setid, $oldsetid) {

@@ -7,6 +7,7 @@ include_once $include_path . '/public_html/libraries/PHPExcel.php';
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
+$year = filter_input(INPUT_POST,'year',FILTER_SANITIZE_NUMBER_INT);
 $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
 $roles = validateRequestAndGetRoles($token);
@@ -22,7 +23,7 @@ switch ($requestType){
         break;
     case "DOWNLOADMARKBOOKFORTEACHER":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
-        downloadAllSets($staffid);
+        downloadAllSets($staffid, $year);
         break;
     default:
         break;
@@ -33,7 +34,7 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                 JOIN TUSERS U ON G.`User ID` = U.`User ID`
                 WHERE G.`Group ID` = $setid
                 AND G.`Archived` <> 1
-                AND U.`Role` = 'STUDENT'
+                AND G.`UserType` = 'P'
                 ORDER BY U.Surname;";
     $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName,
                 DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks,
@@ -139,7 +140,7 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
                 JOIN TUSERS U ON G.`User ID` = U.`User ID`
                 WHERE G.`Group ID` = $setid
                 AND G.`Archived` <> 1
-                AND U.`Role` = 'STUDENT'
+                AND G.`UserType` = 'P'
                 ORDER BY U.Surname;";
     $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName, DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks
                 FROM TGROUPWORKSHEETS GW
@@ -243,13 +244,14 @@ function getDownloadableMarkbookForSetAndTeacher($setid, $staffid, $sheet_index,
     return $objPHPExcel;
 }
 
-function downloadAllSets($staffid) {
+function downloadAllSets($staffid, $year) {
     $query1 = "SELECT Initials FROM TUSERS WHERE `User ID` = $staffid";
     $query2 = "SELECT G.`Group ID` ID, G.`Name`
         FROM `TUSERGROUPS` UG
         JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
         WHERE UG.`User ID` = $staffid
         AND UG.`Archived` = 0 AND G.`Archived` = 0
+        AND G.`AcademicYear` = $year
         ORDER BY G.`Name`";
 
     try{

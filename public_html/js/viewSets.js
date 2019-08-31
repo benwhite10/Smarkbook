@@ -41,7 +41,7 @@ function getSets() {
 
 function getSetsSuccess(json) {
     if (json["success"]) {
-        sets = json["response"];
+        sets = json["response"]["sets"];
         var table_text = "";
         for (var i in sets) {
             table_text += "<tr onclick=goToSet(" + sets[i]["Group ID"] + "," + selected_staff + ")><td>" + sets[i]["Name"] + "</td><td class='students'>" + sets[i]["Count"] + "</td></tr>";

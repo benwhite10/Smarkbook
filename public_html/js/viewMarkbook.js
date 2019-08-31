@@ -1,7 +1,10 @@
 var user;
 var set_id = 0;
-var sets;
+var sets = false;
 var markbook;
+var year = false;
+var years = false;
+var staff_id;
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
@@ -13,6 +16,9 @@ $(document).ready(function(){
 function init_page() {
     set_id = getParameterByName("setid");
     if (set_id === null) set_id = 0;
+    year = getParameterByName("year");
+    staff_id = getParameterByName("staffid");
+    if (staff_id === null) staff_id = user["userId"],
     startSpinnerInDiv("spinner");
     writeNavbar(user);
     getSets();
@@ -21,7 +27,8 @@ function init_page() {
 function getSets() {
     var infoArray = {
         type: "GETSETSFORSTAFF",
-        staff: user["userId"],
+        year: year,
+        staff: staff_id,
         token: user["token"]
     };
     $.ajax({
@@ -31,7 +38,9 @@ function getSets() {
         dataType: "json",
         success: function(json){
             if (json["success"]) {
-                sets = json["response"];
+                sets = json["response"]["sets"];
+                year = json["response"]["year"];
+                years = json["response"]["years"];
                 getSetsSuccess();
             } else {
                 console.log("Error requesting sets.");
@@ -59,6 +68,17 @@ function writeSetDropdown() {
     var set = getSetForId(set_id);
     var html_text = "<div id='title2'><h1>Mark Book</h1></div>";
     html_text += "<ul class='menu navbar'>";
+    for (var i = 0; i < years.length; i++) {
+        if (years[i]["AcademicYear"] == year) {
+            html_text += "<li><a>" + years[i]["Year"] + " &#x25BE</a>";
+            break;
+        }
+    }
+    html_text += "<ul class='dropdown navdrop'>";
+    for (var i = 0; i < years.length; i++) {
+        html_text += "<li><a href='viewSetMarkbook.php?staffid=" + staff_id + "&year=" + years[i]["AcademicYear"] + "'>" + years[i]["Year"] + "</a></li>";
+    }
+    html_text += "</ul></li>";
     html_text += "<li><a>Download &#x25BE</a>";
     html_text += "<ul class='dropdown navdrop'>";
     html_text += "<li><a onclick='downloadExcel(" + set["Group ID"] + ")'>" + set["Name"] + "</a></li>";
@@ -66,7 +86,7 @@ function writeSetDropdown() {
     html_text += "<li><a>" + set["Name"] + " &#x25BE</a>";
     html_text += "<ul class='dropdown navdrop'>";
     for (var i = 0; i < sets.length; i++) {
-        html_text += "<li><a href='viewSetMarkbook.php?staffid=" + user["userId"] + "&setid=" + sets[i]["Group ID"] + "'>" + sets[i]["Name"] + "</a></li>";
+        html_text += "<li><a href='viewSetMarkbook.php?staffid=" + staff_id + "&setid=" + sets[i]["Group ID"] + "&year=" + year + "'>" + sets[i]["Name"] + "</a></li>";
     }
     html_text += "</ul></li></ul>";
     $("#top_bar").html(html_text);
@@ -79,11 +99,12 @@ function getSetForId(group_id) {
     return false;
 }
 
+// TODO, not sure if this actually works yet
 function getMarkbook() {
     var infoArray = {
         type: "MARKBOOKFORSETANDTEACHER",
         set: set_id,
-        staff: user["userId"],
+        staff: staff_id,
         token: user["token"]
     };
     $.ajax({
@@ -136,8 +157,7 @@ function getMarkbookSuccess() {
     html_text += "</tr>";
     for (var i = 0; i < students.length; i++) {
         var stu_id = students[i]["ID"];
-        var stu_name = students [i]["Name"];
-        var staff_id = user["userId"];
+        var stu_name = students [i]["Name"];;
         html_text += "<tr><td class='name' onclick='viewStudent(" + stu_id + ", " + set_id + ", " + staff_id + ");'>" + stu_name + "</td>";
         for (var j = 0; j < worksheets.length; j++) {
             var marks = worksheets[j]["Marks"];
@@ -160,10 +180,11 @@ function getMarkbookSuccess() {
     stopSpinnerInDiv("spinner");
 }
 
-function downloadExcel(set_id){
+function downloadExcel(set_id = false){
     var infoArray = {
         type: "DOWNLOADMARKBOOKFORTEACHER",
-        staff: user["userId"],
+        staff: staff_id,
+        year: year,
         token: user["token"]
     };
     if(set_id) {

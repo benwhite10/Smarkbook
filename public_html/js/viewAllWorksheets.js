@@ -61,7 +61,7 @@ function getSets() {
 
 function getSetsSuccess(json) {
     if (json["success"]) {
-        teacher_sets = json["response"];
+        teacher_sets = json["response"]["sets"];
     } else {
         console.log(json["message"]);
     }
