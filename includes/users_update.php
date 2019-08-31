@@ -77,13 +77,13 @@ function updateSets($sets, $set_lists, $update_all_sets) {
         "DBCol" => "CurrentGroup"
     ));
     try {
-        /*$year_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
+        $year_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
         $year_response = db_select_exception($year_query);
         $current_year_id = $year_response[0]["ID"];
         $update_query = "UPDATE `TGROUPS`
             SET `Type ID` = 3,
             `AcademicYear` = IF(`CurrentGroup`=0, `AcademicYear`, $current_year_id)";
-        db_query_exception($update_query);*/
+        db_query_exception($update_query);
     } catch (Exception $ex) {
         log_error("Error updating the set details in the db.", "includes/users_update.php", __LINE__);
         log_error($ex->getMessage(), "includes/users_update.php", __LINE__);
