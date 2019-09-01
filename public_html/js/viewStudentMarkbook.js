@@ -4,21 +4,23 @@ var sets = false;
 var markbook;
 var year = false;
 var years = false;
+var student_id;
 var staff_id;
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
     window.addEventListener("valid_user", function(){init_page();});
-    validateAccessToken(user, ["SUPER_USER", "STAFF"]);
+    validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
     MicroModal.init();
 });
 
 function init_page() {
     set_id = getParameterByName("setid");
     if (set_id === null) set_id = 0;
-    year = getParameterByName("year");
     staff_id = getParameterByName("staffid");
-    if (staff_id === null) staff_id = user["userId"];
+    if (staff_id === null) staff_id = 0;
+    student_id = user["userId"];
+    year = getParameterByName("year");
     startSpinnerInDiv("spinner");
     writeNavbar(user);
     getSets();
@@ -26,9 +28,9 @@ function init_page() {
 
 function getSets() {
     var infoArray = {
-        type: "GETSETSFORSTAFF",
+        type: "GETSETSFORSTUDENT",
         year: year,
-        staff: staff_id,
+        student: student_id,
         token: user["token"]
     };
     $.ajax({
@@ -56,6 +58,7 @@ function getSets() {
 function getSetsSuccess() {
     if (sets.length > 0) {
         if (set_id === 0) set_id = sets[0]["Group ID"];
+        if (staff_id === 0) staff_id = sets[0]["User ID"];
         getMarkbook();
         writeSetDropdown();
     } else {
@@ -76,17 +79,13 @@ function writeSetDropdown() {
     }
     html_text += "<ul class='dropdown navdrop'>";
     for (var i = 0; i < years.length; i++) {
-        html_text += "<li><a href='viewSetMarkbook.php?staffid=" + staff_id + "&year=" + years[i]["AcademicYear"] + "'>" + years[i]["Year"] + "</a></li>";
+        html_text += "<li><a href='viewStudentMarkbook.php?year=" + years[i]["AcademicYear"] + "'>" + years[i]["Year"] + "</a></li>";
     }
     html_text += "</ul></li>";
-    html_text += "<li><a>Download &#x25BE</a>";
-    html_text += "<ul class='dropdown navdrop'>";
-    html_text += "<li><a onclick='downloadExcel(" + set["Group ID"] + ")'>" + set["Name"] + "</a></li>";
-    html_text += "<li><a onclick='downloadExcel()'>All Sets</a></li></ul></li>";
-    html_text += "<li><a>" + set["Name"] + " &#x25BE</a>";
+    html_text += "<li><a>" + set["Name"] + " (" + set["Initials"] + ") &#x25BE</a>";
     html_text += "<ul class='dropdown navdrop'>";
     for (var i = 0; i < sets.length; i++) {
-        html_text += "<li><a href='viewSetMarkbook.php?staffid=" + staff_id + "&setid=" + sets[i]["Group ID"] + "&year=" + year + "'>" + sets[i]["Name"] + "</a></li>";
+        html_text += "<li><a href='viewStudentMarkbook.php?staffid=" + sets[i]["User ID"] + "&setid=" + sets[i]["Group ID"] + "&year=" + year + "'>" + sets[i]["Name"] + " (" + sets[i]["Initials"] + ")</a></li>";
     }
     html_text += "</ul></li></ul>";
     $("#top_bar").html(html_text);
@@ -101,8 +100,9 @@ function getSetForId(group_id) {
 
 function getMarkbook() {
     var infoArray = {
-        type: "MARKBOOKFORSETANDTEACHER",
+        type: "MARKBOOKFORSETANDSTUDENT",
         set: set_id,
+        stu: student_id,
         staff: staff_id,
         token: user["token"]
     };
@@ -157,7 +157,7 @@ function getMarkbookSuccess() {
     for (var i = 0; i < students.length; i++) {
         var stu_id = students[i]["ID"];
         var stu_name = students [i]["Name"];;
-        html_text += "<tr><td class='name' onclick='viewStudent(" + stu_id + ", " + set_id + ", " + staff_id + ");'>" + stu_name + "</td>";
+        html_text += "<tr><td class='name' onclick='viewStudent(" + stu_id + ", " + set_id + ", " + student_id + ");'>" + stu_name + "</td>";
         for (var j = 0; j < worksheets.length; j++) {
             var marks = worksheets[j]["Marks"];
             var gwid = worksheets[j]["GWID"];
@@ -177,47 +177,6 @@ function getMarkbookSuccess() {
     html_text += "</tbody></table>";
     $("#main_content").html(html_text);
     stopSpinnerInDiv("spinner");
-}
-
-function downloadExcel(set_id = false){
-    var infoArray = {
-        type: "DOWNLOADMARKBOOKFORTEACHER",
-        staff: staff_id,
-        year: year,
-        token: user["token"]
-    };
-    if(set_id) {
-        infoArray["set"] = set_id;
-        infoArray["type"] = "DOWNLOADMARKBOOKFORSETANDTEACHER";
-    }
-    $.ajax({
-        type: "POST",
-        data: infoArray,
-        url: "/requests/getMarkbook.php",
-        dataType: "json",
-        success: function(json){
-            downloadSuccess(json);
-        },
-        error: function (response) {
-            writeMessageModal("Download", "There was an error downloading the markbook, please refresh and try again.", "OK", false);
-            console.log(response.responseText);
-        }
-    });
-    writeMessageModal("Download", "Markbook downloading...", false, false);
-}
-
-function downloadSuccess(json) {
-    if (json["success"]) {
-        MicroModal.close("message_modal");
-        var link = document.createElement("a");
-        link.setAttribute("href", json["url"]);
-        link.setAttribute("download", json["title"]);
-        document.body.appendChild(link);
-        link.click();
-    } else {
-        writeMessageModal("Download", "There was an error downloading the markbook, please refresh and try again.", "OK", false);
-        console.log(json);
-    }
 }
 
 function writeMessageModal(title = "", message = "", button_title = false, button_function = false) {
@@ -243,7 +202,7 @@ function reloadPage() {
 }
 
 function viewWorksheet(gwid) {
-    window.location.href = "editSetResults.php?gwid=" + gwid;
+    window.location.href = "studentWorksheetSummary.php?gw=" + gwid + "&s=" + student_id;
 }
 
 function viewStudent(stuid, setid, staffid) {

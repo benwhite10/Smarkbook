@@ -7,6 +7,7 @@ include_once $include_path . '/public_html/libraries/PHPExcel.php';
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $setid = filter_input(INPUT_POST,'set',FILTER_SANITIZE_STRING);
 $staffid = filter_input(INPUT_POST,'staff',FILTER_SANITIZE_NUMBER_INT);
+$stuid = filter_input(INPUT_POST,'stu',FILTER_SANITIZE_NUMBER_INT);
 $year = filter_input(INPUT_POST,'year',FILTER_SANITIZE_NUMBER_INT);
 $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
@@ -16,6 +17,10 @@ switch ($requestType){
     case "MARKBOOKFORSETANDTEACHER":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
         getMarkbookForSetAndTeacher($setid, $staffid);
+        break;
+    case "MARKBOOKFORSETANDSTUDENT":
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
+        getMarkbookForSetAndStudent($setid, $stuid, $staffid);
         break;
     case "DOWNLOADMARKBOOKFORSETANDTEACHER":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
@@ -73,6 +78,74 @@ function getMarkbookForSetAndTeacher($setid, $staffid){
                     SELECT CQ.`Student ID` StuID, Mark, Marks FROM TCOMPLETEDQUESTIONS CQ
                     JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
                     WHERE `Group Worksheet ID` = $GWID AND CQ.`Deleted` = 0 AND SQ.`Deleted` = 0
+                    GROUP BY CQ.`Student ID`, CQ.`Stored Question ID`) AS A
+                    GROUP BY StuID;";
+        try{
+            $results = db_select_exception($query);
+        } catch (Exception $ex) {
+            $message = "There was an error analysing the markbook";
+            log_error($message, "requests/getMarkbook.php", __LINE__);
+            log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
+            returnToPageError($ex, $message);
+        }
+        $newArray = array();
+        foreach($results as $result){
+            $id = $result["StuID"];
+            $newArray[$id] = $result;
+        }
+
+        $resultsArray[$GWID] = $newArray;
+    }
+
+    $response = array(
+        "success" => TRUE,
+        "students" => $students,
+        "worksheets" => $worksheets,
+        "results" => $resultsArray);
+    echo json_encode($response);
+}
+
+function getMarkbookForSetAndStudent($setid, $stuid, $staffid) {
+    $query1 = "SELECT U.`User ID` ID, U.`Preferred Name` PName, U.`Surname`, U.`First Name` FName
+                FROM TUSERS U WHERE U.`User ID` = $stuid;";
+    $query2 = "SELECT WV.`Version ID` VID, GW.`Group Worksheet ID` GWID, WV.`WName` WName,
+                DATE_FORMAT(GW.`Date Due`, '%d/%m/%Y') Date, DATE_FORMAT(GW.`Date Due`, '%d/%m') ShortDate, SUM(SQ.`Marks`) Marks,
+                GW.`DisplayName` DisplayName
+                FROM TGROUPWORKSHEETS GW
+                JOIN TWORKSHEETVERSION WV ON WV.`Version ID` = GW.`Version ID`
+                JOIN TSTOREDQUESTIONS SQ on SQ.`Version ID` = WV.`Version ID`
+                WHERE (GW.`Primary Staff ID` = $staffid OR GW.`Additional Staff ID` = $staffid OR GW.`Additional Staff ID 2` = $staffid)
+                AND GW.`Group ID` = $setid AND WV.`Deleted` = 0 AND (GW.`Deleted` IS NULL OR GW.`Deleted` <> 1)
+                AND (GW.`Hidden` IS NULL OR GW.`Hidden` <> 1) AND SQ.`Deleted` = 0
+                GROUP BY GW.`Group Worksheet ID`
+                ORDER BY GW.`Date Due` DESC, WV.`WName`;";
+
+    try{
+        $students = db_select_exception($query1);
+        for ($i = 0; $i < count($students); $i++) {
+            $pref_name = $students[$i]["PName"];
+            $first_name = $students[$i]["FName"];
+            $surname = $students[$i]["Surname"];
+            $name = $pref_name <> "" ? $pref_name : $first_name;
+            $name .= " $surname";
+            $students[$i]["Name"] = $name;
+        }
+        $worksheets = db_select_exception($query2);
+    } catch (Exception $ex) {
+        $message = "There was an error retrieving the markbook";
+        log_error($message, "requests/getMarkbook.php", __LINE__);
+        log_error($ex->getMessage(), "requests/getMarkbook.php", __LINE__);
+        returnToPageError($ex, $query1);
+    }
+
+    $resultsArray = array();
+
+    foreach ($worksheets as $worksheet) {
+        $GWID = $worksheet["GWID"];
+        $query = "SELECT StuID, SUM(Mark) Mark, SUM(Marks) Marks FROM (
+                    SELECT CQ.`Student ID` StuID, Mark, Marks FROM TCOMPLETEDQUESTIONS CQ
+                    JOIN TSTOREDQUESTIONS SQ ON CQ.`Stored Question ID` = SQ.`Stored Question ID`
+                    WHERE `Group Worksheet ID` = $GWID AND CQ.`Deleted` = 0 AND SQ.`Deleted` = 0 AND CQ.`Student ID` = $stuid
                     GROUP BY CQ.`Student ID`, CQ.`Stored Question ID`) AS A
                     GROUP BY StuID;";
         try{

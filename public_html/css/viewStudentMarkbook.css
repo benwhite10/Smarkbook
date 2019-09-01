@@ -1,0 +1,7 @@
+ul.dropdown.navdrop {
+    width: calc(100% + 50px);
+}
+
+ul.navdrop li {
+    overflow: hidden;
+}

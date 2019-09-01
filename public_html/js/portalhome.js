@@ -24,6 +24,7 @@ function writeHomeGrid(user) {
     var grid_options = {};
     grid_options["view_worksheets"] = {url: "viewAllWorksheets.php?opt=0", title: "Worksheets", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF"]};
     grid_options["mark_book"] = {url: "viewSetMarkbook.php?staffId=" + user_id, title: "Mark Book", img: "home-markbook.png", permissions: ["SUPER_USER", "STAFF"]};
+    grid_options["mark_book_student"] = {url: "viewStudentMarkbook.php", title: "Mark Book", img: "home-markbook.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
     grid_options["checklists"] = {url: "revisionChecklist.php?course=1", title: "Checklists", img: "home-worksheets.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
     grid_options["enter_results_student"] = {url: "newResultsEntryHome.php", title: "Enter Results", img: "home-enter-results.png", permissions: ["SUPER_USER", "STAFF", "STUDENT"]};
     grid_options["enter_results_staff"] = {url: "viewAllWorksheets.php?opt=1", title: "Enter Results", img: "home-enter-results.png", permissions: ["SUPER_USER", "STAFF"]};
@@ -37,7 +38,7 @@ function writeHomeGrid(user) {
 
     var grid_html = "";
     var staff_grid = ["view_worksheets", "mark_book", "checklists", "reports_staff", "sets", "tags", "quiz"];
-    var student_grid = ["enter_results_student", "reports_student", "checklists", "quiz"];
+    var student_grid = ["mark_book_student", "reports_student", "checklists", "quiz"];
     var final_grid = [];
     if(user_role === "STAFF" || user_role === "SUPER_USER") {
         final_grid = staff_grid;
