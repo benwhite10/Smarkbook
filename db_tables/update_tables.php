@@ -213,6 +213,7 @@ function define_table($table) {
                 array("db_name" => "StaffId", "type" => "int", "primary" => FALSE),
                 array("db_name" => "SetId", "type" => "int", "isams" => "Id", "primary" => FALSE),
                 array("db_name" => "PrimaryTeacher", "type" => "int", "primary" => FALSE),
+                array("db_name" => "UserType", "type" => "text", "primary" => FALSE),
                 array("db_name" => "Name", "type" => "text", "primary" => FALSE)
             ];
             break;

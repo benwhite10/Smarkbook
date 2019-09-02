@@ -35,22 +35,29 @@ function logInUser($user_input, $pwd) {
         log_info("Login failed for ($email) as user does not exist.", "requests/authentication.php");
         returnRequest(FALSE, array("success" => FALSE, "message" => "Invalid username/password.", "url" => ""), null, null);
     }
-    $response = $config['server'] === 'local' ? [TRUE, ""] : authenticateCredentials($user, $pwd);
-    $url = "portalhome.php";
-    if ($response[0]) {
-        $user = createUser($user_id);
-        if ($user->getRole() === "NO") {
-            $response = [FALSE, "Invalid user."];
-            log_info("Login failed for ($email) as user does not have access.", "requests/authentication.php");
-        } else {
-            $user->token = createJWT($user_id, $user->role);
-            $identifier = $user->getRole() === "STUDENT" ? $user->getDisplayName() : $user->getFirstName() . " " . $user->getSurname();
-            log_info("User (" . $identifier . " - $user_id) logged in.", "requests/authentication.php");
-        }
+    $attempts_count = getRecentFailedLoginAttempt($user_id);
+    if ($attempts_count > 2) {
+        $response = [FALSE, "You have too many failed login attempts, please wait 5 minutes and then try again."];
     } else {
-        log_info("Login failed for ($email) as login details are incorrect.", "requests/authentication.php");
+        $response = $config['server'] === 'local' ? [TRUE, ""] : authenticateCredentials($user, $pwd);
+        $url = "portalhome.php";
+        if ($response[0]) {
+            $user = createUser($user_id);
+            if ($user->getRole() === "NO") {
+                $response = [FALSE, "Invalid user."];
+                addFailedLoginAttempt($user_id, "Invalid user.");
+                log_info("Login failed for ($email) as user does not have access.", "requests/authentication.php");
+            } else {
+                $user->token = createJWT($user_id, $user->role);
+                $identifier = $user->getRole() === "STUDENT" ? $user->getDisplayName() : $user->getFirstName() . " " . $user->getSurname();
+                log_info("User (" . $identifier . " - $user_id) logged in.", "requests/authentication.php");
+            }
+        } else {
+            log_info("Login failed for ($email) as login details are incorrect.", "requests/authentication.php");
+            addFailedLoginAttempt($user_id, "Invalid credentials.");
+        }
     }
-    logEvent($user_id, "USER_LOGIN", "");
+    if($response[0]) logEvent($user_id, "USER_LOGIN", "");
     returnRequest(TRUE, array(
         "success" => $response[0],
         "message" => $response[1],
@@ -59,6 +66,25 @@ function logInUser($user_input, $pwd) {
     ));
 }
 
+function addFailedLoginAttempt($user_id, $message = "") {
+    $query = "INSERT INTO `TUSERFAILEDLOGINS`(`UserID`, `AttemptTime`, `Message`) VALUES ($user_id, NOW(), '$message')";
+    try {
+        db_query_exception($query);
+        return;
+    } catch (Excpetion $ex) {
+        return;
+    }
+}
+
+function getRecentFailedLoginAttempt($user_id) {
+    $query = "SELECT COUNT(*) `Count` FROM `TUSERFAILEDLOGINS` WHERE `AttemptTime` > DATE_SUB(NOW(), INTERVAL 5 MINUTE)";
+    try {
+        $count_array = db_select_exception($query);
+        return $count_array[0]["Count"];
+    } catch (Excpetion $ex) {
+        return 0;
+    }
+}
 function validateSession($token) {
     $response = validateToken($token);
     $message = $response[0] ? "" : $response[1];

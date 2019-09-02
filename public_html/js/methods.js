@@ -25,12 +25,16 @@ function closeIEMsg() {
 }
 
 function validateAccessToken(user, roles, unauthorised = false) {
-    if (!user || user === null) {
+    if (!user || user === null || user.length === 0) {
         log_out();
         return;
     }
 
-    var jwt = parseJwt(user["token"])
+    var jwt = parseJwt(user["token"]);
+    if (!jwt) {
+        log_out();
+        return;
+    }
     var user_role = jwt["user_role"];
     var parent_role = jwt["parent_role"];
 
@@ -63,12 +67,16 @@ function validateAccessToken(user, roles, unauthorised = false) {
 }
 
 function parseJwt(token) {
-    var base64Url = token.split('.')[1];
-    var base64 = decodeURIComponent(atob(base64Url).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+    try {
+        var base64Url = token.split('.')[1];
+        var base64 = decodeURIComponent(atob(base64Url).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
 
-    return JSON.parse(base64);
+        return JSON.parse(base64);
+    } catch (exception) {
+        return false;
+    }
 };
 
 function log_out() {
