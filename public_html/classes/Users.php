@@ -15,7 +15,7 @@ class User
     function __construct() {
 
     }
-     // TODO remove no longer required bits
+    
     public static function createUserLoginDetails($id){
         $userObject = new self();
         $query = "SELECT * FROM TUSERS U WHERE U.`User ID` = $id";

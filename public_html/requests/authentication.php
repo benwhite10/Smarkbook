@@ -31,14 +31,25 @@ function logInUser($user_input, $pwd) {
     $user = cleanUserName($user_input);
     $email = $user . "@wellingtoncollege.org.uk";
     $user_id = getDetails($email, 'User ID');
-    if ($user_id === FALSE) returnRequest(FALSE, array("success" => FALSE, "message" => "Invalid username/password.", "url" => ""), null, null);
-    $response = $config['server'] === 'local' ? [TRUE, ""] :authenticateCredentials($user, $pwd);
+    if ($user_id === FALSE) {
+        log_info("Login failed for ($email) as user does not exist.", "requests/authentication.php");
+        returnRequest(FALSE, array("success" => FALSE, "message" => "Invalid username/password.", "url" => ""), null, null);
+    }
+    $response = $config['server'] === 'local' ? [TRUE, ""] : authenticateCredentials($user, $pwd);
     $url = "portalhome.php";
     if ($response[0]) {
         $user = createUser($user_id);
-        $user->token = createJWT($user_id, $user->role);
+        if ($user->getRole() === "NO") {
+            $response = [FALSE, "Invalid user."];
+            log_info("Login failed for ($email) as user does not have access.", "requests/authentication.php");
+        } else {
+            $user->token = createJWT($user_id, $user->role);
+            $identifier = $user->getRole() === "STUDENT" ? $user->getDisplayName() : $user->getFirstName() . " " . $user->getSurname();
+            log_info("User (" . $identifier . " - $user_id) logged in.", "requests/authentication.php");
+        }
+    } else {
+        log_info("Login failed for ($email) as login details are incorrect.", "requests/authentication.php");
     }
-    log_info("User (" . $user->getInitials() . " - $user_id) logged in.", "requests/authentication.php");
     logEvent($user_id, "USER_LOGIN", "");
     returnRequest(TRUE, array(
         "success" => $response[0],
