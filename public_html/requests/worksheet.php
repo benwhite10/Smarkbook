@@ -418,7 +418,7 @@ function getSuggestedTags($tags, $div_id) {
     $response = array(
         "top_values" => getTopValues($suggested_tags, 10),
         "div_id" => $div_id);
-    succeedRequest("Suggested tags", $response);
+    succeedRequest(null, $response);
 }
 
 function tagIsInArray($tag, $tags_array) {
@@ -427,6 +427,7 @@ function tagIsInArray($tag, $tags_array) {
     }
     return FALSE;
 }
+
 function addTagToSuggestedTagArray($tag, $suggested_tags, $count) {
     $tag_id = $tag["Tag ID"];
     $tag_perc = $tag["Count"] / $count;
