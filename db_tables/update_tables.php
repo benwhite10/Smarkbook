@@ -41,7 +41,7 @@ function isams_update_or_insert($isams_array, $table, $update_current, $current_
         $test = db_select_exception($test_query);
         $count = $test[0]["Count"];
         if ($count > 0) {
-            $result = update_table($values_array, $table_details, $update_current, $current_col) ? "update" : false;
+            $result = update_table($values_array, $table_details, $update_current, $current_col, $primary_key_field, $primary_key_value) ? "update" : false;
         } else {
             $result = insert_table($values_array, $table_details, $update_current, $current_col) ? "insert" : false;
         }
@@ -53,7 +53,7 @@ function isams_update_or_insert($isams_array, $table, $update_current, $current_
 }
 
 
-function update_table($array, $table_details, $update_current, $current_col) {
+function update_table($array, $table_details, $update_current, $current_col, $primary_key_field, $primary_key_value) {
     $table_name = $table_details[0];
     $update_query = "UPDATE `$table_name` SET ";
     for ($i = 1; $i < count($array); $i++) {
@@ -62,7 +62,7 @@ function update_table($array, $table_details, $update_current, $current_col) {
     }
     if ($update_current) $update_query .= "`$current_col` = 1 ";
 
-    $update_query .= " WHERE `" . $array[0][0] . "`=" . $array[0][1];
+    $update_query .= " WHERE `" . $primary_key_field . "`=" . $primary_key_value;
 
     try {
         db_begin_transaction();
