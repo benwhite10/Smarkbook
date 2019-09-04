@@ -56,9 +56,11 @@ function isams_update_or_insert($isams_array, $table, $update_current, $current_
 function update_table($array, $table_details, $update_current, $current_col, $primary_key_field, $primary_key_value) {
     $table_name = $table_details[0];
     $update_query = "UPDATE `$table_name` SET ";
-    for ($i = 1; $i < count($array); $i++) {
-        $update_query .= "`" . $array[$i][0] . "`=" . $array[$i][1];
-        if ($i < (count($array) - 1) || ($i === (count($array) - 1) && $update_current)) $update_query .= ", ";
+    for ($i = 0; $i < count($array); $i++) {
+        if ($array[$i][0] !== $primary_key_field) {
+            $update_query .= "`" . $array[$i][0] . "`=" . $array[$i][1];
+            if ($i < (count($array) - 1) || ($i === (count($array) - 1) && $update_current)) $update_query .= ", ";
+        }
     }
     if ($update_current) $update_query .= "`$current_col` = 1 ";
 
