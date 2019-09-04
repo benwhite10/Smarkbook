@@ -160,7 +160,7 @@ function define_table($table) {
                 array("db_name" => "Title", "type" => "text", "primary" => FALSE),
                 array("db_name" => "First Name", "type" => "text", "isams" => "Forename", "primary" => FALSE),
                 array("db_name" => "Surname", "type" => "text", "primary" => FALSE),
-                array("db_name" => "Preferred Name", "type" => "text", "isams" => "PreferredName", "primary" => FALSE)
+                array("db_name" => "Preferred Name", "type" => "text", "isams" => "Preferredname", "primary" => FALSE)
             ];
             break;
         /*case "boardinghouses":
