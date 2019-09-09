@@ -47,12 +47,14 @@ function clickLogin() {
                 localStorage.setItem("sbk_usr", JSON.stringify(user));
                 window.location = url;
             } else {
+                $("#login_password").val("");
                 $("#login_message").html(json["response"]["message"]);
                 $("#login_message").addClass("error");
                 $("#login_message").fadeIn();
             }
         },
         error: function(json) {
+            $("#login_password").val("");
             $("#login_message").html("There was an error logging in. If the error persists please contact <a href='mailto:contact.smarkbook@gmail.com' style='color:inherit; font-size:inherit;'>contact.smarkbook@gmail.com</a>");
             $("#login_message").addClass("error");
             $("#login_message").fadeIn();

@@ -77,7 +77,7 @@ function addFailedLoginAttempt($user_id, $message = "") {
 }
 
 function getRecentFailedLoginAttempt($user_id) {
-    $query = "SELECT COUNT(*) `Count` FROM `TUSERFAILEDLOGINS` WHERE `AttemptTime` > DATE_SUB(NOW(), INTERVAL 5 MINUTE)";
+    $query = "SELECT COUNT(*) `Count` FROM `TUSERFAILEDLOGINS` WHERE `AttemptTime` > DATE_SUB(NOW(), INTERVAL 5 MINUTE) AND `UserID` = $user_id ";
     try {
         $count_array = db_select_exception($query);
         return $count_array[0]["Count"];

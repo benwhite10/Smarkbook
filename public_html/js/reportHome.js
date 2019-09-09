@@ -311,6 +311,7 @@ function sendReportRequest(){
         student: $('#student').val(),
         staff: $('#staff').val(),
         set: $('#set').val(),
+        userid: user["userId"],
         token: user["token"]
     };
     localStorage.setItem("activeReportRequest", JSON.stringify(infoArray));
