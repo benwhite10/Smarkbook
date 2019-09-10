@@ -68,27 +68,34 @@ function getSetsSuccess() {
 }
 
 function writeSetDropdown() {
-    var set = getSetForId(set_id);
-    var html_text = "<div id='title2'><h1>Mark Book</h1></div>";
-    html_text += "<ul class='menu navbar'>";
+    var years_text = "";
+    for (var i = 0; i < years.length; i++) {
+        years_text += "<option value='" + years[i]["AcademicYear"] + "'>" + years[i]["Year"] + "</option>";
+    }
+    var sets_text = "";
+    for (var i = 0; i < sets.length; i++) {
+        sets_text += "<option value='" + sets[i]["Group ID"] + "'>" + sets[i]["Subject"] + " (" + sets[i]["Initials"] + ")</option>";
+    }
+    $("#year_select").html(years_text);
+    $("#sets_select").html(sets_text)
     for (var i = 0; i < years.length; i++) {
         if (years[i]["AcademicYear"] == year) {
-            html_text += "<li><a>" + years[i]["Year"] + " &#x25BE</a>";
+            $("#year_select").val(years[i]["AcademicYear"]);
             break;
         }
     }
-    html_text += "<ul class='dropdown navdrop'>";
-    for (var i = 0; i < years.length; i++) {
-        html_text += "<li><a href='viewStudentMarkbook.php?year=" + years[i]["AcademicYear"] + "'>" + years[i]["Year"] + "</a></li>";
-    }
-    html_text += "</ul></li>";
-    html_text += "<li><a>" + set["Name"] + " (" + set["Initials"] + ") &#x25BE</a>";
-    html_text += "<ul class='dropdown navdrop'>";
-    for (var i = 0; i < sets.length; i++) {
-        html_text += "<li><a href='viewStudentMarkbook.php?staffid=" + sets[i]["User ID"] + "&setid=" + sets[i]["Group ID"] + "&year=" + year + "'>" + sets[i]["Name"] + " (" + sets[i]["Initials"] + ")</a></li>";
-    }
-    html_text += "</ul></li></ul>";
-    $("#top_bar").html(html_text);
+    $("#sets_select").val(set_id);
+}
+
+function changeYear() {
+    var year_id = $("#year_select").val();
+    window.location.href = "viewStudentMarkbook.php?year=" + year_id;
+}
+
+function changeSet() {
+    var set_id = $("#sets_select").val();
+    var set = getSetForId(set_id);
+    window.location.href = "viewStudentMarkbook.php?staffid=" + set["User ID"] + "&setid=" + set["Group ID"] + "&year=" + year;
 }
 
 function getSetForId(group_id) {

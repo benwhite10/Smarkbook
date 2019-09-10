@@ -27,7 +27,11 @@ $info_version = Info::getInfo()->getVersion();
             <ul class='menu topbar'><li id="navbar"></li></ul>
     	</div>
     	<div id="body">
-            <div id="top_bar"></div>
+            <div id="markbook_options">
+                <span><h1>Mark Book</h1></span>
+                <select id="year_select" onchange="changeYear()"></select>
+                <select id="sets_select" onchange="changeSet()"></select>
+            </div>
             <div id="spinner" class="spinner"></div>
             <div id="main_content" style="overflow: scroll;"></div>
     	</div>

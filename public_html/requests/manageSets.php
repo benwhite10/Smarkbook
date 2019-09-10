@@ -238,15 +238,17 @@ function getSetsForStudent($student_id, $year) {
             if ($years[$i]["CurrentYear"]) $current_year_id = $years[$i]["ID"];
         }
         if (!$year_id) $year_id = $current_year_id;
-        //TODO add subjects
-        $sets_query = "SELECT A.*, U.`User ID`, U.`Initials` FROM (SELECT G.`Group ID`, G.`Name`
+        $sets_query = "SELECT A.*, U.`User ID`, U.`Initials` FROM (SELECT G.`Group ID`, G.`Name`, S.`Title` Subject
             FROM `TUSERGROUPS` UG
             JOIN `TGROUPS` G ON UG.`Group ID` = G.`Group ID`
+            JOIN `TSUBJECTS` S ON G.`SubjectID` = S.`SubjectID`
             WHERE UG.`User ID` = $student_id
             AND UG.`Archived` = 0 AND G.`Archived` = 0 AND G.`AcademicYear` = $year_id
-            ORDER BY G.`Name`) AS A
+            AND S.`Markbook` = 1 
+            ORDER BY S.`Title`) AS A
             JOIN `TUSERGROUPS` UG ON A.`Group ID` = UG.`Group ID` AND UG.`UserType` = 'T'
-            JOIN `TUSERS` U ON UG.`User ID` = U.`User ID` AND U.`Role` <> 'STUDENT'";
+            JOIN `TUSERS` U ON UG.`User ID` = U.`User ID` AND U.`Role` <> 'STUDENT'
+            ORDER BY A.`Subject`, U.`Initials`";
         $sets = db_select_exception($sets_query);
         $years = getUserSetsYears($student_id);
         $years = $years[0] ? $years[1] : array();

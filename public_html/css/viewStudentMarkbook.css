@@ -5,3 +5,32 @@ ul.dropdown.navdrop {
 ul.navdrop li {
     overflow: hidden;
 }
+
+#markbook_options {
+    display: inline-block;
+    float: left;
+    width: 100%;
+    padding: 10px;
+    margin-top: 30px;
+    border: 1px solid #323232;
+}
+
+#markbook_options > select {
+    display: inline-block;
+    float: left;
+    width: calc(50% - 10px);
+    outline: none;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    padding: 0;
+    margin-top: 10px;
+}
+
+#year_select {
+    margin-right: 10px;
+}
+
+#sets_select {
+    margin-left: 10px;
+}

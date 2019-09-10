@@ -39,6 +39,7 @@ function createUserData($response) {
     $terms = cleanArray(xmlToArray($response->SchoolManager->Terms));
     $sets = cleanArray(xmlToArray($response->TeachingManager->Sets, array('alwaysArray' => array("Teacher"))));
     $set_lists = cleanArray(xmlToArray($response->TeachingManager->SetLists));
+    $departments = cleanArray(xmlToArray($response->TeachingManager->Departments, array('alwaysArray' => array("Subject"))));
     $return_array["Staff"] = $staff["CurrentStaff"]["StaffMember"];
     $return_array["Pupils"] = $pupils["CurrentPupils"]["Pupil"];
     //$return_array["AcademicHouses"] = $academic_houses["AcademicHouses"]["House"];
@@ -47,6 +48,7 @@ function createUserData($response) {
     $return_array["Terms"] = $terms["Terms"]["Term"];
     $return_array["Sets"] = $sets["Sets"]["Set"];
     $return_array["SetLists"] = $set_lists["SetLists"]["SetList"];
+    $return_array["Departments"] = $departments["Departments"]["Department"];
     return $return_array;
 }
 

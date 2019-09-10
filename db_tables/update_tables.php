@@ -222,14 +222,16 @@ function define_table($table) {
         case "setlists":
             $table_name = "TUSERGROUPS";
             $structure_array = [
-                ["SetListID", "int", "Id"],
-                ["SetId", "int"],
-                ["SchoolId", "text"]
-            ];
-            $structure_array = [
                 array("db_name" => "SetListID", "type" => "int", "isams" => "Id", "primary" => TRUE),
                 array("db_name" => "SetId", "type" => "int", "primary" => FALSE),
                 array("db_name" => "SchoolId", "type" => "text", "primary" => FALSE)
+            ];
+            break;
+        case "subjects":
+            $table_name = "TSUBJECTS";
+            $structure_array = [
+                array("db_name" => "SubjectID", "type" => "int", "primary" => TRUE),
+                array("db_name" => "Title", "type" => "text", "primary" => FALSE)
             ];
             break;
         default:

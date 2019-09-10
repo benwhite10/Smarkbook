@@ -20,7 +20,25 @@ function updateAllUsers($max_time = 300, $update_all_sets = FALSE) {
     updateUserDetails();
     updateTerms($user_data[1]["Terms"], "Terms", "terms");
     updateSets($user_data[1]["Sets"], $user_data[1]["SetLists"], $update_all_sets);
+    updateSubjects($user_data[1]["Departments"]);
     return [TRUE];
+}
+
+function updateSubjects($departments) {
+    $subjects = array();
+    for ($i = 0; $i < count($departments); $i++) {
+        if (array_key_exists("Subjects", $departments[$i])) {
+            $department_subjects = $departments[$i]["Subjects"]["Subject"];
+            for ($j = 0; $j < count($department_subjects); $j++) {
+                array_push($subjects, array(
+                    "SubjectID" => $department_subjects[$j]["Id"],
+                    "Title" => $department_subjects[$j]["Name"]
+                ));
+            }
+        }
+    }
+    runUpdate($subjects, "Subjects", "subjects", FALSE, []);
+    return $subjects;
 }
 
 function updateTerms($terms, $name, $key) {
