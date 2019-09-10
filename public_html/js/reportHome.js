@@ -490,7 +490,7 @@ function generateReport(){
     clearWorksheetsSummary();
     sendReportRequest();
     setInputsTitle();
-    getNotesRequest();
+    //getNotesRequest();
     return false;
 }
 
@@ -1213,7 +1213,7 @@ function hideAllSections(){
     $("#summaryReport").hide();
     $("#questionsReport").hide();
     $("#new_tags_report").hide();
-    $("#report_notes").hide();
+    //$("#report_notes").hide();
     $("#noResults").show();
 }
 
@@ -1222,7 +1222,7 @@ function showAllSections(){
     $("#summaryReport").show();
     //$("#questionsReport").show();
     $("#new_tags_report").show();
-    $("#report_notes").show();
+    //$("#report_notes").show();
     $("#noResults").hide();
     $("#showHideWorksheetText").text("Hide Worksheets \u2191");
 }
@@ -1235,14 +1235,14 @@ function hideAllContent(){
     $("#new_tags_report_main").hide();
     $("#summaryReportDetails").hide();
     $("#questionsReportMain").hide();
-    $("#report_notes_main").hide();
+    //$("#report_notes_main").hide();
 }
 
 function showAllSpinners(){
     hideAllContent();
     startSpinnerInDiv('summaryReportSpinner');
     startSpinnerInDiv('new_tags_report_spinner');
-    startSpinnerInDiv('report_notes_spinner');
+    //startSpinnerInDiv('report_notes_spinner');
 }
 
 function startSpinnerInDiv(div){

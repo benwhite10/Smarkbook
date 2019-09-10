@@ -221,7 +221,7 @@ $info_version = Info::getInfo()->getVersion();
                     </div>
                 </div>
 
-                <div id="report_notes" class="fullSection">
+                <!--<div id="report_notes" class="fullSection">
                     <div id="report_notes_spinner" class="spinnerBox">
                     </div>
                     <div id="report_notes_main">
@@ -230,7 +230,7 @@ $info_version = Info::getInfo()->getVersion();
                         </div>
                         <div id="report_notes_notes"></div>
                     </div>
-                </div>
+                </div>-->
 
                 <div id="tagsReport" class="fullSection" style="display:none">
                     <div id="tagsReportSpinner" class="spinnerBox">

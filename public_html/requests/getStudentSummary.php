@@ -796,16 +796,21 @@ function createCombinedList(){
 }
 
 function getStudentSets($studentId) {
-    $set_query = "SELECT G.`Group ID`, G.`Name` FROM `TCOMPLETEDQUESTIONS` CQ
-            JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
-            JOIN TGROUPS G ON GW.`Group ID` = G.`Group ID`
-            JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`
-            WHERE `Student ID` = $studentId AND G.`Type ID` = 3 AND GW.`Deleted` = 0 AND UG.`Archived` = 0
-            GROUP BY GW.`Group ID`
-            ORDER BY G.`Name`;";
-    $student_query = "SELECT U.`First Name` FName, U.`Surname` Surname, U.`Preferred Name` PName, U.`User ID` UserID FROM TUSERS U "
-            . "WHERE U.`User ID` = $studentId";
     try {
+        $years_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
+        $years = db_select_exception($years_query);
+        $year_id = $years[0]["ID"];
+
+        $set_query = "SELECT G.`Group ID`, G.`Name` FROM `TCOMPLETEDQUESTIONS` CQ
+                JOIN TGROUPWORKSHEETS GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
+                JOIN TGROUPS G ON GW.`Group ID` = G.`Group ID`
+                JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`
+                WHERE `Student ID` = $studentId AND G.`Type ID` = 3 AND GW.`Deleted` = 0 AND UG.`Archived` = 0 AND G.`AcademicYear` = $year_id
+                GROUP BY GW.`Group ID`
+                ORDER BY G.`Name`;";
+        $student_query = "SELECT U.`First Name` FName, U.`Surname` Surname, U.`Preferred Name` PName, U.`User ID` UserID FROM TUSERS U "
+                . "WHERE U.`User ID` = $studentId";
+
         $sets = db_select_exception($set_query);
         $student_details = db_select_exception($student_query);
         $staff_details = [];

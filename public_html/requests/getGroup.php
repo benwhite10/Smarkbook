@@ -31,12 +31,15 @@ switch ($requestType){
 }
 
 function getSetsForUser($staffid, $orderby, $desc){
-    $query = "SELECT G.`Group ID` ID, G.`Name` Name FROM TGROUPS G
-                JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`";
-    $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`", "G.`Archived`"], [$staffid, 3, 0, 0]);
-    $query .= orderBy([$orderby], [$desc]);
+    try {
+        $years_query = "SELECT `ID` FROM `TACADEMICYEAR` WHERE `CurrentYear` = 1";
+        $years = db_select_exception($years_query);
+        $year_id = $years[0]["ID"];
+        $query = "SELECT G.`Group ID` ID, G.`Name` Name FROM TGROUPS G
+                    JOIN TUSERGROUPS UG ON G.`Group ID` = UG.`Group ID`";
+        $query .= filterBy(["UG.`User ID`", "G.`Type ID`", "UG.`Archived`", "G.`Archived`", "G.`AcademicYear`"], [$staffid, 3, 0, 0, $year_id]);
+        $query .= orderBy([$orderby], [$desc]);
 
-    try{
         $sets = db_select_exception($query);
         foreach ($sets as $key=>$set) {
             $group_id = $set["ID"];
