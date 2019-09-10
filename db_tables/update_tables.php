@@ -155,7 +155,7 @@ function define_table($table) {
                 array("db_name" => "UserCode", "type" => "text", "primary" => FALSE),
                 array("db_name" => "Email", "type" => "text", "isams" => "EmailAddress", "primary" => FALSE),
                 array("db_name" => "PupilID", "type" => "int", "isams" => "Id", "primary" => TRUE),
-                array("db_name" => "SchoolID", "type" => "int", "isams" => "SchoolId", "primary" => FALSE),
+                array("db_name" => "SchoolID", "type" => "text", "isams" => "SchoolId", "primary" => FALSE),
                 array("db_name" => "Initials", "type" => "text", "primary" => FALSE),
                 array("db_name" => "Title", "type" => "text", "primary" => FALSE),
                 array("db_name" => "First Name", "type" => "text", "isams" => "Forename", "primary" => FALSE),
