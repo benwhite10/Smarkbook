@@ -7,6 +7,9 @@ var update_locked = false;
 var failed_updates = 0;
 var selected_worksheet;
 var teacher_sets = [];
+var add_results = false;
+var add_results_id = 0;
+var loaded = {"sets": false, "worksheets": false}
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
@@ -23,10 +26,12 @@ function init_page() {
     $("#search_bar_text_input").keyup(function(event){
         searchWorksheets();
     });
-    var favourites = [];
-    var recents = [{"Name":"Recent 1", "Version ID": "1074"},{"Name":"Recent 2", "Version ID": "1074"},{"Name":"Recent 3", "Version ID": "1074"},{"Name":"Recent 4", "Version ID": "1074"},{"Name":"Recent 5", "Version ID": "1074"}];
+    add_results_id = getParameterByName("res");
+    if (add_results_id && add_results_id !== null && add_results_id !== "") add_results = true;
+    //var favourites = [];
+    //var recents = [{"Name":"Recent 1", "Version ID": "1074"},{"Name":"Recent 2", "Version ID": "1074"},{"Name":"Recent 3", "Version ID": "1074"},{"Name":"Recent 4", "Version ID": "1074"},{"Name":"Recent 5", "Version ID": "1074"}];
     //writeFilteredWorksheets(recents, "recent_results", 3);
-    writeFavouritesBar(favourites, null);
+    //writeFavouritesBar(favourites, null);
     selectTabOption("search");
 }
 
@@ -60,6 +65,8 @@ function getSets() {
 function getSetsSuccess(json) {
     if (json["success"]) {
         teacher_sets = json["response"]["sets"];
+        loaded["sets"] = true;
+        checkFullyLoaded();
     } else {
         console.log(json["message"]);
     }
@@ -96,11 +103,20 @@ function getWorksheetsSuccess(json) {
         setUpFolders(json["worksheets"]);
         setUpFilePathBar("all_worksheets_top_bar");
         setUpJSTree();
+        loaded["worksheets"] = true;
+        checkFullyLoaded();
     } else {
         console.log("Error getting worksheet details.");
         console.log(json);
     }
 
+}
+
+function checkFullyLoaded() {
+    for (var key in loaded) {
+        if (!loaded[key]) return;
+    }
+    if (add_results) getWorksheetDetails(add_results_id);
 }
 
 function getWorksheetDetails(id) {
@@ -136,6 +152,7 @@ function getWorksheetDetailsSuccess(json) {
         $('html, body').animate({
             scrollTop: $("#selected_worksheet").offset().top - 100
         }, 500);
+        if (add_results) addNewResults();
     } else {
         $("#selected_worksheet").html("<div class='no_worksheet'>No worksheet selected.</div>");
     }
@@ -744,7 +761,6 @@ function renameFolder() {
 
     for (var j = 0; j < folders.length; j++) {
         if (folder_id === parseInt(folders[j]["id"])) {
-            // TODO add text change here
             folders[j]["value"] = name;
             folders[j]["changed"] = true;
             break;
@@ -1008,6 +1024,7 @@ function writeFavouritesBar(favourites, max) {
     $("#all_worksheets_favourites_bar").html(html_text);
     $("#all_worksheets_favourites_bar").removeClass("hidden");
 }
+
 function getParameterByName(name, url) {
     if (!url) {
       url = window.location.href;

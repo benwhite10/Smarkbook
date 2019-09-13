@@ -80,7 +80,7 @@ $info_version = Info::getInfo()->getVersion();
                 <li><div id="add_question_button" onclick="addNewQuestion()">Add Question</div></li>
                 <li><div id="delete_worksheet_button" onclick="deleteWorksheet()">Delete Worksheet</div></li>
                 <li><div id="copy_worksheet_button" onclick="copyWorksheet()">Copy Worksheet</div></li>
-                <!--<li><div id="add_results_button" onclick="addResults()">Add Results</div></li>-->
+                <li><div id="add_results_button" onclick="addResults()">Add Results</div></li>
                 <li><div id="results_analysis_button" onclick="clickResultsAnalysis()">Results Analysis</div></li>
                 <li><div id="back_button" onclick="backToWorksheets()">Back To All Worksheets</div></li>
             </ul>
