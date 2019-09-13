@@ -35,7 +35,7 @@ switch ($requestType){
         saveResults($gwid, $save_changes, $req_id);
         break;
     case "SAVERESULTSSTUDENT":
-        authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);
+        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
         saveResults($gwid, $save_changes, $req_id);
         break;
     case "SAVEWORKSHEETS":

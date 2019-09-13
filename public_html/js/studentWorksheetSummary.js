@@ -445,7 +445,7 @@ function saveChangesRequest(button) {
                     if (json["success"]) {
                         sendSaveChangesSuccess(json);
                     } else {
-                        sendSaveChangesFail(json["Message"]);
+                        sendSaveChangesFail(json["message"]);
                     }
 
                 },
