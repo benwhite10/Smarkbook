@@ -30,8 +30,6 @@ function init_page() {
     selectTabOption("search");
 }
 
-// TODO See if possibe to add date to file tree
-
 function setUpKeyStrokeListeners() {
     var input_modal_input = document.getElementById("input_modal_input");
     input_modal_input.addEventListener("keyup", function(event) {
@@ -353,7 +351,6 @@ function updateMovedFiles(new_data) {
         for (var j = 0; j < folders.length; j++) {
             if (new_folder["id"] === folders[j]["id"]) {
                 if (checkIfChangedFolder(new_folder, folders[j])) {
-                    folders[j]["value"] = new_folder["text"];
                     folders[j]["parent"] = getNewParent(new_folder);
                     folders[j]["changed"] = true;
                 }
@@ -985,8 +982,7 @@ function writeFilteredWorksheets(results, id, max = null) {
         for (var i = 0; i < count; i++) {
             html_text += "<a class='worksheet_result";
             if (i === count - 1) html_text += " last";
-            html_text += "' onclick='clickSearchResult(" + results[i]["Version ID"] + ")'";
-            html_text += " href='/editWorksheet.php?id=" + results[i]["Version ID"] + "'>";
+            html_text += "' onclick='clickSearchResult(" + results[i]["Version ID"] + ")'>";
             html_text += "<div class='worksheet_result_name'>" + results[i]["Name"] + "</div>";
             html_text += "<div class='worksheet_result_date'>" + results[i]["Date"] + "</div></a>";
         }
