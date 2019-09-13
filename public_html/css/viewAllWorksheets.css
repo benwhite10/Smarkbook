@@ -312,7 +312,7 @@ a, a:hover, a:focus {
 
 .nav-tabs>li {
     height: 30px;
-    width: 50%;
+    width: 33.333%;
     text-align: center;
     margin: 0;
 }

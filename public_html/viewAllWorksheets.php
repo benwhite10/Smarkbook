@@ -29,7 +29,7 @@ $info_version = Info::getInfo()->getVersion();
                     <div id="personal_worksheets_div_content">
                         <ul class="nav nav-tabs">
                             <li><a data-toggle="tab" href="#selected_worksheet">Selected Worksheet</a></li>
-                            <!--<li><a data-toggle="tab" href="#recent">Recent</a></li>-->
+                            <li><a data-toggle="tab" href="#recent">Recent</a></li>
                             <li class="active"><a data-toggle="tab" href="#search" class="right">Search</a></li>
                         </ul>
 
@@ -37,9 +37,9 @@ $info_version = Info::getInfo()->getVersion();
                             <div id="selected_worksheet" class="tab-pane fade">
                                 <div class="no_worksheet">No worksheet selected.</div>
                             </div>
-                            <!--<div id="recent" class="tab-pane fade">
-                                <div id="recent_results" class="worksheet_table no_results">No results to display</div>
-                            </div>-->
+                            <div id="recent" class="tab-pane fade">
+                                <div id="recent_results" class="worksheet_table no_results">No recent worksheets to display</div>
+                            </div>
                             <div id="search" class="tab-pane fade in active">
                                 <div id="search_bar">
                                     <div id="search_bar_text">

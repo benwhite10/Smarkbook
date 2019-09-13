@@ -28,9 +28,6 @@ function init_page() {
     });
     add_results_id = getParameterByName("res");
     if (add_results_id && add_results_id !== null && add_results_id !== "") add_results = true;
-    //var favourites = [];
-    //var recents = [{"Name":"Recent 1", "Version ID": "1074"},{"Name":"Recent 2", "Version ID": "1074"},{"Name":"Recent 3", "Version ID": "1074"},{"Name":"Recent 4", "Version ID": "1074"},{"Name":"Recent 5", "Version ID": "1074"}];
-    //writeFilteredWorksheets(recents, "recent_results", 3);
     //writeFavouritesBar(favourites, null);
     selectTabOption("search");
 }
@@ -117,6 +114,7 @@ function checkFullyLoaded() {
         if (!loaded[key]) return;
     }
     if (add_results) getWorksheetDetails(add_results_id);
+    writeRecentWorksheets();
 }
 
 function getWorksheetDetails(id) {
@@ -1005,6 +1003,37 @@ function writeFilteredWorksheets(results, id, max = null) {
         $("#" + id).removeClass("no_results");
     } else {
         html_text += "No search results to display.";
+        $("#" + id).addClass("no_results");
+    }
+    $("#" + id).html(html_text);
+}
+
+function writeRecentWorksheets() {
+    var max_count = 100;
+    var id = "recent_results";
+    var html_text = "";
+    var results = [];
+    for (var i = 0; i < folders.length; i++) {
+        if (folders[i]["type"] === "File") {
+            results.push({
+                "Version ID": folders[i]["id"],
+                "Name": folders[i]["value"],
+                "Date": folders[i]["date"]
+            })
+            if (results.length >= max_count) break;
+        }
+    }
+    if (results.length > 0) {
+        for (var i = 0; i < results.length; i++) {
+            html_text += "<a class='worksheet_result";
+            if (i === results.length - 1) html_text += " last";
+            html_text += "' onclick='clickSearchResult(" + results[i]["Version ID"] + ")'>";
+            html_text += "<div class='worksheet_result_name'>" + results[i]["Name"] + "</div>";
+            html_text += "<div class='worksheet_result_date'>" + results[i]["Date"] + "</div></a>";
+        }
+        $("#" + id).removeClass("no_results");
+    } else {
+        html_text += "No recent worksheets to display.";
         $("#" + id).addClass("no_results");
     }
     $("#" + id).html(html_text);
