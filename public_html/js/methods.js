@@ -102,7 +102,6 @@ function writeNavbar(user) {
     navbar_html += "<a href='portalhome.php'>" + display_name + " &#x25BE</a>";
     navbar_html += "<ul class='dropdown topdrop'>";
     navbar_html += "<li><a href='portalhome.php' id='navbar_home'>Home</a></li>";
-    navbar_html += "<li><a href='editUser.php' id='navbar_account'>My Account</a></li>";
     navbar_html += "<li><a href='#' id='navbar_log_out' onclick='log_out()'>Log Out</a></li>";
     if(checkRole(user_role, ["STAFF", "SUPER_USER"]) || checkRole(parent_role, ["STAFF", "SUPER_USER"])) navbar_html += "<li><a href='switchUser.php' id='navbar_switch'>Switch User</a></li>";
     if(checkRole(user_role, ["SUPER_USER"]) || checkRole(parent_role, ["SUPER_USER"])) navbar_html += "<li><a href='adminTasks.php' id='navbar_tasks'>Tasks</a></li>";

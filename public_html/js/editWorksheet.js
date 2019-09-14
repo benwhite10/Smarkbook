@@ -577,14 +577,12 @@ function stringForBlankTagEntry(div_id) {
 
 function parseWorksheetDetails(details) {
     var name = details["WName"];
-    var link = details["Link"];
     var author = details["Author ID"];
     var date = moment(details["Date Added"]);
     var date_text = date.format("DD/MM/YYYY");
     var internal = details["InternalResults"] === "1";
     $("#title2").html("<h1>" + name + "</h1>");
     $("#worksheet_name").val(name);
-    $("#worksheet_link").val(link);
     $("#worksheet_author").val(author);
     $("#worksheet_date").val(date_text);
     $("#worksheet_internal").prop('checked', internal);
@@ -967,7 +965,6 @@ function saveWorksheetRequest(delete_sqid) {
             array_to_send.push(array);
         } else if (type === "worksheet_details"){
             var name = $("#worksheet_name").val();
-            var link = $("#worksheet_link").val();
             var date = $("#worksheet_date").val();
             var author = $("#worksheet_author").val();
             var internal = $("#worksheet_internal").prop('checked') ? 1 : 0;
@@ -975,7 +972,6 @@ function saveWorksheetRequest(delete_sqid) {
                 type: type,
                 wid: wid,
                 name: name,
-                link: link,
                 date: date,
                 author: author,
                 internal: internal

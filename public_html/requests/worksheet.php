@@ -57,11 +57,10 @@ function updateWorksheet($info_array, $req_id) {
         } else if ($info["type"] === "worksheet_details"){
             $wid = $info["wid"];
             $name = $info["name"];
-            $link = $info["link"];
             $author = $info["author"];
             $date = $info["date"];
             $internal = $info["internal"];
-            array_push($result_array, updateWorksheetDetails($wid, $name, $link, $date, $author, $internal));
+            array_push($result_array, updateWorksheetDetails($wid, $name, $date, $author, $internal));
         } else if ($info["type"] === "delete_question"){
             $sqid = $info["sqid"];
             array_push($result_array, deleteQuestion($sqid));
@@ -189,10 +188,9 @@ function updateWorksheetTags($wid, $tags) {
     }
 }
 
-function updateWorksheetDetails($wid, $name, $link, $date, $author, $internal) {
+function updateWorksheetDetails($wid, $name, $date, $author, $internal) {
     $query = "UPDATE `TWORKSHEETVERSION` SET "
             . "`WName`='$name', "
-            . "`Link`='$link', "
             . "`Date Added`=STR_TO_DATE('$date','%d/%m/%Y'), "
             . "`Author ID`=$author, "
             . "`InternalResults`=$internal "
@@ -323,8 +321,8 @@ function copyWorksheet($wid) {
             failRequest("Copying worksheet failed: No results for original worksheet.");
         }
         $name = db_escape_string($name_result[0]["WName"] . " (Copy)");
-        $copy_query = "INSERT INTO TWORKSHEETVERSION (`WName`, `VName`, `Link`, `Author ID`,`Date Added`,`Deleted`)
-        (SELECT '$name', `VName`, `Link`, `Author ID`,NOW(),0
+        $copy_query = "INSERT INTO TWORKSHEETVERSION (`WName`, `Author ID`,`Date Added`,`Deleted`, `ParentID`, `Type`)
+        (SELECT '$name', `Author ID`, NOW(), 0, `ParentID`, `Type`
         FROM TWORKSHEETVERSION WHERE `Version ID` = $wid)";
         $result = db_insert_query_exception($copy_query);
         $new_wid = $result[1];

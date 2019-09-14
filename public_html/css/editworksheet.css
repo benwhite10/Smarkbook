@@ -8,7 +8,7 @@ input[type="text"], textarea, input[type="password"], input[type="submit"], sele
     font: normal 100% 'Open Sans', sans-serif;
     line-height: 20px;
     height: 32px;
-    width: calc(100% - 182px);
+    width: calc(100% - 162px);
     background: #FFF;
     margin: 0px auto 10px auto;
     padding: 0 10px;
