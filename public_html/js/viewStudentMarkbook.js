@@ -57,8 +57,17 @@ function getSets() {
 
 function getSetsSuccess() {
     if (sets.length > 0) {
-        if (set_id === 0) set_id = sets[0]["Group ID"];
-        if (staff_id === 0) staff_id = sets[0]["User ID"];
+        if (set_id === 0) {
+            set_id = sets[0]["Group ID"];
+            staff_id = sets[0]["User ID"];
+        } else if (staff_id === 0) {
+            for (var i = 0; i < sets.length; i++) {
+                if (sets[i]["Group ID"] === set_id) {
+                    staff_id = sets[i]["User ID"];
+                    break;
+                }
+            }
+        }
         getMarkbook();
         writeSetDropdown();
     } else {
@@ -73,8 +82,11 @@ function writeSetDropdown() {
         years_text += "<option value='" + years[i]["AcademicYear"] + "'>" + years[i]["Year"] + "</option>";
     }
     var sets_text = "";
+    var current_id = "";
     for (var i = 0; i < sets.length; i++) {
-        sets_text += "<option value='" + sets[i]["Group ID"] + "'>" + sets[i]["Subject"] + " (" + sets[i]["Initials"] + ")</option>";
+        var value = sets[i]["Group ID"] + "-" + sets[i]["User ID"];
+        if (set_id === sets[i]["Group ID"]) current_id = value;
+        sets_text += "<option value='" + value + "'>" + sets[i]["Subject"] + " (" + sets[i]["Initials"] + ")</option>";
     }
     $("#year_select").html(years_text);
     $("#sets_select").html(sets_text)
@@ -84,7 +96,7 @@ function writeSetDropdown() {
             break;
         }
     }
-    $("#sets_select").val(set_id);
+    $("#sets_select").val(current_id);
 }
 
 function changeYear() {
@@ -93,9 +105,11 @@ function changeYear() {
 }
 
 function changeSet() {
-    var set_id = $("#sets_select").val();
-    var set = getSetForId(set_id);
-    window.location.href = "viewStudentMarkbook.php?staffid=" + set["User ID"] + "&setid=" + set["Group ID"] + "&year=" + year;
+    var set_vals = $("#sets_select").val().split("-");
+    var link_href = "viewStudentMarkbook.php?year=" + year;
+    if (set_vals.length > 0) link_href += "&setid=" + set_vals[0];
+    if (set_vals.length > 1) link_href += "&staffid=" + set_vals[1];
+    window.location.href = link_href;
 }
 
 function getSetForId(group_id) {
