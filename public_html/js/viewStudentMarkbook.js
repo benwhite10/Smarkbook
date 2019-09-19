@@ -85,7 +85,7 @@ function writeSetDropdown() {
     var current_id = "";
     for (var i = 0; i < sets.length; i++) {
         var value = sets[i]["Group ID"] + "-" + sets[i]["User ID"];
-        if (set_id === sets[i]["Group ID"]) current_id = value;
+        if (set_id === sets[i]["Group ID"] && staff_id === sets[i]["User ID"]) current_id = value;
         sets_text += "<option value='" + value + "'>" + sets[i]["Subject"] + " (" + sets[i]["Initials"] + ")</option>";
     }
     $("#year_select").html(years_text);
