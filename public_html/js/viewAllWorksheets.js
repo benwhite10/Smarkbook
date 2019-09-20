@@ -512,7 +512,7 @@ function checkIfChangedFolder(new_folder, original_folder) {
 
 function checkOperation(operation, node, parent, position, more) {
     if (operation === "move_node") {
-        if (more && more.dnd && more.pos !== "i") {
+        if ((more && more.dnd && more.pos !== "i") || (user.userId != 1 && node.type === "Folder")) {
             return false;
         } else {
             return true;
