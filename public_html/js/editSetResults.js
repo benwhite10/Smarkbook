@@ -64,27 +64,30 @@ function pad(num, size) {
 
 function pressKeyInDiv(div, e) {
     key_map[e.keyCode] = e.type == 'keydown';
-    if (key_map[16]) {
-        if (key_map[39]) {
-            copyRight(div.id);
-            return false;
-        } else if (key_map[37]) {
-            copyLeft(div.id);
-            return false;
-        }
-    } else {
-        if (key_map[39] || key_map[9] || key_map[13]) {
-            moveRight(div.id);
-            return false;
-        } else if (key_map[37]) {
-            moveLeft(div.id);
-            return false;
-        } else if (key_map[38]) {
-            moveUpDown(div.id, true);
-            return false;
-        } else if (key_map[40]) {
-            moveUpDown(div.id, false);
-            return false;
+    var valid_keys = [9, 13, 16, 37, 38, 39, 40];
+    if (valid_keys.includes(e.keyCode)) {
+        if (key_map[16]) {
+            if (key_map[39]) {
+                copyRight(div.id);
+                return false;
+            } else if (key_map[37]) {
+                copyLeft(div.id);
+                return false;
+            }
+        } else {
+            if (key_map[39] || key_map[9] || key_map[13]) {
+                moveRight(div.id);
+                return false;
+            } else if (key_map[37]) {
+                moveLeft(div.id);
+                return false;
+            } else if (key_map[38]) {
+                moveUpDown(div.id, true);
+                return false;
+            } else if (key_map[40]) {
+                moveUpDown(div.id, false);
+                return false;
+            }
         }
     }
 }
