@@ -59,8 +59,7 @@ function getColour(num, av) {
 function createTabs(tabs, selected) {
     $("#main_content").html("<div id='tab_bar'></div>");
     var perc_width = 100/tabs.length;
-    var subtract = (tabs.length - 1)/tabs.length;
-    var width = "calc(" + perc_width + "% - " + subtract + "px)";
+    var width = perc_width + "%";
     for (var i = 0; i < tabs.length; i++) {
         $("#tab_bar").append("<div id='tab_" + i + "' class='tab_button' onclick='switchTab(" + i + ")' style='width:" + width + "'></div>");
         $("#main_content").append("<div id='tab_option_" + i + "' class='tab_option'>");
@@ -94,7 +93,7 @@ function parseBreakdownTab(tab_id) {
     $("#tab_option_" + tab_id).html("<div id='breakdown_tab_options'><select id='breakdown_tab_select' onchange='changeBreakdownSelect()'></select></div>");
     $("#tab_" + tab_id).html("Breakdown");
     $("#tab_option_" + tab_id).append("<div id='breakdown_chart'></div>");
-    $("#tab_option_" + tab_id).append("<div id='breakdown_table'></div>");
+    $("#tab_option_" + tab_id).append("<div id='breakdown_table' class='worksheet_summary_table'></div>");
     if(results_analysis.hasOwnProperty("Sets")) {
         setUpBreakdownOptions();
         setUpBreakdownChart();
@@ -384,7 +383,7 @@ function clickTableHeading(table, value) {
 
 function parseSummaryTab(tab_id) {
     $("#tab_" + tab_id).html("Summary");
-    $("#tab_option_" + tab_id).html("<div id='summary_table'></div>");
+    $("#tab_option_" + tab_id).html("<div id='summary_table' class='worksheet_summary_table'></div>");
     $("#tab_option_" + tab_id).append("<div id='summary_chart'></div>");
     setUpSummaryTable();
     setUpSummaryChart();
@@ -573,7 +572,7 @@ function writeSummaryChart(datasets, names) {
 
 function parseAllStudentsTab(tab_id) {
     $("#tab_" + tab_id).html("All Students");
-    $("#tab_option_" + tab_id).html("<div id='all_students_table'></div>");
+    $("#tab_option_" + tab_id).html("<div id='all_students_table' class='worksheet_summary_table'></div>");
     setUpAllStudentsTable();
 }
 

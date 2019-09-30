@@ -110,7 +110,10 @@ td.checkbox.selected, .existing_checkbox.selected {
     margin: 10px 0;
 }
 
-#breakdown_table > .row {
+#breakdown_table > .row,
+#summary_table > .row,
+#all_students_table > .row,
+.worksheet_summary_table > .row {
     width: 100%;
     height: 35px;
     line-height: 35px;
@@ -119,6 +122,7 @@ td.checkbox.selected, .existing_checkbox.selected {
     user-select: none;
     cursor: pointer;
     background: transparent;
+    margin: 0;
 }
 
 #breakdown_table > .row.even {
@@ -171,17 +175,6 @@ td.checkbox.selected, .existing_checkbox.selected {
     margin: 10px 0;
 }
 
-#summary_table > .row {
-    width: 100%;
-    height: 35px;
-    line-height: 35px;
-    display: inline-block;
-    float: left;
-    user-select: none;
-    cursor: pointer;
-    background: transparent;
-}
-
 #summary_table > .row.even {
     background: #DDD;
 }
@@ -229,17 +222,6 @@ td.checkbox.selected, .existing_checkbox.selected {
     display: inline-block;
     float: left;
     margin: 10px 0;
-}
-
-#all_students_table > .row {
-    width: 100%;
-    height: 35px;
-    line-height: 35px;
-    display: inline-block;
-    float: left;
-    user-select: none;
-    cursor: pointer;
-    background: transparent;
 }
 
 #all_students_table > .row.even {

@@ -70,6 +70,10 @@ a, a:hover, a:focus {
     margin-bottom: 20px;
 }
 
+#personal_worksheets_div {
+    overflow: hidden;
+}
+
 #all_worksheets_top_bar,
 #all_worksheets_top_buttons,
 #all_worksheets_favourites_bar {
@@ -560,7 +564,7 @@ a, a:hover, a:focus {
 
 .selected_worksheet_button.last {
     height: 26px;
-    border-bottom: 1px solid lightgray;
+    border-bottom: none;
 }
 
 .selected_worksheet_button:hover {
