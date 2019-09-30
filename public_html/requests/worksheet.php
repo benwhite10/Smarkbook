@@ -79,7 +79,6 @@ function updateWorksheet($info_array, $req_id) {
         "req_id" => $req_id,
         "results" => $result_array
     );
-    logEvent($author, "EDIT_WORKSHEET", "ID: " . $wid . ", Title: " . $name);
     succeedRequest("Worksheet updated", $response_array);
 }
 
@@ -392,6 +391,7 @@ function getSuggestedTags($tags, $div_id) {
     $suggested_tags = [];
     foreach($tags_array as $tag) {
         // Get questions with tag
+        if ($tag === "") continue;
         $query = "SELECT `Stored Question ID` SQID FROM TQUESTIONTAGS WHERE `Tag ID` = $tag";
         try {
             $questions = db_select_exception($query);

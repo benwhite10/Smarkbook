@@ -320,12 +320,16 @@ function parseTagsForDiv(div_id) {
 
 function parseSuggestedTagsForDiv(div_id) {
     var tags = $("#" + div_id + "_suggested_values").val();
-    var tags_array = tags.split(":");
-    var html_input_string = tags === "" ? "No Suggestions" : "";
-    for (var i in tags_array) {
-        var tag = getTagForID(tags_array[i]);
-        if (tag) html_input_string += getSuggestedTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]);
+    var html_input_string = "No Suggestions";
+    if (tags) {
+        var tags_array = tags.split(":");
+        html_input_string = tags === "" ? "No Suggestions" : "";
+        for (var i in tags_array) {
+            var tag = getTagForID(tags_array[i]);
+            if (tag) html_input_string += getSuggestedTagInputHTML(div_id,tag["Name"],getTypeFromId(tag["TypeID"]),tag["Tag ID"]);
+        }
     }
+
     $("#" + div_id + "_input_suggested").html(html_input_string);
 }
 
