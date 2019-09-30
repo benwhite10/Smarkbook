@@ -110,6 +110,7 @@ function validateRequestAndGetRoles($token) {
         return $roles;
     } else {
         log_error("Request failed due to invalid JWT token: " . $response[1], "requests/core.php", __LINE__);
+        log_error(json_encode(debug_backtrace()), "requests/core.php", __LINE__);
         returnRequest(FALSE, null, "There was a problem validating your request", null);
     }
 }

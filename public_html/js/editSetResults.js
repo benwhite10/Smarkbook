@@ -2,6 +2,7 @@ var user;
 var gwid;
 var tags;
 var worksheet_tags = [];
+var key_map = {};
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
@@ -62,25 +63,30 @@ function pad(num, size) {
 }
 
 function pressKeyInDiv(div, e) {
-    switch(e.keyCode) {
-        case 9:
-        case 39:
-        case 13:
+    key_map[e.keyCode] = e.type == 'keydown';
+    if (key_map[16]) {
+        if (key_map[39]) {
+            copyRight(div.id);
+            return false;
+        } else if (key_map[37]) {
+            copyLeft(div.id);
+            return false;
+        }
+    } else {
+        if (key_map[39] || key_map[9] || key_map[13]) {
             moveRight(div.id);
             return false;
-        case 37:
+        } else if (key_map[37]) {
             moveLeft(div.id);
             return false;
-        case 38:
+        } else if (key_map[38]) {
             moveUpDown(div.id, true);
             return false;
-        case 40:
+        } else if (key_map[40]) {
             moveUpDown(div.id, false);
             return false;
-        default:
-            break;
+        }
     }
-    //console.log(div.id);
 }
 
 function splitId(id) {
@@ -112,7 +118,37 @@ function previousInput(input) {
 }
 
 function moveLeft(id) {
+    var response = getNextIdLeft(id);
+    var new_id = response[0];
+    if (new_id) {
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else {
+        $("#" + id).blur();
+        $("#" + id).focus();
+    }
+}
+
+function copyLeft(id) {
+    var response = getNextIdLeft(id);
+    var new_id = response[0];
+    if (new_id && !response[1]) {
+        $("#" + new_id).val($("#" + id).val());
+        $("#" + id).val("");
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else if (new_id) {
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else {
+        $("#" + id).blur();
+        $("#" + id).focus();
+    }
+}
+
+function getNextIdLeft(id) {
     var new_id = "";
+    var diff_row = false;
     var row_student_array = JSON.parse(sessionStorage.getItem("row_student_array"));
     if (id.includes("-")) {
         // In results section
@@ -121,6 +157,7 @@ function moveLeft(id) {
         new_id = pos[0] + "-" + pos[1];
         if(!document.getElementById(new_id)) {
             // Go up a row and to the end of the inputs
+            diff_row = true;
             new_id = stepLeftInputs("", getStudentId(row_student_array, parseInt(pos[0]) - 1));
             if (!new_id) {
                 // Go to end of row
@@ -128,6 +165,7 @@ function moveLeft(id) {
             }
         }
     } else {
+        diff_row = true;
         if (id.includes("total_input")) {
             var pos = id.split("_");
             new_id = "total_input_" + (parseInt(pos[2]) - 1);
@@ -141,6 +179,12 @@ function moveLeft(id) {
             }
         }
     }
+    return [new_id, diff_row];
+}
+
+function moveRight(id) {
+    var response = getNextIdRight(id);
+    var new_id = response[0];
     if (new_id) {
         $("#" + new_id).focus();
         $("#" + new_id).select();
@@ -150,8 +194,26 @@ function moveLeft(id) {
     }
 }
 
-function moveRight(id) {
+function copyRight(id) {
+    var response = getNextIdRight(id);
+    var new_id = response[0];
+    if (new_id && !response[1]) {
+        $("#" + new_id).val($("#" + id).val());
+        $("#" + id).val("");
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else if (new_id) {
+        $("#" + new_id).focus();
+        $("#" + new_id).select();
+    } else {
+        $("#" + id).blur();
+        $("#" + id).focus();
+    }
+}
+
+function getNextIdRight(id) {
     var new_id = "";
+    var diff_row = false;
     var row_student_array = JSON.parse(sessionStorage.getItem("row_student_array"));
     if (id.includes("-")) {
         // In results section
@@ -159,12 +221,14 @@ function moveRight(id) {
         pos[1] = parseInt(pos[1]) + 1;
         new_id = pos[0] + "-" + pos[1];
         if(!document.getElementById(new_id)) {
+            diff_row = true;
             new_id = stepRightInputs("", getStudentId(row_student_array, pos[0]));
             if (!new_id) {
                 new_id = newRow(pos[0]);
             }
         }
     } else {
+        diff_row = true;
         if (id.includes("total_input")) {
             var pos = id.split("_");
             new_id = "total_input_" + (parseInt(pos[2]) + 1);
@@ -177,13 +241,7 @@ function moveRight(id) {
             }
         }
     }
-    if (new_id) {
-        $("#" + new_id).focus();
-        $("#" + new_id).select();
-    } else {
-        $("#" + id).blur();
-        $("#" + id).focus();
-    }
+    return [new_id, diff_row];
 }
 
 function moveUpDown(id, up) {
@@ -732,7 +790,7 @@ function parseMainTable() {
             }
             var id_string = row + "-" + col;
             local_results_data_array[id_string] = {cqid: cqid, stuid: stuid, sqid: sqid, marks:marks};
-            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")' onkeydown='return pressKeyInDiv(this, event)'></td>";
+            student_rows += "<td class='results' style='padding:0px;'><input type='text' class='markInput' data-old_value = '" + mark + "' value='" + mark + "' id='" + id_string + "' onBlur='changeResult(this.value,\"" + id_string + "\", " + row + ")' onkeydown='return pressKeyInDiv(this, event)' onkeyup='return pressKeyInDiv(this, event)'></td>";
             col++;
         }
         var display_total = "0 / 0";
@@ -740,14 +798,14 @@ function parseMainTable() {
             totalMark = Math.round(10 * parseFloat(totalMark)) / 10;
             display_total = totalMark + " / " + totalMarks;
         }
-        student_rows += "<td class='results total_mark total_input_col'><input type='text' class='totalMarkInput' value='" + totalMark + "' id='total_input_" + row + "' onBlur='changeTotal(this.value," + row + ")' onkeydown='return pressKeyInDiv(this, event)'></td>";
+        student_rows += "<td class='results total_mark total_input_col'><input type='text' class='totalMarkInput' value='" + totalMark + "' id='total_input_" + row + "' onBlur='changeTotal(this.value," + row + ")' onkeydown='return pressKeyInDiv(this, event)' onkeyup='return pressKeyInDiv(this, event)'></td>";
         student_rows += "<td class='results total_mark total_col'><b class='totalMarks' id='total" + row + "'>" + display_total + "</b></td>";
-        student_rows += "<td class='results total_mark Grade_col hide_col' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
-        student_rows += "<td class='results total_mark UMS_col hide_col' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
+        student_rows += "<td class='results total_mark Grade_col hide_col' id='grade_div_" + stuid + "'><input type='text' class='grade_input' id='grade_" + stuid + "' onBlur='changeGrade(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)' onkeyup='return pressKeyInDiv(this, event)'/></td>";
+        student_rows += "<td class='results total_mark UMS_col hide_col' id='ums_div_" + stuid + "'><input type='text' class='grade_input' id='ums_" + stuid + "' onBlur='changeUMS(" + stuid + ", this.value)' onkeydown='return pressKeyInDiv(this, event)' onkeyup='return pressKeyInDiv(this, event)'/></td>";
         for (var i = 0; i < inputs.length; i++) {
             var short_name = inputs[i]["ShortName"];
             var input_id = inputs[i]["ID"];
-            student_rows += "<td class='results total_mark " + short_name + "_col hide_col' id='" + short_name + "_div_" + stuid + "'><input type='text' class='grade_input' id='" + short_name + "_" + stuid + "' onBlur='changeValue(" + stuid + ", " + input_id + ", this.value)' onkeydown='return pressKeyInDiv(this, event)'/></td>";
+            student_rows += "<td class='results total_mark " + short_name + "_col hide_col' id='" + short_name + "_div_" + stuid + "'><input type='text' class='grade_input' id='" + short_name + "_" + stuid + "' onBlur='changeValue(" + stuid + ", " + input_id + ", this.value)' onkeydown='return pressKeyInDiv(this, event)' onkeyup='return pressKeyInDiv(this, event)'/></td>";
         }
         student_rows += "<td class='results date_completion' id='comp" + stuid + "'><div id='comp_div_" + stuid + "' class='status_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div></td>";
         student_rows += "<td class='results date_completion' id='late" + stuid + "'><div id='late_div_" + stuid + "' class='late_div' onClick='showStatusPopUp(" + stuid + ", " + row + ")'></div><input type='hidden' id='late_value_" + stuid + "' value=''></td>";
@@ -854,6 +912,7 @@ function changeResult(value, id_string, row){
         updateValues(id_string, stuid);
         getQuestionAverages(id_string);
     } else {
+        key_map = {};
         resetQuestion(id_string);
     }
 }
