@@ -31,6 +31,7 @@ function init_page() {
     getWorksheetDetails();
     showAllSpinners();
     getResultsAnalysis();
+    writeNavbar(user);
 }
 
 function getColour(num, av) {

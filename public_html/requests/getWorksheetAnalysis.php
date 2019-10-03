@@ -111,7 +111,8 @@ function getWorksheetSummary($version_id, $return) {
         // 0.18 s
         $results_query = "SELECT CQ.`Student ID`, CQ.`Stored Question ID`, CQ.`Mark`, CQ.`Group Worksheet ID` FROM `TCOMPLETEDQUESTIONS` CQ
                             JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
-                            WHERE GW.`Version ID` = $version_id AND CQ.`Deleted` = 0 AND GW.`Deleted` = 0";
+                            WHERE GW.`Version ID` = $version_id AND CQ.`Deleted` = 0 AND GW.`Deleted` = 0
+                            GROUP BY `Student ID`, `Stored Question ID`";
         $results = db_select_exception($results_query);
 
         //$time_3_1 = microtime(true);
