@@ -1,6 +1,6 @@
 var displayed_gwid = "";
 var student_report_view = false;
-var set_staff_link = [];
+var set_staff_link = {};
 var user;
 var staff_id;
 var stu_id;
@@ -96,26 +96,30 @@ function setVariableInputs(json) {
         var htmlValue = staff_details.length === 0 ? "<option value='0'>-</option>" : "";
         $("#staff").html(htmlValue);
         $('#set').html(htmlValue);
+        var link_id = 1;
+        var initial_link = 1;
+        set_staff_link = {};
         for (var key in staff_details) {
+            set_staff_link[link_id] = {
+                "SetID": staff_details[key]["GroupID"],
+                "StaffID": staff_details[key]["UserID"]
+            };
+            if (set_id == staff_details[key]["UserID"] && set_id == staff_details[key]["UserID"]) initial_link = link_id;
             $('#set').append($('<option/>', {
-                value: staff_details[key]["GroupID"],
+                value: link_id,
                 text : staff_details[key]["GroupName"] + " (" + staff_details[key]["Initials"] + ")"
             }));
             $('#staff').append($('<option/>', {
                 value: staff_details[key]["UserID"],
                 text : staff_details[key]["Initials"]
             }));
-            set_staff_link.push({
-                "SetID": staff_details[key]["GroupID"],
-                "StaffID": staff_details[key]["UserID"]
-            });
+            link_id++;
         }
 
-        var initial_set_val = set_id;
-        if($("#set option[value='" + initial_set_val + "']").length !== 0){
-            $('#set').val(initial_set_val);
+        if($("#set option[value='" + initial_link + "']").length !== 0){
+            $('#set').val(initial_link);
         }
-        var initial_staff_val = staff_id;
+        var initial_staff_val = set_staff_link[initial_link]["StaffID"];
         if($("#staff option[value='" + initial_staff_val + "']").length !== 0){
             $('#staff').val(initial_staff_val);
         }
@@ -230,9 +234,10 @@ function updateSets(){
 function updateStudents(){
     if (!student_report_view) {
         disableGenerateReportButton();
+        var sets_info = getStaffForSet($('#set').val());
         var infoArray = {
             type: "STUDENTSBYSET",
-            set: $('#set').val(),
+            set: sets_info["SetID"],
             token: user["token"]
         };
         $.ajax({
@@ -245,7 +250,8 @@ function updateStudents(){
             }
         });
     } else {
-        $("#staff").val(getStaffForSet($("#set").val()));
+        var set_info = getStaffForSet($("#set").val());
+        $("#staff").val(set_info["StaffID"]);
         generateReport();
     }
 }
@@ -304,13 +310,14 @@ function sendWorksheetSummaryRequest(gwid){
 
 function sendReportRequest(){
     var reqid = generateNewReqId();
+    var set_info = getStaffForSet($('#set').val());
     var infoArray = {
         reqid: reqid,
         startDate: $('#startDate').val(),
         endDate: $('#endDate').val(),
         student: $('#student').val(),
         staff: $('#staff').val(),
-        set: $('#set').val(),
+        set: set_info["SetID"],
         userid: user["userId"],
         token: user["token"]
     };
@@ -328,14 +335,9 @@ function sendReportRequest(){
     sendSummaryRequest(infoArray);
 }
 
-function getStaffForSet(set) {
-    var links = set_staff_link;
-    for (var i = 0; i < links.length; i++) {
-        if (links[i]["SetID"] == set){
-            return links[i]["StaffID"];
-        }
-    }
-    return 0;
+function getStaffForSet(link_id) {
+    var set_info = set_staff_link[link_id];
+    return set_info ? set_info : {"SetID": 0, "StaffID": 0};
 }
 
 /* Responses */
@@ -365,16 +367,26 @@ function updateSetsSuccess(json){
     if(json["success"]){
         var sets = json["sets"];
         var htmlValue = sets.length === 0 ? "<option value='0'>No Sets</option>" : "";
+        var link_id = 1;
+        var initial_link = 1;
+        var staff_id = $("#staff").val();
+        set_staff_link = {};
         $('#set').html(htmlValue);
         for (var key in sets) {
+            if (set_id == sets[key]["ID"]) initial_link = link_id;
+            set_staff_link[link_id] = {
+                "SetID": sets[key]["ID"],
+                "StaffID": staff_id
+            };
             $('#set').append($('<option/>', {
-                value: sets[key]["ID"],
+                value: link_id,
                 text : sets[key]["Name"]
             }));
+            link_id++;
         }
-        var initialVal = set_id;
-        if($("#set option[value='" + initialVal + "']").length !== 0){
-            $('#set').val(initialVal);
+
+        if($("#set option[value='" + initial_link + "']").length !== 0){
+            $('#set').val(initial_link);
         }
         updateStudents();
     } else {

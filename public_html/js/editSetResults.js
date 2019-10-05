@@ -645,6 +645,7 @@ function setUpWorksheetInfo() {
     var dateString = dateDue.format("DD/MM/YYYY");
     var name = (details["DisplayName"] && details["DisplayName"] !== "") ? details["DisplayName"] : details["WName"];
     $("#title2").html("<h1>" + name + "</h1>");
+    $("#menu_button").html("<li><a href='/worksheetSummary.php?wid=" + details["VID"] +  "'>Analysis</a></li>");
     $("#gwid").val(gwid);
     $("#summaryBoxShowDetailsTextMain").text(details["SetName"] + " - " + dateString);
     $("#dateDueMain").val(dateString);

@@ -93,7 +93,7 @@ $info_version = Info::getInfo()->getVersion();
     	<div id="body">
             <div id="top_bar">
                 <div id="title2"></div>
-                <ul class="menu navbar"></ul>
+                <ul id="menu_button" class="menu navbar"></ul>
             </div>
 
             <form id="editForm" class="editResults" action="" method="POST">

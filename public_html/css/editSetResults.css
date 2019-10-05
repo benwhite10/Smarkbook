@@ -860,3 +860,7 @@ input[type="text"].grade_input.awaiting_save{
 .markInput.disabled {
     color: #CCC!important;
 }
+
+ul.menu a {
+    padding: 0 15px;
+}
