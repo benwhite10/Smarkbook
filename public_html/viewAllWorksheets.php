@@ -60,7 +60,7 @@ $info_version = Info::getInfo()->getVersion();
                         <div class="all_worksheets_top_button add" id="create_button" onclick="clickNewFolder()">New Folder</div>
                         <div class="all_worksheets_top_button add" id="create_file_button" onclick="clickNewFile()">New File</div>
                     </div>
-                    <div id="all_worksheets_favourites_bar"></div>
+                    <!--<div id="all_worksheets_favourites_bar"></div>-->
                     <div id="all_worksheets_top_bar"></div>
                     <div id="all_worksheets_content"><div id="worksheets_jstree"></div></div>
                 </div>

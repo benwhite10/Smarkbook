@@ -16,6 +16,7 @@ var students_table_array;
 var students_table_order = "RelPerc";
 var students_table_desc = true;
 var user;
+var selected_user_id;
 
 $(document).ready(function(){
     user = JSON.parse(localStorage.getItem("sbk_usr"));
@@ -26,6 +27,7 @@ $(document).ready(function(){
 function init_page() {
     active_tab = isNaN(parseInt(getParameterByName("tab"))) ? 0 : parseInt(getParameterByName("tab"));
     worksheet_id = getParameterByName("wid");
+    selected_user_id = getParameterByName("uid");
     $("#dialog_message_background").css("display", "none");
     $("#dialog_text").html("<p>Generating results analysis...</p>");
     getWorksheetDetails();
@@ -111,13 +113,16 @@ function changeBreakdownSelect() {
 function setUpBreakdownOptions() {
     var sets = results_analysis["Sets"];
     var select_html = "";
+    selected_set = 0;
     for (var i = 0; i < sets.length; i++) {
         var setid = sets[i]["SetID"];
         if (selected_set === undefined) selected_set = setid;
         if (setid !== "Total") {
             select_html += "<option value='" + setid + "'>" + sets[i]["LongName"] + "</option>";
         }
+        if (sets[i]["SetStaffID"] == selected_user_id) selected_set = setid;
     }
+    if (selected_set === 0) selected_set = sets[0]["SetID"];
     $("#breakdown_tab_select").html(select_html);
     $("#breakdown_tab_select").val(selected_set);
 }

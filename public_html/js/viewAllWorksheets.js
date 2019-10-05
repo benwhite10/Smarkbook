@@ -169,7 +169,7 @@ function writeSelectedWorksheet(worksheet) {
     html_text += writeWorksheetInfoOption("Students", worksheet["students"]);
     html_text += "</div><div class='selected_worksheet_subpane last'>";
     html_text += "<div class='selected_worksheet_button add' onclick='addNewResults()'>Add New Results</div>";
-    html_text += "<a class='selected_worksheet_button' href='/worksheetSummary.php?wid=" + worksheet["Version ID"] + "'>Results Analysis</a>";
+    html_text += "<a class='selected_worksheet_button' href='/worksheetSummary.php?wid=" + worksheet["Version ID"] + "&uid=" + user["userId"] + "'>Results Analysis</a>";
     html_text += "<a class='selected_worksheet_button' href='/editWorksheet.php?id=" + worksheet["Version ID"] + "'>Edit</a>";
     html_text += "<div class='selected_worksheet_button' onclick='clickRename(\"selected\")'>Rename</div>";
     html_text += "<div class='selected_worksheet_button remove last' onclick='clickDelete(\"selected\")'>Delete</div>";

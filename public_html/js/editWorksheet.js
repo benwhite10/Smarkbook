@@ -1168,7 +1168,7 @@ function copyWorksheet() {
 
 function clickResultsAnalysis() {
     var wid = sessionStorage.getItem("worksheet_id");
-    window.location.href = "/worksheetSummary.php?wid=" + wid;
+    window.location.href = "/worksheetSummary.php?wid=" + wid + "&uid=" + user["userId"];
 }
 
 function copyWorksheetSuccess(json) {

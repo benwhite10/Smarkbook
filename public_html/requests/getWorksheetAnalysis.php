@@ -119,7 +119,7 @@ function getWorksheetSummary($version_id, $return) {
         //$log_text .= "DB Request 2: " . round($time_3_1-$time_3,2) . "s, ";
 
         // 2.0 s
-        $students_query = "SELECT CQ.`Student ID`, CQ.`Group Worksheet ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, GW.`Group ID`, G.`Name`, B.`Baseline`, UU.`Initials` FROM `TCOMPLETEDQUESTIONS` CQ
+        $students_query = "SELECT CQ.`Student ID`, CQ.`Group Worksheet ID`, U.`Preferred Name`, U.`First Name`, U.`Surname`, GW.`Group ID`, G.`Name`, B.`Baseline`, UU.`Initials`, UU.`User ID` StaffID FROM `TCOMPLETEDQUESTIONS` CQ
                         JOIN `TGROUPWORKSHEETS` GW ON CQ.`Group Worksheet ID` = GW.`Group Worksheet ID`
                         JOIN `TGROUPS` G ON GW.`Group ID` = G.`Group ID`
                         JOIN `TUSERS` U ON CQ.`Student ID` = U.`User ID`
@@ -183,6 +183,7 @@ function getWorksheetSummary($version_id, $return) {
             $groups[$group_id]["GWID"] = $gw_id;
             $groups[$group_id]["Name"] = $student["Name"];
             $groups[$group_id]["LongName"] = $student["Name"] . " - " . $student["Initials"];
+            $groups[$group_id]["SetStaffID"] = $student["StaffID"];
             if ($baseline > 0) {
                 if (array_key_exists("Baseline", $groups[$group_id])) {
                     $av_baseline = floatval($groups[$group_id]["Baseline"]);
