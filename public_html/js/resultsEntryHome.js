@@ -31,8 +31,8 @@ function staffSuccess(json){
             var teacher = staff[i];
             var id = teacher["User ID"];
             var initials = teacher["Initials"];
-            if(id === userid){ 
-                str2 += "<option value=" + id + " selected>" + initials + "</option>"; 
+            if(id === userid){
+                str2 += "<option value=" + id + " selected>" + initials + "</option>";
             } else{
                 str2 += "<option value=" + id + ">" + initials + "</option>";
             }
@@ -42,6 +42,7 @@ function staffSuccess(json){
         document.getElementById("assisstingStaff1").innerHTML = str;
         document.getElementById("assisstingStaff2").innerHTML = str;
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error retrieving the staff.");
     }
 }
@@ -64,7 +65,7 @@ function setUpWorksheets(){
         infoArray["orderby"] = "WName";
         infoArray["desc"] = "FALSE";
     }
-    
+
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -98,6 +99,7 @@ function worksheetsSuccess(json){
             }
         }
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error retrieving the worksheets.");
     }
     document.getElementById("worksheet").innerHTML = str;
@@ -111,7 +113,7 @@ function countForEachName(names){
     for(var i = 0; i < names.length; i++){
         if(names[i].childNodes[0] !== undefined){
             var name = names[i].childNodes[0].nodeValue;
-            counts[name] = counts[name] ? counts[name] + 1 : 1; 
+            counts[name] = counts[name] ? counts[name] + 1 : 1;
         }
     }
     return counts;
@@ -119,15 +121,15 @@ function countForEachName(names){
 
 function setUpSets(firstTime){
     var infoArray = {
-        orderby: "Name", 
+        orderby: "Name",
         desc: "FALSE",
         userid: $('#userid').val(),
         userval: $('#userval').val()};
     var type = "SETSBYSTAFF";
     infoArray["type"] = type;
     infoArray["staff"] = document.getElementById("creatingStaffMember") ? document.getElementById("creatingStaffMember").value : 0;
-    
-    
+
+
     $.ajax({
         type: "POST",
         data: infoArray,
@@ -137,6 +139,7 @@ function setUpSets(firstTime){
             if(json["success"]){
                 setsSuccess(json, firstTime);
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("There was an error setting up the sets");
             }
         },
@@ -190,13 +193,14 @@ function studentsSuccess(json){
             var id = student["ID"];
             var name = (student["PName"] === undefined || student["PName"] === "") ? student["FName"] : student["PName"];
             var sname = student["SName"];
-            if(id === studentid){ 
-                str += "<option value=" + id + " selected>" + name + " " + sname + "</option>"; 
+            if(id === studentid){
+                str += "<option value=" + id + " selected>" + name + " " + sname + "</option>";
             } else{
                 str += "<option value=" + id + ">" + name + " " + sname + "</option>";
             }
         }
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error loading the students.");
     }
     document.getElementById("students").innerHTML = str;
@@ -213,8 +217,8 @@ function setsSuccess(json, firstTime){
             var set = sets[i];
             var id = set["ID"];
             var name = set["Name"]
-            if(id === setid){ 
-                str += "<option value=" + id + " selected>" + name + "</option>"; 
+            if(id === setid){
+                str += "<option value=" + id + " selected>" + name + "</option>";
             } else{
                 str += "<option value=" + id + ">" + name + "</option>";
             }

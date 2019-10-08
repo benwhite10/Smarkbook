@@ -70,6 +70,7 @@ function getTags(){
                 writeTags();
                 changeTag();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("There was an error loading the tags.");
                 console.log(json);
             }
@@ -115,6 +116,7 @@ function updateInfo(json){
         var tagInfo = json["tagInfo"];
         $("#nameInput").val(tagInfo["Name"]);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error requesting the tag information");
     }
 }
@@ -144,6 +146,7 @@ function mergeSuccess(json) {
     if(json["success"]){
         location.reload();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json["message"]);
         alert("There was an error merging the tags");
     }

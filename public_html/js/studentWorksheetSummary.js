@@ -72,6 +72,7 @@ function getStudentSummary() {
                     createStudentChart(json["result"]["Summary"], 0);
                 }
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("Error getting the student summary");
                 console.log(json);
             }
@@ -105,6 +106,7 @@ function getStudentResultsSuccess(json) {
         }
         updateTotalMarks();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Error");
         console.log(json);
     }
@@ -300,6 +302,7 @@ function setWorksheetDetails(json) {
         }
         getStudentResults(sessionStorage.getItem("stuid"), sessionStorage.getItem("gwid"));
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Error");
         console.log(json);
     }
@@ -445,6 +448,7 @@ function saveChangesRequest(button) {
                     if (json["success"]) {
                         sendSaveChangesSuccess(json);
                     } else {
+                        if (json["response"] === "INVALID_TOKEN") log_out();
                         sendSaveChangesFail(json["message"]);
                     }
 
@@ -496,6 +500,7 @@ function sendSaveWorksheetsRequest() {
             dataType: "json",
             success: function(json){
                 if(!json["success"]) {
+                    if (json["response"] === "INVALID_TOKEN") log_out();
                     console.log("There was an error saving the worksheet");
                     console.log(json);
                 } else {

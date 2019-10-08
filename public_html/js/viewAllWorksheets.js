@@ -65,6 +65,7 @@ function getSetsSuccess(json) {
         loaded["sets"] = true;
         checkFullyLoaded();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json["message"]);
     }
 }
@@ -103,6 +104,7 @@ function getWorksheetsSuccess(json) {
         loaded["worksheets"] = true;
         checkFullyLoaded();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Error getting worksheet details.");
         console.log(json);
     }
@@ -152,6 +154,7 @@ function getWorksheetDetailsSuccess(json) {
         }, 500);
         if (add_results) addNewResults();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         $("#selected_worksheet").html("<div class='no_worksheet'>No worksheet selected.</div>");
     }
 }
@@ -231,6 +234,7 @@ function addNewGroupWorksheet(group_id, vid) {
                     window.location.href = "editSetResults.php?gwid=" + json["result"]["gwid"];
                 }
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log(json);
             }
         },
@@ -431,6 +435,7 @@ function requestFolderUpdate() {
                 update_locked = false;
                 requestFolderUpdate();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 if (json["result"] === undefined) {
                     $("#message_modal-content").html("<p>There has been an error updating the folders. Please refresh and try again.<br>If the problem persists then contact <a mailto='contact.smarkbook@gmail.com'>support</a>.</p>");
                     MicroModal.show("message_modal");
@@ -791,6 +796,7 @@ function deleteFolder(id) {
             if (json["success"]) {
                 location.reload();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("Delete folder request has failed.");
                 console.log(json);
                 $("#message_modal_title").html("Error");
@@ -864,6 +870,7 @@ function createNewFileSuccess(json) {
         var new_vid = json["result"];
         window.location.href = "editWorksheet.php?id=" + new_vid;
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         $("#input_modal_button").off('click').on('click',createNewFile);
         $("#input_modal_text").html("<p>Error creating worksheet, please try again.</p>");
         $("#input_modal_text").removeClass("hidden");
@@ -928,6 +935,7 @@ function createNewFolderRequest(name, parent_id) {
                 console.log("New folder success");
                 console.log(json["result"]);
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("Add new folder request failed.");
                 $("#input_modal_button").off('click').on('click',createNewFolder);
                 $("#input_modal_text").html("<p>Error creating worksheet, please try again.</p>");
@@ -974,6 +982,7 @@ function searchSuccess(json, searchTerm) {
             writeFilteredWorksheets(false, "search_results", null);
         }
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error searching the worksheets.");
         console.log(json["message"]);
     }

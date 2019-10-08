@@ -671,6 +671,7 @@ function getWorksheetDetails() {
                 worksheet_details = json["worksheet"]["details"];
                 parseTitle(worksheet_details["WName"]);
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log(json);
             }
         },
@@ -713,6 +714,7 @@ function resultsAnalysisSuccess(json) {
         setUpStudentsAnalysis();
         createTabs(["BREAKDOWN", "SUMMARY", "ALLSTUDENTS"], active_tab);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json);
     }
 }
@@ -857,6 +859,7 @@ function downloadResultsAnalysis() {
                 link.click();
                 $("#dialog_text").html("<p>Analysis completed, downloading file.</p>");
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log(json);
                 $("#dialog_text").html("<p>There was an error completing the results analysis.</p>");
             }

@@ -43,6 +43,7 @@ function getSets() {
                 years = json["response"]["years"];
                 getSetsSuccess();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("Error requesting sets.");
                 console.log(json);
             }
@@ -116,6 +117,7 @@ function getMarkbook() {
                 markbook = json;
                 getMarkbookSuccess();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("Error requesting mark book.");
                 console.log(json);
             }
@@ -215,6 +217,7 @@ function downloadSuccess(json) {
         document.body.appendChild(link);
         link.click();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         writeMessageModal("Download", "There was an error downloading the markbook, please refresh and try again.", "OK", false);
         console.log(json);
     }

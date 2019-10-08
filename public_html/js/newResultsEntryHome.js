@@ -29,6 +29,7 @@ function setUpSets(firstTime){
             if(json["success"]){
                 setsSuccess(json, firstTime);
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("There was an error setting up the sets");
             }
         },
@@ -103,6 +104,7 @@ function worksheetsSuccess(json){
             }
         }
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error retrieving the worksheets.");
     }
     document.getElementById("worksheet").innerHTML = str;
@@ -159,6 +161,7 @@ function staffSuccess(json){
         document.getElementById("assisstingStaff1").innerHTML = str;
         document.getElementById("assisstingStaff2").innerHTML = str;
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error retrieving the staff.");
     }
 }

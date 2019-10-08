@@ -96,6 +96,9 @@ function getSubjectsSuccess(json) {
             subject_text += "<option value='" + id + "'>" + name + "</option>";
         }
         $("#subject_input").html(subject_text);
+    } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
+        console.log(json);
     }
 }
 
@@ -109,6 +112,9 @@ function getYearsSuccess(json) {
             years_text += "<option value='" + id + "'>" + year + "</option>";
         }
         $("#year_input").html(years_text);
+    } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
+        console.log(json);
     }
 }
 
@@ -119,6 +125,7 @@ function getSetDetailsSuccess(json) {
         students = response["students"];
         checkIfReady();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json["message"]);
     }
 }
@@ -234,6 +241,7 @@ function removeStudentSuccess(json) {
     if(json["success"]){
         location.reload();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         alert("There was an error removing the student:" + json["message"]);
     }
 }
@@ -248,6 +256,7 @@ function getUsersSuccess(json) {
             $('#students').append("<option data-value='" + users[i]["ID"] + "'>" + text + "</option>");
         }
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         $('#students').html("<option data-value='0'>No Students</option>");
         console.log("There was an error getting the users:" + json["message"]);
     }
@@ -258,6 +267,7 @@ function getMergeSetsSuccess(json) {
         var sets = json["response"];
         if (sets.length > 0) writeMergeSetsOption(sets);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error getting the merge sets:" + json["message"]);
     }
 }
@@ -304,6 +314,7 @@ function mergeSetRequest(merge_set_id, set_id) {
             if (json["success"]) {
                 window.location.reload();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 alert("There has been an error merging the sets, please refresh and try again.");
                 console.log(json);
             }
@@ -370,6 +381,7 @@ function addStudentSuccess(json) {
     if(json["success"]){
         location.reload();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         alert("There was an error adding the student: '" + json["message"] + "'");
     }
 }
@@ -398,6 +410,7 @@ function saveSet() {
             if(json["success"]){
                 location.reload();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 alert("There was an error saving the set. Please refresh and try again.");
             }
         }
@@ -420,6 +433,7 @@ function deleteSet() {
                 if(json["success"]){
                     window.location.href = "viewMySets.php";
                 } else {
+                    if (json["response"] === "INVALID_TOKEN") log_out();
                     console.log(json["message"]);
                     alert("There was an error deleting the set. Please refresh and try again.");
                 }

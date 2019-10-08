@@ -213,6 +213,7 @@ function requestStaffSuccess(json) {
         $("#worksheet_author").html(options);
         getWorksheetInfo();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error getting the staff: " + json["message"]);
     }
 }
@@ -240,6 +241,7 @@ function allTagsRequestSuccess(json) {
     if(json["success"]) {
         sessionStorage.setItem("tags_list", JSON.stringify(json["tagsInfo"]));
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error requesting the tags: " + json["message"]);
     }
 }
@@ -285,6 +287,7 @@ function getWorksheetSuccess(json) {
         requestAllSuggestedTags(questions);
         stopSpinnerInDiv('spinner');
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error getting the worksheets: " + json["message"]);
     }
 }
@@ -776,6 +779,9 @@ function suggestedTagsSuccess(json) {
             addSuggestedTagIDForInput(div_id, tag["ID"]);
         }
         parseSuggestedTagsForDiv(div_id);
+    } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
+        console.log(json);
     }
 }
 
@@ -808,6 +814,7 @@ function similarTagsRequestSuccess(json) {
         }
         parseSimilarTagsForDiv("add_new_tag");
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error getting the similar tags: " + json["message"]);
     }
 }
@@ -881,6 +888,7 @@ function addNewTagRequestSuccess(json) {
         updateAwesomplete(div_id);
         closeModal();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Adding tag failed: " + json["message"]);
     }
 }
@@ -1052,6 +1060,7 @@ function saveWorksheetSuccess(json) {
         }
         if (reload_page) location.reload();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Saving worksheet failed: " + json["message"]);
     }
 }
@@ -1175,6 +1184,7 @@ function copyWorksheetSuccess(json) {
     if(json["success"]){
         window.location.href = "/viewAllWorksheets.php";
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         alert("There was an problem copying the worksheet, it has not been copied.");
         console.log(json["message"]);
     }
@@ -1184,6 +1194,7 @@ function deleteWorksheetSuccess(json) {
     if(json["success"]){
         window.location.href = "/viewAllWorksheets.php";
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         alert("There was an problem deleting the worksheet, it has not been deleted.");
         console.log(json["message"]);
     }

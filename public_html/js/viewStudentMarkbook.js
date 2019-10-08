@@ -45,6 +45,7 @@ function getSets() {
                 years = json["response"]["years"];
                 getSetsSuccess();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("Error requesting sets.");
                 console.log(json);
             }
@@ -137,6 +138,7 @@ function getMarkbook() {
                 markbook = json;
                 getMarkbookSuccess();
             } else {
+                if (json["response"] === "INVALID_TOKEN") log_out();
                 console.log("Error requesting mark book.");
                 console.log(json);
             }

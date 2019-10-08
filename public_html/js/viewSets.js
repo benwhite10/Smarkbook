@@ -48,6 +48,7 @@ function getSetsSuccess(json) {
         }
         $("#table_content").html(table_text);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json["message"]);
     }
 }
@@ -82,6 +83,7 @@ function requestStaffSuccess(json) {
         $("#staff_select").val(user["userId"]);
         $("#staff_select_2").val(user["userId"]);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json["message"]);
     }
 }
@@ -129,6 +131,7 @@ function getSubjectsSuccess(json) {
         }
         $("#subject_select").html(subject_text);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json["message"]);
     }
 }
@@ -146,6 +149,9 @@ function getYearsSuccess(json) {
         }
         $("#year_select").html(years_text);
         $("#year_select").val(current_year);
+    } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
+        console.log(json);
     }
 }
 
@@ -180,6 +186,7 @@ function addSetSuccess(json) {
         var new_group_id = json["response"];
         goToSet(new_group_id);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log(json["message"]);
     }
 }

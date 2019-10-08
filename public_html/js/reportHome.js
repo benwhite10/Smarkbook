@@ -130,6 +130,7 @@ function setVariableInputs(json) {
             localStorage.setItem("initialRun", false);
         }
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         setNoResults();
         console.log("Something went wrong getting the details for the students.");
         console.log(json["message"]);
@@ -359,6 +360,7 @@ function getStaffSuccess(json){
         }
         updateSets();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Something went wrong loading the staff");
     }
 }
@@ -390,6 +392,7 @@ function updateSetsSuccess(json){
         }
         updateStudents();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Something went wrong loading the staff");
     }
 }
@@ -413,6 +416,7 @@ function updateStudentsSuccess(json){
         }
         studentChange();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("Something went wrong loading the students");
     }
 }
@@ -526,6 +530,8 @@ function validateResponse(json){
     if(json["success"] || json["reqid"] === undefined){
         var array = JSON.parse(localStorage.getItem("activeReportRequest"));
         return parseInt(array["reqid"]) === parseInt(json["reqid"]);
+    } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
     return false;
 }
@@ -1343,6 +1349,7 @@ function getNotesSuccess(json) {
             parseReportNotes(reports_array);
         }
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         $("#report_notes").hide();
         stopSpinnerInDiv('report_notes_spinner');
         console.log("Error requesting notes");

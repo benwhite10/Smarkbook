@@ -5,6 +5,7 @@
  */
 
 var user;
+var force_log_out = false;
 
 function closeDiv(){
     document.getElementById('message').style.display = 'none';
@@ -38,7 +39,6 @@ function checkUser(interval = 5000) {
             log_out();
             return;
         }
-        console.log("Check");
     }, interval);
 }
 
@@ -100,6 +100,7 @@ function parseJwt(token) {
 };
 
 function log_out() {
+    force_log_out = true;
     localStorage.setItem("sbk_usr", "[]");
     if (window.location.pathname === "/login.php") return;
     window.location.href = "/login.php";

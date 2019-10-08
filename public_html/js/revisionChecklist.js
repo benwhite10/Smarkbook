@@ -44,9 +44,10 @@ function getChecklistsSuccess(json) {
         $("#checklist_select").html(html_text);
         getSpecificationPoints(checklists[0]["ID"]);
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error getting the specification points.");
         console.log(json["message"]);
-    } 
+    }
 }
 
 function changeChecklist() {
@@ -85,9 +86,10 @@ function specificationPointsSuccess(json) {
         }
         setContentHeight();
     } else {
+        if (json["response"] === "INVALID_TOKEN") log_out();
         console.log("There was an error getting the specification points.");
         console.log(json["message"]);
-    }  
+    }
 }
 
 function writeTitle(details) {
@@ -101,7 +103,7 @@ function writeChecklistItem(spec_point) {
     var subtitle = spec_point["Subtitle"];
     var description = spec_point["Description"];
     var links = spec_point["Links"];
-    
+
     var final_text = "<div id='checklist_item_" + id + "' class='checklist_item'>";
     final_text += "<div class='checklist_item_title' onclick='clickTitle(" + id + ")'>";
     final_text += "<h1>" + subject;

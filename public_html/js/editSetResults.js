@@ -1077,8 +1077,7 @@ function saveWorksheets() {
 }
 
 function checkIfUnsavedChanges() {
-    // Add in check here
-
+    if (force_log_out) return false;
     var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
     var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
     var changed = sessionStorage.getItem("update_gw");
