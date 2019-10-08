@@ -13,7 +13,6 @@ $(document).ready(function(){
 function init_page() {
     writeNavbar(user);
     gwid = getParameterByName("gwid");
-
     clearSaveChangesArray();
     clearSaveWorksheetsArray();
     clearGWChanges();
@@ -402,6 +401,7 @@ function requestWorksheetSuccess(json) {
         requestAssociatedStaff();
     } else {
         console.log("There was an error getting the worksheet: " + json["message"]);
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 
@@ -548,6 +548,7 @@ function inputsSuccess(json) {
         $("#select_inputs_input").html(div_text);
     } else {
         console.log(json["message"]);
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 
@@ -568,6 +569,7 @@ function tagsSuccess(json) {
         tags = [];
         console.log("Error getting tags.");
         console.log(json);
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 
@@ -604,6 +606,7 @@ function requestStaffSuccess(json) {
         setUpWorksheetInfo();
     } else {
         console.log("There was an error getting the staff: " + json["message"]);
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 
@@ -635,6 +638,7 @@ function deleteRequestSuccess(json) {
         window.location.href = "/portalhome.php";
     } else {
         alert("There was an error deleting the worksheet, please try again.");
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 
@@ -1045,6 +1049,7 @@ function downloadResultSuccess(json) {
         link.setAttribute("download", json["title"]);
         document.body.appendChild(link);
         link.click();
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 
@@ -1072,6 +1077,8 @@ function saveWorksheets() {
 }
 
 function checkIfUnsavedChanges() {
+    // Add in check here
+
     var save_changes_array = JSON.parse(sessionStorage.getItem("save_changes_array"));
     var save_worksheets_array = JSON.parse(sessionStorage.getItem("save_worksheets_array"));
     var changed = sessionStorage.getItem("update_gw");
@@ -1338,6 +1345,7 @@ function saveWorksheetsSuccess(json) {
     } else {
         console.log("There was an error saving the worksheet: " + json["message"]);
         clearLock("save_worksheets_request_lock", null, true);
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 
@@ -1389,6 +1397,7 @@ function saveResultsSuccess(json) {
     } else {
         clearLock("save_changes_request_lock", null, true);
         console.log("Something didn't go well");
+        if (json["response"] === "INVALID_TOKEN") log_out();
     }
 }
 

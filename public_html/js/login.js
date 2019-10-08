@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+var user;
 
 $(document).ready(function(){
-    var user = JSON.parse(localStorage.getItem("sbk_usr"));
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
     if (user !== null && user.length > 0) {
         window.addEventListener("valid_user", function(){redirect();});
         validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);

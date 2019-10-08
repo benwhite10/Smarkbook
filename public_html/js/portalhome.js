@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    var user = JSON.parse(localStorage.getItem("sbk_usr"));
+    user = JSON.parse(localStorage.getItem("sbk_usr"));
     window.addEventListener("valid_user", function(){init_page(user);});
     validateAccessToken(user, ["SUPER_USER", "STAFF", "STUDENT"]);
 });

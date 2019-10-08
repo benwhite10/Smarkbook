@@ -4,6 +4,8 @@
  * and open the template in the editor.
  */
 
+var user;
+
 function closeDiv(){
     document.getElementById('message').style.display = 'none';
 }
@@ -24,6 +26,22 @@ function closeIEMsg() {
     $("#msg_IE").css("display", "none");
 }
 
+function checkUser(interval = 5000) {
+    window.setInterval(function() {
+        if (!user || user === null || user.length === 0) {
+            log_out();
+            return;
+        }
+
+        var jwt = parseJwt(user["token"]);
+        if (!jwt || jwt["nbf"]*1000 > Date.now() || jwt["exp"]*1000 < Date.now()) {
+            log_out();
+            return;
+        }
+        console.log("Check");
+    }, interval);
+}
+
 function validateAccessToken(user, roles, unauthorised = false) {
     if (!user || user === null || user.length === 0) {
         log_out();
@@ -31,10 +49,11 @@ function validateAccessToken(user, roles, unauthorised = false) {
     }
 
     var jwt = parseJwt(user["token"]);
-    if (!jwt) {
+    if (!jwt || jwt["nbf"]*1000 > Date.now() || jwt["exp"]*1000 < Date.now()) {
         log_out();
         return;
     }
+
     var user_role = jwt["user_role"];
     var parent_role = jwt["parent_role"];
 
@@ -54,6 +73,7 @@ function validateAccessToken(user, roles, unauthorised = false) {
         success: function(json) {
             if(json["success"]){
                 window.dispatchEvent(new Event("valid_user"));
+                checkUser(5000);
             } else {
                 console.log(json);
                 log_out();
