@@ -37,9 +37,8 @@ function createJWT($user_id, $user_role, $parent_id = null, $parent_role = null)
     $payload_array['parent_id'] = $parent_id;
     $payload_array['parent_role'] = $parent_role;
     $payload_array['nbf'] = time();
-    //$payload_array['exp'] = $server === "local" ? time() + 315569520 : time() + 12*60*60;
-    $payload_array['exp'] = $server === "local" ? time() + 30 : time() + 12*60*60;
-
+    $payload_array['exp'] = $server === "local" ? time() + 315569520 : time() + 12*60*60;
+    
     $token = JWT::encode($payload_array, $jwt_key);
     return $token;
 }
