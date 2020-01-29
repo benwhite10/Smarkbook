@@ -115,19 +115,19 @@ function updateSets($sets, $set_lists, $update_all_sets) {
         $groups_count = count($groups);
         for ($i = 0; $i < $user_groups_count; $i++) {
             $update_array = [];
-                for ($j = 0; $j < $users_count; $j++) {
-                    if ((!is_null($user_groups[$i]["StaffId"]) && $user_groups[$i]["StaffId"] === $users[$j]["StaffID"])
-                    || (!is_null($user_groups[$i]["SchoolId"]) && $user_groups[$i]["SchoolId"] === $users[$j]["SchoolID"])) {
-                        array_push($update_array, ["User ID", $users[$j]["User ID"]]);
-                        break;
-                    }
+            for ($j = 0; $j < $users_count; $j++) {
+                if ((!is_null($user_groups[$i]["StaffId"]) && $user_groups[$i]["StaffId"] === $users[$j]["StaffID"])
+                || (!is_null($user_groups[$i]["SchoolId"]) && $user_groups[$i]["SchoolId"] === $users[$j]["SchoolID"])) {
+                    array_push($update_array, ["User ID", $users[$j]["User ID"]]);
+                    break;
                 }
-                for ($j = 0; $j < $groups_count; $j++) {
-                    if ($user_groups[$i]["SetId"] === $groups[$j]["SetID"]) {
-                         array_push($update_array, ["Group ID", $groups[$j]["Group ID"]]);
-                        break;
-                    }
+            }
+            for ($j = 0; $j < $groups_count; $j++) {
+                if ($user_groups[$i]["SetId"] === $groups[$j]["SetID"]) {
+                     array_push($update_array, ["Group ID", $groups[$j]["Group ID"]]);
+                    break;
                 }
+            }
             if (count($update_array) > 0) {
                 $update_query = "UPDATE `TUSERGROUPS` SET ";
                 for ($j = 0; $j < count($update_array); $j++) {
