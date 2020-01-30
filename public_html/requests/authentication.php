@@ -147,7 +147,7 @@ function authenticateCredentials($user, $pwd, $user_id) {
     $result_object = json_decode($result);
     $success = FALSE;
     $message = "";
-    if ($result_object->$success) {
+    if ($result_object->success) {
         $success = $result_object->success && $user == $result_object->response->user;
         if (!$success) $message = "Incorrect user.";
     } else {
@@ -161,11 +161,11 @@ function authenticateCredentials($user, $pwd, $user_id) {
 }
 
 function getUserLoginDetails($user) {
-    $query = "SELECT `OverrideLogin` FROM `tusers` WHERE `User ID` = $user";
+    $query = "SELECT `OverrideLogin` FROM `TUSERS` WHERE `User ID` = $user";
     try {
         $user_array = db_select_exception($query);
         return count($user_array) > 0 ? $user_array[0]["OverrideLogin"] : FALSE;
-    } catch (Excpetion $ex) {
+    } catch (Exception $ex) {
         return FALSE;
     }
 }
