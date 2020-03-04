@@ -46,7 +46,7 @@ function clickLogin() {
                 var url = json["response"]["url"];
                 var user = json["response"]["user"];
                 localStorage.setItem("sbk_usr", JSON.stringify(user));
-                window.location = url;
+                checkStoredUser(url, 0);
             } else {
                 $("#login_password").val("");
                 $("#login_message").html(json["response"]["message"]);
@@ -62,6 +62,25 @@ function clickLogin() {
             console.log(json);
         }
     });
+}
+
+function checkStoredUser(url, count) {
+    var user = JSON.parse(localStorage.getItem("sbk_usr"));
+    count++;
+    if ("token" in user) {
+        window.location = url;
+    } else {
+        if (count <= 5) {
+            setTimeout(function(){
+                checkStoredUser(url, count);
+            }, 300);
+        } else {
+            $("#login_password").val("");
+            $("#login_message").html("There was an error logging you in. Please wait a few minutes and try aagin.");
+            $("#login_message").addClass("error");
+            $("#login_message").fadeIn();
+        }
+    }
 }
 
 function validateLoginDetails(user, password) {

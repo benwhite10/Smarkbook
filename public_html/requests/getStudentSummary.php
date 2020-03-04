@@ -17,6 +17,7 @@ $reqid = filter_input(INPUT_POST, 'reqid', FILTER_SANITIZE_NUMBER_INT);
 $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
 $roles = validateRequestAndGetRoles($token);
+$userid_token = getUserIDFromToken($token);
 
 $questions = [];
 $setWorksheets = [];
@@ -36,9 +37,12 @@ switch ($requestType){
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "NEWSTUDENTREPORT":
-        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
-        logReport($userid, $studentId, $staffId, $setId, "");
-        getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+        if (authoriseUserRoles($roles, ["SUPER_USER", "STAFF"], FALSE) || (authoriseUserRoles($roles, ["STUDENT"], FALSE) && intval($studentId) === intval($userid_token))) {
+            logReport($userid, $studentId, $staffId, $setId, "");
+            getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
+        } else {
+            returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+        }
         break;
     case "STUDENTSUMMARY":
         getSummaryForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
@@ -51,15 +55,27 @@ switch ($requestType){
         break;
     case "STUDENTWORKSHEETSUMMARY":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
-        getStudentWorksheetSummary($studentId, $gwid, $userid, $role);
+        if (intval($studentId) === intval($userid_token)) {
+            getStudentWorksheetSummary($studentId, $gwid, $userid, $role);
+        } else {
+            returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+        }
         break;
     case "CALCSTUWORKSHEETSUMMARY":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
-        studentWorksheetSummary($studentId, $gwid, $userid, $role);
+        if (intval($studentId) === intval($userid_token)) {
+            studentWorksheetSummary($studentId, $gwid, $userid, $role);
+        } else {
+            returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+        }
         break;
     case "WORKSHEETDETAILS":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
-        getWorksheetDetails($gwid, $userid, $studentId, $role);
+        if (intval($studentId) === intval($userid_token)) {
+            getWorksheetDetails($gwid, $userid, $studentId, $role);
+        } else {
+            returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+        }
         break;
     default:
         failRequest("Invalid request type.");

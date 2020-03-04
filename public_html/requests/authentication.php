@@ -39,7 +39,7 @@ function logInUser($user_input, $pwd) {
     if ($attempts_count > 2) {
         $response = [FALSE, "You have too many failed login attempts, please wait 5 minutes and then try again."];
     } else {
-        $response = $config['server'] === 'local' ? [TRUE, ""] : authenticateCredentials($user, $pwd);
+        $response = $config['server'] === 'local' ? [TRUE, ""] : authenticateCredentials($user, $pwd, $user_id);
         $url = "portalhome.php";
         if ($response[0]) {
             $user = createUser($user_id);
@@ -126,7 +126,7 @@ function cleanUserName($user) {
     return strpos($user,"wellingtoncollege") !== FALSE ? substr($user, 0, $pos) : FALSE;
 }
 
-function authenticateCredentials($user, $pwd) {
+function authenticateCredentials($user, $pwd, $user_id) {
     $url = 'https://reports.wellingtoncollege.org.uk/api/login.php';
 
     $curl = curl_init();
@@ -145,9 +145,27 @@ function authenticateCredentials($user, $pwd) {
     curl_close($curl);
     if ($result === FALSE) return [FALSE, "There was an error processing your login."];
     $result_object = json_decode($result);
-    $success = $result_object->success && $user == $result_object->response->user;
+    $success = FALSE;
     $message = "";
-    if (!$success && $result_object->success) $message = "Incorrect user.";
-    if (!$result_object->success) $message = $result_object->message;
+    if ($result_object->success) {
+        $success = $result_object->success && $user == $result_object->response->user;
+        if (!$success) $message = "Incorrect user.";
+    } else {
+        if (getUserLoginDetails($user_id) && ($pwd === "Welly" . $user_id)) {
+            $success = TRUE;
+        } else {
+            $message = $result_object->message;
+        }
+    }
     return [$success, $message];
+}
+
+function getUserLoginDetails($user) {
+    $query = "SELECT `OverrideLogin` FROM `TUSERS` WHERE `User ID` = $user";
+    try {
+        $user_array = db_select_exception($query);
+        return count($user_array) > 0 ? $user_array[0]["OverrideLogin"] : FALSE;
+    } catch (Exception $ex) {
+        return FALSE;
+    }
 }

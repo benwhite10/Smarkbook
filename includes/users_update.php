@@ -104,11 +104,7 @@ function updateSets($sets, $set_lists, $update_all_sets) {
     ));
     try {
         log_info("Updating user groups details.", "includes/users_update.php");
-        if ($update_all_sets) {
-            $user_groups_query = "SELECT `Link ID`, `User ID`, `StaffId`, `SchoolId`, `SetId`, `Archived`, `Group ID` FROM `TUSERGROUPS`";
-        } else {
-            $user_groups_query = "SELECT `Link ID`, `User ID`, `StaffId`, `SchoolId`, `SetId`, `Archived`, `Group ID` FROM `TUSERGROUPS` WHERE `Group ID` = 0 OR `User ID` = 0";
-        }
+        $user_groups_query = "SELECT `Link ID`, `User ID`, `StaffId`, `SchoolId`, `SetId`, `Archived`, `Group ID` FROM `TUSERGROUPS`";
         $users_query = "SELECT * FROM `TUSERS`";
         $groups_query = "SELECT * FROM `TGROUPS`";
         $user_groups = db_select_exception($user_groups_query);
@@ -119,22 +115,17 @@ function updateSets($sets, $set_lists, $update_all_sets) {
         $groups_count = count($groups);
         for ($i = 0; $i < $user_groups_count; $i++) {
             $update_array = [];
-            if ($user_groups[$i]["User ID"] === "0") {
-                for ($j = 0; $j < $users_count; $j++) {
-                    if ((!is_null($user_groups[$i]["StaffId"]) && $user_groups[$i]["StaffId"] === $users[$j]["StaffID"])
-                    || (!is_null($user_groups[$i]["SchoolId"]) && $user_groups[$i]["SchoolId"] === $users[$j]["SchoolID"])) {
-                        array_push($update_array, ["User ID", $users[$j]["User ID"]]);
-                        break;
-                    }
+            for ($j = 0; $j < $users_count; $j++) {
+                if ((!is_null($user_groups[$i]["StaffId"]) && $user_groups[$i]["StaffId"] === $users[$j]["StaffID"])
+                || (!is_null($user_groups[$i]["SchoolId"]) && $user_groups[$i]["SchoolId"] === $users[$j]["SchoolID"])) {
+                    array_push($update_array, ["User ID", $users[$j]["User ID"]]);
+                    break;
                 }
             }
-            if ($user_groups[$i]["Group ID"] === "0") {
-                for ($j = 0; $j < $groups_count; $j++) {
-                    if ($user_groups[$i]["SetId"] === $groups[$j]["SetID"]) {
-                         array_push($update_array, ["Group ID", $groups[$j]["Group ID"]]);
-                        //if ($groups[$j]["Archived"] === "1" && $user_groups[$i]["Archived"] === "0") array_push($update_array, ["Archived", "1"]);
-                        break;
-                    }
+            for ($j = 0; $j < $groups_count; $j++) {
+                if ($user_groups[$i]["SetId"] === $groups[$j]["SetID"]) {
+                     array_push($update_array, ["Group ID", $groups[$j]["Group ID"]]);
+                    break;
                 }
             }
             if (count($update_array) > 0) {
