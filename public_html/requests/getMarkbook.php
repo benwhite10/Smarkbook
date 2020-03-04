@@ -20,8 +20,7 @@ switch ($requestType){
         getMarkbookForSetAndTeacher($setid, $staffid);
         break;
     case "MARKBOOKFORSETANDSTUDENT":
-        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
-        if (intval($stuid) === intval($userid)) {
+        if (authoriseUserRoles($roles, ["SUPER_USER", "STAFF"], FALSE) || (authoriseUserRoles($roles, ["STUDENT"], FALSE) && intval($stuid) === intval($userid_token))) {
             getMarkbookForSetAndStudent($setid, $stuid, $staffid);
         } else {
             returnRequest(FALSE, null, "You are not authorised to complete that request.", null);

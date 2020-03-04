@@ -127,11 +127,15 @@ function getUserIDFromToken($token) {
     }
 }
 
-function authoriseUserRoles($user_roles, $valid_roles){
+function authoriseUserRoles($user_roles, $valid_roles, $hard = TRUE){
     foreach($user_roles as $user_role){
-        if (in_array($user_role, $valid_roles)) return true;
+        if (in_array($user_role, $valid_roles)) return TRUE;
     }
-    returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+    if ($hard) {
+        returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+    } else {
+        return FALSE;
+    }
 }
 
 function returnRequest($success, $response = null, $message = null, $ex = null) {

@@ -37,8 +37,7 @@ switch ($requestType){
         getReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         break;
     case "NEWSTUDENTREPORT":
-        authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
-        if (intval($studentId) === intval($userid_token)) {
+        if (authoriseUserRoles($roles, ["SUPER_USER", "STAFF"], FALSE) || (authoriseUserRoles($roles, ["STUDENT"], FALSE) && intval($studentId) === intval($userid_token))) {
             logReport($userid, $studentId, $staffId, $setId, "");
             getNewReportForStudent($startDate, $endDate, $studentId, $setId, $staffId, $tagsArrayString);
         } else {
