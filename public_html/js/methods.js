@@ -35,7 +35,7 @@ function checkUser(interval = 5000) {
         }
 
         var jwt = parseJwt(user["token"]);
-        if (!jwt || jwt["nbf"]*1000 > Date.now() || jwt["exp"]*1000 < Date.now()) {
+        if (!jwt || (jwt["nbf"] - 300) * 1000 > Date.now() || jwt["exp"]*1000 < Date.now()) {
             log_out();
             return;
         }
@@ -49,7 +49,7 @@ function validateAccessToken(user, roles, unauthorised = false) {
     }
 
     var jwt = parseJwt(user["token"]);
-    if (!jwt || jwt["nbf"]*1000 - 300 > Date.now() || jwt["exp"]*1000 < Date.now()) {
+    if (!jwt || (jwt["nbf"] - 300) * 1000 > Date.now() || jwt["exp"]*1000 < Date.now()) {
         log_out();
         return;
     }
