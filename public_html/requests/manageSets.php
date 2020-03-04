@@ -244,7 +244,7 @@ function getSetsForStudent($student_id, $year) {
             JOIN `TSUBJECTS` S ON G.`SubjectID` = S.`SubjectID`
             WHERE UG.`User ID` = $student_id
             AND UG.`Archived` = 0 AND G.`Archived` = 0 AND G.`AcademicYear` = $year_id
-            AND S.`Markbook` = 1 
+            AND S.`Markbook` = 1
             ORDER BY S.`Title`) AS A
             JOIN `TUSERGROUPS` UG ON A.`Group ID` = UG.`Group ID` AND UG.`UserType` = 'T'
             JOIN `TUSERS` U ON UG.`User ID` = U.`User ID` AND U.`Role` <> 'STUDENT'

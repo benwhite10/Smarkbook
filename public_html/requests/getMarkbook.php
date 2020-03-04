@@ -12,6 +12,7 @@ $year = filter_input(INPUT_POST,'year',FILTER_SANITIZE_NUMBER_INT);
 $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
 $roles = validateRequestAndGetRoles($token);
+$userid = getUserIDFromToken($token);
 
 switch ($requestType){
     case "MARKBOOKFORSETANDTEACHER":
@@ -20,7 +21,11 @@ switch ($requestType){
         break;
     case "MARKBOOKFORSETANDSTUDENT":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF", "STUDENT"]);
-        getMarkbookForSetAndStudent($setid, $stuid, $staffid);
+        if (intval($stuid) === intval($userid)) {
+            getMarkbookForSetAndStudent($setid, $stuid, $staffid);
+        } else {
+            returnRequest(FALSE, null, "You are not authorised to complete that request.", null);
+        }
         break;
     case "DOWNLOADMARKBOOKFORSETANDTEACHER":
         authoriseUserRoles($roles, ["SUPER_USER", "STAFF"]);

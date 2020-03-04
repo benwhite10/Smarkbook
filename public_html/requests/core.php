@@ -115,6 +115,18 @@ function validateRequestAndGetRoles($token) {
     }
 }
 
+function getUserIDFromToken($token) {
+    $response = validateToken($token);
+    if ($response[0]) {
+        $token_array = $response[1];
+        return $token_array->user_id;
+    } else {
+        log_error("Request failed due to invalid JWT token: " . $response[1], "requests/core.php", __LINE__);
+        log_error(json_encode(debug_backtrace()), "requests/core.php", __LINE__);
+        returnRequest(FALSE, "INVALID_TOKEN", "There was a problem validating your request.", null);
+    }
+}
+
 function authoriseUserRoles($user_roles, $valid_roles){
     foreach($user_roles as $user_role){
         if (in_array($user_role, $valid_roles)) return true;
