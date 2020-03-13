@@ -147,16 +147,23 @@ function authenticateCredentials($user, $pwd, $user_id) {
     $result_object = json_decode($result);
     $success = FALSE;
     $message = "";
+    log_info("User: $user", "requests/authentication.php");
+    log_info("Pwd: $pwd", "requests/authentication.php");
     if ($result_object->success) {
+        log_info("LDAP Success.", "requests/authentication.php");
         $success = $result_object->success && $user == $result_object->response->user;
         if (!$success) $message = "Incorrect user.";
     } else {
+        log_info("LDAP Failure.", "requests/authentication.php");
+        $message = $result_object->message;
+        log_info("Message: $message", "requests/authentication.php");
         if (getUserLoginDetails($user_id) && ($pwd === "Welly" . $user_id)) {
             $success = TRUE;
         } else {
             $message = $result_object->message;
         }
     }
+    log_info("Success: $message", "requests/authentication.php");
     return [$success, $message];
 }
 
