@@ -16,12 +16,15 @@ function getUsersData() {
         CURLOPT_URL => $new_url
     ));
     // Send the request & save response to $resp
+    log_info("Data send request.", "includes/users_update.php");
     $resp = curl_exec($curl);
     if(!$resp) return [FALSE, curl_error($curl)];
     curl_close($curl);
+    log_info("Data get response.", "includes/users_update.php");
     // Close request to clear up some resources
     libxml_use_internal_errors(true);
     $response = simplexml_load_string($resp);
+    log_info("Data get response info.", "includes/users_update.php");
     if(!$response) return [FALSE, $resp];
     /*$user_data = createUserData($response);
     file_put_contents('user_data.txt',serialize($user_data));
@@ -31,14 +34,20 @@ function getUsersData() {
 
 function createUserData($response) {
     $return_array = array();
+    log_info("Data get analyses XML 1.", "includes/users_update.php");
     $staff = cleanArray(xmlToArray($response->HRManager->CurrentStaff, array('alwaysArray' => array("Role"))));
+    log_info("Data get analyses XML 2.", "includes/users_update.php");
     $pupils = cleanArray(xmlToArray($response->PupilManager->CurrentPupils));
     //$academic_houses = cleanArray(xmlToArray($response->SchoolManager->AcademicHouses));
     //$boarding_houses = cleanArray(xmlToArray($response->SchoolManager->BoardingHouses));
     //$forms = cleanArray(xmlToArray($response->SchoolManager->Forms));
+    log_info("Data get analyses XML 3.", "includes/users_update.php");
     $terms = cleanArray(xmlToArray($response->SchoolManager->Terms));
+    log_info("Data get analyses XML 4.", "includes/users_update.php");
     $sets = cleanArray(xmlToArray($response->TeachingManager->Sets, array('alwaysArray' => array("Teacher"))));
+    log_info("Data get analyses XML 5.", "includes/users_update.php");
     $set_lists = cleanArray(xmlToArray($response->TeachingManager->SetLists));
+    log_info("Data get analyses XML 6.", "includes/users_update.php");
     $departments = cleanArray(xmlToArray($response->TeachingManager->Departments, array('alwaysArray' => array("Subject"))));
     $return_array["Staff"] = $staff["CurrentStaff"]["StaffMember"];
     $return_array["Pupils"] = $pupils["CurrentPupils"]["Pupil"];
@@ -49,6 +58,7 @@ function createUserData($response) {
     $return_array["Sets"] = $sets["Sets"]["Set"];
     $return_array["SetLists"] = $set_lists["SetLists"]["SetList"];
     $return_array["Departments"] = $departments["Departments"]["Department"];
+    log_info("Data get analyses XML 7.", "includes/users_update.php");
     return $return_array;
 }
 
