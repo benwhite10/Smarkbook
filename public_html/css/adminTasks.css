@@ -90,7 +90,7 @@
     width: calc(100% - 310px);
 }
 
-.task_text_input {
+.task_text_input, .task_select_input {
     width: 150px;
     height: 50px;
     margin: 0;
@@ -98,6 +98,11 @@
     display: inline-block;
     float: left;
     border-left: 1px solid #323232;
+}
+
+.task_select_input {
+    width: 140px;
+    margin-right: 10px;
 }
 
 input[type="text"].task_text_input {
@@ -109,4 +114,11 @@ input[type="text"].task_text_input {
     border: none;
     line-height: 40px;
     text-align: center;
+}
+
+select.task_select_input {
+    border: none;
+    background: transparent;
+    padding: 10px;
+    outline: none;
 }

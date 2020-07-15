@@ -11,8 +11,8 @@ function getTaskDetails($key) {
             return array(
                 "ScheduledFreq" => "+1 day",
                 "ScheduledStart" => [3, 5, 0],
-                "MaxRunTime" => "900",
-                "FailedFreq" => "+10 minutes"
+                "MaxRunTime" => "1200",
+                "FailedFreq" => "+20 minutes"
             );
             break;
         case "TidyLogs":

@@ -6,21 +6,30 @@ include_once $include_path . '/db_tables/update_tables.php';
 include_once $include_path . '/includes/isams_batch.php';
 
 function updateAllUsers($max_time = 300, $update_all_sets = FALSE) {
+    log_info("Updating all users. Max time: $max_time", "includes/users_update.php");
     set_time_limit($max_time);
+    log_info("Point 1.", "includes/users_update.php");
     $user_data = getUsersData();
+    log_info("Point 2.", "includes/users_update.php");
     if (!$user_data[0]) return [FALSE, $user_data[1]];
     runUpdate($user_data[1]["Staff"], "Staff", "staff", TRUE, array(
         "TableName" => "TUSERS",
         "DBCol" => "CurrentStaff"
     ));
+    log_info("Point 3.", "includes/users_update.php");
     runUpdate($user_data[1]["Pupils"], "Pupils", "pupils", TRUE, array(
         "TableName" => "TUSERS",
         "DBCol" => "CurrentPupil"
     ));
+    log_info("Point 4.", "includes/users_update.php");
     updateUserDetails();
+    log_info("Point 5.", "includes/users_update.php");
     updateTerms($user_data[1]["Terms"], "Terms", "terms");
+    log_info("Point 6.", "includes/users_update.php");
     updateSets($user_data[1]["Sets"], $user_data[1]["SetLists"], $update_all_sets);
+    log_info("Point 7.", "includes/users_update.php");
     updateSubjects($user_data[1]["Departments"]);
+    log_info("Point 8.", "includes/users_update.php");
     return [TRUE];
 }
 
@@ -64,6 +73,17 @@ function updateUserDetails() {
 }
 
 function updateSets($sets, $set_lists, $update_all_sets) {
+    try {
+        $update_sets_query = "SELECT `Detail` FROM `TINFO` WHERE `Type` = 'SETS'";
+        $update_sets_response = db_select_exception($update_query);
+        if (count($update_sets_response) <= 0 || $update_sets_response[0]["Detail"] === "0") {
+            return;
+        }
+    } catch (Exception $ex) {
+        log_error("Error getting the update sets setting.", "includes/users_update.php", __LINE__);
+        log_error($ex->getMessage(), "includes/users_update.php", __LINE__);
+    }
+
     $set_teachers = array();
     for ($i = 0; $i < count($sets); $i++) {
         $set = $sets[$i];
