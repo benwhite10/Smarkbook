@@ -28,7 +28,6 @@ $info_version = Info::getInfo()->getVersion();
                     <input id="login_username" type="text" name="username" placeholder="Username" value=""/>
                     <input id="login_password" type="password" name="password" placeholder="Password" id="password"/>
                     <div class="login_button" onclick="clickLogin()">Login</div>
-                    <div id="login_message" class="login_message">Update June 2019: Please login using your Wellington College login details. If you have any problems please contact <a href="mailto:contact.smarkbook@gmail.com" style="color:inherit; font-size:inherit;">contact.smarkbook@gmail.com</a>.</div>
                 </div>
             </div>
         </div>
