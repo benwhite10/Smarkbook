@@ -7,6 +7,9 @@ include_once $include_path . '/public_html/libraries/PHPExcel.php';
 
 $requestType = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 $version_number = filter_input(INPUT_POST,'version_number',FILTER_SANITIZE_STRING);
+$year_id = filter_input(INPUT_POST,'year_id',FILTER_SANITIZE_STRING);
+$year_name = filter_input(INPUT_POST,'year_name',FILTER_SANITIZE_STRING);
+$sets = filter_input(INPUT_POST,'sets',FILTER_SANITIZE_STRING);
 $userid = filter_input(INPUT_POST,'userid',FILTER_SANITIZE_NUMBER_INT);
 $token = filter_input(INPUT_POST,'token',FILTER_SANITIZE_STRING);
 
@@ -25,9 +28,21 @@ switch ($requestType){
         authoriseUserRoles($roles, ["SUPER_USER"]);
         updateVersion($version_number);
         break;
+    case "UPDATEYEAR":
+        authoriseUserRoles($roles, ["SUPER_USER"]);
+        updateYear($year_id, $year_name);
+        break;
+    case "UPDATESETS":
+        authoriseUserRoles($roles, ["SUPER_USER"]);
+        updateSets($sets);
+        break;
     case "GETVERSION":
         authoriseUserRoles($roles, ["SUPER_USER"]);
         getVersionNumber();
+        break;
+    case "GETSETS":
+        authoriseUserRoles($roles, ["SUPER_USER"]);
+        getSets();
         break;
     default:
         break;
@@ -87,6 +102,39 @@ function updateVersion($version) {
         failRequest($ex->getMessage());
     }
     succeedRequest(null, "Version updated to '$version'");
+}
+
+function updateYear($year_id, $year_name) {
+    $query_1 = "UPDATE `TACADEMICYEAR` SET `CurrentYear` = 0;";
+    $query_2 = "UPDATE `TACADEMICYEAR` SET `CurrentYear` = 1 WHERE `ID` = $year_id;";
+    try {
+        db_query_exception($query_1);
+        db_query_exception($query_2);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    succeedRequest(null, "Year updated to '$year_name'");
+}
+
+function getSets() {
+    $query = "SELECT `Detail` FROM `TINFO` WHERE `Type` = 'SETS'";
+    try {
+        $result = db_select_exception($query);
+        succeedRequest($result[0]["Detail"], null);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+}
+
+function updateSets($sets) {
+    $sets_query = $sets === "yes" ? 1 : 0;
+    $query = "UPDATE `TINFO` SET `Detail` = '$sets_query' WHERE `Type` = 'SETS'";
+    try {
+        db_query_exception($query);
+    } catch (Exception $ex) {
+        failRequest($ex->getMessage());
+    }
+    succeedRequest(null, "Sets updated to '$sets'");
 }
 
 function getVersionNumber() {

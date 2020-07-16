@@ -5,7 +5,8 @@ include_once $include_path . '/includes/core.php';
 include_once $include_path . '/db_tables/update_tables.php';
 include_once $include_path . '/includes/isams_batch.php';
 
-function updateAllUsers($max_time = 300, $update_all_sets = FALSE) {
+function updateAllUsers($max_time = 300) {
+    log_info("Updating all users. Max time: $max_time", "includes/users_update.php");
     set_time_limit($max_time);
     $user_data = getUsersData();
     if (!$user_data[0]) return [FALSE, $user_data[1]];
@@ -19,8 +20,9 @@ function updateAllUsers($max_time = 300, $update_all_sets = FALSE) {
     ));
     updateUserDetails();
     updateTerms($user_data[1]["Terms"], "Terms", "terms");
-    updateSets($user_data[1]["Sets"], $user_data[1]["SetLists"], $update_all_sets);
+    updateSets($user_data[1]["Sets"], $user_data[1]["SetLists"]);
     updateSubjects($user_data[1]["Departments"]);
+    log_info("All users updated.", "includes/users_update.php");
     return [TRUE];
 }
 
@@ -63,7 +65,18 @@ function updateUserDetails() {
      }
 }
 
-function updateSets($sets, $set_lists, $update_all_sets) {
+function updateSets($sets, $set_lists) {
+    try {
+        $update_sets_query = "SELECT `Detail` FROM `TINFO` WHERE `Type` = 'SETS'";
+        $update_sets_response = db_select_exception($update_sets_query);
+        if (count($update_sets_response) <= 0 || $update_sets_response[0]["Detail"] === "0") {
+            return;
+        }
+    } catch (Exception $ex) {
+        log_error("Error getting the update sets setting.", "includes/users_update.php", __LINE__);
+        log_error($ex->getMessage(), "includes/users_update.php", __LINE__);
+    }
+
     $set_teachers = array();
     for ($i = 0; $i < count($sets); $i++) {
         $set = $sets[$i];

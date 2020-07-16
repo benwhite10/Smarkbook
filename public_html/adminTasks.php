@@ -53,12 +53,37 @@ $info_version = Info::getInfo()->getVersion();
                     </div>
                     <div id="task_version" class="task">
                         <div class="task_description input">
-                            <p>Update the version number</p>
+                            <p>Version number</p>
                         </div>
                         <div class="task_text_input">
                             <input id="version_number" type="text" class="task_text_input" value=""/>
                         </div>
                         <div id="task_version_button" class="task_button" onclick="runUpdateVersion()">
+                            <p>Update</p>
+                        </div>
+                    </div>
+                    <div id="task_year" class="task">
+                        <div class="task_description input">
+                            <p>Current academic year</p>
+                        </div>
+                        <div class="task_text_input">
+                            <select name="current_year" id="current_year" class="task_select_input"></select>
+                        </div>
+                        <div id="task_year_button" class="task_button" onclick="runUpdateYear()">
+                            <p>Update</p>
+                        </div>
+                    </div>
+                    <div id="task_update_sets" class="task">
+                        <div class="task_description input">
+                            <p>Update sets</p>
+                        </div>
+                        <div class="task_text_input">
+                            <select name="update_sets" id="update_sets" class="task_select_input">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div id="task_update_sets_button" class="task_button" onclick="runUpdateSets()">
                             <p>Update</p>
                         </div>
                     </div>
