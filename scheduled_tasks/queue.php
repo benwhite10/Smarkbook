@@ -7,7 +7,7 @@ require $include_path . '/includes/class.phpmailer.php';
 
 function checkQueue() {
     $config = getConfigFile();
-    $dev = $config["status"] === "dev";    
+    $dev = $config["status"] === "dev";
     $running_query = "SELECT * FROM `TTASKSQUEUE`
         WHERE `Running` = 1";
     $queue_query = "SELECT * FROM `TTASKSQUEUE`
@@ -180,7 +180,7 @@ function failTask($key, $message = "") {
         $time = getTiming($task_details["ScheduledFreq"], $task_details["ScheduledStart"], FALSE, FALSE);
         $fail_count = 0;
         $priority = 0;
-        sendFailedEmail($message, $key);
+        log_error("The task ($key) failed 3 times, it will be paused until it's next scheduled attempt.", "scheduled_tasks/queue.php", __LINE__);
     } else {
         $time = getTiming($task_details["ScheduledFreq"], $task_details["ScheduledStart"], FALSE, $task_details["FailedFreq"]);
         $priority = $task[0]["Priority"];
@@ -228,45 +228,4 @@ function getMaxTime($max_run_time) {
     $now = new DateTime();
     $now->modify("+" . $max_run_time . " seconds");
     return $now->format('Y-m-d H:i:s');
-}
-
-function writeFailedEmail($message, $name) {
-    $body_html = "<html><body>";
-    $body_html .= "<p>There was an error running the task ($name) and the task has been locked for 24 hours.</p>";
-    $body_html .= "<p>The task failed with error message:</p>";
-    $body_html .= "<p>" . $message . "</p>";
-    $body_html .= "</body></html>";
-    $body_text = "There was an error running the task ($name) and the task has been locked for 24 hours. ";
-    $body_text .= "The task failed with error message: " . $message;
-    return array(
-        "Subject" => "Error running task - $name",
-        "BodyHTML" => $body_html,
-        "Body" => $body_text
-    );
-}
-
-function sendFailedEmail($message, $key) {
-    $email = writeFailedEmail($message, $key);
-    try {
-        $config = getConfigFile();
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host = 'smtp.office365.com';
-        $mail->Port       = 587;
-        $mail->SMTPSecure = 'tls';
-        $mail->SMTPAuth   = true;
-        $mail->Username = $config["email_address"];
-        $mail->Password = $confif["email_password"];
-        $mail->SetFrom($config["email_address"], 'Smarkbook');
-        $mail->addAddress("bjw@wellingtoncollege.org.uk", "Ben White");
-        $mail->IsHTML(true);
-        $mail->Subject = "Failed task ($key)";
-        $mail->Body    = $email["BodyHTML"];
-        $mail->AltBody = $email["Body"];
-        $mail->Send();
-    } catch (phpmailerException $ex) {
-        log_error("There was an error sending the failed task email: " . $ex->errorMessage(),"cron_jobs/general_tasks.php", __LINE__);
-    } catch (Exception $ex) {
-        log_error("There was an error sending the failed task email: " . $ex->getMessage(),"cron_jobs/general_tasks.php", __LINE__);
-    }
 }
