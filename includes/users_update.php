@@ -68,7 +68,7 @@ function updateUserDetails() {
 function updateSets($sets, $set_lists) {
     try {
         $update_sets_query = "SELECT `Detail` FROM `TINFO` WHERE `Type` = 'SETS'";
-        $update_sets_response = db_select_exception($update_query);
+        $update_sets_response = db_select_exception($update_sets_query);
         if (count($update_sets_response) <= 0 || $update_sets_response[0]["Detail"] === "0") {
             return;
         }
